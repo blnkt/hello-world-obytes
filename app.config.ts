@@ -73,6 +73,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-router',
     ['app-icon-badge', appIconBadgeConfig],
     ['react-native-edge-to-edge'],
+    [
+      '@kingstinct/react-native-healthkit',
+      {
+        NSHealthShareUsageDescription: 'Your own custom usage description',
+        NSHealthUpdateUsageDescription: false, // if you have no plans to update data, you could skip adding it to your info.plist
+        background: false, // if you have no plans to use it in background mode, you could skip adding it to the entitlements
+      },
+    ],
   ],
   extra: {
     ...ClientEnv,
