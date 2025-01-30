@@ -9,12 +9,9 @@
   "typescript.tsdk": "node_modules/typescript/lib",
   "eslint.format.enable": true,
   "[javascript][typescript][typescriptreact]": {
-    "editor.formatOnSave": true,
+    "editor.formatOnSave": false,
     "editor.defaultFormatter": "dbaeumer.vscode-eslint",
-    "editor.codeActionsOnSave": [
-      "source.addMissingImports",
-      "source.fixAll.eslint"
-    ]
+    "editor.codeActionsOnSave": ["source.addMissingImports"]
   },
   "[json][jsonc]": {
     "editor.formatOnSave": true,

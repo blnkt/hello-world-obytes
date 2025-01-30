@@ -48,11 +48,11 @@ module.exports = {
     ], // Follow the same ordering as the official plugin `prettier-plugin-tailwindcss`
     'simple-import-sort/imports': 'error', // Import configuration for `eslint-plugin-simple-import-sort`
     'simple-import-sort/exports': 'error', // Export configuration for `eslint-plugin-simple-import-sort`
-    '@typescript-eslint/no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': 'warn',
     'tailwindcss/no-custom-classname': 'off',
-    'unused-imports/no-unused-imports': 'error',
+    'unused-imports/no-unused-imports': 'warn',
     'unused-imports/no-unused-vars': [
-      'error',
+      'warn',
       {
         argsIgnorePattern: '^_',
         varsIgnorePattern: '^_',
