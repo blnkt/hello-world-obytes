@@ -1,35 +1,20 @@
-import { FlashList } from '@shopify/flash-list';
 import React from 'react';
+import { useMMKVString } from 'react-native-mmkv';
 
-import type { Post } from '@/api';
-import { usePosts } from '@/api';
-import { Card } from '@/components/card';
-import { EmptyList, FocusAwareStatusBar, Text, View } from '@/components/ui';
+import Shop from '@/app/poi/shop';
+import { Text, View } from '@/components/ui';
+
+import { useScenarioTrigger } from '../../lib/use-scenario-trigger';
 
 export default function Feed() {
-  const { data, isPending, isError } = usePosts();
-  const renderItem = React.useCallback(
-    ({ item }: { item: Post }) => <Card {...item} />,
-    []
-  );
+  const [steps, setSteps] = useMMKVString('stepCount');
+  const stepCount = Number(steps) || 0;
+  useScenarioTrigger(stepCount);
 
-  if (isError) {
-    return (
-      <View>
-        <Text> Error Loading data </Text>
-      </View>
-    );
-  }
   return (
     <View className="flex-1 ">
-      <FocusAwareStatusBar />
-      <FlashList
-        data={data}
-        renderItem={renderItem}
-        keyExtractor={(_, index) => `item-${index}`}
-        ListEmptyComponent={<EmptyList isLoading={isPending} />}
-        estimatedItemSize={300}
-      />
+      <Text>{steps}</Text>
+      <Shop />
     </View>
   );
 }

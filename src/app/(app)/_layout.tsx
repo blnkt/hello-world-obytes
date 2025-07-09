@@ -4,6 +4,7 @@ import React, { useCallback, useEffect } from 'react';
 
 import { Pressable, Text } from '@/components/ui';
 import {
+  Character as CharacterIcon,
   Feed as FeedIcon,
   Settings as SettingsIcon,
   Style as StyleIcon,
@@ -39,6 +40,16 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <FeedIcon color={color} />,
           headerRight: () => <CreateNewPostLink />,
           tabBarButtonTestID: 'feed-tab',
+        }}
+      />
+
+      <Tabs.Screen
+        name="character-sheet"
+        options={{
+          title: 'Character',
+          headerShown: false,
+          tabBarIcon: ({ color }) => <CharacterIcon color={color} />,
+          tabBarButtonTestID: 'character-tab',
         }}
       />
 

@@ -12,7 +12,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 
 import { APIProvider } from '@/api';
-import { hydrateAuth, loadSelectedTheme } from '@/lib';
+import { hydrateAuth, loadSelectedTheme, useAuth, useHealthKit } from '@/lib';
 import { useThemeConfig } from '@/lib/use-theme-config';
 
 export { ErrorBoundary } from 'expo-router';
@@ -32,12 +32,47 @@ SplashScreen.setOptions({
 });
 
 export default function RootLayout() {
+  const status = useAuth.use.status();
+  const signIn = useAuth.use.signIn();
+  const { isAvailable, hasRequestedAuthorization } = useHealthKit();
+  console.log(
+    'isAvailable: ',
+    isAvailable,
+    'hasRequestedAuth:',
+    hasRequestedAuthorization
+  );
+  console.log('status: ', status);
+
+  // Wait for all to be ready
+  if (
+    isAvailable === null ||
+    hasRequestedAuthorization === null ||
+    status === 'idle'
+  ) {
+    return null; // keep splash visible
+  }
+
+  if (isAvailable === true && hasRequestedAuthorization === true) {
+    signIn({ access: 'healthkit', refresh: 'healthkit' });
+  }
+
+  if (!isAvailable || !hasRequestedAuthorization || status === 'signOut') {
+    // Not authorized: show only login
+    return (
+      <Providers>
+        <Stack>
+          <Stack.Screen name="login" options={{ headerShown: false }} />
+        </Stack>
+      </Providers>
+    );
+  }
+
+  // Authorized: show main app
   return (
     <Providers>
       <Stack>
         <Stack.Screen name="(app)" options={{ headerShown: false }} />
-        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-        <Stack.Screen name="login" options={{ headerShown: false }} />
+        {/* <Stack.Screen name="onboarding" options={{ headerShown: false }} /> */}
       </Stack>
     </Providers>
   );

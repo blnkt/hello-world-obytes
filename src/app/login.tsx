@@ -1,19 +1,20 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Alert } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 
 import { Button, FocusAwareStatusBar, Text, View } from '@/components/ui';
-import { getTodayStepCount, useHealthKit } from '@/lib';
+import { getTodayStepCount, useAuth, useHealthKit } from '@/lib';
+import { getItem, setItem } from '@/lib/storage';
 
 export default function Login() {
-  const [stepCount, setStepCount] = useState<number | null>(null);
+  const signIn = useAuth.use.signIn();
   const { isAvailable, hasRequestedAuthorization } = useHealthKit();
 
   const pressHandler = async () => {
     if (isAvailable && hasRequestedAuthorization) {
       const quantity = await getTodayStepCount();
-      setStepCount(quantity);
-      console.log(quantity);
+      setItem('stepCount', quantity);
+      signIn({ access: 'healthkit', refresh: 'healthkit' });
     } else {
       Alert.alert(
         'Where Steps?',
@@ -35,10 +36,10 @@ export default function Login() {
             <Button
               fullWidth
               variant="outline"
-              label="Grant this App access to Health"
+              label="Grant this App access to Health data"
               onPress={pressHandler}
             />
-            <Text>{stepCount}</Text>
+            <Text>{getItem('stepCount')}</Text>
           </View>
         </View>
       </KeyboardAvoidingView>
