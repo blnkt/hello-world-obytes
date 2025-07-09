@@ -1,13 +1,13 @@
 import React from 'react';
 import { useMMKVString } from 'react-native-mmkv';
 
-import Shop from '@/app/poi/shop';
+import { Shop } from '@/app/poi';
 import { Text, View } from '@/components/ui';
 
 import { useScenarioTrigger } from '../../lib/use-scenario-trigger';
 
 export default function Feed() {
-  const [steps, setSteps] = useMMKVString('stepCount');
+  const [steps] = useMMKVString('stepCount');
   const stepCount = Number(steps) || 0;
   useScenarioTrigger(stepCount);
 

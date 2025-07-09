@@ -243,7 +243,7 @@ export const getLevelProgress = (
 export const calculateBalancedXP = (
   baseSteps: number,
   fitnessBackground: string,
-  characterClass: string
+  _characterClass: string
 ): number => {
   let multiplier = 1;
 
@@ -268,22 +268,22 @@ export const calculateBalancedXP = (
   }
 
   // Class effects
-  if (characterClass === 'Cardio Crusher') {
+  if (_characterClass === 'Cardio Crusher') {
     if (baseSteps > 10000)
       multiplier *= 1.5; // Sustained cardio
     else multiplier *= 0.7; // Low intensity penalty
-  } else if (characterClass === 'Strength Seeker') {
+  } else if (_characterClass === 'Strength Seeker') {
     if (baseSteps > 15000)
       multiplier *= 1.4; // High intensity
     else multiplier *= 0.8; // Low intensity penalty
-  } else if (characterClass === 'Flexibility Fanatic') {
+  } else if (_characterClass === 'Flexibility Fanatic') {
     if (baseSteps >= 3000 && baseSteps <= 8000)
       multiplier *= 1.3; // Moderate activity
     else multiplier *= 0.8; // Single activity penalty
-  } else if (characterClass === 'Weight Loss Warrior') {
+  } else if (_characterClass === 'Weight Loss Warrior') {
     multiplier *= 1.2; // Daily consistency bonus
     if (baseSteps > 15000) multiplier *= 0.9; // High intensity penalty
-  } else if (characterClass === 'General Fitness') {
+  } else if (_characterClass === 'General Fitness') {
     multiplier *= 1.1; // General bonus
   }
 
@@ -293,7 +293,7 @@ export const calculateBalancedXP = (
 // Get starting attributes based on race and class
 export const getStartingAttributes = (
   fitnessBackground: string,
-  characterClass: string
+  _characterClass: string
 ) => {
   const baseAttributes = {
     strength: 10,

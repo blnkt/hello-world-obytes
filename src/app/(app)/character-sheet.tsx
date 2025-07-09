@@ -2,8 +2,11 @@ import React, { useEffect, useState } from 'react';
 
 import { CharacterSheet } from '../../components/character-sheet';
 import { getTodayStepCount, useStepCountAsExperience } from '../../lib/health';
-import { calculateBalancedXP, getStartingAttributes } from '../../types/character';
 import type { Character } from '../../types/character';
+import {
+  calculateBalancedXP,
+  getStartingAttributes,
+} from '../../types/character';
 
 const initialCharacter: Character = {
   name: '',
@@ -24,8 +27,12 @@ export default function CharacterSheetScreen() {
 
   // Update character experience when step count changes
   useEffect(() => {
-    const balancedXP = calculateBalancedXP(stepCountExperience, character.fitnessBackground, character.class);
-    setCharacter(prev => ({
+    const balancedXP = calculateBalancedXP(
+      stepCountExperience,
+      character.fitnessBackground,
+      character.class
+    );
+    setCharacter((prev) => ({
       ...prev,
       experience: balancedXP,
       // Level is now auto-calculated in the component
@@ -36,8 +43,12 @@ export default function CharacterSheetScreen() {
   const handleRefreshExperience = async () => {
     try {
       const newStepCount = await getTodayStepCount();
-      const balancedXP = calculateBalancedXP(newStepCount || 0, character.fitnessBackground, character.class);
-      setCharacter(prev => ({
+      const balancedXP = calculateBalancedXP(
+        newStepCount || 0,
+        character.fitnessBackground,
+        character.class
+      );
+      setCharacter((prev) => ({
         ...prev,
         experience: balancedXP,
       }));
@@ -47,9 +58,9 @@ export default function CharacterSheetScreen() {
   };
 
   return (
-    <CharacterSheet 
-      character={character} 
-      onChange={setCharacter} 
+    <CharacterSheet
+      character={character}
+      onChange={setCharacter}
       onRefreshExperience={handleRefreshExperience}
     />
   );

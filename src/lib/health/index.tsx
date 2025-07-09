@@ -116,10 +116,10 @@ export const useStepCountAsExperience = () => {
     };
 
     getExperienceFromSteps();
-    
+
     // Refresh every 5 minutes to keep experience updated
     const interval = setInterval(getExperienceFromSteps, 5 * 60 * 1000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
