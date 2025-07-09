@@ -5,7 +5,7 @@ import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
 import FlashMessage from 'react-native-flash-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -35,13 +35,12 @@ export default function RootLayout() {
   const status = useAuth.use.status();
   const signIn = useAuth.use.signIn();
   const { isAvailable, hasRequestedAuthorization } = useHealthKit();
-  console.log(
-    'isAvailable: ',
-    isAvailable,
-    'hasRequestedAuth:',
-    hasRequestedAuthorization
-  );
-  console.log('status: ', status);
+
+  useEffect(() => {
+    if (isAvailable === true && hasRequestedAuthorization === true) {
+      signIn({ access: 'healthkit', refresh: 'healthkit' });
+    }
+  }, [isAvailable, hasRequestedAuthorization, signIn]);
 
   // Wait for all to be ready
   if (
@@ -50,10 +49,6 @@ export default function RootLayout() {
     status === 'idle'
   ) {
     return null; // keep splash visible
-  }
-
-  if (isAvailable === true && hasRequestedAuthorization === true) {
-    signIn({ access: 'healthkit', refresh: 'healthkit' });
   }
 
   if (!isAvailable || !hasRequestedAuthorization || status === 'signOut') {
