@@ -23,12 +23,30 @@ export function getScenarioHistory(): any[] {
   return value ? JSON.parse(value) || [] : [];
 }
 
-export async function addScenarioToHistory(scenarioHistory: any) {
-  const history = getScenarioHistory();
-  history.unshift(scenarioHistory); // Add to beginning of array
-  await setItem(SCENARIO_HISTORY_KEY, history);
+export async function addScenarioToHistory(historyEntry: any) {
+  const currentHistory = getScenarioHistory();
+  const updatedHistory = [historyEntry, ...currentHistory];
+  await setItem(SCENARIO_HISTORY_KEY, updatedHistory);
 }
 
 export async function clearScenarioHistory() {
   await removeItem(SCENARIO_HISTORY_KEY);
+}
+
+// Character Storage
+const CHARACTER_STORAGE_KEY = 'CHARACTER_DATA';
+
+export function getCharacter(): any {
+  const value = storage.getString(CHARACTER_STORAGE_KEY);
+  const result = value ? JSON.parse(value) || null : null;
+  return result;
+}
+
+export async function setCharacter(character: any) {
+  const jsonString = JSON.stringify(character);
+  storage.set(CHARACTER_STORAGE_KEY, jsonString);
+}
+
+export async function clearCharacter() {
+  await removeItem(CHARACTER_STORAGE_KEY);
 }
