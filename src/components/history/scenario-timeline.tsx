@@ -1,14 +1,16 @@
 import React from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Dimensions, FlatList, Text, View } from 'react-native';
 
 import { MerchantIcon, MonsterIcon } from '../ui/icons';
+
+const ITEM_WIDTH = Dimensions.get('window').width;
 
 const TimelineItem: React.FC<{ entry: any; index: number; total: number }> = ({
   entry,
   index,
   total,
 }) => (
-  <View className="mr-6 w-screen shrink-0 px-4">
+  <View style={{ width: ITEM_WIDTH }} className="mr-6 w-screen shrink-0 px-4">
     {/* Timeline line with icon */}
     <View className="mb-4 items-center">
       {entry.type === 'merchant' ? (
@@ -77,21 +79,23 @@ const TimelineItem: React.FC<{ entry: any; index: number; total: number }> = ({
 const ScenarioTimeline: React.FC<{
   history: any[];
 }> = ({ history }) => (
-  <ScrollView
+  <FlatList
+    data={history}
+    keyExtractor={(item) => item.id}
+    renderItem={({ item, index }) => (
+      <TimelineItem entry={item} index={index} total={history.length} />
+    )}
     horizontal
+    pagingEnabled
+    snapToInterval={ITEM_WIDTH}
+    decelerationRate="fast"
     showsHorizontalScrollIndicator={false}
-    contentContainerStyle={{ paddingHorizontal: 16 }}
-    className="flex-1"
-  >
-    {history.map((entry, index) => (
-      <TimelineItem
-        key={entry.id}
-        entry={entry}
-        index={index}
-        total={history.length}
-      />
-    ))}
-  </ScrollView>
+    getItemLayout={(_, index) => ({
+      length: ITEM_WIDTH,
+      offset: ITEM_WIDTH * index,
+      index,
+    })}
+  />
 );
 
 export default ScenarioTimeline;
