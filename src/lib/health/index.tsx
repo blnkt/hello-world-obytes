@@ -138,42 +138,55 @@ const getStepsGroupedByDay = async (
   return results;
 };
 
-function mergeExperienceMMKV(results, experienceMMKV) {
-  let previousExp = [];
+type ExperienceEntry = { date: string; experience: number };
+type StepEntry = { date: string | Date; steps: number };
+
+function mergeExperienceMMKV(
+  results: StepEntry[],
+  experienceMMKV: string | undefined
+): ExperienceEntry[] {
+  let previousExp: ExperienceEntry[] = [];
   try {
     previousExp = experienceMMKV ? JSON.parse(experienceMMKV) : [];
   } catch {
     previousExp = [];
   }
-  const expMap = new Map(previousExp.map((item) => [item.date, item]));
-  results.forEach((item) => {
+  const expMap = new Map<string, ExperienceEntry>(
+    previousExp.map((item: ExperienceEntry) => [item.date, item])
+  );
+  results.forEach((item: StepEntry) => {
     const dayKey = new Date(item.date).toISOString().split('T')[0];
     expMap.set(dayKey, { date: dayKey, experience: item.steps });
   });
   return Array.from(expMap.values()).sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    (a: ExperienceEntry, b: ExperienceEntry) =>
+      new Date(a.date).getTime() - new Date(b.date).getTime()
   );
 }
 
-function mergeStepsByDayMMKV(results, stepsByDayMMKV) {
-  let previous = [];
+function mergeStepsByDayMMKV(
+  results: StepEntry[],
+  stepsByDayMMKV: string | undefined
+): StepEntry[] {
+  let previous: StepEntry[] = [];
   try {
     previous = stepsByDayMMKV ? JSON.parse(stepsByDayMMKV) : [];
   } catch {
     previous = [];
   }
-  const prevMap = new Map(
-    previous.map((item) => [
+  const prevMap = new Map<string, StepEntry>(
+    previous.map((item: StepEntry) => [
       new Date(item.date).toISOString().split('T')[0],
       item,
     ])
   );
-  results.forEach((item) => {
+  results.forEach((item: StepEntry) => {
     const dayKey = new Date(item.date).toISOString().split('T')[0];
     prevMap.set(dayKey, { ...item, date: dayKey });
   });
   return Array.from(prevMap.values()).sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    (a: StepEntry, b: StepEntry) =>
+      new Date(a.date).getTime() - new Date(b.date).getTime()
   );
 }
 
