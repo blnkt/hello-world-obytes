@@ -278,12 +278,9 @@ export const getStartingAttributes = (
   _characterClass: string
 ) => {
   const baseAttributes = {
+    might: 10,
     speed: 10,
     fortitude: 10,
-    might: 10,
-    intelligence: 10,
-    wisdom: 10,
-    charisma: 10,
   };
 
   // Apply race bonuses
