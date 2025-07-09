@@ -5,7 +5,7 @@ import { Text, View } from '@/components/ui';
 
 import { useScenarioTrigger } from '../../lib/use-scenario-trigger';
 
-export default function Feed() {
+export default function Home() {
   const [steps] = useMMKVString('stepCount');
   const stepCount = Number(steps) || 0;
   useScenarioTrigger(stepCount);

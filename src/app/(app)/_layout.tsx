@@ -8,6 +8,66 @@ import {
 } from '@/components/ui/icons';
 import { useAuth, useIsFirstTime } from '@/lib';
 
+const getTabScreens = () => [
+  {
+    name: 'character-sheet',
+    options: {
+      title: 'Character',
+      headerShown: true,
+      tabBarIcon: ({ color }: { color: string }) => (
+        <CharacterIcon color={color} />
+      ),
+      tabBarButtonTestID: 'character-tab',
+    },
+  },
+  {
+    name: 'steps-history',
+    options: {
+      title: 'Scenarios',
+      headerShown: true,
+      tabBarIcon: ({ color }: { color: string }) => (
+        <MerchantIcon color={color} />
+      ),
+      tabBarButtonTestID: 'scenarios-tab',
+    },
+  },
+  {
+    name: 'settings',
+    options: {
+      title: 'Settings',
+      headerShown: true,
+      tabBarIcon: ({ color }: { color: string }) => (
+        <SettingsIcon color={color} />
+      ),
+      tabBarButtonTestID: 'settings-tab',
+    },
+  },
+  {
+    name: 'index',
+    options: {
+      href: null,
+    },
+  },
+  {
+    name: 'scenario',
+    options: {
+      href: null,
+      title: 'Scenario',
+      headerShown: true,
+      tabBarIcon: ({ color }: { color: string }) => (
+        <MerchantIcon color={color} />
+      ),
+      tabBarButtonTestID: 'senario-tab',
+    },
+  },
+  {
+    name: 'style',
+    options: {
+      href: null,
+    },
+  },
+];
+
 export default function TabLayout() {
   const status = useAuth.use.status();
   const [isFirstTime] = useIsFirstTime();
@@ -30,33 +90,13 @@ export default function TabLayout() {
   }
   return (
     <Tabs>
-      <Tabs.Screen
-        name="character-sheet"
-        options={{
-          title: 'Character',
-          headerShown: false,
-          tabBarIcon: ({ color }) => <CharacterIcon color={color} />,
-          tabBarButtonTestID: 'character-tab',
-        }}
-      />
-      <Tabs.Screen
-        name="steps-history"
-        options={{
-          title: 'Scenarios',
-          headerShown: false,
-          tabBarIcon: ({ color }) => <MerchantIcon color={color} />,
-          tabBarButtonTestID: 'scenarios-tab',
-        }}
-      />
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: 'Settings',
-          headerShown: false,
-          tabBarIcon: ({ color }) => <SettingsIcon color={color} />,
-          tabBarButtonTestID: 'settings-tab',
-        }}
-      />
+      {getTabScreens().map((screen) => (
+        <Tabs.Screen
+          key={screen.name}
+          name={screen.name}
+          options={screen.options}
+        />
+      ))}
     </Tabs>
   );
 }
