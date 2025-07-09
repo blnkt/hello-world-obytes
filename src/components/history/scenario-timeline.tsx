@@ -1,7 +1,10 @@
 import React from 'react';
 import { Dimensions, FlatList, Text, View } from 'react-native';
 
-import { MerchantIcon, MonsterIcon } from '../ui/icons';
+import {
+  MerchantIllustration,
+  MonsterIllustration,
+} from './scenario-illustrations';
 
 const ITEM_WIDTH = Dimensions.get('window').width;
 
@@ -11,15 +14,15 @@ const TimelineItem: React.FC<{ entry: any; index: number; total: number }> = ({
   total,
 }) => (
   <View style={{ width: ITEM_WIDTH }} className="mr-6 w-screen shrink-0 px-4">
-    {/* Timeline line with icon */}
+    {/* Timeline line with illustration */}
     <View className="mb-4 items-center">
       {entry.type === 'merchant' ? (
-        <MerchantIcon color="#10B981" width={24} height={24} />
+        <MerchantIllustration width={ITEM_WIDTH - 32} height={120} />
       ) : (
-        <MonsterIcon color="#EF4444" width={24} height={24} />
+        <MonsterIllustration width={ITEM_WIDTH - 32} height={120} />
       )}
       {index < total - 1 && (
-        <View className="absolute top-6 h-0.5 w-screen bg-gray-300 dark:bg-gray-600" />
+        <View className="absolute top-16 h-0.5 w-screen bg-gray-300 dark:bg-gray-600" />
       )}
     </View>
 
