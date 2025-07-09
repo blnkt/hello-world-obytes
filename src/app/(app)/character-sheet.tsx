@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useMMKVString } from 'react-native-mmkv';
 
 import { CharacterSheet } from '../../components/character/character-sheet';
 import { getTodayStepCount, useStepCountAsExperience } from '../../lib/health';
@@ -23,12 +24,25 @@ const initialCharacter: Character = {
 
 export default function CharacterSheetScreen() {
   const [character, setCharacter] = useState<Character>(initialCharacter);
-  const stepCountExperience = useStepCountAsExperience();
+  const [lastCheckedDate, setLastCheckedDate] =
+    useMMKVString('lastCheckedDate');
+
+  // Default to start of today if not set
+  const lastCheckedDateTime = lastCheckedDate
+    ? new Date(lastCheckedDate)
+    : (() => {
+        const d = new Date();
+        d.setHours(0, 0, 0, 0);
+        return d;
+      })();
+
+  const { experience, stepsByDay } =
+    useStepCountAsExperience(lastCheckedDateTime);
 
   // Update character experience when step count changes
   useEffect(() => {
     const balancedXP = calculateBalancedXP(
-      stepCountExperience,
+      experience,
       character.fitnessBackground,
       character.class
     );
@@ -37,9 +51,16 @@ export default function CharacterSheetScreen() {
       experience: balancedXP,
       // Level is now auto-calculated in the component
     }));
-  }, [stepCountExperience, character.fitnessBackground, character.class]);
+    // Update lastCheckedDate to now after each experience fetch
+    setLastCheckedDate(new Date().toISOString());
+  }, [
+    experience,
+    character.fitnessBackground,
+    character.class,
+    setLastCheckedDate,
+  ]);
 
-  // Manual refresh function
+  // Manual refresh function (optional, can still use getTodayStepCount if needed)
   const handleRefreshExperience = async () => {
     try {
       const newStepCount = await getTodayStepCount();
@@ -52,6 +73,7 @@ export default function CharacterSheetScreen() {
         ...prev,
         experience: balancedXP,
       }));
+      setLastCheckedDate(new Date().toISOString());
     } catch (error) {
       console.error('Error refreshing step count:', error);
     }

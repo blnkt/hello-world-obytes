@@ -4,6 +4,7 @@ import HealthKit, {
   HKUnits,
 } from '@kingstinct/react-native-healthkit';
 import { useEffect, useState } from 'react';
+import { useMMKVString } from 'react-native-mmkv';
 
 const useHealthKitAvailability = () => {
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
@@ -99,29 +100,139 @@ export const useStepCount = () => {
   return stepCount;
 };
 
+const getStepsGroupedByDay = async (
+  startDate: Date,
+  endDate: Date = new Date()
+) => {
+  const results: { date: Date; steps: number }[] = [];
+  let current = new Date(startDate);
+  current.setHours(0, 0, 0, 0);
+  const end = new Date(endDate);
+  end.setHours(0, 0, 0, 0);
+
+  while (current <= end) {
+    const dayStart = new Date(current);
+    const dayEnd = new Date(current);
+    dayEnd.setHours(23, 59, 59, 999);
+
+    try {
+      const result = await HealthKit.queryStatisticsForQuantity(
+        HKQuantityTypeIdentifier.stepCount,
+        [HKStatisticsOptions.cumulativeSum],
+        dayStart,
+        dayEnd,
+        HKUnits.Count
+      );
+      results.push({
+        date: new Date(dayStart),
+        steps: result.sumQuantity?.quantity ?? 0,
+      });
+    } catch (error) {
+      console.log(error);
+      results.push({ date: new Date(dayStart), steps: 0 });
+    }
+
+    current.setDate(current.getDate() + 1);
+  }
+
+  return results;
+};
+
+function mergeExperienceMMKV(results, experienceMMKV) {
+  let previousExp = [];
+  try {
+    previousExp = experienceMMKV ? JSON.parse(experienceMMKV) : [];
+  } catch {
+    previousExp = [];
+  }
+  const expMap = new Map(previousExp.map((item) => [item.date, item]));
+  results.forEach((item) => {
+    const dayKey = new Date(item.date).toISOString().split('T')[0];
+    expMap.set(dayKey, { date: dayKey, experience: item.steps });
+  });
+  return Array.from(expMap.values()).sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
+}
+
+function mergeStepsByDayMMKV(results, stepsByDayMMKV) {
+  let previous = [];
+  try {
+    previous = stepsByDayMMKV ? JSON.parse(stepsByDayMMKV) : [];
+  } catch {
+    previous = [];
+  }
+  const prevMap = new Map(
+    previous.map((item) => [
+      new Date(item.date).toISOString().split('T')[0],
+      item,
+    ])
+  );
+  results.forEach((item) => {
+    const dayKey = new Date(item.date).toISOString().split('T')[0];
+    prevMap.set(dayKey, { ...item, date: dayKey });
+  });
+  return Array.from(prevMap.values()).sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
+}
+
 // New hook for character sheet experience points
-export const useStepCountAsExperience = () => {
+export const useStepCountAsExperience = (lastCheckedDateTime: Date) => {
   const [experience, setExperience] = useState<number>(0);
+  const [stepsByDay, setStepsByDay] = useState<{ date: Date; steps: number }[]>(
+    []
+  );
+  const [experienceMMKV, setExperienceMMKV] = useMMKVString('experience');
+  const [stepsByDayMMKV, setStepsByDayMMKV] = useMMKVString('stepsByDay');
+
+  // Initialize from MMKV on mount
+  useEffect(() => {
+    if (experienceMMKV !== undefined) {
+      setExperience(Number(experienceMMKV) || 0);
+    }
+    if (stepsByDayMMKV !== undefined) {
+      try {
+        const parsed = JSON.parse(stepsByDayMMKV);
+        setStepsByDay(Array.isArray(parsed) ? parsed : []);
+      } catch {
+        setStepsByDay([]);
+      }
+    }
+    // Only run on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const getExperienceFromSteps = async () => {
       try {
-        const stepCount = await getTodayStepCount();
-        // Convert steps to experience points (1 step = 1 XP)
-        setExperience(stepCount || 0);
+        const now = new Date();
+        const results = await getStepsGroupedByDay(lastCheckedDateTime, now);
+        const totalSteps = results.reduce(
+          (sum, day) => sum + (day.steps || 0),
+          0
+        );
+        setExperience(totalSteps);
+        setStepsByDay(results);
+        // Use helpers to merge and store
+        const mergedExp = mergeExperienceMMKV(results, experienceMMKV);
+        setExperienceMMKV(JSON.stringify(mergedExp));
+        const merged = mergeStepsByDayMMKV(results, stepsByDayMMKV);
+        setStepsByDayMMKV(JSON.stringify(merged));
       } catch (error) {
         console.error('Error getting step count for experience:', error);
         setExperience(0);
+        setStepsByDay([]);
+        setExperienceMMKV('0');
+        setStepsByDayMMKV('[]');
       }
     };
 
     getExperienceFromSteps();
 
-    // Refresh every 5 minutes to keep experience updated
     const interval = setInterval(getExperienceFromSteps, 5 * 60 * 1000);
-
     return () => clearInterval(interval);
-  }, []);
+  }, [lastCheckedDateTime, setExperienceMMKV, setStepsByDayMMKV]);
 
-  return experience;
+  return { experience, stepsByDay };
 };
