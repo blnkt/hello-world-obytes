@@ -7,6 +7,8 @@ import {
   View,
 } from 'react-native';
 
+import { Select } from '@/components/ui/select';
+
 import type { Character } from '../types/character';
 import {
   calculateBalancedXP,
@@ -133,48 +135,64 @@ const ClassInfo: React.FC<{ characterClass: string }> = ({
   );
 };
 
+const getValidFitnessBackground = (fitnessBackground: string) =>
+  FITNESS_BACKGROUNDS[fitnessBackground as keyof typeof FITNESS_BACKGROUNDS]
+    ? fitnessBackground
+    : Object.keys(FITNESS_BACKGROUNDS)[0];
+
+const getValidClass = (characterClass: string) =>
+  FITNESS_CLASSES[characterClass as keyof typeof FITNESS_CLASSES]
+    ? characterClass
+    : Object.keys(FITNESS_CLASSES)[0];
+
 const FitnessBackgroundClassFields: React.FC<{
   character: Character;
   updateField: (field: keyof Character, value: any) => void;
-}> = ({ character, updateField }) => (
-  <View className="space-y-4">
-    {/* Fitness Background Selection */}
-    <View>
-      <Text className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-        Fitness Background
-      </Text>
-      <View className="rounded-md border border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-700">
-        <TextInput
+}> = ({ character, updateField }) => {
+  return (
+    <View className="space-y-4">
+      {/* Fitness Background Selection */}
+      <View>
+        <Select
+          label="Fitness Background"
           value={character.fitnessBackground}
-          onChangeText={(text) => updateField('fitnessBackground', text)}
-          className="px-3 py-2 text-gray-900 dark:text-white"
+          onSelect={(value) => updateField('fitnessBackground', value)}
+          options={Object.keys(FITNESS_BACKGROUNDS).map((key) => ({
+            label: key,
+            value: key,
+          }))}
           placeholder="Select your fitness background"
-          placeholderTextColor="#9CA3AF"
+        />
+        <FitnessBackgroundInfo
+          fitnessBackground={getValidFitnessBackground(
+            character.fitnessBackground
+          )}
         />
       </View>
-      <FitnessBackgroundInfo fitnessBackground={character.fitnessBackground} />
-    </View>
 
-    {/* Class Selection */}
-    <View>
-      <Text className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-        Class
-      </Text>
-      <View className="rounded-md border border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-700">
-        <TextInput
+      {/* Class Selection */}
+      <View>
+        <Select
+          label="Class"
           value={character.class}
-          onChangeText={(text) => updateField('class', text)}
-          className="px-3 py-2 text-gray-900 dark:text-white"
+          onSelect={(value) => updateField('class', value)}
+          options={Object.keys(FITNESS_CLASSES).map((key) => ({
+            label: key,
+            value: key,
+          }))}
           placeholder="Select your training focus"
-          placeholderTextColor="#9CA3AF"
         />
+        <ClassInfo characterClass={getValidClass(character.class)} />
       </View>
-      <ClassInfo characterClass={character.class} />
     </View>
-  </View>
-);
+  );
+};
 
 const LevelDisplay: React.FC<{ character: Character }> = ({ character }) => {
+  const validFitnessBackground = getValidFitnessBackground(
+    character.fitnessBackground
+  );
+  const validClass = getValidClass(character.class);
   const calculatedLevel = getCharacterLevel(character.experience);
   const levelProgress = getLevelProgress(character.experience);
   const currentLevelData =
@@ -216,11 +234,15 @@ const ExperienceField: React.FC<{
   character: Character;
   onRefreshExperience?: () => void;
 }> = ({ character, onRefreshExperience }) => {
+  const validFitnessBackground = getValidFitnessBackground(
+    character.fitnessBackground
+  );
+  const validClass = getValidClass(character.class);
   const baseSteps = character.experience;
   const balancedXP = calculateBalancedXP(
     baseSteps,
-    character.fitnessBackground,
-    character.class
+    validFitnessBackground,
+    validClass
   );
   const xpMultiplier =
     baseSteps > 0 ? (balancedXP / baseSteps).toFixed(2) : '1.00';
