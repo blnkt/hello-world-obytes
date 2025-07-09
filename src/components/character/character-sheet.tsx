@@ -5,7 +5,6 @@ import type { Character } from '../../types/character';
 import { AttributesSection } from './attributes-section';
 import { FitnessBackgroundClassFields } from './fitness-background-class-fields';
 import { LevelExpFields } from './level-exp-fields';
-// Update imports to kebab-case
 import { NameField } from './name-field';
 
 export type CharacterSheetProps = {

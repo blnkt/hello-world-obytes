@@ -5,12 +5,9 @@ export type Character = {
   level: number;
   experience: number;
   attributes: {
-    strength: number;
-    dexterity: number;
-    constitution: number;
-    intelligence: number;
-    wisdom: number;
-    charisma: number;
+    might: number;
+    speed: number;
+    fortitude: number;
   };
   skills: string[];
   equipment: string[];
@@ -43,12 +40,9 @@ export const FITNESS_BACKGROUNDS = {
       consistency: 'Loses motivation with high expectations',
     },
     startingStats: {
-      constitution: 6,
-      strength: 4,
-      dexterity: 8,
-      intelligence: 10,
-      wisdom: 8,
-      charisma: 7,
+      might: 6,
+      speed: 4,
+      fortitude: 8,
     },
   },
   'Weekend Warrior': {
@@ -62,12 +56,9 @@ export const FITNESS_BACKGROUNDS = {
       consistency: 'Struggles with daily routines',
     },
     startingStats: {
-      constitution: 8,
-      strength: 7,
-      dexterity: 9,
-      intelligence: 9,
-      wisdom: 8,
-      charisma: 8,
+      might: 8,
+      speed: 7,
+      fortitude: 9,
     },
   },
   'Former Athlete': {
@@ -81,12 +72,9 @@ export const FITNESS_BACKGROUNDS = {
       pressure: 'High expectations can lead to burnout',
     },
     startingStats: {
-      constitution: 12,
-      strength: 10,
-      dexterity: 8,
-      intelligence: 8,
-      wisdom: 9,
-      charisma: 7,
+      might: 12,
+      speed: 10,
+      fortitude: 8,
     },
   },
   'Natural Runner': {
@@ -100,12 +88,9 @@ export const FITNESS_BACKGROUNDS = {
       flexibility: 'Struggles with varied workout types',
     },
     startingStats: {
-      constitution: 14,
-      strength: 6,
-      dexterity: 12,
-      intelligence: 7,
-      wisdom: 8,
-      charisma: 6,
+      might: 14,
+      speed: 6,
+      fortitude: 12,
     },
   },
   'Fitness Newbie': {
@@ -119,12 +104,9 @@ export const FITNESS_BACKGROUNDS = {
       consistency: 'Takes time to build consistency',
     },
     startingStats: {
-      constitution: 7,
-      strength: 6,
-      dexterity: 7,
-      intelligence: 9,
-      wisdom: 8,
-      charisma: 8,
+      might: 7,
+      speed: 6,
+      fortitude: 7,
     },
   },
 } as const;
@@ -296,9 +278,9 @@ export const getStartingAttributes = (
   _characterClass: string
 ) => {
   const baseAttributes = {
-    strength: 10,
-    dexterity: 10,
-    constitution: 10,
+    speed: 10,
+    fortitude: 10,
+    might: 10,
     intelligence: 10,
     wisdom: 10,
     charisma: 10,
