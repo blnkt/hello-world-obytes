@@ -79,15 +79,18 @@ export const Options = React.forwardRef<BottomSheetModal, OptionsProps>(
     const isDark = colorScheme === 'dark';
 
     const renderSelectItem = React.useCallback(
-      ({ item }: { item: OptionType }) => (
-        <Option
-          key={`select-item-${item.value}`}
-          label={item.label}
-          selected={value === item.value}
-          onPress={() => onSelect(item)}
-          testID={testID ? `${testID}-item-${item.value}` : undefined}
-        />
-      ),
+      ({ item }: { item: OptionType }) => {
+        const isSelected = value === item.value;
+        return (
+          <Option
+            key={`select-item-${item.value}`}
+            label={item.label}
+            selected={isSelected}
+            onPress={() => onSelect(item)}
+            testID={testID ? `${testID}-item-${item.value}` : undefined}
+          />
+        );
+      },
       [onSelect, value, testID]
     );
 
@@ -168,6 +171,10 @@ export const Select = (props: SelectProps) => {
     [modal, onSelect]
   );
 
+  const handlePress = React.useCallback(() => {
+    modal.present();
+  }, [modal]);
+
   const styles = React.useMemo(
     () =>
       selectTv({
@@ -199,7 +206,7 @@ export const Select = (props: SelectProps) => {
         <Pressable
           className={styles.input()}
           disabled={disabled}
-          onPress={modal.present}
+          onPress={handlePress}
           testID={testID ? `${testID}-trigger` : undefined}
         >
           <View className="flex-1">
@@ -221,6 +228,7 @@ export const Select = (props: SelectProps) => {
         ref={modal.ref}
         options={options}
         onSelect={onSelectOption}
+        value={value}
       />
     </>
   );
