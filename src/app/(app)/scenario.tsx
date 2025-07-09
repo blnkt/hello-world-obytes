@@ -8,21 +8,9 @@ import { ScenarioOutcome } from '../../components/scenario-outcome';
 import { generateRandomScenarios } from '../../lib/scenario';
 import type { Scenario } from '../../types/scenario';
 
-export default function ScenarioScreen() {
-  const router = useRouter();
-  const { milestone } = useLocalSearchParams();
-  const milestoneNumber = Number(milestone) || 5000;
-  const [selectedScenario, setSelectedScenario] = useState<string | null>(null);
-  const [showOutcome, setShowOutcome] = useState(false);
-  const [selectedScenarioData, setSelectedScenarioData] =
-    useState<Scenario | null>(null);
+const useScenarioAnimations = () => {
   const [fadeAnim] = useState(new Animated.Value(0));
   const [slideAnim] = useState(new Animated.Value(50));
-
-  const scenarios = useMemo(
-    () => generateRandomScenarios(milestoneNumber),
-    [milestoneNumber]
-  );
 
   React.useEffect(() => {
     Animated.parallel([
@@ -38,6 +26,32 @@ export default function ScenarioScreen() {
       }),
     ]).start();
   }, [fadeAnim, slideAnim]);
+
+  return { fadeAnim, slideAnim };
+};
+
+const ScenarioFooter: React.FC = () => (
+  <View className="mt-8 items-center">
+    <Text className="text-center text-sm text-gray-500 dark:text-gray-400">
+      Your choice will affect your character's journey!
+    </Text>
+  </View>
+);
+
+export default function ScenarioScreen() {
+  const router = useRouter();
+  const { milestone } = useLocalSearchParams();
+  const milestoneNumber = Number(milestone) || 5000;
+  const [selectedScenario, setSelectedScenario] = useState<string | null>(null);
+  const [showOutcome, setShowOutcome] = useState(false);
+  const [selectedScenarioData, setSelectedScenarioData] =
+    useState<Scenario | null>(null);
+  const { fadeAnim, slideAnim } = useScenarioAnimations();
+
+  const scenarios = useMemo(
+    () => generateRandomScenarios(milestoneNumber),
+    [milestoneNumber]
+  );
 
   const handleScenarioSelect = (scenarioId: string) => {
     const scenario = scenarios.find((s) => s.id === scenarioId);
@@ -79,11 +93,7 @@ export default function ScenarioScreen() {
           ))}
         </View>
 
-        <View className="mt-8 items-center">
-          <Text className="text-center text-sm text-gray-500 dark:text-gray-400">
-            Your choice will affect your character's journey!
-          </Text>
-        </View>
+        <ScenarioFooter />
       </Animated.View>
 
       {selectedScenarioData && (
