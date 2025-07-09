@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useMMKVString } from 'react-native-mmkv';
 
 import { CharacterSheet } from '../../components/character/character-sheet';
-import { getTodayStepCount, useStepCountAsExperience } from '../../lib/health';
+import { useStepCountAsExperience } from '../../lib/health';
 import type { Character } from '../../types/character';
 import {
   calculateBalancedXP,
@@ -36,8 +36,7 @@ export default function CharacterSheetScreen() {
         return d;
       })();
 
-  const { experience, stepsByDay } =
-    useStepCountAsExperience(lastCheckedDateTime);
+  const { experience } = useStepCountAsExperience(lastCheckedDateTime);
 
   // Update character experience when step count changes
   useEffect(() => {
@@ -61,29 +60,29 @@ export default function CharacterSheetScreen() {
   ]);
 
   // Manual refresh function (optional, can still use getTodayStepCount if needed)
-  const handleRefreshExperience = async () => {
-    try {
-      const newStepCount = await getTodayStepCount();
-      const balancedXP = calculateBalancedXP(
-        newStepCount || 0,
-        character.fitnessBackground,
-        character.class
-      );
-      setCharacter((prev) => ({
-        ...prev,
-        experience: balancedXP,
-      }));
-      setLastCheckedDate(new Date().toISOString());
-    } catch (error) {
-      console.error('Error refreshing step count:', error);
-    }
-  };
+  // const handleRefreshExperience = async () => {
+  //   try {
+  //     const newStepCount = await getTodayStepCount();
+  //     const balancedXP = calculateBalancedXP(
+  //       newStepCount || 0,
+  //       character.fitnessBackground,
+  //       character.class
+  //     );
+  //     setCharacter((prev) => ({
+  //       ...prev,
+  //       experience: balancedXP,
+  //     }));
+  //     setLastCheckedDate(new Date().toISOString());
+  //   } catch (error) {
+  //     console.error('Error refreshing step count:', error);
+  //   }
+  // };
 
   return (
     <CharacterSheet
       character={character}
       onChange={setCharacter}
-      onRefreshExperience={handleRefreshExperience}
+      // onRefreshExperience={handleRefreshExperience}
     />
   );
 }

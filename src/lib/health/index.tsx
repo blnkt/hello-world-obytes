@@ -245,6 +245,7 @@ export const useStepCountAsExperience = (lastCheckedDateTime: Date) => {
 
     const interval = setInterval(getExperienceFromSteps, 5 * 60 * 1000);
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastCheckedDateTime, setExperienceMMKV, setStepsByDayMMKV]);
 
   return { experience, stepsByDay };

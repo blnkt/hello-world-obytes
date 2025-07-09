@@ -5,6 +5,7 @@ import { Animated, Text, View } from 'react-native';
 import { ScenarioCard } from '../../components/scenario-card';
 import { ScenarioHeader } from '../../components/scenario-header';
 import { ScenarioOutcome } from '../../components/scenario-outcome';
+import { useScenarioHistory } from '../../lib/hooks/use-scenario-history';
 import { generateRandomScenarios } from '../../lib/scenario';
 import type { Scenario } from '../../types/scenario';
 
@@ -38,7 +39,7 @@ const ScenarioFooter: React.FC = () => (
   </View>
 );
 
-export default function ScenarioScreen() {
+const useScenarioState = () => {
   const router = useRouter();
   const { milestone } = useLocalSearchParams();
   const milestoneNumber = Number(milestone) || 5000;
@@ -46,19 +47,20 @@ export default function ScenarioScreen() {
   const [showOutcome, setShowOutcome] = useState(false);
   const [selectedScenarioData, setSelectedScenarioData] =
     useState<Scenario | null>(null);
-  const { fadeAnim, slideAnim } = useScenarioAnimations();
+  const { addToHistory } = useScenarioHistory();
 
   const scenarios = useMemo(
     () => generateRandomScenarios(milestoneNumber),
     [milestoneNumber]
   );
 
-  const handleScenarioSelect = (scenarioId: string) => {
+  const handleScenarioSelect = async (scenarioId: string) => {
     const scenario = scenarios.find((s) => s.id === scenarioId);
     if (scenario) {
       setSelectedScenario(scenarioId);
       setSelectedScenarioData(scenario);
       setShowOutcome(true);
+      await addToHistory(scenario, milestoneNumber);
     }
   };
 
@@ -68,6 +70,29 @@ export default function ScenarioScreen() {
     setSelectedScenarioData(null);
     router.back();
   };
+
+  return {
+    milestoneNumber,
+    selectedScenario,
+    showOutcome,
+    selectedScenarioData,
+    scenarios,
+    handleScenarioSelect,
+    handleOutcomeClose,
+  };
+};
+
+export default function ScenarioScreen() {
+  const { fadeAnim, slideAnim } = useScenarioAnimations();
+  const {
+    milestoneNumber,
+    selectedScenario,
+    showOutcome,
+    selectedScenarioData,
+    scenarios,
+    handleScenarioSelect,
+    handleOutcomeClose,
+  } = useScenarioState();
 
   return (
     <View className="flex-1 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900 dark:to-red-900">

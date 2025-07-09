@@ -3,7 +3,7 @@ import React, { useCallback, useEffect } from 'react';
 
 import {
   Character as CharacterIcon,
-  Feed as FeedIcon,
+  MerchantIcon,
   Settings as SettingsIcon,
 } from '@/components/ui/icons';
 import { useAuth, useIsFirstTime } from '@/lib';
@@ -42,10 +42,10 @@ export default function TabLayout() {
       <Tabs.Screen
         name="steps-history"
         options={{
-          title: 'History',
+          title: 'Scenarios',
           headerShown: false,
-          tabBarIcon: ({ color }) => <FeedIcon color={color} />, // Use Feed icon for history
-          tabBarButtonTestID: 'history-tab',
+          tabBarIcon: ({ color }) => <MerchantIcon color={color} />,
+          tabBarButtonTestID: 'scenarios-tab',
         }}
       />
       <Tabs.Screen

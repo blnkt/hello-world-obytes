@@ -10,13 +10,13 @@ import { NameField } from './name-field';
 export type CharacterSheetProps = {
   character: Character;
   onChange: (updated: Character) => void;
-  onRefreshExperience?: () => void;
+  // onRefreshExperience?: () => void;
 };
 
 export const CharacterSheet: React.FC<CharacterSheetProps> = ({
   character,
   onChange,
-  onRefreshExperience,
+  // onRefreshExperience,
 }) => {
   const updateField = (field: keyof Character, value: any) => {
     onChange({ ...character, [field]: value });
