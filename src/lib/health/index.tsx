@@ -98,3 +98,30 @@ export const useStepCount = () => {
 
   return stepCount;
 };
+
+// New hook for character sheet experience points
+export const useStepCountAsExperience = () => {
+  const [experience, setExperience] = useState<number>(0);
+
+  useEffect(() => {
+    const getExperienceFromSteps = async () => {
+      try {
+        const stepCount = await getTodayStepCount();
+        // Convert steps to experience points (1 step = 1 XP)
+        setExperience(stepCount || 0);
+      } catch (error) {
+        console.error('Error getting step count for experience:', error);
+        setExperience(0);
+      }
+    };
+
+    getExperienceFromSteps();
+    
+    // Refresh every 5 minutes to keep experience updated
+    const interval = setInterval(getExperienceFromSteps, 5 * 60 * 1000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  return experience;
+};
