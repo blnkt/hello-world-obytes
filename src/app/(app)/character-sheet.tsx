@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { CharacterSheet } from '../../components/character-sheet';
+import { CharacterSheet } from '../../components/character/character-sheet';
 import { getTodayStepCount, useStepCountAsExperience } from '../../lib/health';
 import type { Character } from '../../types/character';
 import {

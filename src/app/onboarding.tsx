@@ -22,7 +22,7 @@ export default function Onboarding() {
       </View>
       <View className="w-full justify-end px-4">
         <Text className="my-3 text-center text-5xl font-bold text-purple-700 dark:text-purple-200">
-          StepQuest: Fitness RPG
+          DungeonWalk: Fitness RPG
         </Text>
         <Text className="mb-4 text-center text-lg italic text-gray-700 dark:text-gray-300">
           Level up your life, one step at a time!
