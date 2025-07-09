@@ -1,7 +1,6 @@
 export * from './arrow-right';
 export * from './caret-down';
 export * from './character';
-export * from './feed';
 export * from './github';
 export * from './home';
 export * from './language';
