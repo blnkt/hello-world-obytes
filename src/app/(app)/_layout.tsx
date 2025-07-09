@@ -1,9 +1,9 @@
-/* eslint-disable react/no-unstable-nested-components */
 import { Redirect, SplashScreen, Tabs } from 'expo-router';
 import React, { useCallback, useEffect } from 'react';
 
 import {
   Character as CharacterIcon,
+  Feed as FeedIcon,
   Settings as SettingsIcon,
 } from '@/components/ui/icons';
 import { useAuth, useIsFirstTime } from '@/lib';
@@ -37,6 +37,15 @@ export default function TabLayout() {
           headerShown: false,
           tabBarIcon: ({ color }) => <CharacterIcon color={color} />,
           tabBarButtonTestID: 'character-tab',
+        }}
+      />
+      <Tabs.Screen
+        name="steps-history"
+        options={{
+          title: 'History',
+          headerShown: false,
+          tabBarIcon: ({ color }) => <FeedIcon color={color} />, // Use Feed icon for history
+          tabBarButtonTestID: 'history-tab',
         }}
       />
       <Tabs.Screen
