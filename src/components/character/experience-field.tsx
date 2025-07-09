@@ -3,22 +3,15 @@ import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 import type { Character } from '../../types/character';
 import { calculateBalancedXP } from '../../types/character';
-import { getValidClass, getValidFitnessBackground } from './utils';
+import { getValidClass } from './utils';
 
 export const ExperienceField: React.FC<{
   character: Character;
   onRefreshExperience?: () => void;
 }> = ({ character, onRefreshExperience }) => {
-  const validFitnessBackground = getValidFitnessBackground(
-    character.fitnessBackground
-  );
   const validClass = getValidClass(character.class);
   const baseSteps = character.experience;
-  const balancedXP = calculateBalancedXP(
-    baseSteps,
-    validFitnessBackground,
-    validClass
-  );
+  const balancedXP = calculateBalancedXP(baseSteps, validClass);
   const xpMultiplier =
     baseSteps > 0 ? (balancedXP / baseSteps).toFixed(2) : '1.00';
 

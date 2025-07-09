@@ -11,11 +11,10 @@ import {
 
 const initialCharacter: Character = {
   name: '',
-  fitnessBackground: 'Fitness Newbie', // Default fitness background
   class: 'General Fitness', // Default class
   level: 1, // This will be auto-calculated from experience
   experience: 0,
-  attributes: getStartingAttributes('Fitness Newbie', 'General Fitness'),
+  classAttributes: getStartingAttributes('General Fitness'),
   skills: [],
   equipment: [],
   abilities: [],
@@ -40,11 +39,7 @@ export default function CharacterSheetScreen() {
 
   // Update character experience when step count changes
   useEffect(() => {
-    const balancedXP = calculateBalancedXP(
-      experience,
-      character.fitnessBackground,
-      character.class
-    );
+    const balancedXP = calculateBalancedXP(experience, character.class);
     setCharacter((prev) => ({
       ...prev,
       experience: balancedXP,
@@ -52,12 +47,7 @@ export default function CharacterSheetScreen() {
     }));
     // Update lastCheckedDate to now after each experience fetch
     setLastCheckedDate(new Date().toISOString());
-  }, [
-    experience,
-    character.fitnessBackground,
-    character.class,
-    setLastCheckedDate,
-  ]);
+  }, [experience, character.class, setLastCheckedDate]);
 
   // Manual refresh function (optional, can still use getTodayStepCount if needed)
   // const handleRefreshExperience = async () => {
@@ -65,7 +55,6 @@ export default function CharacterSheetScreen() {
   //     const newStepCount = await getTodayStepCount();
   //     const balancedXP = calculateBalancedXP(
   //       newStepCount || 0,
-  //       character.fitnessBackground,
   //       character.class
   //     );
   //     setCharacter((prev) => ({

@@ -1,10 +1,9 @@
 export type Character = {
   name: string;
-  fitnessBackground: string;
   class: string;
   level: number;
   experience: number;
-  attributes: {
+  classAttributes: {
     might: number;
     speed: number;
     fortitude: number;
@@ -27,91 +26,6 @@ export const FITNESS_LEVELS = {
   8: { minXP: 150000, name: 'Fitness Legend', color: 'text-yellow-600' },
 } as const;
 
-// Balanced Race System
-export const FITNESS_BACKGROUNDS = {
-  'Couch Potato': {
-    description: 'Starting from zero, every step counts more',
-    strengths: {
-      experience: '2x XP from steps under 5,000',
-      motivation: 'Easy to get started',
-    },
-    weaknesses: {
-      experience: '0.5x XP from steps over 15,000',
-      consistency: 'Loses motivation with high expectations',
-    },
-    startingStats: {
-      might: 6,
-      speed: 4,
-      fortitude: 8,
-    },
-  },
-  'Weekend Warrior': {
-    description: 'Balanced approach with moderate activity',
-    strengths: {
-      experience: '1.5x XP from weekend activity',
-      flexibility: 'Good at varied routines',
-    },
-    weaknesses: {
-      experience: '0.8x XP from weekday activity',
-      consistency: 'Struggles with daily routines',
-    },
-    startingStats: {
-      might: 8,
-      speed: 7,
-      fortitude: 9,
-    },
-  },
-  'Former Athlete': {
-    description: 'Muscle memory helps, but high expectations',
-    strengths: {
-      experience: '1.3x XP from high-intensity activities',
-      recovery: 'Better at handling intense workouts',
-    },
-    weaknesses: {
-      experience: '0.7x XP from low-intensity activities',
-      pressure: 'High expectations can lead to burnout',
-    },
-    startingStats: {
-      might: 12,
-      speed: 10,
-      fortitude: 8,
-    },
-  },
-  'Natural Runner': {
-    description: 'Born to move, but struggles with variety',
-    strengths: {
-      experience: '1.4x XP from running and walking',
-      endurance: 'Excels at sustained activity',
-    },
-    weaknesses: {
-      experience: '0.6x XP from strength training',
-      flexibility: 'Struggles with varied workout types',
-    },
-    startingStats: {
-      might: 14,
-      speed: 6,
-      fortitude: 12,
-    },
-  },
-  'Fitness Newbie': {
-    description: 'Fresh start with no bad habits',
-    strengths: {
-      experience: '1.1x XP from all activities',
-      learning: 'Quick to learn new routines',
-    },
-    weaknesses: {
-      experience: '0.9x XP from advanced activities',
-      consistency: 'Takes time to build consistency',
-    },
-    startingStats: {
-      might: 7,
-      speed: 6,
-      fortitude: 7,
-    },
-  },
-} as const;
-
-// Balanced Class System
 export const FITNESS_CLASSES = {
   'Cardio Crusher': {
     description: 'Focus on heart health and endurance',
@@ -124,6 +38,11 @@ export const FITNESS_CLASSES = {
       flexibility: 'Struggles with varied workout types',
     },
     specialAbility: 'Marathon Training - 2x XP for 10k+ steps once per week',
+    attributes: {
+      might: 6,
+      speed: 12,
+      fortitude: 10,
+    },
   },
   'Strength Seeker': {
     description: 'Build muscle and power',
@@ -136,6 +55,11 @@ export const FITNESS_CLASSES = {
       endurance: 'Struggles with long-duration activities',
     },
     specialAbility: 'Power Walking - 1.5x XP for 15k+ steps once per week',
+    attributes: {
+      might: 14,
+      speed: 6,
+      fortitude: 8,
+    },
   },
   'Flexibility Fanatic': {
     description: 'Balance and mobility focus',
@@ -148,6 +72,11 @@ export const FITNESS_CLASSES = {
       intensity: 'Struggles with high-intensity workouts',
     },
     specialAbility: 'Active Recovery - XP from rest days with light activity',
+    attributes: {
+      might: 5,
+      speed: 8,
+      fortitude: 12,
+    },
   },
   'Weight Loss Warrior': {
     description: 'Calorie burning specialist',
@@ -160,6 +89,11 @@ export const FITNESS_CLASSES = {
       intensity: 'Struggles with very high-intensity workouts',
     },
     specialAbility: 'Streak Master - 1.3x XP for 7+ day streaks',
+    attributes: {
+      might: 7,
+      speed: 9,
+      fortitude: 11,
+    },
   },
   'General Fitness': {
     description: 'Balanced approach to overall health',
@@ -173,6 +107,11 @@ export const FITNESS_CLASSES = {
     },
     specialAbility:
       'Wellness Balance - Small bonus XP for multiple activity types',
+    attributes: {
+      might: 8,
+      speed: 8,
+      fortitude: 8,
+    },
   },
 } as const;
 
@@ -221,74 +160,49 @@ export const getLevelProgress = (
   };
 };
 
-// Calculate XP with race and class bonuses/penalties
+// Calculate XP with class bonuses/penalties
 export const calculateBalancedXP = (
   baseSteps: number,
-  fitnessBackground: string,
-  _characterClass: string
+  characterClass: string
 ): number => {
   let multiplier = 1;
 
-  // Race effects
-  if (fitnessBackground === 'Couch Potato') {
-    if (baseSteps < 5000) multiplier *= 2;
-    if (baseSteps > 15000) multiplier *= 0.5;
-  } else if (fitnessBackground === 'Weekend Warrior') {
-    const isWeekend = [0, 6].includes(new Date().getDay()); // Saturday or Sunday
-    if (isWeekend) multiplier *= 1.5;
-    else multiplier *= 0.8;
-  } else if (fitnessBackground === 'Former Athlete') {
-    if (baseSteps > 12000) multiplier *= 1.3; // High intensity
-    if (baseSteps < 3000) multiplier *= 0.7; // Low intensity
-  } else if (fitnessBackground === 'Natural Runner') {
-    if (baseSteps > 8000)
-      multiplier *= 1.4; // Running/walking
-    else multiplier *= 0.6; // Other activities
-  } else if (fitnessBackground === 'Fitness Newbie') {
-    multiplier *= 1.1; // General bonus
-    if (baseSteps > 10000) multiplier *= 0.9; // Advanced penalty
-  }
-
   // Class effects
-  if (_characterClass === 'Cardio Crusher') {
+  if (characterClass === 'Cardio Crusher') {
     if (baseSteps > 10000)
       multiplier *= 1.5; // Sustained cardio
     else multiplier *= 0.7; // Low intensity penalty
-  } else if (_characterClass === 'Strength Seeker') {
+  } else if (characterClass === 'Strength Seeker') {
     if (baseSteps > 15000)
       multiplier *= 1.4; // High intensity
     else multiplier *= 0.8; // Low intensity penalty
-  } else if (_characterClass === 'Flexibility Fanatic') {
+  } else if (characterClass === 'Flexibility Fanatic') {
     if (baseSteps >= 3000 && baseSteps <= 8000)
       multiplier *= 1.3; // Moderate activity
     else multiplier *= 0.8; // Single activity penalty
-  } else if (_characterClass === 'Weight Loss Warrior') {
+  } else if (characterClass === 'Weight Loss Warrior') {
     multiplier *= 1.2; // Daily consistency bonus
     if (baseSteps > 15000) multiplier *= 0.9; // High intensity penalty
-  } else if (_characterClass === 'General Fitness') {
+  } else if (characterClass === 'General Fitness') {
     multiplier *= 1.1; // General bonus
   }
 
   return Math.floor(baseSteps * multiplier);
 };
 
-// Get starting attributes based on race and class
-export const getStartingAttributes = (
-  fitnessBackground: string,
-  _characterClass: string
-) => {
-  const baseAttributes = {
-    might: 10,
-    speed: 10,
-    fortitude: 10,
-  };
+// Get starting attributes based on class
+export const getStartingAttributes = (characterClass: string) => {
+  const classData =
+    FITNESS_CLASSES[characterClass as keyof typeof FITNESS_CLASSES];
 
-  // Apply race bonuses
-  const raceData =
-    FITNESS_BACKGROUNDS[fitnessBackground as keyof typeof FITNESS_BACKGROUNDS];
-  if (raceData) {
-    Object.assign(baseAttributes, raceData.startingStats);
+  if (classData && classData.attributes) {
+    return classData.attributes;
   }
 
-  return baseAttributes;
+  // Fallback to default balanced stats
+  return {
+    might: 8,
+    speed: 8,
+    fortitude: 8,
+  };
 };
