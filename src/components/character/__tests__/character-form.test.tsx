@@ -4,36 +4,42 @@ import { render, screen, fireEvent } from '@testing-library/react-native';
 import { CharacterForm } from '../character-form';
 
 // Mock the child components
-jest.mock('../class-details', () => ({
-  ClassDetails: ({ selectedClass }: { selectedClass: string }) => (
-    <div data-testid="class-details">{selectedClass}</div>
-  ),
-}));
+jest.mock('../name-field', () => {
+  const React = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    NameField: ({ value, onChangeText, placeholder, label }: { value: string; onChangeText: (v: string) => void; placeholder: string; label: string }) => (
+      <View testID="name-field">
+        <Text testID="name-label">{label}</Text>
+        <Text
+          testID="name-input"
+          onPress={() => onChangeText('New Character Name')}
+        >
+          {value || placeholder}
+        </Text>
+      </View>
+    ),
+  };
+});
 
-jest.mock('../class-select', () => ({
-  ClassSelect: ({ selectedClass, setSelectedClass }: any) => (
-    <div data-testid="class-select">
-      <div>Selected: {selectedClass}</div>
-      <button
-        data-testid="change-class"
-        onClick={() => setSelectedClass('Cardio Crusher')}
-      >
-        Change Class
-      </button>
-    </div>
-  ),
-}));
-
-jest.mock('@/components/ui/input', () => ({
-  Input: ({ value, onChangeText, placeholder }: any) => (
-    <input
-      data-testid="name-input"
-      value={value}
-      onChange={(e) => onChangeText(e.target.value)}
-      placeholder={placeholder}
-    />
-  ),
-}));
+jest.mock('../fitness-background-class-fields', () => {
+  const React = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    FitnessClassFields: ({ selectedClass, setSelectedClass, label }: { selectedClass: string; setSelectedClass: (v: string) => void; label: string }) => (
+      <View testID="fitness-class-fields">
+        <Text testID="class-label">{label}</Text>
+        <Text testID="selected-class">Selected: {selectedClass}</Text>
+        <Text
+          testID="change-class"
+          onPress={() => setSelectedClass('Cardio Crusher')}
+        >
+          Change Class
+        </Text>
+      </View>
+    ),
+  };
+});
 
 describe('CharacterForm', () => {
   const mockSetName = jest.fn();
@@ -71,8 +77,7 @@ describe('CharacterForm', () => {
       />
     );
 
-    const nameInput = screen.getByTestId('name-input') as HTMLInputElement;
-    expect(nameInput.value).toBe('Test Character');
+    expect(screen.getByTestId('name-input')).toHaveTextContent('Test Character');
     expect(screen.getByText('Selected: Strength Seeker')).toBeTruthy();
   });
 
@@ -87,7 +92,7 @@ describe('CharacterForm', () => {
     );
 
     const nameInput = screen.getByTestId('name-input');
-    fireEvent.changeText(nameInput, 'New Character Name');
+    fireEvent.press(nameInput);
 
     expect(mockSetName).toHaveBeenCalledWith('New Character Name');
   });
@@ -108,7 +113,7 @@ describe('CharacterForm', () => {
     expect(mockSetSelectedClass).toHaveBeenCalledWith('Cardio Crusher');
   });
 
-  it('renders class details component', () => {
+  it('renders fitness class fields component', () => {
     render(
       <CharacterForm
         name=""
@@ -118,6 +123,7 @@ describe('CharacterForm', () => {
       />
     );
 
-    expect(screen.getByTestId('class-details')).toHaveTextContent('General Fitness');
+    expect(screen.getByTestId('fitness-class-fields')).toBeTruthy();
+    expect(screen.getByText('Selected: General Fitness')).toBeTruthy();
   });
 }); 
