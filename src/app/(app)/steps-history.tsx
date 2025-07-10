@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { useMMKVString } from 'react-native-mmkv';
 
 import {
   ScenarioFilterButtons,
@@ -14,6 +13,7 @@ import {
 } from '../../components/history';
 import { useStepCountAsExperience } from '../../lib/health';
 import { useScenarioHistory } from '../../lib/hooks/use-scenario-history';
+import { useLastCheckedDate } from '../../lib/storage';
 
 const StepsTab: React.FC<{ stepsByDay: { date: Date; steps: number }[] }> = ({
   stepsByDay,
@@ -87,8 +87,10 @@ export default function HistoryScreen() {
   const [activeFilter, setActiveFilter] = useState('all');
   const [activeView, setActiveView] = useState('cards'); // New state for visualization
 
+  // Use reactive hook for last checked date
+  const [lastCheckedDate] = useLastCheckedDate();
+
   // Step history data
-  const [lastCheckedDate] = useMMKVString('lastCheckedDate');
   const lastCheckedDateTime = lastCheckedDate
     ? new Date(lastCheckedDate)
     : (() => {

@@ -4,7 +4,13 @@ import HealthKit, {
   HKUnits,
 } from '@kingstinct/react-native-healthkit';
 import { useEffect, useState } from 'react';
-import { useMMKVString } from 'react-native-mmkv';
+
+import {
+  getExperience,
+  getStepsByDay,
+  setExperience,
+  setStepsByDay,
+} from '../storage';
 
 const useHealthKitAvailability = () => {
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
@@ -192,28 +198,18 @@ function mergeStepsByDayMMKV(
 
 // New hook for character sheet experience points
 export const useStepCountAsExperience = (lastCheckedDateTime: Date) => {
-  const [experience, setExperience] = useState<number>(0);
-  const [stepsByDay, setStepsByDay] = useState<{ date: Date; steps: number }[]>(
-    []
-  );
-  const [experienceMMKV, setExperienceMMKV] = useMMKVString('experience');
-  const [stepsByDayMMKV, setStepsByDayMMKV] = useMMKVString('stepsByDay');
+  const [experience, setExperienceState] = useState<number>(0);
+  const [stepsByDay, setStepsByDayState] = useState<
+    { date: Date; steps: number }[]
+  >([]);
 
-  // Initialize from MMKV on mount
+  // Initialize from storage on mount
   useEffect(() => {
-    if (experienceMMKV !== undefined) {
-      setExperience(Number(experienceMMKV) || 0);
-    }
-    if (stepsByDayMMKV !== undefined) {
-      try {
-        const parsed = JSON.parse(stepsByDayMMKV);
-        setStepsByDay(Array.isArray(parsed) ? parsed : []);
-      } catch {
-        setStepsByDay([]);
-      }
-    }
-    // Only run on mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const storedExperience = getExperience();
+    setExperienceState(storedExperience);
+
+    const storedStepsByDay = getStepsByDay();
+    setStepsByDayState(storedStepsByDay);
   }, []);
 
   useEffect(() => {
@@ -225,19 +221,19 @@ export const useStepCountAsExperience = (lastCheckedDateTime: Date) => {
           (sum, day) => sum + (day.steps || 0),
           0
         );
-        setExperience(totalSteps);
-        setStepsByDay(results);
-        // Use helpers to merge and store
-        const mergedExp = mergeExperienceMMKV(results, experienceMMKV);
-        setExperienceMMKV(JSON.stringify(mergedExp));
-        const merged = mergeStepsByDayMMKV(results, stepsByDayMMKV);
-        setStepsByDayMMKV(JSON.stringify(merged));
+
+        setExperienceState(totalSteps);
+        setStepsByDayState(results);
+
+        // Save to storage
+        await setExperience(totalSteps);
+        await setStepsByDay(results);
       } catch (error) {
         console.error('Error getting step count for experience:', error);
-        setExperience(0);
-        setStepsByDay([]);
-        setExperienceMMKV('0');
-        setStepsByDayMMKV('[]');
+        setExperienceState(0);
+        setStepsByDayState([]);
+        await setExperience(0);
+        await setStepsByDay([]);
       }
     };
 
@@ -245,8 +241,7 @@ export const useStepCountAsExperience = (lastCheckedDateTime: Date) => {
 
     const interval = setInterval(getExperienceFromSteps, 5 * 60 * 1000);
     return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastCheckedDateTime, setExperienceMMKV, setStepsByDayMMKV]);
+  }, [lastCheckedDateTime]);
 
   return { experience, stepsByDay };
 };

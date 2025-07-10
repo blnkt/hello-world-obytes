@@ -1,10 +1,9 @@
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { useMMKVString } from 'react-native-mmkv';
 
 import { useStepCountAsExperience } from '../../lib/health';
-import { getCharacter } from '../../lib/storage';
+import { getCharacter, useLastCheckedDate } from '../../lib/storage';
 import { useScenarioTrigger } from '../../lib/use-scenario-trigger';
 
 const MILESTONE_INTERVAL = 1000; // Every 1k steps
@@ -174,7 +173,8 @@ const MotivationalSection = ({ stepCount }: { stepCount: number }) => {
 };
 
 export default function Home() {
-  const [lastCheckedDate] = useMMKVString('lastCheckedDate');
+  // Use reactive hook for last checked date
+  const [lastCheckedDate] = useLastCheckedDate();
 
   // Default to start of today if not set
   const lastCheckedDateTime = lastCheckedDate

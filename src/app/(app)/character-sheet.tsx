@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useMMKVString } from 'react-native-mmkv';
 
 import { CharacterSheet } from '../../components/character/character-sheet';
 import { useStepCountAsExperience } from '../../lib/health';
 import {
   getCharacter as getStoredCharacter,
   setCharacter as saveCharacterToStorage,
+  useLastCheckedDate,
 } from '../../lib/storage';
 import type { Character } from '../../types/character';
 import { getStartingAttributes } from '../../types/character';
@@ -49,8 +49,6 @@ const saveCharacterToStorageAsync = async (character: Character) => {
 
 export default function CharacterSheetScreen() {
   const [character, setCharacter] = useState<Character>(initialCharacter);
-  const [lastCheckedDate, setLastCheckedDate] =
-    useMMKVString('lastCheckedDate');
   const currentClassRef = useRef(character.class);
 
   // Load character data from storage on mount
@@ -70,6 +68,9 @@ export default function CharacterSheetScreen() {
   useEffect(() => {
     currentClassRef.current = character.class;
   }, [character.class]);
+
+  // Use reactive hook for last checked date
+  const [lastCheckedDate] = useLastCheckedDate();
 
   // Default to start of today if not set
   const lastCheckedDateTime = lastCheckedDate
