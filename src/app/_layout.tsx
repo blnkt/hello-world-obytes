@@ -14,6 +14,7 @@ import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { APIProvider } from '@/api';
 import { loadSelectedTheme, useHealthKit } from '@/lib';
 import { useIsFirstTime } from '@/lib/hooks/use-is-first-time';
+import { getCharacter } from '@/lib/storage';
 import { useThemeConfig } from '@/lib/use-theme-config';
 
 export { ErrorBoundary } from 'expo-router';
@@ -49,10 +50,33 @@ function getAppContent({
     );
   }
 
-  // If not first time, show main app
+  // Check if character exists
+  const character = getCharacter();
+  const hasCharacter =
+    character && character.name && character.name.trim() !== '';
+
+  // If not first time but no character, show character creation
+  if (!hasCharacter) {
+    return (
+      <Stack>
+        <Stack.Screen
+          name="character-creation"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen name="(app)" options={{ headerShown: false }} />
+        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+      </Stack>
+    );
+  }
+
+  // If not first time and has character, show main app
   return (
     <Stack>
       <Stack.Screen name="(app)" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="character-creation"
+        options={{ headerShown: false }}
+      />
       <Stack.Screen name="onboarding" options={{ headerShown: false }} />
     </Stack>
   );

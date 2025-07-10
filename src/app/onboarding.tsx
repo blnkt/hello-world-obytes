@@ -29,7 +29,7 @@ const handlePermissionRequest = async (
       setTimeout(() => {
         if (hasRequestedAuthorization) {
           setIsFirstTime(false);
-          router.replace('/(app)');
+          router.replace('/character-creation');
         } else {
           Alert.alert(
             'Permission Required',
@@ -58,14 +58,14 @@ const handlePermissionRequest = async (
     }
   } else if (hasRequestedAuthorization) {
     setIsFirstTime(false);
-    router.replace('/(app)');
+    router.replace('/character-creation');
   } else {
     Alert.alert(
       'Health Not Available',
       'Health data is not available on this device. You can still use the app for character creation and tracking manually.'
     );
     setIsFirstTime(false);
-    router.replace('/(app)');
+    router.replace('/character-creation');
   }
 };
 
