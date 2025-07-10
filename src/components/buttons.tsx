@@ -1,3 +1,13 @@
+/**
+ * DEMO COMPONENT - CAN BE SAFELY DELETED
+ *
+ * This component is only used in the demo style screen.
+ * It showcases button variants and can be removed along with:
+ * - src/app/(app)/style.tsx
+ * - src/components/colors.tsx
+ * - src/components/inputs.tsx
+ * - src/components/typography.tsx
+ */
 import React from 'react';
 
 import { Button, View } from '@/components/ui';
@@ -8,44 +18,15 @@ export const Buttons = () => {
   return (
     <>
       <Title text="Buttons" />
-      <View>
-        <View className="flex-row  flex-wrap">
-          <Button label="small" size="sm" className="mr-2" />
-          <Button
-            label="small"
-            loading
-            size="sm"
-            className="mr-2 min-w-[60px]"
-          />
-          <Button
-            label="small"
-            size="sm"
-            variant="secondary"
-            className="mr-2"
-          />
-          <Button label="small" size="sm" variant="outline" className="mr-2" />
-          <Button
-            label="small"
-            size="sm"
-            variant="destructive"
-            className="mr-2"
-          />
-          <Button label="small" size="sm" variant="ghost" className="mr-2" />
-          <Button label="small" size="sm" disabled className="mr-2" />
-        </View>
-        <Button label="Default Button" />
-        <Button label="Secondary Button" variant="secondary" />
-        <Button label="Outline Button" variant="outline" />
-        <Button label="Destructive Button" variant="destructive" />
-        <Button label="Ghost Button" variant="ghost" />
-        <Button label="Button" loading={true} />
-        <Button label="Button" loading={true} variant="outline" />
-        <Button label="Default Button Disabled" disabled />
-        <Button
-          label="Secondary Button Disabled"
-          disabled
-          variant="secondary"
-        />
+      <View className="space-y-4">
+        <Button label="Primary" />
+        <Button label="Secondary" variant="outline" />
+        <Button label="Danger" variant="destructive" />
+        <Button label="Disabled" disabled />
+        <Button label="Loading" loading />
+        <Button label="Small" size="sm" />
+        <Button label="Large" size="lg" />
+        <Button label="Full Width" fullWidth />
       </View>
     </>
   );

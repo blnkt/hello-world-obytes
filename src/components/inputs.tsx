@@ -1,3 +1,13 @@
+/**
+ * DEMO COMPONENT - CAN BE SAFELY DELETED
+ *
+ * This component is only used in the demo style screen.
+ * It showcases input variants and can be removed along with:
+ * - src/app/(app)/style.tsx
+ * - src/components/buttons.tsx
+ * - src/components/colors.tsx
+ * - src/components/typography.tsx
+ */
 import React from 'react';
 
 import type { OptionType } from '@/components/ui';

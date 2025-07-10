@@ -1,3 +1,13 @@
+/**
+ * DEMO COMPONENT - CAN BE SAFELY DELETED
+ *
+ * This component is only used in the demo style screen.
+ * It showcases typography variants and can be removed along with:
+ * - src/app/(app)/style.tsx
+ * - src/components/buttons.tsx
+ * - src/components/colors.tsx
+ * - src/components/inputs.tsx
+ */
 import React from 'react';
 
 import { Text, View } from '@/components/ui';
@@ -8,19 +18,17 @@ export const Typography = () => {
   return (
     <>
       <Title text="Typography" />
-      <View className="mb-4 flex-col">
-        <Text className="text-3xl  tracking-tight">
-          H1: Lorem ipsum dolor sit
-        </Text>
-        <Text className="text-2xl ">H2: Lorem ipsum dolor sit</Text>
-        <Text className="text-xl ">H3: Lorem ipsum dolor sit</Text>
-        <Text className="text-lg ">H4: Lorem ipsum dolor sit</Text>
-        <Text className="text-base">
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Cumque quasi
-          aut, expedita tempore ratione quidem in, corporis quia minus et
-          dolorem sunt temporibus iusto consequatur culpa. Omnis sequi debitis
-          recusandae?
-        </Text>
+      <View className="space-y-4">
+        <Text className="text-xs">Text XS</Text>
+        <Text className="text-sm">Text SM</Text>
+        <Text className="text-base">Text Base</Text>
+        <Text className="text-lg">Text LG</Text>
+        <Text className="text-xl">Text XL</Text>
+        <Text className="text-2xl">Text 2XL</Text>
+        <Text className="text-3xl">Text 3XL</Text>
+        <Text className="font-bold">Bold Text</Text>
+        <Text className="italic">Italic Text</Text>
+        <Text className="underline">Underlined Text</Text>
       </View>
     </>
   );

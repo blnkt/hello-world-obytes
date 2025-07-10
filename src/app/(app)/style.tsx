@@ -1,3 +1,15 @@
+/**
+ * DEMO SCREEN - CAN BE SAFELY DELETED
+ *
+ * This is a development/demo screen that showcases UI components.
+ * It's not accessible to users (href: null in tab layout).
+ *
+ * Used components that can also be deleted:
+ * - src/components/buttons.tsx
+ * - src/components/colors.tsx
+ * - src/components/inputs.tsx
+ * - src/components/typography.tsx
+ */
 import * as React from 'react';
 
 import { Buttons } from '@/components/buttons';
