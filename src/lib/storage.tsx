@@ -50,3 +50,18 @@ export async function setCharacter(character: any) {
 export async function clearCharacter() {
   await removeItem(CHARACTER_STORAGE_KEY);
 }
+
+// First Time Storage
+const IS_FIRST_TIME_KEY = 'IS_FIRST_TIME';
+
+export function resetFirstTime() {
+  storage.delete(IS_FIRST_TIME_KEY);
+}
+
+export function setFirstTime(value: boolean) {
+  storage.set(IS_FIRST_TIME_KEY, value);
+}
+
+export function clearAllStorage() {
+  storage.clearAll();
+}
