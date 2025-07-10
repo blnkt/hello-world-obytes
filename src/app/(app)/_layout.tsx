@@ -6,7 +6,6 @@ import {
   MerchantIcon,
   Settings as SettingsIcon,
 } from '@/components/ui/icons';
-import { useAuth } from '@/lib/auth';
 
 const getTabScreens = () => [
   {
@@ -69,17 +68,16 @@ const getTabScreens = () => [
 ];
 
 export default function TabLayout() {
-  const status = useAuth.use.status();
   const hideSplash = useCallback(async () => {
     await SplashScreen.hideAsync();
   }, []);
+
   useEffect(() => {
-    if (status !== 'idle') {
-      setTimeout(() => {
-        hideSplash();
-      }, 1000);
-    }
-  }, [hideSplash, status]);
+    // Hide splash screen after a short delay
+    setTimeout(() => {
+      hideSplash();
+    }, 1000);
+  }, [hideSplash]);
 
   return (
     <Tabs>

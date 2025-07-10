@@ -12,7 +12,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 
 import { APIProvider } from '@/api';
-import { hydrateAuth, loadSelectedTheme, useAuth, useHealthKit } from '@/lib';
+import { loadSelectedTheme, useHealthKit } from '@/lib';
 import { useIsFirstTime } from '@/lib/hooks/use-is-first-time';
 import { useThemeConfig } from '@/lib/use-theme-config';
 
@@ -22,7 +22,6 @@ export const unstable_settings = {
   initialRouteName: '(app)',
 };
 
-hydrateAuth();
 loadSelectedTheme();
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -33,15 +32,13 @@ SplashScreen.setOptions({
 });
 
 function getAppContent({
-  status,
   isFirstTime,
-  isAvailable,
-  hasRequestedAuthorization,
+  _isAvailable,
+  _hasRequestedAuthorization,
 }: {
-  status: string;
   isFirstTime: boolean;
-  isAvailable: boolean | null;
-  hasRequestedAuthorization: boolean | null;
+  _isAvailable: boolean | null;
+  _hasRequestedAuthorization: boolean | null;
 }) {
   // Show onboarding if it's the first time
   if (isFirstTime) {
@@ -62,30 +59,20 @@ function getAppContent({
 }
 
 export default function RootLayout() {
-  const status = useAuth.use.status();
   const [isFirstTime] = useIsFirstTime();
-  // const signIn = useAuth.use.signIn();
   const { isAvailable, hasRequestedAuthorization } = useHealthKit();
 
-  // Debug logging
-  // Remove useEffect for signIn
-
-  // Wait for all to be ready
-  if (
-    isAvailable === null ||
-    hasRequestedAuthorization === null ||
-    status === 'idle'
-  ) {
+  // Wait for HealthKit to be ready
+  if (isAvailable === null || hasRequestedAuthorization === null) {
     return null; // keep splash visible
   }
 
   return (
     <Providers>
       {getAppContent({
-        status,
         isFirstTime,
-        isAvailable,
-        hasRequestedAuthorization,
+        _isAvailable: isAvailable,
+        _hasRequestedAuthorization: hasRequestedAuthorization,
       })}
     </Providers>
   );
