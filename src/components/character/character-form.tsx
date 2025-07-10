@@ -1,10 +1,9 @@
 import React from 'react';
 
 import { Text, View } from '@/components/ui';
-import { Input } from '@/components/ui/input';
 
-import { ClassDetails } from './class-details';
-import { ClassSelect } from './class-select';
+import { FitnessClassFields } from './fitness-background-class-fields';
+import { NameField } from './name-field';
 
 type CharacterFormProps = {
   name: string;
@@ -12,23 +11,6 @@ type CharacterFormProps = {
   selectedClass: string;
   setSelectedClass: (className: string) => void;
 };
-
-const NameInput: React.FC<{
-  name: string;
-  setName: (name: string) => void;
-}> = ({ name, setName }) => (
-  <View className="space-y-2">
-    <Text className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-      Character Name
-    </Text>
-    <Input
-      placeholder="Enter your character's name"
-      value={name}
-      onChangeText={setName}
-      maxLength={20}
-    />
-  </View>
-);
 
 export const CharacterForm: React.FC<CharacterFormProps> = ({
   name,
@@ -47,12 +29,25 @@ export const CharacterForm: React.FC<CharacterFormProps> = ({
           Choose your name and fitness class to begin your adventure
         </Text>
       </View>
-      <NameInput name={name} setName={setName} />
-      <ClassSelect
+
+      {/* Name Input - using enhanced NameField */}
+      <NameField
+        value={name}
+        onChangeText={setName}
+        placeholder="Enter your character's name"
+        label="Character Name"
+      />
+
+      {/* Class Selection - using enhanced FitnessClassFields */}
+      <FitnessClassFields
         selectedClass={selectedClass}
         setSelectedClass={setSelectedClass}
+        label="Choose Your Class"
+        placeholder="Select your fitness class"
+        showClassInfo={true}
+        classInfoVariant="detailed"
+        showAttributes={true}
       />
-      <ClassDetails selectedClass={selectedClass} />
     </View>
   );
 };

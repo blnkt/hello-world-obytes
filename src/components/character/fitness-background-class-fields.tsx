@@ -8,36 +8,90 @@ import { FITNESS_CLASSES, getStartingAttributes } from '../../types/character';
 import { ClassInfo } from './class-info';
 import { getValidClass } from './utils';
 
-export const FitnessClassFields: React.FC<{
-  character: Character;
-  updateField: (field: keyof Character, value: any) => void;
+type FitnessClassFieldsProps = {
+  // For character sheet (editing mode)
+  character?: Character;
+  updateField?: (field: keyof Character, value: any) => void;
   onChange?: (updated: Character | ((prev: Character) => Character)) => void;
-}> = ({ character, updateField, onChange }) => {
-  const prevClassRef = useRef(character.class);
+  // For character creation (controlled mode)
+  selectedClass?: string;
+  setSelectedClass?: (className: string) => void;
+  // Common props
+  label?: string;
+  placeholder?: string;
+  showClassInfo?: boolean;
+  classInfoVariant?: 'compact' | 'detailed';
+  showAttributes?: boolean;
+};
+
+type ClassChangeParams = {
+  newClass: string | number;
+  isEditingMode: boolean;
+  onChange?: (updated: Character | ((prev: Character) => Character)) => void;
+  updateField?: (field: keyof Character, value: any) => void;
+  setSelectedClass?: (className: string) => void;
+};
+
+const handleClassChangeLogic = ({
+  newClass,
+  isEditingMode,
+  onChange,
+  updateField,
+  setSelectedClass,
+}: ClassChangeParams) => {
+  const classString = String(newClass);
+
+  if (isEditingMode && onChange) {
+    // Use onChange for atomic updates in editing mode
+    const newAttributes = getStartingAttributes(classString);
+    onChange((prevCharacter) => ({
+      ...prevCharacter,
+      class: classString,
+      classAttributes: newAttributes,
+    }));
+  } else if (isEditingMode && updateField) {
+    // Fallback to updateField for backward compatibility
+    updateField('class', classString);
+    const newAttributes = getStartingAttributes(classString);
+    updateField('classAttributes', newAttributes);
+  } else if (setSelectedClass) {
+    // Creation mode
+    setSelectedClass(classString);
+  }
+};
+
+export const FitnessClassFields: React.FC<FitnessClassFieldsProps> = ({
+  character,
+  updateField,
+  onChange,
+  selectedClass,
+  setSelectedClass,
+  label = 'Class',
+  placeholder = 'Select your training focus',
+  showClassInfo = true,
+  classInfoVariant = 'compact',
+  showAttributes = false,
+}) => {
+  const prevClassRef = useRef(character?.class || selectedClass);
+
+  // Determine if we're in editing mode (character sheet) or creation mode
+  const isEditingMode = Boolean(character && (updateField || onChange));
+  const currentClass = isEditingMode ? character!.class : selectedClass;
 
   useEffect(() => {
-    if (prevClassRef.current !== character.class) {
-      prevClassRef.current = character.class;
+    if (prevClassRef.current !== currentClass) {
+      prevClassRef.current = currentClass;
     }
-  }, [character.class]);
+  }, [currentClass]);
 
-  const handleClassChange = (newClass: string | number) => {
-    const classString = String(newClass);
-
-    if (onChange) {
-      // Use onChange for atomic updates
-      const newAttributes = getStartingAttributes(classString);
-      onChange((prevCharacter) => ({
-        ...prevCharacter,
-        class: classString,
-        classAttributes: newAttributes,
-      }));
-    } else {
-      // Fallback to updateField for backward compatibility
-      updateField('class', classString);
-      const newAttributes = getStartingAttributes(classString);
-      updateField('classAttributes', newAttributes);
-    }
+  const handleClassChangeInternal = (newClass: string | number) => {
+    handleClassChangeLogic({
+      newClass,
+      isEditingMode,
+      onChange,
+      updateField,
+      setSelectedClass,
+    });
   };
 
   const options = Object.keys(FITNESS_CLASSES).map((key) => ({
@@ -50,14 +104,20 @@ export const FitnessClassFields: React.FC<{
       {/* Class Selection */}
       <View>
         <Select
-          label="Class"
-          value={character.class}
-          onSelect={handleClassChange}
+          label={label}
+          value={currentClass}
+          onSelect={handleClassChangeInternal}
           options={options}
-          placeholder="Select your training focus"
+          placeholder={placeholder}
           testID="class-select"
         />
-        <ClassInfo characterClass={getValidClass(character.class)} />
+        {showClassInfo && currentClass && (
+          <ClassInfo
+            characterClass={getValidClass(currentClass)}
+            variant={classInfoVariant}
+            showAttributes={showAttributes}
+          />
+        )}
       </View>
     </View>
   );
