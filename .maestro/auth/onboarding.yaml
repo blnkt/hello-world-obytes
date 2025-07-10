@@ -2,7 +2,14 @@ appId: ${APP_ID}
 ---
 - clearState
 - launchApp
-- assertVisible: "Obytes Starter"
-- assertVisible: "Let's Get Started "
-- tapOn: "Let's Get Started "
-- assertVisible: "Sign In"
+- assertVisible: 'DungeonWalk: Fitness RPG'
+- assertVisible: 'Level up your life, one step at a time!'
+- assertVisible: '🎲 Create your fitness character and choose your background/class'
+- assertVisible: '🏆 Earn XP and level up by walking in real life'
+- assertVisible: '⚔️ Encounter random RPG scenarios as you hit step milestones'
+- assertVisible: '📈 Track your progress and attributes on your character sheet'
+- assertVisible: '🎉 Unlock new abilities and rewards as you move'
+- assertVisible: 'Start your fitness adventure now!'
+- assertVisible: "Let's Get Started"
+- tapOn: "Let's Get Started"
+- assertVisible: 'Grant this App access to Health data'

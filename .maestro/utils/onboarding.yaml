@@ -2,7 +2,7 @@ appId: ${APP_ID}
 tags:
   - util
 ---
-- assertVisible: 'Obytes Starter'
-- assertVisible: "Let's Get Started "
-- tapOn: "Let's Get Started "
-- assertVisible: 'Sign In'
+- assertVisible: 'DungeonWalk: Fitness RPG'
+- assertVisible: "Let's Get Started"
+- tapOn: "Let's Get Started"
+- assertVisible: 'Grant this App access to Health data'
