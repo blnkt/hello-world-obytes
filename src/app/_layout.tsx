@@ -13,6 +13,7 @@ import { KeyboardProvider } from 'react-native-keyboard-controller';
 
 import { APIProvider } from '@/api';
 import { hydrateAuth, loadSelectedTheme, useAuth, useHealthKit } from '@/lib';
+import { useIsFirstTime } from '@/lib/hooks/use-is-first-time';
 import { useThemeConfig } from '@/lib/use-theme-config';
 
 export { ErrorBoundary } from 'expo-router';
@@ -31,11 +32,42 @@ SplashScreen.setOptions({
   fade: true,
 });
 
+function getAppContent({
+  status,
+  isFirstTime,
+  isAvailable,
+  hasRequestedAuthorization,
+}: {
+  status: string;
+  isFirstTime: boolean;
+  isAvailable: boolean | null;
+  hasRequestedAuthorization: boolean | null;
+}) {
+  // Show onboarding if it's the first time
+  if (isFirstTime) {
+    return (
+      <Stack>
+        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+      </Stack>
+    );
+  }
+
+  // If not first time, show main app
+  return (
+    <Stack>
+      <Stack.Screen name="(app)" options={{ headerShown: false }} />
+      <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+    </Stack>
+  );
+}
+
 export default function RootLayout() {
   const status = useAuth.use.status();
+  const [isFirstTime] = useIsFirstTime();
   // const signIn = useAuth.use.signIn();
   const { isAvailable, hasRequestedAuthorization } = useHealthKit();
 
+  // Debug logging
   // Remove useEffect for signIn
 
   // Wait for all to be ready
@@ -47,24 +79,14 @@ export default function RootLayout() {
     return null; // keep splash visible
   }
 
-  if (!isAvailable || !hasRequestedAuthorization || status === 'signOut') {
-    // Not authorized: show only login
-    return (
-      <Providers>
-        <Stack>
-          <Stack.Screen name="login" options={{ headerShown: false }} />
-        </Stack>
-      </Providers>
-    );
-  }
-
-  // Authorized: show main app
   return (
     <Providers>
-      <Stack>
-        <Stack.Screen name="(app)" options={{ headerShown: false }} />
-        {/* <Stack.Screen name="onboarding" options={{ headerShown: false }} /> */}
-      </Stack>
+      {getAppContent({
+        status,
+        isFirstTime,
+        isAvailable,
+        hasRequestedAuthorization,
+      })}
     </Providers>
   );
 }

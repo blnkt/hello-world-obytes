@@ -1,4 +1,4 @@
-import { Redirect, SplashScreen, Tabs } from 'expo-router';
+import { SplashScreen, Tabs } from 'expo-router';
 import React, { useCallback, useEffect } from 'react';
 
 import {
@@ -7,7 +7,6 @@ import {
   Settings as SettingsIcon,
 } from '@/components/ui/icons';
 import { useAuth } from '@/lib/auth';
-import { useIsFirstTime } from '@/lib/hooks/use-is-first-time';
 
 const getTabScreens = () => [
   {
@@ -71,7 +70,6 @@ const getTabScreens = () => [
 
 export default function TabLayout() {
   const status = useAuth.use.status();
-  const [isFirstTime] = useIsFirstTime();
   const hideSplash = useCallback(async () => {
     await SplashScreen.hideAsync();
   }, []);
@@ -83,12 +81,6 @@ export default function TabLayout() {
     }
   }, [hideSplash, status]);
 
-  if (isFirstTime) {
-    return <Redirect href="/onboarding" />;
-  }
-  if (status === 'signOut') {
-    return <Redirect href="/login" />;
-  }
   return (
     <Tabs>
       {getTabScreens().map((screen) => (
