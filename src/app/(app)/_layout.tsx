@@ -3,6 +3,7 @@ import React, { useCallback, useEffect } from 'react';
 
 import {
   Character as CharacterIcon,
+  Home as HomeIcon,
   MerchantIcon,
   Settings as SettingsIcon,
 } from '@/components/ui/icons';
@@ -44,7 +45,10 @@ const getTabScreens = () => [
   {
     name: 'index',
     options: {
-      href: null,
+      title: 'Home',
+      headerShown: true,
+      tabBarIcon: ({ color }: { color: string }) => <HomeIcon color={color} />,
+      tabBarButtonTestID: 'home-tab',
     },
   },
   {
@@ -56,7 +60,7 @@ const getTabScreens = () => [
       tabBarIcon: ({ color }: { color: string }) => (
         <MerchantIcon color={color} />
       ),
-      tabBarButtonTestID: 'senario-tab',
+      tabBarButtonTestID: 'scenario-tab',
     },
   },
   {

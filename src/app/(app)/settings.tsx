@@ -9,27 +9,68 @@ import {
   setItem,
 } from '@/lib/storage';
 
+const DebugInfo = ({
+  isFirstTime,
+  forceUpdate,
+}: {
+  isFirstTime: boolean;
+  forceUpdate: number;
+}) => (
+  <View className="space-y-2">
+    <Text className="text-sm text-gray-600">
+      Debug Info: isFirstTime = {String(isFirstTime)}
+    </Text>
+    <Text className="text-sm text-gray-600">
+      Force Update Counter: {forceUpdate}
+    </Text>
+  </View>
+);
+
+const createResetHandler =
+  (
+    isFirstTime: boolean,
+    setIsFirstTime: (value: boolean) => void,
+    setForceUpdate: (fn: (prev: number) => number) => void
+  ) =>
+  () => {
+    resetFirstTime();
+    setIsFirstTime(true);
+    setForceUpdate((prev) => prev + 1);
+    alert('First time flag reset! Restart the app to see onboarding.');
+  };
+
+const createClearHandler =
+  (
+    isFirstTime: boolean,
+    setIsFirstTime: (value: boolean) => void,
+    setForceUpdate: (fn: (prev: number) => number) => void
+  ) =>
+  () => {
+    clearAllStorage();
+    setIsFirstTime(true);
+    setForceUpdate((prev) => prev + 1);
+    alert('All storage cleared! Restart the app to see onboarding.');
+  };
+
 export default function Settings() {
   const [steps, setSteps] = useState(Number(getItem('stepCount')) || 0);
-  const [isFirstTime] = useIsFirstTime();
+  const [isFirstTime, setIsFirstTime] = useIsFirstTime();
+  const [forceUpdate, setForceUpdate] = useState(0);
 
   const pressHandler = async () => {
     setSteps(steps + 10);
   };
 
-  const resetFirstTimeHandler = () => {
-    console.log('🔄 Resetting first time flag...');
-    resetFirstTime();
-    console.log('✅ First time flag reset');
-    alert('First time flag reset! Restart the app to see onboarding.');
-  };
-
-  const clearAllStorageHandler = () => {
-    console.log('🗑️ Clearing all storage...');
-    clearAllStorage();
-    console.log('✅ All storage cleared');
-    alert('All storage cleared! Restart the app to see onboarding.');
-  };
+  const resetFirstTimeHandler = createResetHandler(
+    isFirstTime,
+    setIsFirstTime,
+    setForceUpdate
+  );
+  const clearAllStorageHandler = createClearHandler(
+    isFirstTime,
+    setIsFirstTime,
+    setForceUpdate
+  );
 
   useEffect(() => {
     setItem('stepCount', steps);
@@ -40,9 +81,7 @@ export default function Settings() {
       <Text className="mb-4 text-2xl font-bold">Settings</Text>
 
       <View className="space-y-4">
-        <Text className="text-sm text-gray-600">
-          Debug Info: isFirstTime = {String(isFirstTime)}
-        </Text>
+        <DebugInfo isFirstTime={isFirstTime} forceUpdate={forceUpdate} />
 
         <Button
           fullWidth
