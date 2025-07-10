@@ -6,7 +6,8 @@ import {
   MerchantIcon,
   Settings as SettingsIcon,
 } from '@/components/ui/icons';
-import { useAuth, useIsFirstTime } from '@/lib';
+import { useAuth } from '@/lib/auth';
+import { useIsFirstTime } from '@/lib/hooks/use-is-first-time';
 
 const getTabScreens = () => [
   {

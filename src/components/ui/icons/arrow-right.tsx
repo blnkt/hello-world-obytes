@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 import type { SvgProps } from 'react-native-svg';
 import Svg, { Path } from 'react-native-svg';
 
-import { isRTL } from '@/lib';
+import { isRTL } from '@/lib/i18n';
 
 export const ArrowRight = ({ color = '#CCC', style, ...props }: SvgProps) => (
   <Svg
