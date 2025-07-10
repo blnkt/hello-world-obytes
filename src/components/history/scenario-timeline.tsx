@@ -1,5 +1,6 @@
+import { FlashList } from '@shopify/flash-list';
 import React from 'react';
-import { Dimensions, FlatList, Text, View } from 'react-native';
+import { Dimensions, Text, View } from 'react-native';
 
 import {
   MerchantIllustration,
@@ -82,7 +83,7 @@ const TimelineItem: React.FC<{ entry: any; index: number; total: number }> = ({
 const ScenarioTimeline: React.FC<{
   history: any[];
 }> = ({ history }) => (
-  <FlatList
+  <FlashList
     data={history}
     keyExtractor={(item) => item.id}
     renderItem={({ item, index }) => (
@@ -93,11 +94,7 @@ const ScenarioTimeline: React.FC<{
     snapToInterval={ITEM_WIDTH}
     decelerationRate="fast"
     showsHorizontalScrollIndicator={false}
-    getItemLayout={(_, index) => ({
-      length: ITEM_WIDTH,
-      offset: ITEM_WIDTH * index,
-      index,
-    })}
+    estimatedItemSize={ITEM_WIDTH}
   />
 );
 
