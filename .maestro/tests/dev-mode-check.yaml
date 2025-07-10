@@ -1,0 +1,37 @@
+appId: com.hello-world-expo-owner.development
+name: Development Mode Check
+tags:
+  - dev-mode
+  - e2e
+
+# Test to verify the app is running in development mode
+---
+- launchApp
+
+# Check if development mode indicator is visible
+- assertVisible: 'DEV MODE'
+
+# Optional: Take a screenshot to verify the indicator
+- takeScreenshot: 'dev-mode-indicator-visible'
+
+# Continue with other tests only if in dev mode
+- runFlow:
+    when:
+      visible: 'DEV MODE'
+    commands:
+      - tapOn: 'DEV MODE' # Optional: tap to dismiss or interact
+      - assertVisible: 'DEV MODE' # Verify it's still there
+      - takeScreenshot: 'dev-mode-interaction'
+
+# Example of conditional test execution based on dev mode
+- runFlow:
+    when:
+      visible: 'DEV MODE'
+    commands:
+      # These commands only run if dev mode indicator is visible
+      - tapOn: 'DEV MODE'
+      - assertVisible: 'DEV MODE'
+    otherwise:
+      # These commands run if dev mode indicator is NOT visible
+      - takeScreenshot: 'not-in-dev-mode'
+      - fail: 'App is not running in development mode'

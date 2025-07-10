@@ -1,0 +1,37 @@
+name: Development Mode Utilities
+description: Reusable flows for checking development mode in Maestro tests
+
+# Flow to verify app is running in development mode
+---
+- runFlow:
+    name: 'Verify Dev Mode'
+    commands:
+      - assertVisible: 'DEV MODE'
+      - takeScreenshot: 'dev-mode-verified'
+
+# Flow to skip tests if not in dev mode
+---
+- runFlow:
+    name: 'Skip If Not Dev Mode'
+    commands:
+      - runFlow:
+          when:
+            visible: 'DEV MODE'
+          commands:
+            - takeScreenshot: 'continuing-in-dev-mode'
+          otherwise:
+            - takeScreenshot: 'skipping-not-in-dev-mode'
+            - fail: 'Test requires development mode'
+
+# Flow to get dev mode status
+---
+- runFlow:
+    name: 'Get Dev Mode Status'
+    commands:
+      - runFlow:
+          when:
+            visible: 'DEV MODE'
+          commands:
+            - evalScript: 'window.devMode = true'
+          otherwise:
+            - evalScript: 'window.devMode = false'

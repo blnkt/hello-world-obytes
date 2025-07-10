@@ -1,0 +1,58 @@
+appId: com.hello-world-expo-owner.development
+name: Character Creation with Dev Mode Check
+tags:
+  - character-creation
+  - dev-mode
+  - e2e
+
+# Test character creation flow with development mode verification
+---
+- launchApp
+
+# First, verify we're in development mode
+- assertVisible: 'DEV MODE'
+- takeScreenshot: 'app-launched-in-dev-mode'
+
+# Navigate through onboarding (if first time)
+- runFlow:
+    when:
+      visible: 'DungeonWalk: Fitness RPG'
+    commands:
+      - tapOn: "Let's Get Started"
+      - takeScreenshot: 'onboarding-completed'
+
+# Navigate to character creation
+- runFlow:
+    when:
+      visible: 'Create Your Character'
+    commands:
+      - takeScreenshot: 'character-creation-screen'
+
+      # Enter character name
+      - tapOn: "Enter your character's name"
+      - inputText: 'Test Character'
+      - takeScreenshot: 'character-name-entered'
+
+      # Select a class
+      - tapOn: 'Choose Your Class'
+      - tapOn: 'Cardio Crusher'
+      - takeScreenshot: 'class-selected'
+
+      # Verify class details are shown
+      - assertVisible: 'Cardio Crusher'
+      - assertVisible: 'Focus on heart health and endurance'
+      - assertVisible: '💪 Might: 6'
+      - assertVisible: '⚡ Speed: 12'
+      - assertVisible: '🛡️ Fortitude: 10'
+
+      # Create character
+      - tapOn: 'Create Character'
+      - takeScreenshot: 'character-created'
+
+# Verify we're back in the main app
+- assertVisible: 'Character Sheet'
+- takeScreenshot: 'main-app-after-character-creation'
+
+# Final dev mode check
+- assertVisible: 'DEV MODE'
+- takeScreenshot: 'final-dev-mode-check'

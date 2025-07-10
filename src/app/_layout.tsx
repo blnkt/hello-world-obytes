@@ -6,7 +6,7 @@ import { ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import FlashMessage from 'react-native-flash-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
@@ -98,6 +98,22 @@ export default function RootLayout() {
         _isAvailable: isAvailable,
         _hasRequestedAuthorization: hasRequestedAuthorization,
       })}
+      {/* Development mode indicator for E2E testing */}
+      {__DEV__ && (
+        <View
+          testID="dev-mode-indicator"
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            backgroundColor: 'red',
+            padding: 4,
+            zIndex: 9999,
+          }}
+        >
+          <Text style={{ color: 'white', fontSize: 10 }}>DEV MODE</Text>
+        </View>
+      )}
     </Providers>
   );
 }
