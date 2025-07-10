@@ -38,7 +38,6 @@
       }
     },
     "development": {
-      "developmentClient": true,
       "distribution": "internal",
       "pnpm": "9.12.3",
       "ios": {
@@ -64,6 +63,21 @@
       "env": {
         "APP_ENV": "development",
         "EXPO_NO_DOTENV": "1"
+      }
+    },
+    "local-production": {
+      "pnpm": "9.12.3",
+      "ios": {
+        "simulator": true,
+        "image": "latest"
+      },
+      "android": {
+        "image": "latest"
+      },
+      "env": {
+        "APP_ENV": "production",
+        "EXPO_NO_DOTENV": "1",
+        "FLIPPER_DISABLE": "1"
       }
     }
   },
