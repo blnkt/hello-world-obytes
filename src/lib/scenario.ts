@@ -1,5 +1,8 @@
 import type { EncounterType, Scenario } from '../types/scenario';
 
+// TODO: PHASE 2 - Expand scenario variety - Add more merchant and monster encounters
+// TODO: PHASE 2 - Add scenario outcomes - Implement actual rewards and consequences
+
 const ENCOUNTER_TYPES: EncounterType[] = ['merchant', 'monster'];
 
 const SCENARIO_TEMPLATES: Record<EncounterType, Omit<Scenario, 'id'>[]> = {

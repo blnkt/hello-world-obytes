@@ -14,6 +14,9 @@ export type Character = {
   notes?: string;
 };
 
+// TODO: PHASE 3 - Add inventory system - Let players collect and use items from scenarios
+// TODO: PHASE 3 - Create quest system - Add daily/weekly quests with rewards
+
 // Fitness-focused level progression
 export const FITNESS_LEVELS = {
   1: { minXP: 0, name: 'Couch Potato', color: 'text-gray-500' },

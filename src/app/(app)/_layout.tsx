@@ -8,6 +8,10 @@ import {
   Settings as SettingsIcon,
 } from '@/components/ui/icons';
 
+// TODO: PHASE 4 - Add animations - Smooth transitions between screens and interactions
+// TODO: PHASE 4 - Add character portraits - Visual representation of characters
+// TODO: PHASE 4 - Implement particle effects - Visual effects for level-ups and achievements
+
 const getTabScreens = () => [
   {
     name: 'character-sheet',
