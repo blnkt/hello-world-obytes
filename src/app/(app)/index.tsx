@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import React from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
-import { useStepCountAsExperience } from '../../lib/health';
+import { useStepCountAsExperience, useStreakTracking } from '../../lib/health';
 import {
   getCharacter,
   useDailyStepsGoal,
@@ -10,12 +10,70 @@ import {
 } from '../../lib/storage';
 import { useScenarioTrigger } from '../../lib/use-scenario-trigger';
 
-// TODO: PHASE 2 - Add goal setting - Let users set custom step goals
 // TODO: PHASE 2 - Add detailed analytics - Track step trends, patterns, and insights
 // TODO: PHASE 2 - Create progress reports - Weekly/monthly progress summaries
 // TODO: PHASE 3 - Add data visualization - Charts and graphs for progress tracking
 
 const MILESTONE_INTERVAL = 1000; // Every 1k steps
+
+const StreakSection = ({ stepCount }: { stepCount: number }) => {
+  const [lastCheckedDate] = useLastCheckedDate();
+
+  // Default to start of today if not set
+  const lastCheckedDateTime = lastCheckedDate
+    ? new Date(lastCheckedDate)
+    : (() => {
+        const d = new Date();
+        d.setHours(0, 0, 0, 0);
+        return d;
+      })();
+
+  const { streaks, currentStreak, longestStreak } =
+    useStreakTracking(lastCheckedDateTime);
+
+  if (streaks.length === 0) {
+    return (
+      <View className="mb-4">
+        <View className="mb-2 flex-row justify-between">
+          <Text className="text-sm text-white/80">🔥 Streaks</Text>
+          <Text className="text-sm text-white/80">No streaks yet</Text>
+        </View>
+        <View className="rounded-lg bg-white/10 p-3">
+          <Text className="text-center text-xs text-white/80">
+            Meet your daily goal for 2+ consecutive days to start a streak!
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View className="mb-4">
+      <View className="mb-2 flex-row justify-between">
+        <Text className="text-sm text-white/80">🔥 Streaks</Text>
+        <Text className="text-sm text-white/80">
+          {streaks.length} total streak{streaks.length !== 1 ? 's' : ''}
+        </Text>
+      </View>
+      <View className="rounded-lg bg-white/10 p-3">
+        <View className="mb-2 flex-row items-center justify-between">
+          <Text className="text-xs text-white/80">Longest Streak</Text>
+          <Text className="text-xs font-semibold text-white">
+            {longestStreak} days
+          </Text>
+        </View>
+        {currentStreak && (
+          <View className="flex-row items-center justify-between">
+            <Text className="text-xs text-white/80">Current Streak</Text>
+            <Text className="text-xs font-semibold text-green-300">
+              {currentStreak.daysCount} days
+            </Text>
+          </View>
+        )}
+      </View>
+    </View>
+  );
+};
 
 const DailyGoalSection = ({ stepCount }: { stepCount: number }) => {
   const [dailyStepsGoal, setDailyStepsGoal] = useDailyStepsGoal();
@@ -105,6 +163,9 @@ const ProgressDashboard = ({
 
       {/* Daily Goal Progress */}
       <DailyGoalSection stepCount={stepCount} />
+
+      {/* Streak Section */}
+      <StreakSection stepCount={stepCount} />
 
       {/* Progress bar to next milestone */}
       <View className="mb-4">

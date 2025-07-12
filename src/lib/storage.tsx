@@ -211,6 +211,46 @@ export const useDailyStepsGoal = () => {
   ] as const;
 };
 
+// Streaks Storage
+const STREAKS_KEY = 'streaks';
+
+export type Streak = {
+  id: string;
+  startDate: string; // ISO date string
+  endDate: string; // ISO date string
+  daysCount: number;
+  averageSteps: number;
+};
+
+export function getStreaks(): Streak[] {
+  const value = storage.getString(STREAKS_KEY);
+  try {
+    return value ? JSON.parse(value) || [] : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function setStreaks(streaks: Streak[]) {
+  await setItem(STREAKS_KEY, streaks);
+}
+
+export async function addStreak(streak: Streak) {
+  const currentStreaks = getStreaks();
+  const updatedStreaks = [...currentStreaks, streak];
+  await setStreaks(updatedStreaks);
+}
+
+export async function clearStreaks() {
+  await removeItem(STREAKS_KEY);
+}
+
+// React Hook for Streaks
+export const useStreaks = () => {
+  const [streaks, setStreaks] = useMMKVString(STREAKS_KEY, storage);
+  return [streaks ? JSON.parse(streaks) || [] : [], setStreaks] as const;
+};
+
 export function clearAllStorage() {
   storage.clearAll();
 }

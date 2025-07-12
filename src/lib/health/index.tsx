@@ -3,10 +3,12 @@ import HealthKit, {
   HKStatisticsOptions,
   HKUnits,
 } from '@kingstinct/react-native-healthkit';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
+  addStreak,
   getCumulativeExperience,
+  getDailyStepsGoal,
   getExperience,
   getFirstExperienceDate,
   getStepsByDay,
@@ -14,7 +16,9 @@ import {
   setExperience,
   setFirstExperienceDate,
   setStepsByDay,
+  type Streak,
   useLastCheckedDate,
+  useStreaks,
 } from '../storage';
 
 // TODO: PHASE 1 - Fix unused merge functions - Implement mergeStepsByDayMMKV in the main hook (mergeExperienceMMKV implemented)
@@ -306,6 +310,123 @@ export const useStepCountAsExperience = (lastCheckedDateTime: Date) => {
     cumulativeExperience,
     firstExperienceDate,
     stepsByDay,
+  };
+};
+
+/**
+ * Creates a streak object from streak data
+ */
+const createStreak = (
+  currentStreakStart: Date,
+  currentStreakDays: { date: Date; steps: number }[]
+): Streak => {
+  const averageSteps =
+    currentStreakDays.reduce((sum, d) => sum + d.steps, 0) /
+    currentStreakDays.length;
+
+  return {
+    id: `${currentStreakStart.toISOString()}-${new Date(currentStreakDays[currentStreakDays.length - 1].date).toISOString()}`,
+    startDate: currentStreakStart.toISOString(),
+    endDate: new Date(
+      currentStreakDays[currentStreakDays.length - 1].date
+    ).toISOString(),
+    daysCount: currentStreakDays.length,
+    averageSteps: Math.round(averageSteps),
+  };
+};
+
+/**
+ * Detects and tracks streaks based on daily step goals
+ *
+ * A streak is defined as 2 or more consecutive days where
+ * the user met their daily step goal.
+ *
+ * @param stepsByDay - Array of daily step data
+ * @param dailyGoal - The daily step goal to check against
+ * @returns Array of detected streaks
+ */
+export const detectStreaks = (
+  stepsByDay: { date: Date; steps: number }[],
+  dailyGoal: number
+): Streak[] => {
+  const streaks: Streak[] = [];
+  let currentStreakStart: Date | null = null;
+  let currentStreakDays: { date: Date; steps: number }[] = [];
+
+  // Sort steps by date to ensure chronological order
+  const sortedSteps = [...stepsByDay].sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
+
+  for (const day of sortedSteps) {
+    const metGoal = day.steps >= dailyGoal;
+
+    if (metGoal) {
+      if (currentStreakStart === null) {
+        // Start a new streak
+        currentStreakStart = new Date(day.date);
+        currentStreakDays = [day];
+      } else {
+        // Continue current streak
+        currentStreakDays.push(day);
+      }
+    } else {
+      // Goal not met, check if we had a streak to save
+      if (currentStreakStart !== null && currentStreakDays.length >= 2) {
+        streaks.push(createStreak(currentStreakStart, currentStreakDays));
+      }
+
+      // Reset streak tracking
+      currentStreakStart = null;
+      currentStreakDays = [];
+    }
+  }
+
+  // Check if we have an ongoing streak at the end
+  if (currentStreakStart !== null && currentStreakDays.length >= 2) {
+    streaks.push(createStreak(currentStreakStart, currentStreakDays));
+  }
+
+  return streaks;
+};
+
+/**
+ * Hook to track and manage streaks
+ *
+ * @param lastCheckedDateTime - The date when experience was last checked
+ * @returns Object containing current streaks and streak detection function
+ */
+// eslint-disable-next-line max-lines-per-function
+export const useStreakTracking = (lastCheckedDateTime: Date) => {
+  const { stepsByDay } = useStepCountAsExperience(lastCheckedDateTime);
+  const dailyGoal = getDailyStepsGoal();
+  const [streaks] = useStreaks();
+
+  // Detect new streaks whenever stepsByDay changes
+  React.useEffect(() => {
+    if (stepsByDay.length > 0) {
+      const detectedStreaks = detectStreaks(stepsByDay, dailyGoal);
+
+      // Find new streaks that aren't already stored
+      const existingStreakIds = new Set(streaks.map((s: Streak) => s.id));
+      const newStreaks = detectedStreaks.filter(
+        (streak) => !existingStreakIds.has(streak.id)
+      );
+
+      // Add new streaks to storage
+      newStreaks.forEach((streak) => {
+        addStreak(streak);
+      });
+    }
+  }, [stepsByDay, dailyGoal, streaks]);
+
+  return {
+    streaks,
+    currentStreak: streaks.length > 0 ? streaks[streaks.length - 1] : null,
+    longestStreak:
+      streaks.length > 0
+        ? Math.max(...streaks.map((s: Streak) => s.daysCount))
+        : 0,
   };
 };
 
