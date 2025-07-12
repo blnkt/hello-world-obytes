@@ -6,6 +6,7 @@ import HealthKit, {
 import React, { useEffect, useState } from 'react';
 
 import {
+  addCurrency,
   addStreak,
   getCumulativeExperience,
   getDailyStepsGoal,
@@ -16,7 +17,9 @@ import {
   setExperience,
   setFirstExperienceDate,
   setStepsByDay,
+  spendCurrency,
   type Streak,
+  useCurrency,
   useLastCheckedDate,
   useStreaks,
 } from '../storage';
@@ -475,5 +478,63 @@ export const useCumulativeExperienceSimple = () => {
   return {
     cumulativeExperience,
     firstExperienceDate,
+  };
+};
+
+/**
+ * Currency conversion rates and settings
+ */
+const CURRENCY_CONVERSION_RATES = {
+  XP_TO_CURRENCY: 0.1, // 10 XP = 1 Currency
+  MILESTONE_BONUS: 50, // Bonus currency for reaching milestones
+  STREAK_BONUS: 25, // Bonus currency for completing streaks
+};
+
+/**
+ * Converts experience points to currency
+ * @param experience - Experience points to convert
+ * @returns Currency amount
+ */
+export const convertExperienceToCurrency = (experience: number): number => {
+  return Math.floor(experience * CURRENCY_CONVERSION_RATES.XP_TO_CURRENCY);
+};
+
+/**
+ * Hook for managing the currency system
+ *
+ * @param lastCheckedDateTime - The date when experience was last checked
+ * @returns Object containing currency data and conversion functions
+ */
+export const useCurrencySystem = (lastCheckedDateTime: Date) => {
+  const { experience, cumulativeExperience } =
+    useStepCountAsExperience(lastCheckedDateTime);
+  const [currency, setCurrency] = useCurrency();
+
+  // Convert experience to currency
+  const availableCurrency = convertExperienceToCurrency(experience);
+  const totalCurrencyEarned = convertExperienceToCurrency(cumulativeExperience);
+
+  // Function to convert current experience to currency
+  const convertCurrentExperience = async () => {
+    if (experience > 0) {
+      const currencyToAdd = convertExperienceToCurrency(experience);
+      await addCurrency(currencyToAdd);
+      return currencyToAdd;
+    }
+    return 0;
+  };
+
+  // Function to spend currency
+  const spend = async (amount: number): Promise<boolean> => {
+    return await spendCurrency(amount);
+  };
+
+  return {
+    currency,
+    availableCurrency,
+    totalCurrencyEarned,
+    convertCurrentExperience,
+    spend,
+    conversionRate: CURRENCY_CONVERSION_RATES.XP_TO_CURRENCY,
   };
 };

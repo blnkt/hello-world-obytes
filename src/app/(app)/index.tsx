@@ -2,7 +2,11 @@ import { useRouter } from 'expo-router';
 import React from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
-import { useStepCountAsExperience, useStreakTracking } from '../../lib/health';
+import {
+  useCurrencySystem,
+  useStepCountAsExperience,
+  useStreakTracking,
+} from '../../lib/health';
 import {
   getCharacter,
   useDailyStepsGoal,
@@ -138,6 +142,38 @@ const DailyGoalSection = ({ stepCount }: { stepCount: number }) => {
   );
 };
 
+const CurrencyDisplay = ({ currency }: { currency: number }) => (
+  <View className="absolute right-4 top-4 flex-row items-center">
+    <Text className="mr-1 text-lg font-bold text-yellow-300">{currency}</Text>
+    <Text className="text-base text-yellow-200">💰</Text>
+  </View>
+);
+
+const MilestoneProgressBar = ({ stepCount }: { stepCount: number }) => {
+  const nextMilestone =
+    Math.ceil(stepCount / MILESTONE_INTERVAL) * MILESTONE_INTERVAL;
+  const progressToNext = stepCount % MILESTONE_INTERVAL;
+  const progressPercentage = (progressToNext / MILESTONE_INTERVAL) * 100;
+  return (
+    <View className="mb-4">
+      <View className="mb-2 flex-row justify-between">
+        <Text className="text-sm text-white/80">Progress to Adventure</Text>
+        <Text className="text-sm text-white/80">
+          {MILESTONE_INTERVAL - (stepCount % MILESTONE_INTERVAL)} steps left
+        </Text>
+      </View>
+      <View className="h-3 rounded-full bg-white/20">
+        <View
+          className="h-3 rounded-full bg-white"
+          style={{
+            width: `${((stepCount % MILESTONE_INTERVAL) / MILESTONE_INTERVAL) * 100}%`,
+          }}
+        />
+      </View>
+    </View>
+  );
+};
+
 const ProgressDashboard = ({
   stepCount,
   experience,
@@ -147,44 +183,32 @@ const ProgressDashboard = ({
   experience: number;
   cumulativeExperience: number;
 }) => {
-  const nextMilestone =
-    Math.ceil(stepCount / MILESTONE_INTERVAL) * MILESTONE_INTERVAL;
-  const progressToNext = stepCount % MILESTONE_INTERVAL;
-  const progressPercentage = (progressToNext / MILESTONE_INTERVAL) * 100;
+  const [lastCheckedDate] = useLastCheckedDate();
+  // Default to start of today if not set
+  const lastCheckedDateTime = lastCheckedDate
+    ? new Date(lastCheckedDate)
+    : (() => {
+        const d = new Date();
+        d.setHours(0, 0, 0, 0);
+        return d;
+      })();
+  const { currency } = useCurrencySystem(lastCheckedDateTime);
 
   return (
-    <View className="mb-6 rounded-2xl bg-blue-500 p-6">
+    <View className="relative mb-6 rounded-2xl bg-blue-500 p-6">
+      <CurrencyDisplay currency={currency} />
       <View className="mb-4 items-center">
         <Text className="text-4xl font-bold text-white">
           {stepCount.toLocaleString()}
         </Text>
         <Text className="text-lg text-white/80">Steps Today</Text>
       </View>
-
       {/* Daily Goal Progress */}
       <DailyGoalSection stepCount={stepCount} />
-
       {/* Streak Section */}
       <StreakSection stepCount={stepCount} />
-
       {/* Progress bar to next milestone */}
-      <View className="mb-4">
-        <View className="mb-2 flex-row justify-between">
-          <Text className="text-sm text-white/80">Progress to Adventure</Text>
-          <Text className="text-sm text-white/80">
-            {MILESTONE_INTERVAL - (stepCount % MILESTONE_INTERVAL)} steps left
-          </Text>
-        </View>
-        <View className="h-3 rounded-full bg-white/20">
-          <View
-            className="h-3 rounded-full bg-white"
-            style={{
-              width: `${((stepCount % MILESTONE_INTERVAL) / MILESTONE_INTERVAL) * 100}%`,
-            }}
-          />
-        </View>
-      </View>
-
+      <MilestoneProgressBar stepCount={stepCount} />
       <View className="rounded-xl bg-white/10 p-4">
         <Text className="text-center font-semibold text-white">
           🎯 Next adventure at{' '}
@@ -219,6 +243,13 @@ const QuickNavigation = () => {
       icon: '📚',
       color: 'bg-purple-500',
       onPress: () => router.push('/steps-history'),
+    },
+    {
+      title: 'Shop',
+      subtitle: 'Spend your coins',
+      icon: '💰',
+      color: 'bg-yellow-500',
+      onPress: () => router.push('/shop'),
     },
     {
       title: 'Settings',

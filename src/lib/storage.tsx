@@ -251,6 +251,43 @@ export const useStreaks = () => {
   return [streaks ? JSON.parse(streaks) || [] : [], setStreaks] as const;
 };
 
+// Currency Storage
+const CURRENCY_KEY = 'currency';
+const DEFAULT_CURRENCY = 0;
+
+export function getCurrency(): number {
+  const value = storage.getString(CURRENCY_KEY);
+  return value ? Number(value) || DEFAULT_CURRENCY : DEFAULT_CURRENCY;
+}
+
+export async function setCurrency(currency: number) {
+  storage.set(CURRENCY_KEY, String(currency));
+}
+
+export async function addCurrency(amount: number) {
+  const currentCurrency = getCurrency();
+  await setCurrency(currentCurrency + amount);
+}
+
+export async function spendCurrency(amount: number): Promise<boolean> {
+  const currentCurrency = getCurrency();
+  if (currentCurrency >= amount) {
+    await setCurrency(currentCurrency - amount);
+    return true;
+  }
+  return false;
+}
+
+export async function clearCurrency() {
+  await removeItem(CURRENCY_KEY);
+}
+
+// React Hook for Currency
+export const useCurrency = () => {
+  const [currency, setCurrency] = useMMKVString(CURRENCY_KEY, storage);
+  return [currency ? Number(currency) : DEFAULT_CURRENCY, setCurrency] as const;
+};
+
 export function clearAllStorage() {
   storage.clearAll();
 }
