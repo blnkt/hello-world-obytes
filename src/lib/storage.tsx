@@ -180,6 +180,37 @@ export async function clearFirstExperienceDate() {
   await removeItem(FIRST_EXPERIENCE_DATE_KEY);
 }
 
+// Daily Step Goal Storage
+const DAILY_STEPS_GOAL_KEY = 'dailyStepsGoal';
+const DEFAULT_DAILY_STEPS_GOAL = 10000;
+
+export function getDailyStepsGoal(): number {
+  const value = storage.getString(DAILY_STEPS_GOAL_KEY);
+  return value
+    ? Number(value) || DEFAULT_DAILY_STEPS_GOAL
+    : DEFAULT_DAILY_STEPS_GOAL;
+}
+
+export async function setDailyStepsGoal(goal: number) {
+  storage.set(DAILY_STEPS_GOAL_KEY, String(goal));
+}
+
+export async function clearDailyStepsGoal() {
+  await removeItem(DAILY_STEPS_GOAL_KEY);
+}
+
+// React Hook for Daily Step Goal
+export const useDailyStepsGoal = () => {
+  const [dailyStepsGoal, setDailyStepsGoal] = useMMKVString(
+    DAILY_STEPS_GOAL_KEY,
+    storage
+  );
+  return [
+    dailyStepsGoal ? Number(dailyStepsGoal) : DEFAULT_DAILY_STEPS_GOAL,
+    setDailyStepsGoal,
+  ] as const;
+};
+
 export function clearAllStorage() {
   storage.clearAll();
 }

@@ -3,7 +3,11 @@ import React from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 import { useStepCountAsExperience } from '../../lib/health';
-import { getCharacter, useLastCheckedDate } from '../../lib/storage';
+import {
+  getCharacter,
+  useDailyStepsGoal,
+  useLastCheckedDate,
+} from '../../lib/storage';
 import { useScenarioTrigger } from '../../lib/use-scenario-trigger';
 
 // TODO: PHASE 2 - Add goal setting - Let users set custom step goals
@@ -12,6 +16,69 @@ import { useScenarioTrigger } from '../../lib/use-scenario-trigger';
 // TODO: PHASE 3 - Add data visualization - Charts and graphs for progress tracking
 
 const MILESTONE_INTERVAL = 1000; // Every 1k steps
+
+const DailyGoalSection = ({ stepCount }: { stepCount: number }) => {
+  const [dailyStepsGoal, setDailyStepsGoal] = useDailyStepsGoal();
+  const [goalInput, setGoalInput] = React.useState(dailyStepsGoal.toString());
+
+  // Calculate progress towards daily goal
+  const goalProgress = Math.min((stepCount / dailyStepsGoal) * 100, 100);
+  const stepsToGoal = Math.max(dailyStepsGoal - stepCount, 0);
+
+  const handleGoalChange = () => {
+    const parsed = parseInt(goalInput, 10);
+    if (!isNaN(parsed) && parsed > 0) {
+      setDailyStepsGoal(String(parsed));
+    } else {
+      setGoalInput(dailyStepsGoal.toString());
+    }
+  };
+
+  return (
+    <View className="mb-4">
+      <View className="mb-2 flex-row justify-between">
+        <Text className="text-sm text-white/80">Daily Goal</Text>
+        <Text className="text-sm text-white/80">
+          {stepsToGoal > 0
+            ? `${stepsToGoal.toLocaleString()} steps left`
+            : 'Goal reached!'}
+        </Text>
+      </View>
+      <View className="h-3 rounded-full bg-white/20">
+        <View
+          className="h-3 rounded-full bg-green-400"
+          style={{ width: `${goalProgress}%` }}
+        />
+      </View>
+      <View className="mt-2 flex-row items-center justify-between">
+        <Text className="text-xs text-white/80">
+          Goal: {dailyStepsGoal.toLocaleString()} steps
+        </Text>
+        <View className="flex-row items-center">
+          <Text className="mr-2 text-xs text-white/80">Set goal:</Text>
+          <input
+            type="number"
+            min={1}
+            value={goalInput}
+            onChange={(e) => setGoalInput(e.target.value)}
+            onBlur={handleGoalChange}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleGoalChange();
+            }}
+            style={{
+              width: 80,
+              borderRadius: 4,
+              padding: 2,
+              border: '1px solid #fff',
+              background: 'rgba(255,255,255,0.1)',
+              color: '#fff',
+            }}
+          />
+        </View>
+      </View>
+    </View>
+  );
+};
 
 const ProgressDashboard = ({
   stepCount,
@@ -36,25 +103,34 @@ const ProgressDashboard = ({
         <Text className="text-lg text-white/80">Steps Today</Text>
       </View>
 
+      {/* Daily Goal Progress */}
+      <DailyGoalSection stepCount={stepCount} />
+
       {/* Progress bar to next milestone */}
       <View className="mb-4">
         <View className="mb-2 flex-row justify-between">
           <Text className="text-sm text-white/80">Progress to Adventure</Text>
           <Text className="text-sm text-white/80">
-            {MILESTONE_INTERVAL - progressToNext} steps left
+            {MILESTONE_INTERVAL - (stepCount % MILESTONE_INTERVAL)} steps left
           </Text>
         </View>
         <View className="h-3 rounded-full bg-white/20">
           <View
             className="h-3 rounded-full bg-white"
-            style={{ width: `${progressPercentage}%` }}
+            style={{
+              width: `${((stepCount % MILESTONE_INTERVAL) / MILESTONE_INTERVAL) * 100}%`,
+            }}
           />
         </View>
       </View>
 
       <View className="rounded-xl bg-white/10 p-4">
         <Text className="text-center font-semibold text-white">
-          🎯 Next adventure at {nextMilestone.toLocaleString()} steps
+          🎯 Next adventure at{' '}
+          {(
+            Math.ceil(stepCount / MILESTONE_INTERVAL) * MILESTONE_INTERVAL
+          ).toLocaleString()}{' '}
+          steps
         </Text>
         <Text className="mt-1 text-center text-sm text-white/80">
           Today's XP: {experience.toLocaleString()} | Total XP:{' '}
