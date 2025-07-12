@@ -149,6 +149,37 @@ export async function clearExperience() {
   await removeItem(EXPERIENCE_KEY);
 }
 
+// Cumulative Experience Storage
+const CUMULATIVE_EXPERIENCE_KEY = 'cumulativeExperience';
+
+export function getCumulativeExperience(): number {
+  const value = storage.getString(CUMULATIVE_EXPERIENCE_KEY);
+  return value ? Number(value) || 0 : 0;
+}
+
+export async function setCumulativeExperience(experience: number) {
+  storage.set(CUMULATIVE_EXPERIENCE_KEY, String(experience));
+}
+
+export async function clearCumulativeExperience() {
+  await removeItem(CUMULATIVE_EXPERIENCE_KEY);
+}
+
+// First Experience Date Storage
+const FIRST_EXPERIENCE_DATE_KEY = 'firstExperienceDate';
+
+export function getFirstExperienceDate(): string | null {
+  return storage.getString(FIRST_EXPERIENCE_DATE_KEY) || null;
+}
+
+export async function setFirstExperienceDate(date: string) {
+  storage.set(FIRST_EXPERIENCE_DATE_KEY, date);
+}
+
+export async function clearFirstExperienceDate() {
+  await removeItem(FIRST_EXPERIENCE_DATE_KEY);
+}
+
 export function clearAllStorage() {
   storage.clearAll();
 }

@@ -6,14 +6,21 @@ import { useStepCountAsExperience } from '../../lib/health';
 import { getCharacter, useLastCheckedDate } from '../../lib/storage';
 import { useScenarioTrigger } from '../../lib/use-scenario-trigger';
 
+// TODO: PHASE 2 - Add goal setting - Let users set custom step goals
+// TODO: PHASE 2 - Add detailed analytics - Track step trends, patterns, and insights
+// TODO: PHASE 2 - Create progress reports - Weekly/monthly progress summaries
+// TODO: PHASE 3 - Add data visualization - Charts and graphs for progress tracking
+
 const MILESTONE_INTERVAL = 1000; // Every 1k steps
 
 const ProgressDashboard = ({
   stepCount,
   experience,
+  cumulativeExperience,
 }: {
   stepCount: number;
   experience: number;
+  cumulativeExperience: number;
 }) => {
   const nextMilestone =
     Math.ceil(stepCount / MILESTONE_INTERVAL) * MILESTONE_INTERVAL;
@@ -50,7 +57,8 @@ const ProgressDashboard = ({
           🎯 Next adventure at {nextMilestone.toLocaleString()} steps
         </Text>
         <Text className="mt-1 text-center text-sm text-white/80">
-          Experience gained: {experience.toLocaleString()} XP
+          Today's XP: {experience.toLocaleString()} | Total XP:{' '}
+          {cumulativeExperience.toLocaleString()}
         </Text>
       </View>
     </View>
@@ -185,7 +193,7 @@ export default function Home() {
         return d;
       })();
 
-  const { stepsByDay, experience } =
+  const { stepsByDay, experience, cumulativeExperience } =
     useStepCountAsExperience(lastCheckedDateTime);
 
   // Calculate today's step count
@@ -211,7 +219,11 @@ export default function Home() {
           Welcome Back!
         </Text>
 
-        <ProgressDashboard stepCount={todaySteps} experience={experience} />
+        <ProgressDashboard
+          stepCount={todaySteps}
+          experience={experience}
+          cumulativeExperience={cumulativeExperience}
+        />
 
         <CharacterPreview />
 
