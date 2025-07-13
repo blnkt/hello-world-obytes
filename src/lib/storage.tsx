@@ -288,6 +288,46 @@ export const useCurrency = () => {
   return [currency ? Number(currency) : DEFAULT_CURRENCY, setCurrency] as const;
 };
 
+// Purchased Items Storage
+const PURCHASED_ITEMS_KEY = 'purchasedItems';
+
+export function getPurchasedItems(): string[] {
+  const value = storage.getString(PURCHASED_ITEMS_KEY);
+  try {
+    return value ? JSON.parse(value) || [] : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function setPurchasedItems(items: string[]) {
+  await setItem(PURCHASED_ITEMS_KEY, items);
+}
+
+export async function addPurchasedItem(itemId: string) {
+  const currentItems = getPurchasedItems();
+  if (!currentItems.includes(itemId)) {
+    const updatedItems = [...currentItems, itemId];
+    await setPurchasedItems(updatedItems);
+  }
+}
+
+export async function clearPurchasedItems() {
+  await removeItem(PURCHASED_ITEMS_KEY);
+}
+
+// React Hook for Purchased Items
+export const usePurchasedItems = () => {
+  const [purchasedItems, setPurchasedItems] = useMMKVString(
+    PURCHASED_ITEMS_KEY,
+    storage
+  );
+  return [
+    purchasedItems ? JSON.parse(purchasedItems) || [] : [],
+    setPurchasedItems,
+  ] as const;
+};
+
 export function clearAllStorage() {
   storage.clearAll();
 }
