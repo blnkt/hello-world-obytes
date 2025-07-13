@@ -328,6 +328,71 @@ export const usePurchasedItems = () => {
   ] as const;
 };
 
+// Hybrid Health Data Storage - Core data batched, large datasets separate
+const HEALTH_CORE_KEY = 'healthCore';
+
+export type HealthCore = {
+  experience: number;
+  cumulativeExperience: number;
+  firstExperienceDate: string | null;
+  currency: number;
+  lastCheckedDate: string | null;
+  dailyStepsGoal: number;
+  lastMilestone: string | null;
+};
+
+export function getHealthCore(): Partial<HealthCore> {
+  const value = storage.getString(HEALTH_CORE_KEY);
+  try {
+    return value ? JSON.parse(value) || {} : {};
+  } catch {
+    return {};
+  }
+}
+
+export async function setHealthCore(data: Partial<HealthCore>) {
+  await setItem(HEALTH_CORE_KEY, data);
+}
+
+export async function updateHealthCore(updates: Partial<HealthCore>) {
+  const currentData = getHealthCore();
+  const updatedData = { ...currentData, ...updates };
+  await setHealthCore(updatedData);
+}
+
+// Migration helper to move from old separate keys to new batched core
+export async function migrateToHealthCore() {
+  const coreData: Partial<HealthCore> = {};
+
+  // Migrate individual keys to core batch
+  const experience = getExperience();
+  if (experience !== 0) coreData.experience = experience;
+
+  const cumulativeExperience = getCumulativeExperience();
+  if (cumulativeExperience !== 0)
+    coreData.cumulativeExperience = cumulativeExperience;
+
+  const firstExperienceDate = getFirstExperienceDate();
+  if (firstExperienceDate) coreData.firstExperienceDate = firstExperienceDate;
+
+  const currency = getCurrency();
+  if (currency !== 0) coreData.currency = currency;
+
+  const lastCheckedDate = getLastCheckedDate();
+  if (lastCheckedDate) coreData.lastCheckedDate = lastCheckedDate;
+
+  const dailyStepsGoal = getDailyStepsGoal();
+  if (dailyStepsGoal !== 10000) coreData.dailyStepsGoal = dailyStepsGoal;
+
+  const lastMilestone = getLastMilestone();
+  if (lastMilestone) coreData.lastMilestone = lastMilestone;
+
+  if (Object.keys(coreData).length > 0) {
+    await setHealthCore(coreData);
+    console.log('Migrated health data to core batch storage');
+  }
+}
+
 export function clearAllStorage() {
   storage.clearAll();
 }

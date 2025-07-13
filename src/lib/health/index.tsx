@@ -6,9 +6,9 @@ import HealthKit, {
 import React, { useEffect, useState } from 'react';
 
 import {
-  addCurrency,
   addStreak,
   getCumulativeExperience,
+  getCurrency,
   getDailyStepsGoal,
   getExperience,
   getFirstExperienceDate,
@@ -19,6 +19,7 @@ import {
   setStepsByDay,
   spendCurrency,
   type Streak,
+  updateHealthCore,
   useCurrency,
   useLastCheckedDate,
   useStreaks,
@@ -167,7 +168,8 @@ const getStepsGroupedByDay = async (
   return results;
 };
 
-type _StepEntry = { date: string | Date; steps: number };
+// Unused type - kept for potential future use
+// type _StepEntry = { date: string | Date; steps: number };
 
 // TODO: PHASE 1 - Add comprehensive tests - Unit and integration tests for all features
 // TODO: PHASE 4 - Refactor duplicate code - Consolidate similar functionality
@@ -223,7 +225,8 @@ function mergeExperienceMMKV(
  *
  * This hook converts step count data from HealthKit into experience points
  * and tracks both current session experience and cumulative experience
- * from the first time the user started using the app.
+ * from the first time the user started using the app. It also automatically
+ * converts new experience to currency to avoid data loss.
  *
  * @param lastCheckedDateTime - The date when experience was last checked
  * @returns Object containing:
@@ -282,6 +285,9 @@ export const useStepCountAsExperience = (lastCheckedDateTime: Date) => {
           0
         );
 
+        // Get previous experience to calculate the difference
+        const previousExperience = getExperience();
+
         // Use mergeExperienceMMKV to update cumulative experience
         const {
           cumulativeExperience: newCumulativeExperience,
@@ -293,9 +299,30 @@ export const useStepCountAsExperience = (lastCheckedDateTime: Date) => {
         setFirstExperienceDateState(newFirstExperienceDate);
         setStepsByDayState(results);
 
-        // Save to storage
-        await setExperience(totalSteps);
-        await setStepsByDay(results);
+        // Batch update all related health data
+        const experienceDifference = totalSteps - previousExperience;
+        const currencyToAdd =
+          experienceDifference > 0
+            ? convertExperienceToCurrency(experienceDifference)
+            : 0;
+
+        const currentCurrency = getCurrency();
+        const batchUpdate = {
+          experience: totalSteps,
+          cumulativeExperience: newCumulativeExperience,
+          firstExperienceDate: newFirstExperienceDate,
+          stepsByDay: results,
+          currency: currentCurrency + currencyToAdd,
+          lastCheckedDate: lastCheckedDateTime.toISOString(),
+        };
+
+        await updateHealthCore(batchUpdate);
+
+        if (experienceDifference > 0) {
+          console.log(
+            `Auto-converted ${experienceDifference} XP to ${currencyToAdd} currency`
+          );
+        }
       } catch (error) {
         console.error('Error getting step count for experience:', error);
         await handleError();
@@ -502,25 +529,26 @@ export const convertExperienceToCurrency = (experience: number): number => {
 /**
  * Hook for managing the currency system
  *
+ * Since experience is now automatically converted to currency,
+ * availableCurrency will always be 0 as all new experience
+ * is immediately converted and stored.
+ *
  * @param lastCheckedDateTime - The date when experience was last checked
  * @returns Object containing currency data and conversion functions
  */
 export const useCurrencySystem = (lastCheckedDateTime: Date) => {
-  const { experience, cumulativeExperience } =
+  const { cumulativeExperience } =
     useStepCountAsExperience(lastCheckedDateTime);
-  const [currency, setCurrency] = useCurrency();
+  const [currency] = useCurrency();
 
-  // Convert experience to currency
-  const availableCurrency = convertExperienceToCurrency(experience);
+  // Since experience is auto-converted, available currency is always 0
+  const availableCurrency = 0;
   const totalCurrencyEarned = convertExperienceToCurrency(cumulativeExperience);
 
-  // Function to convert current experience to currency
+  // Function to convert current experience to currency (now just returns 0)
   const convertCurrentExperience = async () => {
-    if (experience > 0) {
-      const currencyToAdd = convertExperienceToCurrency(experience);
-      await addCurrency(currencyToAdd);
-      return currencyToAdd;
-    }
+    // Experience is automatically converted, so this function is deprecated
+    console.log('Experience is now automatically converted to currency');
     return 0;
   };
 
