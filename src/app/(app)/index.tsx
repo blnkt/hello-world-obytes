@@ -14,10 +14,6 @@ import {
 } from '../../lib/storage';
 import { useScenarioTrigger } from '../../lib/use-scenario-trigger';
 
-// TODO: PHASE 2 - Add detailed analytics - Track step trends, patterns, and insights
-// TODO: PHASE 2 - Create progress reports - Weekly/monthly progress summaries
-// TODO: PHASE 3 - Add data visualization - Charts and graphs for progress tracking
-
 const MILESTONE_INTERVAL = 1000; // Every 1k steps
 
 const StreakSection = ({ stepCount }: { stepCount: number }) => {
