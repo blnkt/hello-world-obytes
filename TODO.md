@@ -44,9 +44,63 @@ This document consolidates all TODOs from the codebase, organized by development
 ### Testing
 
 - [ ] **Add comprehensive tests** - Unit and integration tests for all features
+
   - **File**: `src/lib/health/index.tsx:173`
   - **Priority**: High
   - **Description**: Expand test coverage for health system and other core features
+
+- [ ] **Add unit tests for storage functions** - Test all storage functions in src/lib/storage.tsx
+
+  - **File**: `src/lib/storage.tsx`
+  - **Priority**: High
+  - **Description**: Ensure data persistence and retrieval work correctly
+
+- [ ] **Add unit tests for hooks** - Test all hooks in src/lib/hooks/
+
+  - **File**: `src/lib/hooks/`
+  - **Priority**: High
+  - **Description**: Verify hook behavior and state management
+
+- [ ] **Add tests for scenario logic** - Test scenario generation and outcomes
+
+  - **File**: `src/lib/scenario.ts`
+  - **Priority**: Medium
+  - **Description**: Ensure scenario system works correctly
+
+- [ ] **Add tests for streak detection and currency conversion** - Test health system business logic
+
+  - **File**: `src/lib/health/index.tsx`
+  - **Priority**: High
+  - **Description**: Verify streak detection and currency conversion accuracy
+
+- [ ] **Add/expand tests for UI components** - Test all components in src/components/ui/
+
+  - **File**: `src/components/ui/`
+  - **Priority**: Medium
+  - **Description**: Ensure UI components render and behave correctly
+
+- [ ] **Add integration tests for flows** - Test onboarding and dashboard flows
+
+  - **File**: `src/app/`
+  - **Priority**: Medium
+  - **Description**: Verify complete user journeys work end-to-end
+
+- [ ] **Add E2E tests for shop purchase flow** - Test complete purchase journey
+
+  - **File**: `src/app/(app)/shop.tsx`
+  - **Priority**: Medium
+  - **Description**: Ensure shop functionality works in real scenarios
+
+- [ ] **Set up CI coverage threshold** - Fail builds on coverage drop below 80%
+
+  - **File**: `.github/workflows/`
+  - **Priority**: High
+  - **Description**: Maintain high test coverage standards
+
+- [ ] **Add migration tests** - Test data structure changes and migrations
+  - **File**: `src/lib/storage.tsx`
+  - **Priority**: Medium
+  - **Description**: Ensure data migrations work correctly
 
 ### UI/UX
 
