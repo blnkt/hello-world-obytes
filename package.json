@@ -44,7 +44,8 @@
     "test:ci": "pnpm run test --coverage",
     "test:watch": "pnpm run test --watch",
     "install-maestro": "curl -Ls 'https://get.maestro.mobile.dev' | bash",
-    "e2e-test": "maestro test .maestro/ -e APP_ID=com.hello-world-expo-owner.development"
+    "e2e-test": "maestro test .maestro/ -e APP_ID=com.hello-world-expo-owner.development",
+    "create-issues": "tasks/directions/create-issues-from-tasks.sh"
   },
   "dependencies": {
     "@expo/metro-runtime": "^4.0.1",
