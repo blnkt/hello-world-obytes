@@ -18,6 +18,7 @@ import {
   setFirstExperienceDate,
   setStepsByDay,
   spendCurrency,
+  storage,
   type Streak,
   updateHealthCore,
   useCurrency,
@@ -35,6 +36,59 @@ import {
 // TODO: PHASE 1 - Optimize data storage - Improve MMKV usage and data structure
 // TODO: PHASE 1 - Add offline support - Cache step data locally when HealthKit is not available
 // TODO: PHASE 3 - Optimize data fetching - Reduce API calls by implementing smarter caching
+
+// Manual Entry Mode Storage
+const MANUAL_ENTRY_MODE_KEY = 'manualEntryMode';
+
+export function getManualEntryMode(): boolean {
+  const value = storage.getString(MANUAL_ENTRY_MODE_KEY);
+  return value ? JSON.parse(value) || false : false;
+}
+
+export async function setManualEntryMode(enabled: boolean) {
+  storage.set(MANUAL_ENTRY_MODE_KEY, JSON.stringify(enabled));
+}
+
+export async function clearManualEntryMode() {
+  storage.delete(MANUAL_ENTRY_MODE_KEY);
+}
+
+// Manual Entry Mode Hook
+export const useManualEntryMode = () => {
+  const [isManualMode, setIsManualMode] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const loadManualEntryMode = async () => {
+      try {
+        const mode = getManualEntryMode();
+        setIsManualMode(mode);
+      } catch (error) {
+        console.error('Error loading manual entry mode:', error);
+        setIsManualMode(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadManualEntryMode();
+  }, []);
+
+  const setManualMode = async (enabled: boolean) => {
+    try {
+      await setManualEntryMode(enabled);
+      setIsManualMode(enabled);
+    } catch (error) {
+      console.error('Error setting manual entry mode:', error);
+    }
+  };
+
+  return {
+    isManualMode,
+    setManualMode,
+    isLoading,
+  };
+};
 
 // Enhanced HealthKit availability status types
 export type HealthKitAvailabilityStatus =

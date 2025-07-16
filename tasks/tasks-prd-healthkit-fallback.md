@@ -24,8 +24,8 @@
 
 - [ ] 1.0 HealthKit Availability Detection and Fallback Logic (#132)
 
-  - [ ] 1.1 Enhance `useHealthKitAvailability` hook to detect permission denied scenarios
-  - [ ] 1.2 Create `useManualEntryMode` hook to track manual vs HealthKit mode
+  - [x] 1.1 Enhance `useHealthKitAvailability` hook to detect permission denied scenarios
+  - [x] 1.2 Create `useManualEntryMode` hook to track manual vs HealthKit mode
   - [ ] 1.3 Implement fallback logic to automatically suggest manual entry when HealthKit unavailable
   - [ ] 1.4 Add developer mode flag to bypass HealthKit availability checks
   - [ ] 1.5 Create user choice interface to select between HealthKit and manual modes
