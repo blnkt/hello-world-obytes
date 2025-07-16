@@ -10,6 +10,32 @@ To guide an AI assistant in creating a detailed Product Requirements Document (P
 2.  **Ask Clarifying Questions:** Before writing the PRD, the AI _must_ ask clarifying questions to gather sufficient detail. The goal is to understand the "what" and "why" of the feature, not necessarily the "how" (which the developer will figure out). Make sure to provide options in letter/number lists so I can respond easily with my selections.
 3.  **Generate PRD:** Based on the initial prompt and the user's answers to the clarifying questions, generate a PRD using the structure outlined below.
 4.  **Save PRD:** Save the generated document as `prd-[feature-name].md` inside the `/tasks` directory.
+5.  **Branch Management:** After creating the PRD, instruct the user to create a feature branch using the PRD filename as the branch name.
+
+## Branch Management
+
+After creating a PRD, the user must create a feature branch for all work related to that PRD:
+
+```bash
+# Create and switch to a new branch named after the PRD
+git checkout -b feature/[prd-filename]
+
+# Example: If PRD is saved as prd-user-profile-editing.md
+git checkout -b feature/prd-user-profile-editing
+```
+
+**Branch Naming Convention:**
+
+- Use the PRD filename (without .md extension) as the branch name
+- Prefix with `feature/` to indicate it's a feature branch
+- Use kebab-case for multi-word features
+
+**Branch Rules:**
+
+- All work related to a PRD must be done on its associated branch
+- Never work on the main branch for feature development
+- Each PRD gets its own dedicated branch
+- Branch names should be descriptive and match the PRD filename
 
 ## Clarifying Questions (Examples)
 
@@ -54,3 +80,8 @@ Assume the primary reader of the PRD is a **junior developer**. Therefore, requi
 1. Do NOT start implementing the PRD
 2. Make sure to ask the user clarifying questions
 3. Take the user's answers to the clarifying questions and improve the PRD
+4. After creating the PRD, instruct the user to create a feature branch:
+   ```bash
+   git checkout -b feature/[prd-filename]
+   ```
+5. Remind the user that all work related to this PRD must be done on this feature branch

@@ -2,6 +2,41 @@
 
 Guidelines for managing task lists in markdown files to track progress on completing a PRD
 
+## Branch Management
+
+**Critical Requirement:** All work must be done on feature branches associated with PRDs.
+
+### Branch Rules
+
+- **Never work on main/master branch** for feature development
+- **Each PRD gets its own feature branch:** `feature/[prd-filename]`
+- **Branch naming:** Use the PRD filename as the branch name
+  - Example: `prd-user-profile-editing.md` → `feature/prd-user-profile-editing`
+- **Verify branch before starting work:**
+  ```bash
+  git branch --show-current
+  # Should show: feature/[prd-filename]
+  ```
+
+### Branch Workflow
+
+1. **Before starting any task:**
+
+   - Ensure you're on the correct feature branch
+   - If not, switch: `git checkout feature/[prd-filename]`
+   - If branch doesn't exist, create it: `git checkout -b feature/[prd-filename]`
+
+2. **During development:**
+
+   - All commits must be on the feature branch
+   - Never commit directly to main/master
+   - Use descriptive commit messages with issue references
+
+3. **When complete:**
+   - Create pull request from feature branch to main
+   - Include PRD reference in pull request description
+   - Link related GitHub issues
+
 ## Task Implementation
 
 - **One sub-task at a time:** Do **NOT** start the next sub‑task until you ask the user for permission and they say "yes" or "y"
@@ -9,6 +44,7 @@ Guidelines for managing task lists in markdown files to track progress on comple
 
   1. When you finish a **sub-task**, follow this sequence:
 
+  - **Verify branch:** Ensure you're on the correct feature branch
   - Immediately mark it as completed by changing `[ ]` to `[x]`.
   - Run `pnpm lint --fix` on any files that have changed and try to fix any errors that are not auto-fixed
   - If **linter errors** remain, tell the user, and wait for their go-ahead
@@ -58,12 +94,27 @@ Guidelines for managing task lists in markdown files to track progress on comple
 
 When working with task lists, the AI must:
 
-1. Regularly update the task list file after finishing any significant work.
-2. Follow the completion protocol:
+1. **Verify branch before starting work:**
+
+   - Check if user is on the correct feature branch
+   - Ensure branch name matches PRD filename: `feature/[prd-filename]`
+   - If not on correct branch, instruct user to switch before proceeding
+
+2. Regularly update the task list file after finishing any significant work.
+
+3. Follow the completion protocol:
+
    - Mark each finished **sub‑task** `[x]`.
    - Mark the **parent task** `[x]` once **all** its subtasks are `[x]`.
-3. Add newly discovered tasks.
-4. Keep "Relevant Files" accurate and up to date.
-5. Before starting work, check which sub‑task is next.
-6. After implementing a sub‑task, update the file and then pause for user approval.
-7. **Extract GitHub issue numbers** from the parent task (format: `(#123)`) and include them in commit messages using `Related to #123`.
+
+4. Add newly discovered tasks.
+
+5. Keep "Relevant Files" accurate and up to date.
+
+6. Before starting work, check which sub‑task is next.
+
+7. After implementing a sub‑task, update the file and then pause for user approval.
+
+8. **Extract GitHub issue numbers** from the parent task (format: `(#123)`) and include them in commit messages using `Related to #123`.
+
+9. **Ensure all commits are on the feature branch** and never on main/master.
