@@ -36,39 +36,107 @@ import {
 // TODO: PHASE 1 - Add offline support - Cache step data locally when HealthKit is not available
 // TODO: PHASE 3 - Optimize data fetching - Reduce API calls by implementing smarter caching
 
-const useHealthKitAvailability = () => {
-  const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
+// Enhanced HealthKit availability status types
+export type HealthKitAvailabilityStatus =
+  | 'available'
+  | 'not_available'
+  | 'permission_denied'
+  | 'not_supported'
+  | 'loading'
+  | 'error';
+
+export type HealthKitAvailabilityResult = {
+  status: HealthKitAvailabilityStatus;
+  error?: string;
+  canRequestPermission: boolean;
+};
+
+const useHealthKitAvailability = (): HealthKitAvailabilityResult => {
+  const [status, setStatus] = useState<HealthKitAvailabilityStatus>('loading');
+  const [error, setError] = useState<string | undefined>(undefined);
+  const [canRequestPermission, setCanRequestPermission] =
+    useState<boolean>(false);
 
   useEffect(() => {
     const checkAvailability = async () => {
-      const available = await HealthKit.isHealthDataAvailable();
-      setIsAvailable(available);
+      try {
+        setStatus('loading');
+        setError(undefined);
+
+        // Check if HealthKit is available on the device
+        const isAvailable = await HealthKit.isHealthDataAvailable();
+
+        if (!isAvailable) {
+          setStatus('not_supported');
+          setCanRequestPermission(false);
+          return;
+        }
+
+        // HealthKit is available, now check authorization status
+        try {
+          const _authorizationStatus =
+            await HealthKit.getRequestStatusForAuthorization([
+              HKQuantityTypeIdentifier.stepCount,
+            ]);
+
+          // For now, assume we can request permission if HealthKit is available
+          // The actual permission request will be handled by the useHealthKit hook
+          setCanRequestPermission(true);
+          setStatus('available');
+        } catch (authError) {
+          console.error('Error checking authorization status:', authError);
+          // If we can't check authorization status, it might be due to permission issues
+          setStatus('permission_denied');
+          setError(
+            'HealthKit permissions have been denied. Please enable in Settings.'
+          );
+          setCanRequestPermission(false);
+        }
+      } catch (error) {
+        console.error('Error checking HealthKit availability:', error);
+        setStatus('error');
+        setError('Failed to check HealthKit availability');
+        setCanRequestPermission(false);
+      }
     };
+
     checkAvailability();
   }, []);
 
-  return isAvailable;
+  return {
+    status,
+    error,
+    canRequestPermission,
+  };
 };
 
 export const useHealthKit = () => {
-  const isAvailable = useHealthKitAvailability();
+  const availability = useHealthKitAvailability();
   const [hasRequestedAuthorization, setHasRequestedAuthorization] = useState<
     boolean | null
   >(null);
 
   useEffect(() => {
-    if (isAvailable) {
-      HealthKit.requestAuthorization([HKQuantityTypeIdentifier.stepCount]).then(
-        () => {
+    if (
+      availability.status === 'available' &&
+      availability.canRequestPermission
+    ) {
+      HealthKit.requestAuthorization([HKQuantityTypeIdentifier.stepCount])
+        .then(() => {
           setHasRequestedAuthorization(true);
-        }
-      );
+        })
+        .catch((error) => {
+          console.error('Error requesting HealthKit authorization:', error);
+          setHasRequestedAuthorization(false);
+        });
     }
-  }, [isAvailable]);
+  }, [availability.status, availability.canRequestPermission]);
 
   return {
-    isAvailable,
+    isAvailable: availability.status === 'available',
     hasRequestedAuthorization,
+    availabilityStatus: availability.status,
+    availabilityError: availability.error,
   };
 };
 
