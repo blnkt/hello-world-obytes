@@ -90,6 +90,57 @@ export const useManualEntryMode = () => {
   };
 };
 
+// Developer Mode Storage
+const DEVELOPER_MODE_KEY = 'developerMode';
+
+export function getDeveloperMode(): boolean {
+  const value = storage.getString(DEVELOPER_MODE_KEY);
+  return value ? JSON.parse(value) || false : false;
+}
+
+export async function setDeveloperMode(enabled: boolean) {
+  storage.set(DEVELOPER_MODE_KEY, JSON.stringify(enabled));
+}
+
+export async function clearDeveloperMode() {
+  storage.delete(DEVELOPER_MODE_KEY);
+}
+
+export const useDeveloperMode = () => {
+  const [isDeveloperMode, setIsDeveloperMode] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const loadDeveloperMode = async () => {
+      try {
+        const mode = getDeveloperMode();
+        setIsDeveloperMode(mode);
+      } catch (error) {
+        console.error('Error loading developer mode:', error);
+        setIsDeveloperMode(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadDeveloperMode();
+  }, []);
+
+  const setDevMode = async (enabled: boolean) => {
+    try {
+      await setDeveloperMode(enabled);
+      setIsDeveloperMode(enabled);
+    } catch (error) {
+      console.error('Error setting developer mode:', error);
+    }
+  };
+
+  return {
+    isDeveloperMode,
+    setDevMode,
+    isLoading,
+  };
+};
+
 // Enhanced HealthKit availability status types
 export type HealthKitAvailabilityStatus =
   | 'available'
@@ -285,11 +336,19 @@ export const useHealthKitFallback = (): FallbackLogicResult => {
     setManualMode,
     isLoading: manualModeLoading,
   } = useManualEntryMode();
+  const { isDeveloperMode, isLoading: developerModeLoading } =
+    useDeveloperMode();
   const [suggestion, setSuggestion] = useState<FallbackSuggestion>('none');
   const [reason, setReason] = useState<string>('');
   const [canRetryHealthKit, setCanRetryHealthKit] = useState<boolean>(false);
 
   useEffect(() => {
+    if (isDeveloperMode) {
+      setSuggestion('force_manual');
+      setReason('Developer mode is enabled. HealthKit checks are bypassed.');
+      setCanRetryHealthKit(false);
+      return;
+    }
     determineFallbackLogic({
       availabilityStatus: availability.status,
       isManualMode,
@@ -297,13 +356,16 @@ export const useHealthKitFallback = (): FallbackLogicResult => {
       setReason,
       setCanRetryHealthKit,
     });
-  }, [availability.status, isManualMode, availability.error]);
+  }, [availability.status, isManualMode, availability.error, isDeveloperMode]);
 
   // Auto-switch to manual mode for certain scenarios
   useEffect(() => {
     const autoSwitchToManual = async () => {
-      // Auto-switch to manual mode if HealthKit is not supported
-      if (availability.status === 'not_supported' && !isManualMode) {
+      // Auto-switch to manual mode if HealthKit is not supported or developer mode is enabled
+      if (
+        (availability.status === 'not_supported' && !isManualMode) ||
+        isDeveloperMode
+      ) {
         try {
           await setManualMode(true);
         } catch (error) {
@@ -311,18 +373,21 @@ export const useHealthKitFallback = (): FallbackLogicResult => {
         }
       }
     };
-
     autoSwitchToManual();
-  }, [availability.status, isManualMode, setManualMode]);
+  }, [availability.status, isManualMode, setManualMode, isDeveloperMode]);
 
-  const shouldUseManualEntry = isManualMode || suggestion === 'force_manual';
+  const shouldUseManualEntry =
+    isManualMode || suggestion === 'force_manual' || isDeveloperMode;
 
   return {
     shouldUseManualEntry,
     suggestion,
     reason,
     canRetryHealthKit,
-    isLoading: availability.status === 'loading' || manualModeLoading,
+    isLoading:
+      availability.status === 'loading' ||
+      manualModeLoading ||
+      developerModeLoading,
     error: availability.error,
   };
 };
