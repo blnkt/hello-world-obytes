@@ -194,6 +194,139 @@ export const useHealthKit = () => {
   };
 };
 
+// Fallback Logic Types
+export type FallbackSuggestion =
+  | 'none'
+  | 'suggest_manual'
+  | 'force_manual'
+  | 'retry_healthkit';
+
+export type FallbackLogicResult = {
+  shouldUseManualEntry: boolean;
+  suggestion: FallbackSuggestion;
+  reason: string;
+  canRetryHealthKit: boolean;
+  isLoading: boolean;
+  error?: string;
+};
+
+// Helper function to determine fallback logic
+const determineFallbackLogic = (params: {
+  availabilityStatus: HealthKitAvailabilityStatus;
+  isManualMode: boolean;
+  setSuggestion: (suggestion: FallbackSuggestion) => void;
+  setReason: (reason: string) => void;
+  setCanRetryHealthKit: (canRetry: boolean) => void;
+}) => {
+  const {
+    availabilityStatus,
+    isManualMode,
+    setSuggestion,
+    setReason,
+    setCanRetryHealthKit,
+  } = params;
+
+  if (isManualMode) {
+    setSuggestion('none');
+    setReason('User has chosen manual entry mode');
+    setCanRetryHealthKit(true);
+    return;
+  }
+
+  if (availabilityStatus === 'available') {
+    setSuggestion('none');
+    setReason('HealthKit is available and working');
+    setCanRetryHealthKit(false);
+    return;
+  }
+
+  if (availabilityStatus === 'not_supported') {
+    setSuggestion('force_manual');
+    setReason('HealthKit is not supported on this device');
+    setCanRetryHealthKit(false);
+    return;
+  }
+
+  if (availabilityStatus === 'permission_denied') {
+    setSuggestion('suggest_manual');
+    setReason(
+      'HealthKit permissions have been denied. You can still track your steps manually.'
+    );
+    setCanRetryHealthKit(true);
+    return;
+  }
+
+  if (availabilityStatus === 'loading') {
+    setSuggestion('none');
+    setReason('Checking HealthKit availability...');
+    setCanRetryHealthKit(false);
+    return;
+  }
+
+  if (availabilityStatus === 'error') {
+    setSuggestion('suggest_manual');
+    setReason(
+      'HealthKit is experiencing issues. You can track your steps manually.'
+    );
+    setCanRetryHealthKit(true);
+    return;
+  }
+
+  setSuggestion('suggest_manual');
+  setReason('HealthKit is not available. You can track your steps manually.');
+  setCanRetryHealthKit(true);
+};
+
+// Comprehensive Fallback Logic Hook
+export const useHealthKitFallback = (): FallbackLogicResult => {
+  const availability = useHealthKitAvailability();
+  const {
+    isManualMode,
+    setManualMode,
+    isLoading: manualModeLoading,
+  } = useManualEntryMode();
+  const [suggestion, setSuggestion] = useState<FallbackSuggestion>('none');
+  const [reason, setReason] = useState<string>('');
+  const [canRetryHealthKit, setCanRetryHealthKit] = useState<boolean>(false);
+
+  useEffect(() => {
+    determineFallbackLogic({
+      availabilityStatus: availability.status,
+      isManualMode,
+      setSuggestion,
+      setReason,
+      setCanRetryHealthKit,
+    });
+  }, [availability.status, isManualMode, availability.error]);
+
+  // Auto-switch to manual mode for certain scenarios
+  useEffect(() => {
+    const autoSwitchToManual = async () => {
+      // Auto-switch to manual mode if HealthKit is not supported
+      if (availability.status === 'not_supported' && !isManualMode) {
+        try {
+          await setManualMode(true);
+        } catch (error) {
+          console.error('Error auto-switching to manual mode:', error);
+        }
+      }
+    };
+
+    autoSwitchToManual();
+  }, [availability.status, isManualMode, setManualMode]);
+
+  const shouldUseManualEntry = isManualMode || suggestion === 'force_manual';
+
+  return {
+    shouldUseManualEntry,
+    suggestion,
+    reason,
+    canRetryHealthKit,
+    isLoading: availability.status === 'loading' || manualModeLoading,
+    error: availability.error,
+  };
+};
+
 export const getTodayStepCount = async () => {
   const todayStart = new Date(new Date().setHours(0, 0, 0, 0));
   const todayEnd = new Date(new Date().setHours(23, 59, 59, 999));
