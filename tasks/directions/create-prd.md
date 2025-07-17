@@ -4,6 +4,18 @@
 
 To guide an AI assistant in creating a detailed Product Requirements Document (PRD) in Markdown format, based on an initial user prompt. The PRD should be clear, actionable, and suitable for a junior developer to understand and implement the feature.
 
+## File Naming Convention
+
+- **PRD files:** `prd-[descriptive-feature-name].md`
+- **Task files:** `tasks-prd-[descriptive-feature-name].md` (generated from this PRD)
+- **Branch names:** `feature/prd-[prd-filename]`
+
+**Example:**
+
+- PRD: `prd-user-profile-editing.md`
+- Tasks: `tasks-prd-user-profile-editing.md`
+- Branch: `feature/prd-user-profile-editing`
+
 ## Process
 
 1.  **Receive Initial Prompt:** The user provides a brief description or request for a new feature or functionality.
@@ -36,6 +48,16 @@ git checkout -b feature/prd-user-profile-editing
 - Never work on the main branch for feature development
 - Each PRD gets its own dedicated branch
 - Branch names should be descriptive and match the PRD filename
+
+## Related Workflows
+
+This workflow is part of a larger development process:
+
+1. **PRD Creation** (this workflow) → Creates `prd-[feature-name].md`
+2. **Task Generation** (`@generate-tasks.md`) → Creates `tasks-prd-[feature-name].md` from the PRD
+3. **Task Implementation** (`@process-task-list.md`) → Implements the tasks using TDD workflow
+
+**Next Steps:** After creating the PRD, use the `@generate-tasks.md` workflow to create a detailed task list for implementation.
 
 ## Clarifying Questions (Examples)
 

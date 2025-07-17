@@ -2,6 +2,28 @@
 
 Guidelines for managing task lists in markdown files to track progress on completing a PRD
 
+## File Naming Convention
+
+- **PRD files:** `prd-[descriptive-feature-name].md` (input)
+- **Task files:** `tasks-prd-[descriptive-feature-name].md` (this file)
+- **Branch names:** `feature/prd-[prd-filename]`
+
+**Example:**
+
+- PRD: `prd-user-profile-editing.md`
+- Tasks: `tasks-prd-user-profile-editing.md`
+- Branch: `feature/prd-user-profile-editing`
+
+## Related Workflows
+
+This workflow is part of a larger development process:
+
+1. **PRD Creation** (`@create-prd.md`) → Creates `prd-[feature-name].md`
+2. **Task Generation** (`@generate-tasks.md`) → Creates `tasks-prd-[feature-name].md` from the PRD
+3. **Task Implementation** (this workflow) → Implements the tasks using TDD workflow
+
+**Prerequisites:** This workflow requires a task list file created using the `@generate-tasks.md` workflow.
+
 ## Branch Management
 
 **Critical Requirement:** All work must be done on feature branches associated with PRDs.

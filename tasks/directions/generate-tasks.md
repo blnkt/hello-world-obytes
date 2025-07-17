@@ -4,11 +4,33 @@
 
 To guide an AI assistant in creating a detailed, step-by-step task list in Markdown format based on an existing Product Requirements Document (PRD). The task list should guide a developer through implementation.
 
+## File Naming Convention
+
+- **PRD files:** `prd-[descriptive-feature-name].md` (input)
+- **Task files:** `tasks-prd-[descriptive-feature-name].md` (output)
+- **Branch names:** `feature/prd-[descriptive-feature-name]`
+
+**Example:**
+
+- Input PRD: `prd-user-profile-editing.md`
+- Output Tasks: `tasks-prd-user-profile-editing.md`
+- Branch: `feature/prd-user-profile-editing`
+
 ## Output
 
 - **Format:** Markdown (`.md`)
 - **Location:** `/tasks/`
 - **Filename:** `tasks-[prd-file-name].md` (e.g., `tasks-prd-user-profile-editing.md`)
+
+## Related Workflows
+
+This workflow is part of a larger development process:
+
+1. **PRD Creation** (`@create-prd.md`) → Creates `prd-[feature-name].md`
+2. **Task Generation** (this workflow) → Creates `tasks-prd-[feature-name].md` from the PRD
+3. **Task Implementation** (`@process-task-list.md`) → Implements the tasks using TDD workflow
+
+**Prerequisites:** This workflow requires an existing PRD file created using the `@create-prd.md` workflow.
 
 ## Process
 
