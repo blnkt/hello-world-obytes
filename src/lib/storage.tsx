@@ -434,6 +434,40 @@ export function hasManualEntryForDate(date: string): boolean {
   return entry !== null;
 }
 
+export async function migrateManualStepEntries() {
+  const existingSteps = getStepsByDay();
+  const existingManualSteps = getManualStepsByDay();
+
+  if (existingSteps.length === 0) {
+    return;
+  }
+
+  // Convert old step data to manual entry format
+  const migratedEntries: ManualStepEntry[] = existingSteps.map((step) => ({
+    date:
+      step.date instanceof Date
+        ? step.date.toISOString().split('T')[0]
+        : String(step.date).split('T')[0],
+    steps: step.steps,
+    source: 'manual' as const,
+  }));
+
+  // Merge with existing manual entries, avoiding duplicates
+  const allEntries = [...existingManualSteps, ...migratedEntries];
+  const uniqueEntries = allEntries.reduce((acc, entry) => {
+    const existing = acc.find((e) => e.date === entry.date);
+    if (!existing) {
+      acc.push(entry);
+    }
+    return acc;
+  }, [] as ManualStepEntry[]);
+
+  // Sort by date
+  uniqueEntries.sort((a, b) => a.date.localeCompare(b.date));
+
+  await setManualStepsByDay(uniqueEntries);
+}
+
 export function clearAllStorage() {
   storage.clearAll();
 }

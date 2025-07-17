@@ -1,4 +1,4 @@
-import { getManualStepsByDay, setManualStepsByDay, clearManualStepsByDay, setManualStepEntry, getManualStepEntry, hasManualEntryForDate } from '../storage';
+import { getManualStepsByDay, setManualStepsByDay, clearManualStepsByDay, setManualStepEntry, getManualStepEntry, hasManualEntryForDate, clearStepsByDay, setStepsByDay, migrateManualStepEntries } from '../storage';
 
 // MMKV is a singleton, so clear between tests
 beforeEach(() => {
@@ -121,5 +121,58 @@ describe('Manual Entry Tracking', () => {
     expect(hasManualEntryForDate('2024-06-01')).toBe(true);
     expect(hasManualEntryForDate('2024-06-02')).toBe(true);
     expect(hasManualEntryForDate('2024-06-03')).toBe(false);
+  });
+});
+
+describe('Manual Step Entry Migration', () => {
+  it('should migrate existing step data to manual entry format', async () => {
+    await clearManualStepsByDay();
+    await clearStepsByDay();
+    // Simulate old step data format
+    const oldStepData = [
+      { date: new Date('2024-06-01'), steps: 1000 },
+      { date: new Date('2024-06-02'), steps: 2000 },
+    ];
+    await setStepsByDay(oldStepData);
+    
+    await migrateManualStepEntries();
+    
+    const migratedData = getManualStepsByDay();
+    expect(migratedData).toEqual([
+      { date: '2024-06-01', steps: 1000, source: 'manual' },
+      { date: '2024-06-02', steps: 2000, source: 'manual' },
+    ]);
+  });
+
+  it('should not migrate if no existing step data exists', async () => {
+    await clearManualStepsByDay();
+    await clearStepsByDay();
+    
+    await migrateManualStepEntries();
+    
+    const migratedData = getManualStepsByDay();
+    expect(migratedData).toEqual([]);
+  });
+
+  it('should preserve existing manual entries during migration', async () => {
+    await clearManualStepsByDay();
+    await clearStepsByDay();
+    
+    // Add existing manual entries
+    await setManualStepEntry({ date: '2024-06-01', steps: 1500, source: 'manual' });
+    
+    // Add old step data
+    const oldStepData = [
+      { date: new Date('2024-06-02'), steps: 2000 },
+    ];
+    await setStepsByDay(oldStepData);
+    
+    await migrateManualStepEntries();
+    
+    const migratedData = getManualStepsByDay();
+    expect(migratedData).toEqual([
+      { date: '2024-06-01', steps: 1500, source: 'manual' },
+      { date: '2024-06-02', steps: 2000, source: 'manual' },
+    ]);
   });
 }); 
