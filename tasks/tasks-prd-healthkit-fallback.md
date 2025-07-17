@@ -32,8 +32,8 @@
 
 - [ ] 2.0 Manual Step Entry Interface and Validation (#133)
 
-  - [ ] 2.1 Create `ManualStepEntry` component with number input field
-  - [ ] 2.2 Implement step count validation to ensure data structure compatibility
+  - [x] 2.1 Create `ManualStepEntry` component with number input field
+  - [x] 2.2 Implement step count validation to ensure data structure compatibility
   - [ ] 2.3 Add input constraints (positive numbers, reasonable daily limits)
   - [ ] 2.4 Create confirmation dialog for manual step entry submission
   - [ ] 2.5 Implement error handling for invalid step entries
