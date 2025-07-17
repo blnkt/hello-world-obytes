@@ -253,3 +253,76 @@ describe('ManualStepEntry error handling on submit', () => {
     expect(await screen.findByTestId('confirmation-dialog')).toBeOnTheScreen();
   });
 });
+
+describe('ManualStepEntry loading states', () => {
+  it('should show loading indicator when loading prop is true', () => {
+    render(<ManualStepEntry testID="manual-step-entry" loading={true} />);
+    expect(screen.getByTestId('manual-step-entry-loading')).toBeOnTheScreen();
+  });
+
+  it('should not show loading indicator when loading prop is false', () => {
+    render(<ManualStepEntry testID="manual-step-entry" loading={false} />);
+    expect(screen.queryByTestId('manual-step-entry-loading')).toBeNull();
+  });
+
+  it('should disable input when loading is true', () => {
+    render(<ManualStepEntry testID="manual-step-entry" loading={true} />);
+    const input = screen.getByTestId('manual-step-entry');
+    expect(input.props.editable).toBe(false);
+  });
+
+  it('should enable input when loading is false', () => {
+    render(<ManualStepEntry testID="manual-step-entry" loading={false} />);
+    const input = screen.getByTestId('manual-step-entry');
+    expect(input.props.editable).toBe(true);
+  });
+
+  it('should show loading text when loading is true', () => {
+    render(<ManualStepEntry testID="manual-step-entry" loading={true} />);
+    expect(screen.getByTestId('manual-step-entry-loading')).toHaveTextContent(
+      'Processing...'
+    );
+  });
+
+  it('should maintain loading state during async operations', async () => {
+    function Wrapper() {
+      const [loading, setLoading] = React.useState(false);
+      const [val, setVal] = React.useState('');
+
+      const handleSubmit = async () => {
+        setLoading(true);
+        // Simulate async operation
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        setLoading(false);
+      };
+
+      return (
+        <ManualStepEntry
+          testID="manual-step-entry"
+          value={val}
+          onChangeText={setVal}
+          loading={loading}
+          onSubmitEditing={handleSubmit}
+        />
+      );
+    }
+
+    render(<Wrapper />);
+    const input = screen.getByTestId('manual-step-entry');
+
+    // Initially not loading
+    expect(screen.queryByTestId('manual-step-entry-loading')).toBeNull();
+
+    // Trigger loading state
+    fireEvent(input, 'submitEditing');
+
+    // Should show loading indicator
+    expect(screen.getByTestId('manual-step-entry-loading')).toBeOnTheScreen();
+
+    // Wait for async operation to complete
+    await new Promise((resolve) => setTimeout(resolve, 150));
+
+    // Should hide loading indicator
+    expect(screen.queryByTestId('manual-step-entry-loading')).toBeNull();
+  });
+});

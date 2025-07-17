@@ -10,6 +10,7 @@ export interface ManualStepEntryProps
   label?: string;
   disabled?: boolean;
   error?: string;
+  loading?: boolean;
   onChangeText?: (text: string) => void;
 }
 
@@ -42,6 +43,7 @@ export const ManualStepEntry = React.forwardRef<
     error: errorProp,
     testID,
     disabled = false,
+    loading = false,
     onChangeText,
     onFocus,
     onBlur,
@@ -106,7 +108,7 @@ export const ManualStepEntry = React.forwardRef<
         placeholderTextColor="#9CA3AF"
         className="mt-0 rounded-xl border-[0.5px] border-neutral-300 bg-neutral-100 px-4 py-3 font-inter text-base font-medium leading-5 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
         keyboardType="numeric"
-        editable={!disabled}
+        editable={!disabled && !loading}
         onFocus={onFocus}
         onBlur={handleBlur}
         onChangeText={handleChangeText}
@@ -114,6 +116,14 @@ export const ManualStepEntry = React.forwardRef<
         onSubmitEditing={handleSubmitEditing}
         {...inputProps}
       />
+      {loading && (
+        <Text
+          testID={testID ? `${testID}-loading` : undefined}
+          className="mt-1 text-sm text-neutral-500 dark:text-neutral-400"
+        >
+          Processing...
+        </Text>
+      )}
       {error && (
         <Text
           testID={testID ? `${testID}-error` : undefined}
