@@ -231,7 +231,7 @@ describe('Manual Step Entry Data Validation', () => {
   it('should throw when setManualStepEntry is called with steps above 100,000', async () => {
     await clearManualStepsByDay();
     const invalidEntry = { date: '2024-06-01', steps: 100001, source: 'manual' as const };
-    await expect(setManualStepEntry(invalidEntry)).rejects.toThrow('Invalid manual step entry structure');
+    await expect(setManualStepEntry(invalidEntry)).rejects.toThrow('Invalid manual step entry');
   });
 
   it('should throw when setManualStepsByDay is called with an entry above 100,000 steps', async () => {

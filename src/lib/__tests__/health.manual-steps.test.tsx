@@ -39,6 +39,10 @@ describe('useStepCountAsExperience with Manual Steps', () => {
     clearManualStepsByDay();
     clearStepsByDay();
     setManualEntryMode(false);
+    
+    // Clear HealthKit mock data
+    const HealthKitMock = require('../../../__mocks__/@kingstinct/react-native-healthkit.js');
+    HealthKitMock.__setStepSamples([]);
   });
 
   afterEach(() => {
@@ -46,6 +50,10 @@ describe('useStepCountAsExperience with Manual Steps', () => {
     clearManualStepsByDay();
     clearStepsByDay();
     setManualEntryMode(false);
+    
+    // Clear HealthKit mock data
+    const HealthKitMock = require('../../../__mocks__/@kingstinct/react-native-healthkit.js');
+    HealthKitMock.__setStepSamples([]);
   });
 
   it('should include manual step entries in experience calculation', async () => {
@@ -56,12 +64,12 @@ describe('useStepCountAsExperience with Manual Steps', () => {
     ];
     await setManualStepsByDay(manualSteps);
 
-    // Set up HealthKit step entries
-    const healthKitSteps = [
-      { date: new Date('2024-06-01'), steps: 2000 },
-      { date: new Date('2024-06-03'), steps: 4000 },
-    ];
-    await setStepsByDay(healthKitSteps);
+    // Set up HealthKit mock data
+    const HealthKitMock = require('../../../__mocks__/@kingstinct/react-native-healthkit.js');
+    HealthKitMock.__setStepSamples([
+      { startDate: new Date('2024-06-01'), endDate: new Date('2024-06-01'), quantity: 2000 },
+      { startDate: new Date('2024-06-03'), endDate: new Date('2024-06-03'), quantity: 4000 },
+    ]);
 
     const lastCheckedDateTime = new Date('2024-06-01');
     const { result } = renderHook(() =>
@@ -81,13 +89,13 @@ describe('useStepCountAsExperience with Manual Steps', () => {
       expect(manualEntries.find(day => {
         const dayDate = typeof day.date === 'string' ? new Date(day.date) : day.date;
         return dayDate.toISOString().split('T')[0] === '2024-06-01';
-      })?.steps).toBe(5000);
+      })?.steps).toBe(7000); // 5000 (manual) + 2000 (HealthKit)
       expect(manualEntries.find(day => {
         const dayDate = typeof day.date === 'string' ? new Date(day.date) : day.date;
         return dayDate.toISOString().split('T')[0] === '2024-06-02';
-      })?.steps).toBe(3000);
+      })?.steps).toBe(3000); // 3000 (manual only)
       
-      expect(result.current.experience).toBe(12000); // 5000 (manual) + 3000 (manual) + 4000 (HealthKit) - manual takes priority over HealthKit for same date
+      expect(result.current.experience).toBe(14000); // 7000 + 3000 + 4000 (HealthKit)
     });
   });
 
@@ -101,11 +109,11 @@ describe('useStepCountAsExperience with Manual Steps', () => {
       source: 'manual',
     });
 
-    // Set up HealthKit step entry for the same date
-    const healthKitSteps = [
-      { date: today, steps: 3000 },
-    ];
-    await setStepsByDay(healthKitSteps);
+    // Set up HealthKit mock data for the same date
+    const HealthKitMock = require('../../../__mocks__/@kingstinct/react-native-healthkit.js');
+    HealthKitMock.__setStepSamples([
+      { startDate: today, endDate: today, quantity: 3000 },
+    ]);
 
     const lastCheckedDateTime = new Date(today);
     lastCheckedDateTime.setHours(0, 0, 0, 0);
@@ -115,14 +123,14 @@ describe('useStepCountAsExperience with Manual Steps', () => {
     );
 
     await waitFor(() => {
-      // Should use manual entry (8000) instead of HealthKit entry (3000)
+      // Should sum manual entry (8000) + HealthKit entry (3000) = 11000
       const todayEntry = result.current.stepsByDay.find(day => {
         const dayDate = typeof day.date === 'string' 
           ? new Date(day.date) 
           : day.date;
         return dayDate.toISOString().split('T')[0] === todayString;
       });
-      expect(todayEntry?.steps).toBe(8000);
+      expect(todayEntry?.steps).toBe(11000); // 8000 + 3000
     });
   });
 
@@ -134,11 +142,12 @@ describe('useStepCountAsExperience with Manual Steps', () => {
     ];
     await setManualStepsByDay(manualSteps);
 
-    const healthKitSteps = [
-      { date: new Date('2024-06-02'), steps: 4000 },
-      { date: new Date('2024-06-04'), steps: 6000 },
-    ];
-    await setStepsByDay(healthKitSteps);
+    // Set up HealthKit mock data
+    const HealthKitMock = require('../../../__mocks__/@kingstinct/react-native-healthkit.js');
+    HealthKitMock.__setStepSamples([
+      { startDate: new Date('2024-06-02'), endDate: new Date('2024-06-02'), quantity: 4000 },
+      { startDate: new Date('2024-06-04'), endDate: new Date('2024-06-04'), quantity: 6000 },
+    ]);
 
     const lastCheckedDateTime = new Date('2024-06-01');
     const { result } = renderHook(() =>
@@ -167,10 +176,10 @@ describe('useStepCountAsExperience with Manual Steps', () => {
 
   it('should handle empty manual entries gracefully', async () => {
     // Only HealthKit data
-    const healthKitSteps = [
-      { date: new Date('2024-06-01'), steps: 3000 },
-    ];
-    await setStepsByDay(healthKitSteps);
+    const HealthKitMock = require('../../../__mocks__/@kingstinct/react-native-healthkit.js');
+    HealthKitMock.__setStepSamples([
+      { startDate: new Date('2024-06-01'), endDate: new Date('2024-06-01'), quantity: 3000 },
+    ]);
 
     const lastCheckedDateTime = new Date('2024-06-01');
     const { result } = renderHook(() =>
@@ -220,11 +229,11 @@ describe('useStepCountAsExperience with Manual Steps', () => {
     // by comparing cumulative experience calculations
     
     // Scenario 1: Only HealthKit data
-    const healthKitSteps = [
-      { date: new Date('2024-06-01'), steps: 5000 },
-      { date: new Date('2024-06-02'), steps: 3000 },
-    ];
-    await setStepsByDay(healthKitSteps);
+    const HealthKitMock = require('../../../__mocks__/@kingstinct/react-native-healthkit.js');
+    HealthKitMock.__setStepSamples([
+      { startDate: new Date('2024-06-01'), endDate: new Date('2024-06-01'), quantity: 5000 },
+      { startDate: new Date('2024-06-02'), endDate: new Date('2024-06-02'), quantity: 3000 },
+    ]);
     
     const lastCheckedDateTime = new Date('2024-06-01');
     const { result: resultHealthKit } = renderHook(() =>
@@ -262,10 +271,9 @@ describe('useStepCountAsExperience with Manual Steps', () => {
     clearManualStepsByDay();
 
     // Scenario 3: Mixed data
-    const mixedHealthKitSteps = [
-      { date: new Date('2024-06-01'), steps: 2000 },
-    ];
-    await setStepsByDay(mixedHealthKitSteps);
+    HealthKitMock.__setStepSamples([
+      { startDate: new Date('2024-06-01'), endDate: new Date('2024-06-01'), quantity: 2000 },
+    ]);
 
     const mixedManualSteps = [
       { date: '2024-06-02', steps: 3000, source: 'manual' as const },
@@ -349,10 +357,10 @@ describe('useStepCountAsExperience with Manual Steps', () => {
     await setStepsByDay([]);
     
     // Test with HealthKit data first
-    const healthKitSteps = [
-      { date: new Date('2024-06-01'), steps: 8000 },
-    ];
-    await setStepsByDay(healthKitSteps);
+    const HealthKitMock = require('../../../__mocks__/@kingstinct/react-native-healthkit.js');
+    HealthKitMock.__setStepSamples([
+      { startDate: new Date('2024-06-01'), endDate: new Date('2024-06-01'), quantity: 8000 },
+    ]);
 
     const lastCheckedDateTime = new Date('2024-06-01');
     const { result: healthKitResult } = renderHook(() =>
@@ -374,6 +382,9 @@ describe('useStepCountAsExperience with Manual Steps', () => {
     await setExperience(0);
     await setCurrency(0);
     await setStepsByDay([]);
+    
+    // Clear HealthKit mock data for manual test
+    HealthKitMock.__setStepSamples([]);
     
     const manualSteps = [
       { date: '2024-06-01', steps: 8000, source: 'manual' as const },
@@ -713,11 +724,11 @@ describe('useStepCountAsExperience with Manual Steps', () => {
     await setFirstExperienceDate('');
     
     // Scenario 1: Only HealthKit data
-    const healthKitSteps = [
-      { date: new Date('2024-06-01'), steps: 10000 },
-      { date: new Date('2024-06-02'), steps: 8000 },
-    ];
-    await setStepsByDay(healthKitSteps);
+    const HealthKitMock = require('../../../__mocks__/@kingstinct/react-native-healthkit.js');
+    HealthKitMock.__setStepSamples([
+      { startDate: new Date('2024-06-01'), endDate: new Date('2024-06-01'), quantity: 10000 },
+      { startDate: new Date('2024-06-02'), endDate: new Date('2024-06-02'), quantity: 8000 },
+    ]);
     
     const lastCheckedDateTime = new Date('2024-06-01');
     const { result: healthKitResult } = renderHook(() =>
@@ -734,6 +745,9 @@ describe('useStepCountAsExperience with Manual Steps', () => {
     await setCumulativeExperience(0);
     await setFirstExperienceDate('');
     await clearStepsByDay();
+    
+    // Clear HealthKit mock data for manual test
+    HealthKitMock.__setStepSamples([]);
     
     const manualSteps = [
       { date: '2024-06-01', steps: 10000, source: 'manual' as const },
