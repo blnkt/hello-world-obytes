@@ -42,7 +42,7 @@
 - [ ] 3.0 Storage Integration for Manual Entries (#134)
 
   - [x] 3.1 Extend storage functions to handle manual step entries
-  - [ ] 3.2 Create `setManualStepEntry` function in storage.tsx
+  - [x] 3.2 Create `setManualStepEntry` function in storage.tsx
   - [ ] 3.3 Implement `getManualStepEntry` function for retrieving manual data
   - [ ] 3.4 Add manual entry tracking to prevent duplicate daily entries
   - [ ] 3.5 Create storage migration for existing users to support manual entries

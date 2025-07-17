@@ -415,6 +415,15 @@ export async function clearManualStepsByDay() {
   await removeItem(MANUAL_STEPS_BY_DAY_KEY);
 }
 
+export async function setManualStepEntry(entry: ManualStepEntry) {
+  const current = getManualStepsByDay();
+  const filtered = current.filter((e) => e.date !== entry.date);
+  const updated = [...filtered, entry].sort((a, b) =>
+    a.date.localeCompare(b.date)
+  );
+  await setManualStepsByDay(updated);
+}
+
 export function clearAllStorage() {
   storage.clearAll();
 }
