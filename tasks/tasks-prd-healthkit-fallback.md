@@ -71,8 +71,7 @@
   - [ ] 6.2 Create integration tests for manual entry flow
   - [ ] 6.3 Test fallback scenarios when HealthKit is unavailable
   - [ ] 6.4 Implement error boundaries for manual entry failures
-  - [ ] 6.5 Add logging for debugging manual entry issues
-  - [ ] 6.6 Test data structure compatibility with existing HealthKit hooks
+  - [ ] 6.5 Test data structure compatibility with existing HealthKit hooks
 
 ## Subtask 4.6: Experience/Currency Parity Tests ✅ COMPLETED
 

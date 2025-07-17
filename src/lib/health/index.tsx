@@ -600,57 +600,40 @@ const queryHealthKitForDay = async (
   }
 };
 
-// Helper to handle a single day's step retrieval, conflict resolution, and storage update
-async function getStepsForDay({
+async function getStepsForDaySum({
   dayStart,
   dayEnd,
   storedHealthKitData,
+  manualSteps,
   dataIsFresh,
 }: {
   dayStart: Date;
   dayEnd: Date;
   storedHealthKitData: { date: Date; steps: number }[];
+  manualSteps: { date: string; steps: number; source: 'manual' }[];
   dataIsFresh: boolean;
 }): Promise<{ date: Date; steps: number }> {
-  // Check if we have stored data for this date
+  const dateStr = dayStart.toISOString().split('T')[0];
+
+  // HealthKit steps for this date
+  let healthKitSteps = 0;
   const storedEntry = storedHealthKitData.find((entry) => {
     const entryDate =
       typeof entry.date === 'string' ? new Date(entry.date) : entry.date;
-    return (
-      entryDate.toISOString().split('T')[0] ===
-      dayStart.toISOString().split('T')[0]
-    );
+    return entryDate.toISOString().split('T')[0] === dateStr;
   });
-
   if (storedEntry && dataIsFresh) {
-    // Use stored data if available and fresh
-    const entryDate =
-      typeof storedEntry.date === 'string'
-        ? new Date(storedEntry.date)
-        : storedEntry.date;
-    return {
-      date: entryDate,
-      steps: storedEntry.steps,
-    };
+    healthKitSteps = storedEntry.steps;
   } else {
-    // Query HealthKit for this date (either no stored data or data is stale)
-    const healthKitSteps = await queryHealthKitForDay(dayStart, dayEnd);
-
-    // If we have stored data but it's stale, log the conflict and update storage
+    healthKitSteps = await queryHealthKitForDay(dayStart, dayEnd);
+    // Optionally update storage if stale
     if (storedEntry && !dataIsFresh) {
-      logDataConflict(
-        dayStart.toISOString().split('T')[0],
-        storedEntry.steps,
-        healthKitSteps
-      );
+      logDataConflict(dateStr, storedEntry.steps, healthKitSteps);
       storedEntry.steps = healthKitSteps;
       const updatedArray = storedHealthKitData.map((entry) => {
         const entryDate =
           typeof entry.date === 'string' ? new Date(entry.date) : entry.date;
-        if (
-          entryDate.toISOString().split('T')[0] ===
-          dayStart.toISOString().split('T')[0]
-        ) {
+        if (entryDate.toISOString().split('T')[0] === dateStr) {
           return { ...entry, steps: healthKitSteps };
         }
         return entry;
@@ -659,12 +642,16 @@ async function getStepsForDay({
         await setStepsByDay(updatedArray);
       }
     }
-    // Always return the fresh HealthKit value
-    return {
-      date: new Date(dayStart),
-      steps: healthKitSteps,
-    };
   }
+  // Manual steps for this date
+  const manualEntry = manualSteps.find((entry) => entry.date === dateStr);
+  const manualStepsValue = manualEntry ? manualEntry.steps : 0;
+
+  // Sum both sources
+  return {
+    date: new Date(dateStr),
+    steps: healthKitSteps + manualStepsValue,
+  };
 }
 
 const getStepsGroupedByDay = async (
@@ -689,15 +676,40 @@ const getStepsGroupedByDay = async (
     const dayEnd = new Date(current);
     dayEnd.setHours(23, 59, 59, 999);
 
-    // Use helper to get steps for this day
-    // eslint-disable-next-line no-await-in-loop
-    const dayResult = await getStepsForDay({
-      dayStart,
-      dayEnd,
-      storedHealthKitData,
-      dataIsFresh,
+    // Only get HealthKit data, not combined data
+    const dateStr = dayStart.toISOString().split('T')[0];
+    let healthKitSteps = 0;
+    const storedEntry = storedHealthKitData.find((entry) => {
+      const entryDate =
+        typeof entry.date === 'string' ? new Date(entry.date) : entry.date;
+      return entryDate.toISOString().split('T')[0] === dateStr;
     });
-    results.push(dayResult);
+    if (storedEntry && dataIsFresh) {
+      healthKitSteps = storedEntry.steps;
+    } else {
+      healthKitSteps = await queryHealthKitForDay(dayStart, dayEnd);
+      // Optionally update storage if stale
+      if (storedEntry && !dataIsFresh) {
+        logDataConflict(dateStr, storedEntry.steps, healthKitSteps);
+        storedEntry.steps = healthKitSteps;
+        const updatedArray = storedHealthKitData.map((entry) => {
+          const entryDate =
+            typeof entry.date === 'string' ? new Date(entry.date) : entry.date;
+          if (entryDate.toISOString().split('T')[0] === dateStr) {
+            return { ...entry, steps: healthKitSteps };
+          }
+          return entry;
+        });
+        if (typeof setStepsByDay === 'function') {
+          await setStepsByDay(updatedArray);
+        }
+      }
+    }
+
+    results.push({
+      date: new Date(dateStr),
+      steps: healthKitSteps,
+    });
 
     current.setDate(current.getDate() + 1);
   }
@@ -764,41 +776,34 @@ const mergeStepData = (
   healthKitResults: { date: Date; steps: number }[],
   manualSteps: { date: string; steps: number; source: 'manual' }[]
 ): { date: Date; steps: number }[] => {
-  const mergedResults = [...healthKitResults];
+  // Map dates to steps for both sources
+  const stepMap = new Map<string, number>();
 
-  // Add manual entries, prioritizing them over HealthKit entries for the same date
-  manualSteps.forEach((manualEntry) => {
-    const manualDate = new Date(manualEntry.date);
-    const existingIndex = mergedResults.findIndex((day) => {
-      const dayDate =
-        typeof day.date === 'string' ? new Date(day.date) : day.date;
-      return (
-        dayDate.toISOString().split('T')[0] ===
-        manualDate.toISOString().split('T')[0]
-      );
-    });
-
-    if (existingIndex >= 0) {
-      // Replace HealthKit entry with manual entry (manual takes priority)
-      mergedResults[existingIndex] = {
-        date: manualDate,
-        steps: manualEntry.steps,
-      };
-    } else {
-      // Add new manual entry
-      mergedResults.push({
-        date: manualDate,
-        steps: manualEntry.steps,
-      });
-    }
+  // Add HealthKit steps
+  healthKitResults.forEach((entry) => {
+    const dateStr =
+      entry.date instanceof Date
+        ? entry.date.toISOString().split('T')[0]
+        : new Date(entry.date).toISOString().split('T')[0];
+    stepMap.set(dateStr, (stepMap.get(dateStr) || 0) + entry.steps);
   });
+
+  // Add manual steps (sum with HealthKit if exists)
+  manualSteps.forEach((entry) => {
+    const dateStr = entry.date;
+    stepMap.set(dateStr, (stepMap.get(dateStr) || 0) + entry.steps);
+  });
+
+  // Convert back to array of { date, steps }
+  const mergedResults = Array.from(stepMap.entries()).map(
+    ([dateStr, steps]) => ({
+      date: new Date(dateStr),
+      steps,
+    })
+  );
 
   // Sort by date
-  mergedResults.sort((a, b) => {
-    const dateA = typeof a.date === 'string' ? new Date(a.date) : a.date;
-    const dateB = typeof b.date === 'string' ? new Date(b.date) : b.date;
-    return dateA.getTime() - dateB.getTime();
-  });
+  mergedResults.sort((a, b) => a.date.getTime() - b.date.getTime());
 
   return mergedResults;
 };

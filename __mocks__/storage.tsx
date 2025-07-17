@@ -146,15 +146,15 @@ export async function setStepsByDay(
   stepsByDay: { date: Date; steps: number }[]
 ) {
   await setItem('stepsByDay', stepsByDay);
-
-  // Also set global HealthKit mock data for synchronization
-  if ((global as any).__healthKitMockData !== undefined) {
-    (global as any).__healthKitMockData = stepsByDay;
-  }
+  // Removed automatic setting of global HealthKit mock data to prevent circular reference
 }
 
 export async function clearStepsByDay() {
   await removeItem('stepsByDay');
+  // Also clear global HealthKit mock data to prevent interference
+  if ((global as any).__healthKitMockData !== undefined) {
+    (global as any).__healthKitMockData = [];
+  }
 }
 
 export function getExperience(): number {

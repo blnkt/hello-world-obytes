@@ -4,6 +4,10 @@ import { Button, Text, View } from '@/components/ui';
 import { useDeveloperMode, useManualEntryMode } from '@/lib/health';
 import { clearManualStepsByDay, getManualStepsByDay } from '@/lib/storage';
 
+if (typeof global.alert === 'undefined') {
+  global.alert = () => {};
+}
+
 const EntryModeIndicator = () => {
   const { isManualMode } = useManualEntryMode();
   const { isDeveloperMode } = useDeveloperMode();

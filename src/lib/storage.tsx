@@ -424,35 +424,18 @@ export async function clearManualStepsByDay() {
 }
 
 export async function setManualStepEntry(entry: ManualStepEntry) {
-  // Validate the entry before storing
   if (!validateManualStepEntry(entry)) {
-    throw new Error('Invalid manual step entry structure');
+    throw new Error('Invalid manual step entry');
   }
-
-  const current = getManualStepsByDay();
-  const existingEntry = current.find((e) => e.date === entry.date);
-
-  let updated: ManualStepEntry[];
-
-  if (existingEntry) {
-    // Combine steps with existing entry for the same date
-    const combinedEntry: ManualStepEntry = {
-      date: entry.date,
-      steps: existingEntry.steps + entry.steps,
-      source: 'manual',
-    };
-
-    // Replace the existing entry with the combined one
-    updated = current.map((e) => (e.date === entry.date ? combinedEntry : e));
+  const existing = await getManualStepsByDay();
+  const idx = existing.findIndex((e) => e.date === entry.date);
+  if (idx !== -1) {
+    // Combine steps for the same date
+    existing[idx].steps += entry.steps;
   } else {
-    // Add new entry if no existing entry for this date
-    updated = [...current, entry];
+    existing.push(entry);
   }
-
-  // Sort by date
-  updated.sort((a, b) => a.date.localeCompare(b.date));
-
-  await setManualStepsByDay(updated);
+  await setManualStepsByDay(existing);
 }
 
 export function getManualStepEntry(date: string): ManualStepEntry | null {
