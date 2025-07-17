@@ -528,8 +528,11 @@ export function validateManualStepEntry(entry: any): entry is ManualStepEntry {
     return false;
   }
 
-  // Validate steps (non-negative number)
+  // Validate steps (non-negative number, reasonable upper limit)
   if (entry.steps < 0) {
+    return false;
+  }
+  if (entry.steps > 100000) {
     return false;
   }
 

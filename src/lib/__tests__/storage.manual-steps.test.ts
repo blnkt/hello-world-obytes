@@ -222,4 +222,24 @@ describe('Manual Step Entry Data Validation', () => {
     const validEntry = { date: '2024-06-01', steps: 0, source: 'manual' as const };
     expect(validateManualStepEntry(validEntry)).toBe(true);
   });
+
+  it('should reject manual step entry with steps above 100,000', () => {
+    const invalidEntry = { date: '2024-06-01', steps: 100001, source: 'manual' as const };
+    expect(validateManualStepEntry(invalidEntry)).toBe(false);
+  });
+
+  it('should throw when setManualStepEntry is called with steps above 100,000', async () => {
+    await clearManualStepsByDay();
+    const invalidEntry = { date: '2024-06-01', steps: 100001, source: 'manual' as const };
+    await expect(setManualStepEntry(invalidEntry)).rejects.toThrow('Invalid manual step entry structure');
+  });
+
+  it('should throw when setManualStepsByDay is called with an entry above 100,000 steps', async () => {
+    await clearManualStepsByDay();
+    const entries = [
+      { date: '2024-06-01', steps: 1000, source: 'manual' as const },
+      { date: '2024-06-02', steps: 100001, source: 'manual' as const },
+    ];
+    await expect(setManualStepsByDay(entries)).rejects.toThrow('Invalid manual step entry structure');
+  });
 }); 
