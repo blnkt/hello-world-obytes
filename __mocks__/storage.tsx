@@ -48,7 +48,7 @@ export const storage = {
     );
     Object.keys(mockStorage).forEach((k) => delete mockStorage[k]);
   },
-};
+} as any; // Type as any to avoid TypeScript conflicts with MMKV interface
 
 // Mock all the exported functions
 export function getItem<T>(key: string): T | null {
@@ -257,22 +257,30 @@ export const useStreaks = () => {
   return [getLatestStreaks(), setStreaks] as const;
 };
 
-export function getCurrency(): number {
+export function getCurrencySync(): number {
   const value = storage.getString('currency');
-  return value ? Number(value) || 0 : 0;
+  const result = value ? Number(value) || 0 : 0;
+  console.log('[Storage Mock] getCurrencySync() =', result);
+  return result;
+}
+
+export function getCurrency(): number {
+  return getCurrencySync();
 }
 
 export async function setCurrency(currency: number) {
+  console.log('[Storage Mock] setCurrency called with:', currency);
+  await new Promise((resolve) => setTimeout(resolve, 10));
   storage.set('currency', String(currency));
 }
 
 export async function addCurrency(amount: number) {
-  const currentCurrency = getCurrency();
+  const currentCurrency = await getCurrency();
   await setCurrency(currentCurrency + amount);
 }
 
 export async function spendCurrency(amount: number): Promise<boolean> {
-  const currentCurrency = getCurrency();
+  const currentCurrency = await getCurrency();
   if (currentCurrency >= amount) {
     await setCurrency(currentCurrency - amount);
     return true;
@@ -285,7 +293,7 @@ export async function clearCurrency() {
 }
 
 export const useCurrency = () => {
-  const [currency, setCurrency] = React.useState<number>(getCurrency());
+  const [currency, setCurrency] = React.useState<number>(getCurrencySync());
   return [currency, setCurrency] as const;
 };
 
@@ -331,7 +339,7 @@ export function getHealthCore(): Partial<HealthCore> {
     experience: getExperience(),
     cumulativeExperience: getCumulativeExperience(),
     firstExperienceDate: getFirstExperienceDate(),
-    currency: getCurrency(),
+    currency: getCurrencySync(),
     lastCheckedDate: getLastCheckedDate(),
     dailyStepsGoal: getDailyStepsGoal(),
     lastMilestone: getLastMilestone(),
@@ -339,6 +347,7 @@ export function getHealthCore(): Partial<HealthCore> {
 }
 
 export async function setHealthCore(data: Partial<HealthCore>) {
+  console.log('[Storage Mock] setHealthCore called with:', data);
   if (data.experience !== undefined) await setExperience(data.experience);
   if (data.cumulativeExperience !== undefined)
     await setCumulativeExperience(data.cumulativeExperience);
@@ -349,7 +358,10 @@ export async function setHealthCore(data: Partial<HealthCore>) {
       await clearFirstExperienceDate();
     }
   }
-  if (data.currency !== undefined) await setCurrency(data.currency);
+  if (data.currency !== undefined) {
+    console.log('[Storage Mock] Setting currency to:', data.currency);
+    await setCurrency(data.currency);
+  }
   if (data.lastCheckedDate !== undefined) {
     if (data.lastCheckedDate !== null) {
       await setLastCheckedDate(data.lastCheckedDate);
@@ -369,6 +381,7 @@ export async function setHealthCore(data: Partial<HealthCore>) {
 }
 
 export async function updateHealthCore(updates: Partial<HealthCore>) {
+  console.log('[Storage Mock] updateHealthCore called with:', updates);
   await setHealthCore(updates);
 }
 

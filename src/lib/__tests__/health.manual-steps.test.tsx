@@ -1,6 +1,9 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react-native';
 
+// Explicitly mock storage to ensure singleton behavior
+jest.mock('../storage', () => require('../../../__mocks__/storage.tsx'));
+
 import {
   useStepCountAsExperience,
   getManualEntryMode,
@@ -18,6 +21,10 @@ import {
   clearStepsByDay,
   getDailyStepsGoal,
   setDailyStepsGoal,
+  getCurrency,
+  setCurrency,
+  getExperience,
+  setExperience,
 } from '../storage';
 
 describe('useStepCountAsExperience with Manual Steps', () => {
@@ -291,6 +298,147 @@ describe('useStepCountAsExperience with Manual Steps', () => {
       // We can't directly test the currency conversion here since it's internal,
       // but we can verify that the experience is calculated correctly
       expect(result.current.cumulativeExperience).toBeGreaterThan(0);
+    });
+  });
+
+  it('should verify manual entries trigger currency conversion with correct rate', async () => {
+    // Test that manual entries trigger currency conversion with the correct conversion rate
+    // Currency conversion rate is 0.1 (10 XP = 1 Currency)
+    
+    // Clear any existing data
+    await setExperience(0);
+    await setCurrency(0);
+    
+    // Set up manual step entries
+    const manualSteps = [
+      { date: '2024-06-01', steps: 10000, source: 'manual' as const }, // 10000 XP should = 1000 currency
+    ];
+    await setManualStepsByDay(manualSteps);
+
+    const lastCheckedDateTime = new Date('2024-06-01');
+    const { result } = renderHook(() =>
+      useStepCountAsExperience(lastCheckedDateTime)
+    );
+
+    await waitFor(() => {
+      // Verify that manual entries are included in experience calculation
+      expect(result.current.experience).toBe(10000);
+      expect(result.current.cumulativeExperience).toBeGreaterThan(0);
+    });
+
+    // Wait for currency to be updated
+    await waitFor(async () => {
+      const currency = await getCurrency();
+      console.log('[TEST DEBUG] Currency after manual entry:', currency);
+      expect(currency).toBe(1000); // 10000 XP * 0.1 = 1000 currency
+    });
+  });
+
+  it('should verify manual entries trigger currency conversion identically to HealthKit', async () => {
+    // Test that manual entries trigger currency conversion identically to HealthKit entries
+    
+    // Clear any existing data
+    await setExperience(0);
+    await setCurrency(0);
+    await setStepsByDay([]);
+    
+    // Test with HealthKit data first
+    const healthKitSteps = [
+      { date: new Date('2024-06-01'), steps: 8000 },
+    ];
+    await setStepsByDay(healthKitSteps);
+
+    const lastCheckedDateTime = new Date('2024-06-01');
+    const { result: healthKitResult } = renderHook(() =>
+      useStepCountAsExperience(lastCheckedDateTime)
+    );
+
+    await waitFor(() => {
+      expect(healthKitResult.current.experience).toBe(8000);
+    });
+
+    // Wait for currency to be updated
+    let healthKitCurrency: number;
+    await waitFor(async () => {
+      healthKitCurrency = await getCurrency();
+      expect(healthKitCurrency).toBe(800); // 8000 XP * 0.1 = 800 currency
+    });
+
+    // Clear data and test with manual entries
+    await setExperience(0);
+    await setCurrency(0);
+    await setStepsByDay([]);
+    
+    const manualSteps = [
+      { date: '2024-06-01', steps: 8000, source: 'manual' as const },
+    ];
+    await setManualStepsByDay(manualSteps);
+
+    const { result: manualResult } = renderHook(() =>
+      useStepCountAsExperience(lastCheckedDateTime)
+    );
+
+    await waitFor(() => {
+      expect(manualResult.current.experience).toBe(8000);
+    });
+
+    // Wait for currency to be updated
+    await waitFor(async () => {
+      const manualCurrency = await getCurrency();
+      expect(manualCurrency).toBe(800); // Should be identical to HealthKit
+      expect(manualCurrency).toBe(healthKitCurrency);
+    });
+  });
+
+  it('should verify manual entries trigger incremental currency conversion', async () => {
+    // Test that manual entries trigger incremental currency conversion when experience increases
+    
+    // Clear any existing data
+    await setExperience(0);
+    await setCurrency(0);
+    
+    // Set initial manual entry
+    const initialManualSteps = [
+      { date: '2024-06-01', steps: 5000, source: 'manual' as const },
+    ];
+    await setManualStepsByDay(initialManualSteps);
+
+    const lastCheckedDateTime = new Date('2024-06-01');
+    const { result: initialResult } = renderHook(() =>
+      useStepCountAsExperience(lastCheckedDateTime)
+    );
+
+    await waitFor(() => {
+      expect(initialResult.current.experience).toBe(5000);
+    });
+
+    // Wait for currency to be updated
+    await waitFor(async () => {
+      const initialCurrency = await getCurrency();
+      expect(initialCurrency).toBe(500); // 5000 XP * 0.1 = 500 currency
+    });
+
+    // Add more manual entries to increase experience
+    const updatedManualSteps = [
+      { date: '2024-06-01', steps: 5000, source: 'manual' as const },
+      { date: '2024-06-02', steps: 3000, source: 'manual' as const },
+    ];
+    await setManualStepsByDay(updatedManualSteps);
+
+    // Create a new hook instance to trigger new calculation
+    const { result: updatedResult } = renderHook(() =>
+      useStepCountAsExperience(lastCheckedDateTime)
+    );
+
+    await waitFor(() => {
+      expect(updatedResult.current.experience).toBe(8000); // 5000 + 3000
+    });
+
+    // Wait for currency to be updated
+    await waitFor(async () => {
+      const updatedCurrency = await getCurrency();
+      // Should only add the difference: (8000 - 5000) * 0.1 = 300 additional currency
+      expect(updatedCurrency).toBe(800); // 500 + 300 = 800
     });
   });
 
