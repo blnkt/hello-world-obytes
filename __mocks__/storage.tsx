@@ -1,0 +1,377 @@
+import React from 'react';
+
+console.log('[Storage Mock] Manual mock loaded');
+
+// Mock storage object
+const mockStorage: Record<string, string> = {};
+
+export const storage = {
+  getString: (key: string): string | null => {
+    const value = mockStorage[key] || null;
+    console.log(`[Storage Mock] getString(${key}) = ${value}`);
+    return value;
+  },
+  set: (key: string, value: string): void => {
+    console.log(`[Storage Mock] set(${key}, ${value})`);
+    mockStorage[key] = value;
+  },
+  delete: (key: string): void => {
+    console.log(`[Storage Mock] delete(${key})`);
+    delete mockStorage[key];
+  },
+  clear: (): void => {
+    console.log(
+      `[Storage Mock] clear() - clearing ${Object.keys(mockStorage).length} keys`
+    );
+    Object.keys(mockStorage).forEach((k) => delete mockStorage[k]);
+  },
+};
+
+// Mock all the exported functions
+export function getItem<T>(key: string): T | null {
+  const value = storage.getString(key);
+  return value ? JSON.parse(value) || null : null;
+}
+
+export async function setItem<T>(key: string, value: T) {
+  storage.set(key, JSON.stringify(value));
+}
+
+export async function removeItem(key: string) {
+  storage.delete(key);
+}
+
+// Mock all the specific storage functions
+export function getScenarioHistory(): any[] {
+  const value = storage.getString('SCENARIO_HISTORY');
+  return value ? JSON.parse(value) || [] : [];
+}
+
+export async function addScenarioToHistory(historyEntry: any) {
+  const currentHistory = getScenarioHistory();
+  const updatedHistory = [historyEntry, ...currentHistory];
+  await setItem('SCENARIO_HISTORY', updatedHistory);
+}
+
+export async function clearScenarioHistory() {
+  await removeItem('SCENARIO_HISTORY');
+}
+
+export function getCharacter(): any {
+  const value = storage.getString('CHARACTER_DATA');
+  const result = value ? JSON.parse(value) || null : null;
+  return result;
+}
+
+export async function setCharacter(character: any) {
+  const jsonString = JSON.stringify(character);
+  storage.set('CHARACTER_DATA', jsonString);
+}
+
+export async function clearCharacter() {
+  await removeItem('CHARACTER_DATA');
+}
+
+export function resetFirstTime() {
+  storage.delete('IS_FIRST_TIME');
+}
+
+export function setFirstTime(value: boolean) {
+  storage.set('IS_FIRST_TIME', String(value));
+}
+
+export function getLastCheckedDate(): string | null {
+  return storage.getString('lastCheckedDate') || null;
+}
+
+export async function setLastCheckedDate(date: string) {
+  storage.set('lastCheckedDate', date);
+}
+
+export async function clearLastCheckedDate() {
+  await removeItem('lastCheckedDate');
+}
+
+export const useLastCheckedDate = () => {
+  const [lastCheckedDate, setLastCheckedDate] = React.useState<string | null>(
+    getLastCheckedDate()
+  );
+  return [lastCheckedDate, setLastCheckedDate] as const;
+};
+
+export function getLastMilestone(): string | null {
+  return storage.getString('lastMilestone') || null;
+}
+
+export async function setLastMilestone(milestone: string) {
+  storage.set('lastMilestone', milestone);
+}
+
+export async function clearLastMilestone() {
+  await removeItem('lastMilestone');
+}
+
+export const useLastMilestone = () => {
+  const [lastMilestone, setLastMilestone] = React.useState<string | null>(
+    getLastMilestone()
+  );
+  return [lastMilestone, setLastMilestone] as const;
+};
+
+export function getStepsByDay(): { date: Date; steps: number }[] {
+  const value = storage.getString('stepsByDay');
+  try {
+    return value ? JSON.parse(value) || [] : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function setStepsByDay(
+  stepsByDay: { date: Date; steps: number }[]
+) {
+  await setItem('stepsByDay', stepsByDay);
+}
+
+export async function clearStepsByDay() {
+  await removeItem('stepsByDay');
+}
+
+export function getExperience(): number {
+  const value = storage.getString('experience');
+  return value ? Number(value) || 0 : 0;
+}
+
+export async function setExperience(experience: number) {
+  storage.set('experience', String(experience));
+}
+
+export async function clearExperience() {
+  await removeItem('experience');
+}
+
+export function getCumulativeExperience(): number {
+  const value = storage.getString('cumulativeExperience');
+  return value ? Number(value) || 0 : 0;
+}
+
+export async function setCumulativeExperience(experience: number) {
+  storage.set('cumulativeExperience', String(experience));
+}
+
+export async function clearCumulativeExperience() {
+  await removeItem('cumulativeExperience');
+}
+
+export function getFirstExperienceDate(): string | null {
+  return storage.getString('firstExperienceDate') || null;
+}
+
+export async function setFirstExperienceDate(date: string) {
+  storage.set('firstExperienceDate', date);
+}
+
+export async function clearFirstExperienceDate() {
+  await removeItem('firstExperienceDate');
+}
+
+export function getDailyStepsGoal(): number {
+  const value = storage.getString('dailyStepsGoal');
+  return value ? Number(value) || 10000 : 10000;
+}
+
+export async function setDailyStepsGoal(goal: number) {
+  storage.set('dailyStepsGoal', String(goal));
+}
+
+export async function clearDailyStepsGoal() {
+  await removeItem('dailyStepsGoal');
+}
+
+export const useDailyStepsGoal = () => {
+  const [dailyStepsGoal, setDailyStepsGoal] =
+    React.useState<number>(getDailyStepsGoal());
+  return [dailyStepsGoal, setDailyStepsGoal] as const;
+};
+
+export type Streak = {
+  id: string;
+  startDate: string;
+  endDate: string;
+  daysCount: number;
+  averageSteps: number;
+};
+
+export function getStreaks(): Streak[] {
+  const value = storage.getString('streaks');
+  return value ? JSON.parse(value) || [] : [];
+}
+
+export async function setStreaks(streaks: Streak[]) {
+  await setItem('streaks', streaks);
+}
+
+export async function addStreak(streak: Streak) {
+  const currentStreaks = getStreaks();
+  const updatedStreaks = [...currentStreaks, streak];
+  await setStreaks(updatedStreaks);
+}
+
+export async function clearStreaks() {
+  await removeItem('streaks');
+}
+
+export const useStreaks = () => {
+  const [streaks, setStreaks] = React.useState<Streak[]>(getStreaks());
+  return [streaks, setStreaks] as const;
+};
+
+export function getCurrency(): number {
+  const value = storage.getString('currency');
+  return value ? Number(value) || 0 : 0;
+}
+
+export async function setCurrency(currency: number) {
+  storage.set('currency', String(currency));
+}
+
+export async function addCurrency(amount: number) {
+  const currentCurrency = getCurrency();
+  await setCurrency(currentCurrency + amount);
+}
+
+export async function spendCurrency(amount: number): Promise<boolean> {
+  const currentCurrency = getCurrency();
+  if (currentCurrency >= amount) {
+    await setCurrency(currentCurrency - amount);
+    return true;
+  }
+  return false;
+}
+
+export async function clearCurrency() {
+  await removeItem('currency');
+}
+
+export const useCurrency = () => {
+  const [currency, setCurrency] = React.useState<number>(getCurrency());
+  return [currency, setCurrency] as const;
+};
+
+export function getPurchasedItems(): string[] {
+  const value = storage.getString('purchasedItems');
+  return value ? JSON.parse(value) || [] : [];
+}
+
+export async function setPurchasedItems(items: string[]) {
+  await setItem('purchasedItems', items);
+}
+
+export async function addPurchasedItem(itemId: string) {
+  const currentItems = getPurchasedItems();
+  if (!currentItems.includes(itemId)) {
+    const updatedItems = [...currentItems, itemId];
+    await setPurchasedItems(updatedItems);
+  }
+}
+
+export async function clearPurchasedItems() {
+  await removeItem('purchasedItems');
+}
+
+export const usePurchasedItems = () => {
+  const [purchasedItems, setPurchasedItems] =
+    React.useState<string[]>(getPurchasedItems());
+  return [purchasedItems, setPurchasedItems] as const;
+};
+
+export type HealthCore = {
+  experience: number;
+  cumulativeExperience: number;
+  firstExperienceDate: string | null;
+  currency: number;
+  lastCheckedDate: string | null;
+  dailyStepsGoal: number;
+  lastMilestone: string | null;
+};
+
+export function getHealthCore(): Partial<HealthCore> {
+  return {
+    experience: getExperience(),
+    cumulativeExperience: getCumulativeExperience(),
+    firstExperienceDate: getFirstExperienceDate(),
+    currency: getCurrency(),
+    lastCheckedDate: getLastCheckedDate(),
+    dailyStepsGoal: getDailyStepsGoal(),
+    lastMilestone: getLastMilestone(),
+  };
+}
+
+export async function setHealthCore(data: Partial<HealthCore>) {
+  if (data.experience !== undefined) await setExperience(data.experience);
+  if (data.cumulativeExperience !== undefined)
+    await setCumulativeExperience(data.cumulativeExperience);
+  if (data.firstExperienceDate !== undefined) {
+    if (data.firstExperienceDate !== null) {
+      await setFirstExperienceDate(data.firstExperienceDate);
+    } else {
+      await clearFirstExperienceDate();
+    }
+  }
+  if (data.currency !== undefined) await setCurrency(data.currency);
+  if (data.lastCheckedDate !== undefined) {
+    if (data.lastCheckedDate !== null) {
+      await setLastCheckedDate(data.lastCheckedDate);
+    } else {
+      await clearLastCheckedDate();
+    }
+  }
+  if (data.dailyStepsGoal !== undefined)
+    await setDailyStepsGoal(data.dailyStepsGoal);
+  if (data.lastMilestone !== undefined) {
+    if (data.lastMilestone !== null) {
+      await setLastMilestone(data.lastMilestone);
+    } else {
+      await clearLastMilestone();
+    }
+  }
+}
+
+export async function updateHealthCore(updates: Partial<HealthCore>) {
+  await setHealthCore(updates);
+}
+
+export async function migrateToHealthCore() {
+  // Mock implementation
+}
+
+export function clearAllStorage() {
+  storage.clear();
+}
+
+// Mock the functions that the health module defines locally
+export function getManualEntryMode(): boolean {
+  const value = storage.getString('manualEntryMode');
+  return value ? JSON.parse(value) || false : false;
+}
+
+export async function setManualEntryMode(enabled: boolean) {
+  storage.set('manualEntryMode', JSON.stringify(enabled));
+}
+
+export async function clearManualEntryMode() {
+  storage.delete('manualEntryMode');
+}
+
+export function getDeveloperMode(): boolean {
+  const value = storage.getString('developerMode');
+  return value ? JSON.parse(value) || false : false;
+}
+
+export async function setDeveloperMode(enabled: boolean) {
+  storage.set('developerMode', JSON.stringify(enabled));
+}
+
+export async function clearDeveloperMode() {
+  storage.delete('developerMode');
+}
