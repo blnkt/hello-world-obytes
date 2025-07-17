@@ -73,3 +73,24 @@
   - [ ] 6.4 Implement error boundaries for manual entry failures
   - [ ] 6.5 Add logging for debugging manual entry issues
   - [ ] 6.6 Test data structure compatibility with existing HealthKit hooks
+
+## Subtask 4.6: Experience/Currency Parity Tests ✅ COMPLETED
+
+- [x] Test that manual step entries trigger currency conversion identically to HealthKit entries
+- [x] Test that experience calculation is identical between HealthKit and manual entries
+- [x] Test that currency calculation is identical between HealthKit and manual entries
+- [x] Test mixed scenarios with both HealthKit and manual data
+- [x] Optimize HealthKit mock with `__setStepSamples` helper for faster, more reliable testing
+- [x] Update all parity tests to use optimized mock
+- [x] Verify all existing tests still pass with optimized mock
+
+## Subtask 4.7: Optimize All HealthKit Tests ✅ COMPLETED
+
+- [x] Update all test files using HealthKit to use the new optimized mock
+- [x] Verify that `src/lib/health/index.test.tsx` still passes (uses only availability methods)
+- [x] Verify that `src/lib/__tests__/healthCore.test.ts` still passes (no HealthKit usage)
+- [x] Confirm `src/lib/__tests__/health.manual-steps.test.tsx` uses optimized mock
+- [x] Run comprehensive test suite to ensure all tests pass
+- [x] Document the optimization benefits (faster test execution, more reliable testing)
+
+## Subtask 4.8: Final Integration Testing
