@@ -28,7 +28,7 @@
   - [x] 1.2 Create `useManualEntryMode` hook to track manual vs HealthKit mode
   - [x] 1.3 Implement fallback logic to automatically suggest manual entry when HealthKit unavailable
   - [x] 1.4 Add developer mode flag to bypass HealthKit availability checks
-  - [ ] 1.5 Create user choice interface to select between HealthKit and manual modes
+  - [x] 1.5 Create user choice interface to select between HealthKit and manual modes
 
 - [ ] 2.0 Manual Step Entry Interface and Validation (#133)
 
