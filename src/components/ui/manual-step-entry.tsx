@@ -75,6 +75,20 @@ export const ManualStepEntry = React.forwardRef<
     [onChangeText, error]
   );
 
+  const handleSubmitEditing = React.useCallback(
+    (e: any) => {
+      const validationError = validate(value as string);
+      if (validationError) {
+        setError(validationError);
+        return;
+      }
+      if (props.onSubmitEditing) {
+        props.onSubmitEditing(e);
+      }
+    },
+    [validate, value, props, setError]
+  );
+
   return (
     <View className="mb-2">
       {label && (
@@ -97,6 +111,7 @@ export const ManualStepEntry = React.forwardRef<
         onBlur={handleBlur}
         onChangeText={handleChangeText}
         value={value as string}
+        onSubmitEditing={handleSubmitEditing}
         {...inputProps}
       />
       {error && (

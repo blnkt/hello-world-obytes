@@ -208,3 +208,48 @@ describe('ManualStepEntry input constraints', () => {
     expect(screen.queryByTestId('manual-step-entry-error')).toBeNull();
   });
 });
+
+describe('ManualStepEntry error handling on submit', () => {
+  function Wrapper({ initialValue = '' }: { initialValue?: string }) {
+    const [val, setVal] = React.useState(initialValue);
+    const [showDialog, setShowDialog] = React.useState(false);
+    return (
+      <>
+        <ManualStepEntry
+          testID="manual-step-entry"
+          value={val}
+          onChangeText={setVal}
+          onSubmitEditing={() => setShowDialog(true)}
+        />
+        {showDialog && <div data-testid="confirmation-dialog">Dialog</div>}
+      </>
+    );
+  }
+
+  it('should show error and not open dialog if value is empty', async () => {
+    render(<Wrapper initialValue="" />);
+    const input = screen.getByTestId('manual-step-entry');
+    fireEvent(input, 'submitEditing');
+    expect(
+      await screen.findByTestId('manual-step-entry-error')
+    ).toBeOnTheScreen();
+    expect(screen.queryByTestId('confirmation-dialog')).toBeNull();
+  });
+
+  it('should show error and not open dialog if value is invalid', async () => {
+    render(<Wrapper initialValue="-100" />);
+    const input = screen.getByTestId('manual-step-entry');
+    fireEvent(input, 'submitEditing');
+    expect(
+      await screen.findByTestId('manual-step-entry-error')
+    ).toBeOnTheScreen();
+    expect(screen.queryByTestId('confirmation-dialog')).toBeNull();
+  });
+
+  it('should open dialog if value is valid', async () => {
+    render(<Wrapper initialValue="12345" />);
+    const input = screen.getByTestId('manual-step-entry');
+    fireEvent(input, 'submitEditing');
+    expect(await screen.findByTestId('confirmation-dialog')).toBeOnTheScreen();
+  });
+});
