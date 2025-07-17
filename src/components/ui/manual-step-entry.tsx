@@ -18,13 +18,14 @@ const useValidation = () => {
     if (!val || val.trim() === '') {
       return 'Step count is required';
     }
-    if (!/^[0-9]+$/.test(val)) {
+    if (!/^[-]?[0-9]+$/.test(val)) {
       if (/\./.test(val)) return 'Step count must be a whole number';
       return 'Step count must be a positive number';
     }
     const num = Number(val);
-    if (num <= 0) return 'Step count must be a positive number';
-    if (num > 100000) return 'Step count is too large';
+    if (num < 1) return 'Step count must be at least 1 step';
+    if (num > 100000)
+      return 'Step count exceeds maximum daily limit of 100,000 steps';
     return undefined;
   }, []);
 

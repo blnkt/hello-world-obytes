@@ -123,13 +123,13 @@ describe('ManualStepEntry validation', () => {
     const input = screen.getByTestId('manual-step-entry');
     fireEvent(input, 'blur');
     expect(screen.getByTestId('manual-step-entry-error')).toHaveTextContent(
-      /must be a positive number/i
+      /at least 1 step/i
     );
     render(<ManualStepEntry testID="manual-step-entry" value="-100" />);
     const input2 = screen.getByTestId('manual-step-entry');
     fireEvent(input2, 'blur');
     expect(screen.getByTestId('manual-step-entry-error')).toHaveTextContent(
-      /must be a positive number/i
+      /at least 1 step/i
     );
   });
 
@@ -143,16 +143,66 @@ describe('ManualStepEntry validation', () => {
   });
 
   it('should show error for excessively large input', () => {
-    render(<ManualStepEntry testID="manual-step-entry" value="1000000" />);
+    render(<ManualStepEntry testID="manual-step-entry" value="150000" />);
     const input = screen.getByTestId('manual-step-entry');
     fireEvent(input, 'blur');
     expect(screen.getByTestId('manual-step-entry-error')).toHaveTextContent(
-      /too large/i
+      /exceeds maximum daily limit/i
     );
   });
 
   it('should accept valid positive integer input', () => {
     render(<ManualStepEntry testID="manual-step-entry" value="12345" />);
+    const input = screen.getByTestId('manual-step-entry');
+    fireEvent(input, 'blur');
+    expect(screen.queryByTestId('manual-step-entry-error')).toBeNull();
+  });
+});
+
+describe('ManualStepEntry input constraints', () => {
+  it('should show error for step count below minimum (1)', () => {
+    render(<ManualStepEntry testID="manual-step-entry" value="0" />);
+    const input = screen.getByTestId('manual-step-entry');
+    fireEvent(input, 'blur');
+    expect(screen.getByTestId('manual-step-entry-error')).toHaveTextContent(
+      /at least 1 step/i
+    );
+  });
+
+  it('should show error for step count above maximum daily limit', () => {
+    render(<ManualStepEntry testID="manual-step-entry" value="150000" />);
+    const input = screen.getByTestId('manual-step-entry');
+    fireEvent(input, 'blur');
+    expect(screen.getByTestId('manual-step-entry-error')).toHaveTextContent(
+      /exceeds maximum daily limit/i
+    );
+  });
+
+  it('should accept step count within reasonable daily limits', () => {
+    render(<ManualStepEntry testID="manual-step-entry" value="25000" />);
+    const input = screen.getByTestId('manual-step-entry');
+    fireEvent(input, 'blur');
+    expect(screen.queryByTestId('manual-step-entry-error')).toBeNull();
+  });
+
+  it('should accept step count at the boundary of maximum limit', () => {
+    render(<ManualStepEntry testID="manual-step-entry" value="100000" />);
+    const input = screen.getByTestId('manual-step-entry');
+    fireEvent(input, 'blur');
+    expect(screen.queryByTestId('manual-step-entry-error')).toBeNull();
+  });
+
+  it('should show error for step count just above the maximum limit', () => {
+    render(<ManualStepEntry testID="manual-step-entry" value="100001" />);
+    const input = screen.getByTestId('manual-step-entry');
+    fireEvent(input, 'blur');
+    expect(screen.getByTestId('manual-step-entry-error')).toHaveTextContent(
+      /exceeds maximum daily limit/i
+    );
+  });
+
+  it('should accept step count at the boundary of minimum limit', () => {
+    render(<ManualStepEntry testID="manual-step-entry" value="1" />);
     const input = screen.getByTestId('manual-step-entry');
     fireEvent(input, 'blur');
     expect(screen.queryByTestId('manual-step-entry-error')).toBeNull();
