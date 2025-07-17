@@ -68,7 +68,7 @@ const DeveloperModeToggle = () => {
   );
 };
 
-const ManualEntriesInfo = () => {
+const ManualEntriesInfo = ({ onRefresh }: { onRefresh: () => void }) => {
   const [manualStepsCount, setManualStepsCount] = React.useState<number>(0);
 
   React.useEffect(() => {
@@ -89,6 +89,7 @@ const ManualEntriesInfo = () => {
     try {
       await clearManualStepsByDay();
       setManualStepsCount(0);
+      onRefresh();
       alert('Manual entries cleared!');
     } catch (error) {
       console.error('Error clearing manual entries:', error);
@@ -153,47 +154,51 @@ const ManualEntryHistoryItem = ({ entry }: { entry: any }) => {
   );
 };
 
-const ManualEntryHistory = () => {
+const ManualEntryHistoryLoading = () => (
+  <View className="rounded-md border border-neutral-200 p-3 dark:border-neutral-700">
+    <Text className="font-medium">Manual Entry History</Text>
+    <Text className="text-sm text-neutral-600 dark:text-neutral-400">
+      Loading...
+    </Text>
+  </View>
+);
+
+const ManualEntryHistoryEmpty = () => (
+  <View className="rounded-md border border-neutral-200 p-3 dark:border-neutral-700">
+    <Text className="font-medium">Manual Entry History</Text>
+    <Text className="text-sm text-neutral-600 dark:text-neutral-400">
+      No manual entries found
+    </Text>
+  </View>
+);
+
+const ManualEntryHistory = ({ refreshTrigger }: { refreshTrigger: number }) => {
   const [manualSteps, setManualSteps] = React.useState<any[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
 
-  React.useEffect(() => {
-    const loadManualSteps = async () => {
-      try {
-        setIsLoading(true);
-        const steps = getManualStepsByDay();
-        setManualSteps(steps || []);
-      } catch (error) {
-        console.error('Error loading manual steps history:', error);
-        setManualSteps([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadManualSteps();
+  const loadManualSteps = React.useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const steps = getManualStepsByDay();
+      setManualSteps(steps || []);
+    } catch (error) {
+      console.error('Error loading manual steps history:', error);
+      setManualSteps([]);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
+  React.useEffect(() => {
+    loadManualSteps();
+  }, [loadManualSteps]);
+
   if (isLoading) {
-    return (
-      <View className="rounded-md border border-neutral-200 p-3 dark:border-neutral-700">
-        <Text className="font-medium">Manual Entry History</Text>
-        <Text className="text-sm text-neutral-600 dark:text-neutral-400">
-          Loading...
-        </Text>
-      </View>
-    );
+    return <ManualEntryHistoryLoading />;
   }
 
   if (manualSteps.length === 0) {
-    return (
-      <View className="rounded-md border border-neutral-200 p-3 dark:border-neutral-700">
-        <Text className="font-medium">Manual Entry History</Text>
-        <Text className="text-sm text-neutral-600 dark:text-neutral-400">
-          No manual entries found
-        </Text>
-      </View>
-    );
+    return <ManualEntryHistoryEmpty />;
   }
 
   // Sort by date (newest first)
@@ -224,6 +229,12 @@ const ManualEntryHistory = () => {
 };
 
 export const ManualEntrySection = () => {
+  const [refreshTrigger, setRefreshTrigger] = React.useState(0);
+
+  const handleRefresh = () => {
+    setRefreshTrigger((prev) => prev + 1);
+  };
+
   return (
     <View className="space-y-4">
       <Text className="text-lg font-semibold">Manual Entry Settings</Text>
@@ -231,8 +242,8 @@ export const ManualEntrySection = () => {
       <View className="space-y-3">
         <ManualEntryModeToggle />
         <DeveloperModeToggle />
-        <ManualEntriesInfo />
-        <ManualEntryHistory />
+        <ManualEntriesInfo onRefresh={handleRefresh} />
+        <ManualEntryHistory refreshTrigger={refreshTrigger} />
       </View>
     </View>
   );
