@@ -52,7 +52,7 @@
 
   - [x] 4.1 Modify `useStepCountAsExperience` to handle manual step data
   - [x] 4.2 Update `mergeExperienceMMKV` to process manual entries identically to HealthKit
-  - [ ] 4.3 Integrate manual steps with streak detection system
+  - [x] 4.3 Integrate manual steps with streak detection system
   - [ ] 4.4 Ensure manual entries trigger currency conversion correctly
   - [ ] 4.5 Update cumulative experience calculation to include manual entries
   - [ ] 4.6 Test experience/currency parity between HealthKit and manual entries

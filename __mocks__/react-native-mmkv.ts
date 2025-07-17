@@ -48,3 +48,29 @@ export const clearMMKVStore = () => {
 
 // Add a getStore utility for debugging
 export const getMMKVStore = () => ({ ...store });
+
+// Mock useMMKVString hook for react-native-mmkv
+export const mmkvMockStorage: Record<string, string> = {};
+
+export const useMMKVString = (
+  key: string,
+  storageInstance?: any
+): [string | null, (newValue: string | null) => void] => {
+  const [value, setValue] = require('react').useState(() => {
+    return mmkvMockStorage[key] || null;
+  });
+
+  const setValueWithStorage = require('react').useCallback(
+    (newValue: string | null) => {
+      if (newValue === null) {
+        delete mmkvMockStorage[key];
+      } else {
+        mmkvMockStorage[key] = newValue;
+      }
+      setValue(newValue);
+    },
+    [key]
+  );
+
+  return [value, setValueWithStorage];
+};

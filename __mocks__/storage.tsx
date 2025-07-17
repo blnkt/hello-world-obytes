@@ -1,9 +1,32 @@
 import React from 'react';
 
+import { mmkvMockStorage } from './react-native-mmkv';
+
 console.log('[Storage Mock] Manual mock loaded');
 
 // Mock storage object
 const mockStorage: Record<string, string> = {};
+
+// Mock useMMKVString hook
+export const useMMKVString = (key: string, storageInstance?: any) => {
+  const [value, setValue] = React.useState<string | null>(() => {
+    return mockStorage[key] || null;
+  });
+
+  const setValueWithStorage = React.useCallback(
+    (newValue: string | null) => {
+      if (newValue === null) {
+        delete mockStorage[key];
+      } else {
+        mockStorage[key] = newValue;
+      }
+      setValue(newValue);
+    },
+    [key]
+  );
+
+  return [value, setValueWithStorage] as const;
+};
 
 export const storage = {
   getString: (key: string): string | null => {
@@ -203,27 +226,35 @@ export type Streak = {
 };
 
 export function getStreaks(): Streak[] {
-  const value = storage.getString('streaks');
+  const value = mmkvMockStorage['STREAKS'] || null;
   return value ? JSON.parse(value) || [] : [];
 }
 
 export async function setStreaks(streaks: Streak[]) {
-  await setItem('streaks', streaks);
+  mmkvMockStorage['STREAKS'] = JSON.stringify(streaks);
 }
 
 export async function addStreak(streak: Streak) {
-  const currentStreaks = getStreaks();
-  const updatedStreaks = [...currentStreaks, streak];
-  await setStreaks(updatedStreaks);
+  console.log('[Storage Mock] addStreak called with:', streak);
+  const current = getStreaks();
+  console.log('[Storage Mock] current streaks:', current);
+  await setStreaks([...current, streak]);
+  console.log('[Storage Mock] updated streaks:', getStreaks());
 }
 
 export async function clearStreaks() {
-  await removeItem('streaks');
+  delete mmkvMockStorage['STREAKS'];
 }
 
 export const useStreaks = () => {
-  const [streaks, setStreaks] = React.useState<Streak[]>(getStreaks());
-  return [streaks, setStreaks] as const;
+  const getLatestStreaks = () => {
+    const value = mmkvMockStorage['STREAKS'] || null;
+    return value ? JSON.parse(value) || [] : [];
+  };
+  const setStreaks = (newStreaks: Streak[]) => {
+    mmkvMockStorage['STREAKS'] = JSON.stringify(newStreaks);
+  };
+  return [getLatestStreaks(), setStreaks] as const;
 };
 
 export function getCurrency(): number {

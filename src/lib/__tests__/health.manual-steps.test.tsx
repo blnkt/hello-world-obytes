@@ -5,6 +5,8 @@ import {
   useStepCountAsExperience,
   getManualEntryMode,
   setManualEntryMode,
+  detectStreaks,
+  useStreakTracking,
 } from '../health';
 import {
   getManualStepsByDay,
@@ -14,6 +16,8 @@ import {
   getStepsByDay,
   setStepsByDay,
   clearStepsByDay,
+  getDailyStepsGoal,
+  setDailyStepsGoal,
 } from '../storage';
 
 describe('useStepCountAsExperience with Manual Steps', () => {
@@ -287,6 +291,159 @@ describe('useStepCountAsExperience with Manual Steps', () => {
       // We can't directly test the currency conversion here since it's internal,
       // but we can verify that the experience is calculated correctly
       expect(result.current.cumulativeExperience).toBeGreaterThan(0);
+    });
+  });
+
+  it('should integrate manual steps with streak detection system', async () => {
+    // Test that manual steps are properly included in streak detection
+    
+    // Set up manual step entries that would create a streak
+    const manualSteps = [
+      { date: '2024-06-01', steps: 8000, source: 'manual' as const }, // Above goal
+      { date: '2024-06-02', steps: 7500, source: 'manual' as const }, // Above goal
+      { date: '2024-06-03', steps: 3000, source: 'manual' as const }, // Below goal
+      { date: '2024-06-04', steps: 8500, source: 'manual' as const }, // Above goal
+      { date: '2024-06-05', steps: 9000, source: 'manual' as const }, // Above goal
+    ];
+    await setManualStepsByDay(manualSteps);
+
+    // Set daily goal to 7000 steps
+    await setDailyStepsGoal(7000);
+
+    const lastCheckedDateTime = new Date('2024-06-01');
+    const { result, unmount } = renderHook(() =>
+      useStreakTracking(lastCheckedDateTime)
+    );
+
+    await waitFor(() => {
+      // Verify that manual entries are included in streak detection
+      expect(result.current.streaks).toBeDefined();
+    });
+
+    // Unmount and re-mount the hook to pick up the new streaks after the effect runs
+    unmount();
+    const { result: result2 } = renderHook(() => useStreakTracking(lastCheckedDateTime));
+
+    await waitFor(() => {
+      expect(result2.current.streaks.length).toBeGreaterThan(0);
+      
+      // Should detect a streak from 2024-06-01 to 2024-06-02 (2 days)
+      const firstStreak = result2.current.streaks[0];
+      expect(firstStreak.daysCount).toBe(2);
+      expect(firstStreak.startDate).toContain('2024-06-01');
+      expect(firstStreak.endDate).toContain('2024-06-02');
+    });
+  });
+
+  it('should detect streaks with mixed HealthKit and manual data', async () => {
+    // Test streak detection with both HealthKit and manual data
+    
+    // Set up HealthKit data
+    const healthKitSteps = [
+      { date: new Date('2024-06-01'), steps: 8000 }, // Above goal
+      { date: new Date('2024-06-03'), steps: 7500 }, // Above goal
+    ];
+    await setStepsByDay(healthKitSteps);
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    // Set up manual data for the same dates (manual should take priority)
+    const manualSteps = [
+      { date: '2024-06-01', steps: 9000, source: 'manual' as const }, // Higher than HealthKit
+      { date: '2024-06-02', steps: 8500, source: 'manual' as const }, // New manual entry
+      { date: '2024-06-03', steps: 7000, source: 'manual' as const }, // Lower than HealthKit
+    ];
+    await setManualStepsByDay(manualSteps);
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    // Set daily goal to 7000 steps
+    await setDailyStepsGoal(7000);
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    const lastCheckedDateTime = new Date('2024-06-01');
+    
+    // First, let's check what the merged data looks like
+    const { result: stepResult } = renderHook(() =>
+      useStepCountAsExperience(lastCheckedDateTime)
+    );
+
+    // Wait for merged stepsByDay to contain all three days
+    await waitFor(() => {
+      expect(stepResult.current.stepsByDay.length).toBeGreaterThanOrEqual(3);
+      const dates = stepResult.current.stepsByDay.map(d => d.date.toISOString().split('T')[0]);
+      expect(dates).toContain('2024-06-01');
+      expect(dates).toContain('2024-06-02');
+      expect(dates).toContain('2024-06-03');
+    });
+
+
+
+    const { result, unmount } = renderHook(() =>
+      useStreakTracking(lastCheckedDateTime)
+    );
+
+    await waitFor(() => {
+      // Verify that manual entries are prioritized in streak detection
+      expect(result.current.streaks).toBeDefined();
+    });
+
+    // Unmount and re-mount the hook to pick up the new streaks after the effect runs
+    unmount();
+    const { result: result2 } = renderHook(() => useStreakTracking(lastCheckedDateTime));
+
+    await waitFor(() => {
+      expect(result2.current.streaks.length).toBeGreaterThan(0);
+      
+      // Should detect a streak from 2024-06-01 to 2024-06-03 (3 days)
+      const firstStreak = result2.current.streaks[0];
+      expect(firstStreak.daysCount).toBe(3);
+      expect(firstStreak.startDate).toContain('2024-06-01');
+      expect(firstStreak.endDate).toContain('2024-06-03');
+      
+      // The average steps should be calculated from manual entries
+      expect(firstStreak.averageSteps).toBe(8167); // (9000 + 8500 + 7000) / 3 rounded
+    });
+  });
+
+  it('should handle manual entries in detectStreaks function directly', async () => {
+    // Test the detectStreaks function directly with manual data
+    
+    // Set up manual step entries
+    const manualSteps = [
+      { date: '2024-06-01', steps: 8000, source: 'manual' as const },
+      { date: '2024-06-02', steps: 7500, source: 'manual' as const },
+      { date: '2024-06-03', steps: 3000, source: 'manual' as const }, // Below goal
+      { date: '2024-06-04', steps: 8500, source: 'manual' as const },
+      { date: '2024-06-05', steps: 9000, source: 'manual' as const },
+    ];
+    await setManualStepsByDay(manualSteps);
+
+    // Get the merged step data
+    const lastCheckedDateTime = new Date('2024-06-01');
+    const { result } = renderHook(() =>
+      useStepCountAsExperience(lastCheckedDateTime)
+    );
+
+    await waitFor(() => {
+      const stepsByDay = result.current.stepsByDay;
+      const dailyGoal = 7000;
+      
+      // Test detectStreaks function directly
+      const detectedStreaks = detectStreaks(stepsByDay, dailyGoal);
+      
+      // Should detect two streaks:
+      // 1. 2024-06-01 to 2024-06-02 (2 days)
+      // 2. 2024-06-04 to 2024-06-05 (2 days)
+      expect(detectedStreaks).toHaveLength(2);
+      
+      const firstStreak = detectedStreaks[0];
+      expect(firstStreak.daysCount).toBe(2);
+      expect(firstStreak.startDate).toContain('2024-06-01');
+      expect(firstStreak.endDate).toContain('2024-06-02');
+      
+      const secondStreak = detectedStreaks[1];
+      expect(secondStreak.daysCount).toBe(2);
+      expect(secondStreak.startDate).toContain('2024-06-04');
+      expect(secondStreak.endDate).toContain('2024-06-05');
     });
   });
 }); 

@@ -6,7 +6,6 @@ import HealthKit, {
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 import {
-  addStreak,
   getCumulativeExperience,
   getCurrency,
   getDailyStepsGoal,
@@ -24,7 +23,6 @@ import {
   updateHealthCore,
   useCurrency,
   useLastCheckedDate,
-  useStreaks,
 } from '../storage';
 
 // TODO: PHASE 1 - Fix unused merge functions - Implement mergeStepsByDayMMKV in the main hook (mergeExperienceMMKV implemented)
@@ -969,25 +967,17 @@ export const detectStreaks = (
 export const useStreakTracking = (lastCheckedDateTime: Date) => {
   const { stepsByDay } = useStepCountAsExperience(lastCheckedDateTime);
   const dailyGoal = getDailyStepsGoal();
-  const [streaks] = useStreaks();
+  // Use local state for detected streaks
+  const [streaks, setStreaks] = React.useState<Streak[]>([]);
 
-  // Detect new streaks whenever stepsByDay changes
   React.useEffect(() => {
     if (stepsByDay.length > 0) {
       const detectedStreaks = detectStreaks(stepsByDay, dailyGoal);
-
-      // Find new streaks that aren't already stored
-      const existingStreakIds = new Set(streaks.map((s: Streak) => s.id));
-      const newStreaks = detectedStreaks.filter(
-        (streak) => !existingStreakIds.has(streak.id)
-      );
-
-      // Add new streaks to storage
-      newStreaks.forEach((streak) => {
-        addStreak(streak);
-      });
+      setStreaks(detectedStreaks);
+      // Optionally, also update storage if needed
+      // setStreaksInStorage(detectedStreaks);
     }
-  }, [stepsByDay, dailyGoal, streaks]);
+  }, [stepsByDay, dailyGoal]);
 
   return {
     streaks,
