@@ -116,6 +116,113 @@ const ManualEntriesInfo = () => {
   );
 };
 
+const ManualEntryHistoryItem = ({ entry }: { entry: any }) => {
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+    } catch {
+      return dateString;
+    }
+  };
+
+  const formatSteps = (steps: number) => {
+    return steps.toLocaleString();
+  };
+
+  return (
+    <View className="flex-row items-center justify-between border-b border-neutral-100 py-2 last:border-b-0 dark:border-neutral-700">
+      <View className="flex-1">
+        <Text className="text-sm font-medium">{formatDate(entry.date)}</Text>
+        <Text className="text-xs text-neutral-500 dark:text-neutral-400">
+          {formatSteps(entry.steps)} steps
+        </Text>
+      </View>
+      <View className="flex-row items-center space-x-2">
+        <View className="size-2 rounded-full bg-blue-500" />
+        <Text className="text-xs text-neutral-500 dark:text-neutral-400">
+          Manual
+        </Text>
+      </View>
+    </View>
+  );
+};
+
+const ManualEntryHistory = () => {
+  const [manualSteps, setManualSteps] = React.useState<any[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const loadManualSteps = async () => {
+      try {
+        setIsLoading(true);
+        const steps = getManualStepsByDay();
+        setManualSteps(steps || []);
+      } catch (error) {
+        console.error('Error loading manual steps history:', error);
+        setManualSteps([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadManualSteps();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <View className="rounded-md border border-neutral-200 p-3 dark:border-neutral-700">
+        <Text className="font-medium">Manual Entry History</Text>
+        <Text className="text-sm text-neutral-600 dark:text-neutral-400">
+          Loading...
+        </Text>
+      </View>
+    );
+  }
+
+  if (manualSteps.length === 0) {
+    return (
+      <View className="rounded-md border border-neutral-200 p-3 dark:border-neutral-700">
+        <Text className="font-medium">Manual Entry History</Text>
+        <Text className="text-sm text-neutral-600 dark:text-neutral-400">
+          No manual entries found
+        </Text>
+      </View>
+    );
+  }
+
+  // Sort by date (newest first)
+  const sortedSteps = [...manualSteps].sort((a, b) => {
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+    return dateB.getTime() - dateA.getTime();
+  });
+
+  return (
+    <View className="rounded-md border border-neutral-200 p-3 dark:border-neutral-700">
+      <Text className="mb-2 font-medium">Manual Entry History</Text>
+      <View className="space-y-2">
+        {sortedSteps.slice(0, 10).map((entry, index) => (
+          <ManualEntryHistoryItem
+            key={`${entry.date}-${index}`}
+            entry={entry}
+          />
+        ))}
+        {sortedSteps.length > 10 && (
+          <Text className="pt-2 text-center text-xs text-neutral-500 dark:text-neutral-400">
+            Showing 10 most recent entries
+          </Text>
+        )}
+      </View>
+    </View>
+  );
+};
+
 export const ManualEntrySection = () => {
   return (
     <View className="space-y-4">
@@ -125,6 +232,7 @@ export const ManualEntrySection = () => {
         <ManualEntryModeToggle />
         <DeveloperModeToggle />
         <ManualEntriesInfo />
+        <ManualEntryHistory />
       </View>
     </View>
   );

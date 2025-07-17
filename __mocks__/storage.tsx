@@ -2,8 +2,6 @@ import React from 'react';
 
 import { mmkvMockStorage } from './react-native-mmkv';
 
-console.log('[Storage Mock] Manual mock loaded');
-
 // Mock storage object
 const mockStorage: Record<string, string> = {};
 
@@ -31,21 +29,15 @@ export const useMMKVString = (key: string, storageInstance?: any) => {
 export const storage = {
   getString: (key: string): string | null => {
     const value = mockStorage[key] || null;
-    console.log(`[Storage Mock] getString(${key}) = ${value}`);
     return value;
   },
   set: (key: string, value: string): void => {
-    console.log(`[Storage Mock] set(${key}, ${value})`);
     mockStorage[key] = value;
   },
   delete: (key: string): void => {
-    console.log(`[Storage Mock] delete(${key})`);
     delete mockStorage[key];
   },
   clear: (): void => {
-    console.log(
-      `[Storage Mock] clear() - clearing ${Object.keys(mockStorage).length} keys`
-    );
     Object.keys(mockStorage).forEach((k) => delete mockStorage[k]);
   },
 } as any; // Type as any to avoid TypeScript conflicts with MMKV interface
@@ -235,11 +227,8 @@ export async function setStreaks(streaks: Streak[]) {
 }
 
 export async function addStreak(streak: Streak) {
-  console.log('[Storage Mock] addStreak called with:', streak);
   const current = getStreaks();
-  console.log('[Storage Mock] current streaks:', current);
   await setStreaks([...current, streak]);
-  console.log('[Storage Mock] updated streaks:', getStreaks());
 }
 
 export async function clearStreaks() {
@@ -260,7 +249,6 @@ export const useStreaks = () => {
 export function getCurrencySync(): number {
   const value = storage.getString('currency');
   const result = value ? Number(value) || 0 : 0;
-  console.log('[Storage Mock] getCurrencySync() =', result);
   return result;
 }
 
@@ -269,7 +257,6 @@ export function getCurrency(): number {
 }
 
 export async function setCurrency(currency: number) {
-  console.log('[Storage Mock] setCurrency called with:', currency);
   await new Promise((resolve) => setTimeout(resolve, 10));
   storage.set('currency', String(currency));
 }
@@ -347,7 +334,6 @@ export function getHealthCore(): Partial<HealthCore> {
 }
 
 export async function setHealthCore(data: Partial<HealthCore>) {
-  console.log('[Storage Mock] setHealthCore called with:', data);
   if (data.experience !== undefined) await setExperience(data.experience);
   if (data.cumulativeExperience !== undefined)
     await setCumulativeExperience(data.cumulativeExperience);
@@ -359,7 +345,6 @@ export async function setHealthCore(data: Partial<HealthCore>) {
     }
   }
   if (data.currency !== undefined) {
-    console.log('[Storage Mock] Setting currency to:', data.currency);
     await setCurrency(data.currency);
   }
   if (data.lastCheckedDate !== undefined) {
@@ -381,7 +366,6 @@ export async function setHealthCore(data: Partial<HealthCore>) {
 }
 
 export async function updateHealthCore(updates: Partial<HealthCore>) {
-  console.log('[Storage Mock] updateHealthCore called with:', updates);
   await setHealthCore(updates);
 }
 
