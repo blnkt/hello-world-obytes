@@ -87,9 +87,23 @@ Guidelines for managing task lists in markdown files to track progress on comple
 
       **Note:** The issue number `#123` should be taken from the parent task where it appears as `(#123)` after the task description.
 
-  2. Once all the subtasks are marked completed and changes have been committed, mark the **parent task** as completed.
+  2. **Self-verification checklist before proceeding:**
 
-- Stop after each sub‑task and wait for the user's go‑ahead.
+  Before asking to proceed to the next sub-task, the AI must self-verify:
+
+  - [ ] Subtask is marked `[x]` in the task list
+  - [ ] All linter errors are fixed or user has approved proceeding
+  - [ ] All tests pass
+  - [ ] Changes are committed with a descriptive, conventional commit message referencing the parent issue
+  - [ ] User has given explicit go-ahead
+
+  3. **Explicit pause and confirm:**
+
+  After completing the above steps for a sub-task, the AI must explicitly pause and request user confirmation before proceeding to the next sub-task. Do not suggest or start the next subtask until the user has confirmed.
+
+  4. Once all the subtasks are marked completed and changes have been committed, mark the **parent task** as completed.
+
+- **No skipping steps:** The AI must not skip or reorder any steps in the completion protocol, even if the user prompt is ambiguous or suggests moving ahead.
 
 ## Task List Maintenance
 
@@ -145,3 +159,7 @@ When working with task lists, the AI must:
 9. **Extract GitHub issue numbers** from the parent task (format: `(#123)`) and include them in commit messages using `Related to #123`.
 
 10. **Ensure all commits are on the feature branch** and never on main/master.
+
+11. **Complete the self-verification checklist** before asking to proceed to the next sub-task.
+
+12. **Explicitly pause and request confirmation** before proceeding to the next sub-task.
