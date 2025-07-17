@@ -301,6 +301,9 @@ describe('ManualEntrySection', () => {
       });
 
       render(<ManualEntrySection />);
+
+      // The error should be logged but the component should continue to work
+      // with default values (0 count)
       expect(
         screen.getByText('0 manual step entries stored')
       ).toBeOnTheScreen();
@@ -347,6 +350,10 @@ describe('ManualEntrySection', () => {
       await user.press(screen.getByText('Clear All Manual Entries'));
 
       expect(mockClearManualStepsByDay).toHaveBeenCalledTimes(1);
+
+      // The error should be logged but the component should continue to work
+      // The clear operation should still be attempted
+      expect(mockClearManualStepsByDay).toHaveBeenCalled();
     });
   });
 

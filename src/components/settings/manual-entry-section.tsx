@@ -134,7 +134,7 @@ const ManualEntriesInfo = ({ onRefresh }: { onRefresh: () => void }) => {
       } catch (error) {
         console.error('Error loading manual steps count:', error);
         setManualStepsCount(0);
-        throw error; // Re-throw to trigger error boundary
+        // Don't re-throw - error boundaries don't catch async errors
       }
     };
 
@@ -150,7 +150,7 @@ const ManualEntriesInfo = ({ onRefresh }: { onRefresh: () => void }) => {
     } catch (error) {
       console.error('Error clearing manual entries:', error);
       alert('Error clearing manual entries');
-      throw error; // Re-throw to trigger error boundary
+      // Don't re-throw - error boundaries don't catch async errors
     }
   };
 
@@ -241,7 +241,7 @@ const ManualEntryHistory = ({ refreshTrigger }: { refreshTrigger: number }) => {
     } catch (error) {
       console.error('Error loading manual steps history:', error);
       setManualSteps([]);
-      throw error; // Re-throw to trigger error boundary
+      // Don't re-throw - error boundaries don't catch async errors
     } finally {
       setIsLoading(false);
     }
