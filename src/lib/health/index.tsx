@@ -11,6 +11,7 @@ import {
   getDailyStepsGoal,
   getExperience,
   getFirstExperienceDate,
+  getLastCheckedDate,
   getManualStepsByDay,
   getStepsByDay,
   setCumulativeExperience,
@@ -558,6 +559,114 @@ export const useStepCount = () => {
   return stepCount;
 };
 
+// Helper function to check if data is fresh
+const isDataFresh = (lastCheckedDate: string | null): boolean => {
+  if (!lastCheckedDate) return false;
+  return new Date(lastCheckedDate) > new Date(Date.now() - 60 * 60 * 1000);
+};
+
+// Helper function to detect and log data conflicts
+const logDataConflict = (
+  date: string,
+  localSteps: number,
+  healthKitSteps: number
+): void => {
+  const difference = Math.abs(localSteps - healthKitSteps);
+  const threshold = Math.max(100, localSteps * 0.1); // 10% or 100 steps
+  if (difference > threshold) {
+    console.log(
+      `Data conflict detected for ${date}: Local=${localSteps}, HealthKit=${healthKitSteps}, using HealthKit data`
+    );
+  }
+};
+
+// Helper function to query HealthKit for a specific day
+const queryHealthKitForDay = async (
+  dayStart: Date,
+  dayEnd: Date
+): Promise<number> => {
+  try {
+    const result = await HealthKit.queryStatisticsForQuantity(
+      HKQuantityTypeIdentifier.stepCount,
+      [HKStatisticsOptions.cumulativeSum],
+      dayStart,
+      dayEnd,
+      HKUnits.Count
+    );
+    return result.sumQuantity?.quantity ?? 0;
+  } catch (error) {
+    console.log(error);
+    return 0;
+  }
+};
+
+// Helper to handle a single day's step retrieval, conflict resolution, and storage update
+async function getStepsForDay({
+  dayStart,
+  dayEnd,
+  storedHealthKitData,
+  dataIsFresh,
+}: {
+  dayStart: Date;
+  dayEnd: Date;
+  storedHealthKitData: { date: Date; steps: number }[];
+  dataIsFresh: boolean;
+}): Promise<{ date: Date; steps: number }> {
+  // Check if we have stored data for this date
+  const storedEntry = storedHealthKitData.find((entry) => {
+    const entryDate =
+      typeof entry.date === 'string' ? new Date(entry.date) : entry.date;
+    return (
+      entryDate.toISOString().split('T')[0] ===
+      dayStart.toISOString().split('T')[0]
+    );
+  });
+
+  if (storedEntry && dataIsFresh) {
+    // Use stored data if available and fresh
+    const entryDate =
+      typeof storedEntry.date === 'string'
+        ? new Date(storedEntry.date)
+        : storedEntry.date;
+    return {
+      date: entryDate,
+      steps: storedEntry.steps,
+    };
+  } else {
+    // Query HealthKit for this date (either no stored data or data is stale)
+    const healthKitSteps = await queryHealthKitForDay(dayStart, dayEnd);
+
+    // If we have stored data but it's stale, log the conflict and update storage
+    if (storedEntry && !dataIsFresh) {
+      logDataConflict(
+        dayStart.toISOString().split('T')[0],
+        storedEntry.steps,
+        healthKitSteps
+      );
+      storedEntry.steps = healthKitSteps;
+      const updatedArray = storedHealthKitData.map((entry) => {
+        const entryDate =
+          typeof entry.date === 'string' ? new Date(entry.date) : entry.date;
+        if (
+          entryDate.toISOString().split('T')[0] ===
+          dayStart.toISOString().split('T')[0]
+        ) {
+          return { ...entry, steps: healthKitSteps };
+        }
+        return entry;
+      });
+      if (typeof setStepsByDay === 'function') {
+        await setStepsByDay(updatedArray);
+      }
+    }
+    // Always return the fresh HealthKit value
+    return {
+      date: new Date(dayStart),
+      steps: healthKitSteps,
+    };
+  }
+}
+
 const getStepsGroupedByDay = async (
   startDate: Date,
   endDate: Date = new Date()
@@ -571,50 +680,24 @@ const getStepsGroupedByDay = async (
   // Get stored HealthKit data
   const storedHealthKitData = getStepsByDay();
 
+  // Check if data is fresh (less than 1 hour old)
+  const lastCheckedDate = getLastCheckedDate();
+  const dataIsFresh = isDataFresh(lastCheckedDate);
+
   while (current <= end) {
     const dayStart = new Date(current);
     const dayEnd = new Date(current);
     dayEnd.setHours(23, 59, 59, 999);
 
-    // Check if we have stored data for this date
-    const storedEntry = storedHealthKitData.find((entry) => {
-      const entryDate =
-        typeof entry.date === 'string' ? new Date(entry.date) : entry.date;
-      return (
-        entryDate.toISOString().split('T')[0] ===
-        dayStart.toISOString().split('T')[0]
-      );
+    // Use helper to get steps for this day
+    // eslint-disable-next-line no-await-in-loop
+    const dayResult = await getStepsForDay({
+      dayStart,
+      dayEnd,
+      storedHealthKitData,
+      dataIsFresh,
     });
-
-    if (storedEntry) {
-      // Use stored data if available
-      const entryDate =
-        typeof storedEntry.date === 'string'
-          ? new Date(storedEntry.date)
-          : storedEntry.date;
-      results.push({
-        date: entryDate,
-        steps: storedEntry.steps,
-      });
-    } else {
-      // Query HealthKit for this date
-      try {
-        const result = await HealthKit.queryStatisticsForQuantity(
-          HKQuantityTypeIdentifier.stepCount,
-          [HKStatisticsOptions.cumulativeSum],
-          dayStart,
-          dayEnd,
-          HKUnits.Count
-        );
-        results.push({
-          date: new Date(dayStart),
-          steps: result.sumQuantity?.quantity ?? 0,
-        });
-      } catch (error) {
-        console.log(error);
-        results.push({ date: new Date(dayStart), steps: 0 });
-      }
-    }
+    results.push(dayResult);
 
     current.setDate(current.getDate() + 1);
   }

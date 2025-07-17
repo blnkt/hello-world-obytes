@@ -146,6 +146,11 @@ export async function setStepsByDay(
   stepsByDay: { date: Date; steps: number }[]
 ) {
   await setItem('stepsByDay', stepsByDay);
+
+  // Also set global HealthKit mock data for synchronization
+  if ((global as any).__healthKitMockData !== undefined) {
+    (global as any).__healthKitMockData = stepsByDay;
+  }
 }
 
 export async function clearStepsByDay() {
