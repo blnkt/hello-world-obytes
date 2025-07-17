@@ -1,4 +1,4 @@
-import { getManualStepsByDay, setManualStepsByDay, clearManualStepsByDay, setManualStepEntry, getManualStepEntry, hasManualEntryForDate, clearStepsByDay, setStepsByDay, migrateManualStepEntries } from '../storage';
+import { getManualStepsByDay, setManualStepsByDay, clearManualStepsByDay, setManualStepEntry, getManualStepEntry, hasManualEntryForDate, clearStepsByDay, setStepsByDay, migrateManualStepEntries, validateManualStepEntry } from '../storage';
 
 // MMKV is a singleton, so clear between tests
 beforeEach(() => {
@@ -174,5 +174,52 @@ describe('Manual Step Entry Migration', () => {
       { date: '2024-06-01', steps: 1500, source: 'manual' },
       { date: '2024-06-02', steps: 2000, source: 'manual' },
     ]);
+  });
+}); 
+
+describe('Manual Step Entry Data Validation', () => {
+  it('should validate correct manual step entry structure', () => {
+    const validEntry = { date: '2024-06-01', steps: 1000, source: 'manual' as const };
+    expect(validateManualStepEntry(validEntry)).toBe(true);
+  });
+
+  it('should reject manual step entry with missing date', () => {
+    const invalidEntry = { steps: 1000, source: 'manual' as const } as any;
+    expect(validateManualStepEntry(invalidEntry)).toBe(false);
+  });
+
+  it('should reject manual step entry with missing steps', () => {
+    const invalidEntry = { date: '2024-06-01', source: 'manual' as const } as any;
+    expect(validateManualStepEntry(invalidEntry)).toBe(false);
+  });
+
+  it('should reject manual step entry with missing source', () => {
+    const invalidEntry = { date: '2024-06-01', steps: 1000 } as any;
+    expect(validateManualStepEntry(invalidEntry)).toBe(false);
+  });
+
+  it('should reject manual step entry with wrong source value', () => {
+    const invalidEntry = { date: '2024-06-01', steps: 1000, source: 'healthkit' as any };
+    expect(validateManualStepEntry(invalidEntry)).toBe(false);
+  });
+
+  it('should reject manual step entry with non-numeric steps', () => {
+    const invalidEntry = { date: '2024-06-01', steps: 'abc', source: 'manual' as const } as any;
+    expect(validateManualStepEntry(invalidEntry)).toBe(false);
+  });
+
+  it('should reject manual step entry with negative steps', () => {
+    const invalidEntry = { date: '2024-06-01', steps: -100, source: 'manual' as const };
+    expect(validateManualStepEntry(invalidEntry)).toBe(false);
+  });
+
+  it('should reject manual step entry with invalid date format', () => {
+    const invalidEntry = { date: 'invalid-date', steps: 1000, source: 'manual' as const };
+    expect(validateManualStepEntry(invalidEntry)).toBe(false);
+  });
+
+  it('should validate manual step entry with zero steps', () => {
+    const validEntry = { date: '2024-06-01', steps: 0, source: 'manual' as const };
+    expect(validateManualStepEntry(validEntry)).toBe(true);
   });
 }); 

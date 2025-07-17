@@ -408,6 +408,14 @@ export function getManualStepsByDay(): ManualStepEntry[] {
 }
 
 export async function setManualStepsByDay(stepsByDay: ManualStepEntry[]) {
+  // Validate all entries before storing
+  for (const entry of stepsByDay) {
+    if (!validateManualStepEntry(entry)) {
+      throw new Error(
+        `Invalid manual step entry structure: ${JSON.stringify(entry)}`
+      );
+    }
+  }
   await setItem(MANUAL_STEPS_BY_DAY_KEY, stepsByDay);
 }
 
@@ -416,6 +424,11 @@ export async function clearManualStepsByDay() {
 }
 
 export async function setManualStepEntry(entry: ManualStepEntry) {
+  // Validate the entry before storing
+  if (!validateManualStepEntry(entry)) {
+    throw new Error('Invalid manual step entry structure');
+  }
+
   const current = getManualStepsByDay();
   const filtered = current.filter((e) => e.date !== entry.date);
   const updated = [...filtered, entry].sort((a, b) =>
@@ -470,4 +483,37 @@ export async function migrateManualStepEntries() {
 
 export function clearAllStorage() {
   storage.clearAll();
+}
+
+export function validateManualStepEntry(entry: any): entry is ManualStepEntry {
+  // Check if entry is an object
+  if (!entry || typeof entry !== 'object') {
+    return false;
+  }
+
+  // Check required fields
+  if (!entry.date || typeof entry.date !== 'string') {
+    return false;
+  }
+
+  if (typeof entry.steps !== 'number') {
+    return false;
+  }
+
+  if (entry.source !== 'manual') {
+    return false;
+  }
+
+  // Validate date format (YYYY-MM-DD)
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!dateRegex.test(entry.date)) {
+    return false;
+  }
+
+  // Validate steps (non-negative number)
+  if (entry.steps < 0) {
+    return false;
+  }
+
+  return true;
 }
