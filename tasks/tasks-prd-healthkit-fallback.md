@@ -37,7 +37,7 @@
   - [x] 2.3 Add input constraints (positive numbers, reasonable daily limits)
   - [x] 2.4 Create confirmation dialog for manual step entry submission
   - [x] 2.5 Implement error handling for invalid step entries
-  - [ ] 2.6 Add loading states during step entry processing
+  - [x] 2.6 Add loading states during step entry processing
 
 - [ ] 3.0 Storage Integration for Manual Entries (#134)
 
