@@ -1,4 +1,4 @@
-import { getManualStepsByDay, setManualStepsByDay, clearManualStepsByDay, setManualStepEntry } from '../storage';
+import { getManualStepsByDay, setManualStepsByDay, clearManualStepsByDay, setManualStepEntry, getManualStepEntry } from '../storage';
 
 // MMKV is a singleton, so clear between tests
 beforeEach(() => {
@@ -65,5 +65,32 @@ describe('setManualStepEntry', () => {
       { date: '2024-06-01', steps: 1000, source: 'manual' },
       { date: '2024-06-02', steps: 2000, source: 'manual' },
     ]);
+  });
+});
+
+describe('getManualStepEntry', () => {
+  it('should retrieve a manual step entry for a specific date', async () => {
+    await clearManualStepsByDay();
+    await setManualStepsByDay([
+      { date: '2024-06-01', steps: 1000, source: 'manual' as const },
+      { date: '2024-06-02', steps: 2000, source: 'manual' as const },
+    ]);
+    const result = getManualStepEntry('2024-06-01');
+    expect(result).toEqual({ date: '2024-06-01', steps: 1000, source: 'manual' });
+  });
+
+  it('should return null if no manual step entry exists for the given date', async () => {
+    await clearManualStepsByDay();
+    await setManualStepsByDay([
+      { date: '2024-06-01', steps: 1000, source: 'manual' as const },
+    ]);
+    const result = getManualStepEntry('2024-06-02');
+    expect(result).toBeNull();
+  });
+
+  it('should return null if no manual step entries exist', async () => {
+    await clearManualStepsByDay();
+    const result = getManualStepEntry('2024-06-01');
+    expect(result).toBeNull();
   });
 }); 

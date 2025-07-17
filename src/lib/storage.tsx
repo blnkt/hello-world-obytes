@@ -424,6 +424,11 @@ export async function setManualStepEntry(entry: ManualStepEntry) {
   await setManualStepsByDay(updated);
 }
 
+export function getManualStepEntry(date: string): ManualStepEntry | null {
+  const entries = getManualStepsByDay();
+  return entries.find((entry) => entry.date === date) || null;
+}
+
 export function clearAllStorage() {
   storage.clearAll();
 }
