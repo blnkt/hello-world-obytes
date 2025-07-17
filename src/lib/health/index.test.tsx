@@ -198,3 +198,296 @@ describe('useHealthKitFallback - working scenarios', () => {
     expect(['none', 'suggest_manual']).toContain(result.current.suggestion);
   });
 });
+
+describe('useHealthKitFallback - fallback scenarios when HealthKit is unavailable', () => {
+  beforeEach(async () => {
+    // Reset all storage and modes before each test
+    const { MMKV } = require('react-native-mmkv');
+    MMKV.mockClear();
+    MMKV().clearAll();
+    await clearManualEntryMode();
+    await clearDeveloperMode();
+  });
+
+  it('should force manual mode when HealthKit is not supported', async () => {
+    const HealthKit = require('@kingstinct/react-native-healthkit').default;
+    HealthKit.isHealthDataAvailable.mockResolvedValue(false);
+    // Don't mock getRequestStatusForAuthorization since it won't be called when isHealthDataAvailable returns false
+
+    const { result } = renderHook(() => useHealthKitFallback(), {
+      wrapper: ({ children }: { children: React.ReactNode }) => (
+        <HealthModeProvider>{children}</HealthModeProvider>
+      ),
+    });
+
+    await act(async () => {
+      await flushPromises();
+    });
+
+    // Should auto-switch to manual mode for not_supported
+    expect(result.current.shouldUseManualEntry).toBe(true);
+    expect(result.current.suggestion).toBe('none'); // After auto-switch
+    expect(result.current.canRetryHealthKit).toBe(true); // User can retry even after auto-switch
+  });
+
+  it('should suggest manual mode when HealthKit permissions are denied', async () => {
+    const HealthKit = require('@kingstinct/react-native-healthkit').default;
+    HealthKit.isHealthDataAvailable.mockResolvedValue(true);
+    HealthKit.getRequestStatusForAuthorization.mockRejectedValue(
+      new Error('Permission denied')
+    );
+
+    const { result } = renderHook(() => useHealthKitFallback(), {
+      wrapper: ({ children }: { children: React.ReactNode }) => (
+        <HealthModeProvider>{children}</HealthModeProvider>
+      ),
+    });
+
+    await act(async () => {
+      await flushPromises();
+    });
+
+    expect(result.current.shouldUseManualEntry).toBe(false); // Not auto-switched
+    expect(result.current.suggestion).toBe('suggest_manual');
+    expect(result.current.reason).toContain(
+      'HealthKit permissions have been denied'
+    );
+    expect(result.current.canRetryHealthKit).toBe(true);
+  });
+
+  it('should suggest manual mode when HealthKit encounters an error', async () => {
+    const HealthKit = require('@kingstinct/react-native-healthkit').default;
+    HealthKit.isHealthDataAvailable.mockRejectedValue(
+      new Error('HealthKit error')
+    );
+    HealthKit.getRequestStatusForAuthorization.mockResolvedValue(
+      'sharingAuthorized'
+    );
+
+    const { result } = renderHook(() => useHealthKitFallback(), {
+      wrapper: ({ children }: { children: React.ReactNode }) => (
+        <HealthModeProvider>{children}</HealthModeProvider>
+      ),
+    });
+
+    await act(async () => {
+      await flushPromises();
+    });
+
+    expect(result.current.shouldUseManualEntry).toBe(false); // Not auto-switched
+    expect(result.current.suggestion).toBe('suggest_manual');
+    expect(result.current.reason).toContain('HealthKit is experiencing issues');
+    expect(result.current.canRetryHealthKit).toBe(true);
+  });
+
+  it('should suggest manual mode when HealthKit is not available', async () => {
+    const HealthKit = require('@kingstinct/react-native-healthkit').default;
+    HealthKit.isHealthDataAvailable.mockResolvedValue(false);
+    // Don't mock getRequestStatusForAuthorization since it won't be called
+
+    const { result } = renderHook(() => useHealthKitFallback(), {
+      wrapper: ({ children }: { children: React.ReactNode }) => (
+        <HealthModeProvider>{children}</HealthModeProvider>
+      ),
+    });
+
+    await act(async () => {
+      await flushPromises();
+    });
+
+    // For not_supported, it should auto-switch to manual mode
+    expect(result.current.shouldUseManualEntry).toBe(true);
+    expect(result.current.suggestion).toBe('none'); // After auto-switch
+    expect(result.current.canRetryHealthKit).toBe(true);
+  });
+
+  it('should show none suggestion when HealthKit is loading', async () => {
+    const HealthKit = require('@kingstinct/react-native-healthkit').default;
+    // Don't resolve the promise to keep it in loading state
+    HealthKit.isHealthDataAvailable.mockImplementation(
+      () => new Promise(() => {})
+    );
+    HealthKit.getRequestStatusForAuthorization.mockResolvedValue(
+      'sharingAuthorized'
+    );
+
+    const { result } = renderHook(() => useHealthKitFallback(), {
+      wrapper: ({ children }: { children: React.ReactNode }) => (
+        <HealthModeProvider>{children}</HealthModeProvider>
+      ),
+    });
+
+    // Should be in loading state initially
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.suggestion).toBe('none');
+    expect(result.current.reason).toContain('Checking HealthKit availability');
+    expect(result.current.canRetryHealthKit).toBe(false);
+  });
+
+  it('should force manual mode when developer mode is enabled regardless of HealthKit status', async () => {
+    await setDeveloperMode(true);
+
+    const HealthKit = require('@kingstinct/react-native-healthkit').default;
+    HealthKit.isHealthDataAvailable.mockResolvedValue(true);
+    HealthKit.getRequestStatusForAuthorization.mockResolvedValue(
+      'sharingAuthorized'
+    );
+
+    const { result } = renderHook(() => useHealthKitFallback(), {
+      wrapper: ({ children }: { children: React.ReactNode }) => (
+        <HealthModeProvider>{children}</HealthModeProvider>
+      ),
+    });
+
+    await act(async () => {
+      await flushPromises();
+    });
+
+    expect(result.current.shouldUseManualEntry).toBe(true);
+    expect(result.current.suggestion).toBe('force_manual');
+    expect(result.current.reason).toContain('Developer mode is enabled');
+    expect(result.current.canRetryHealthKit).toBe(false);
+  });
+
+  it('should respect manual mode user choice even when HealthKit becomes available', async () => {
+    await setManualEntryMode(true);
+
+    const HealthKit = require('@kingstinct/react-native-healthkit').default;
+    HealthKit.isHealthDataAvailable.mockResolvedValue(true);
+    HealthKit.getRequestStatusForAuthorization.mockResolvedValue(
+      'sharingAuthorized'
+    );
+
+    const { result } = renderHook(() => useHealthKitFallback(), {
+      wrapper: ({ children }: { children: React.ReactNode }) => (
+        <HealthModeProvider>{children}</HealthModeProvider>
+      ),
+    });
+
+    await act(async () => {
+      await flushPromises();
+    });
+
+    expect(result.current.shouldUseManualEntry).toBe(true);
+    expect(result.current.suggestion).toBe('none');
+    expect(result.current.reason).toContain(
+      'User has chosen manual entry mode'
+    );
+    expect(result.current.canRetryHealthKit).toBe(true);
+  });
+
+  it('should auto-switch to manual mode for not_supported devices', async () => {
+    const HealthKit = require('@kingstinct/react-native-healthkit').default;
+    HealthKit.isHealthDataAvailable.mockResolvedValue(false);
+    HealthKit.getRequestStatusForAuthorization.mockResolvedValue(
+      'notDetermined'
+    );
+
+    const { result } = renderHook(() => useHealthKitFallback(), {
+      wrapper: ({ children }: { children: React.ReactNode }) => (
+        <HealthModeProvider>{children}</HealthModeProvider>
+      ),
+    });
+
+    await act(async () => {
+      await flushPromises();
+    });
+
+    // Should auto-switch to manual mode
+    expect(result.current.shouldUseManualEntry).toBe(true);
+
+    // Verify manual mode was actually set
+    const { result: manualModeView } = renderHook(() => useManualEntryMode(), {
+      wrapper: ({ children }: { children: React.ReactNode }) => (
+        <HealthModeProvider>{children}</HealthModeProvider>
+      ),
+    });
+
+    await act(async () => {
+      await flushPromises();
+    });
+
+    expect(manualModeView.current.isManualMode).toBe(true);
+  });
+
+  it('should not auto-switch to manual mode for permission_denied scenarios', async () => {
+    const HealthKit = require('@kingstinct/react-native-healthkit').default;
+    HealthKit.isHealthDataAvailable.mockResolvedValue(true);
+    HealthKit.getRequestStatusForAuthorization.mockResolvedValue(
+      'sharingDenied'
+    );
+
+    const { result } = renderHook(() => useHealthKitFallback(), {
+      wrapper: ({ children }: { children: React.ReactNode }) => (
+        <HealthModeProvider>{children}</HealthModeProvider>
+      ),
+    });
+
+    await act(async () => {
+      await flushPromises();
+    });
+
+    // Should NOT auto-switch to manual mode for permission_denied
+    expect(result.current.shouldUseManualEntry).toBe(false);
+
+    // Verify manual mode was NOT set
+    const { result: manualModeView } = renderHook(() => useManualEntryMode(), {
+      wrapper: ({ children }: { children: React.ReactNode }) => (
+        <HealthModeProvider>{children}</HealthModeProvider>
+      ),
+    });
+
+    await act(async () => {
+      await flushPromises();
+    });
+
+    expect(manualModeView.current.isManualMode).toBe(false);
+  });
+
+  it('should handle error state with proper fallback suggestion', async () => {
+    const HealthKit = require('@kingstinct/react-native-healthkit').default;
+    HealthKit.isHealthDataAvailable.mockRejectedValue(
+      new Error('Network error')
+    );
+    HealthKit.getRequestStatusForAuthorization.mockResolvedValue(
+      'sharingAuthorized'
+    );
+
+    const { result } = renderHook(() => useHealthKitFallback(), {
+      wrapper: ({ children }: { children: React.ReactNode }) => (
+        <HealthModeProvider>{children}</HealthModeProvider>
+      ),
+    });
+
+    await act(async () => {
+      await flushPromises();
+    });
+
+    expect(result.current.shouldUseManualEntry).toBe(false);
+    expect(result.current.suggestion).toBe('suggest_manual');
+    expect(result.current.reason).toContain('HealthKit is experiencing issues');
+    expect(result.current.canRetryHealthKit).toBe(true);
+    expect(result.current.error).toBeDefined();
+  });
+
+  it('should provide retry capability for recoverable HealthKit issues', async () => {
+    const HealthKit = require('@kingstinct/react-native-healthkit').default;
+    HealthKit.isHealthDataAvailable.mockResolvedValue(false);
+    // Don't mock getRequestStatusForAuthorization since it won't be called
+
+    const { result } = renderHook(() => useHealthKitFallback(), {
+      wrapper: ({ children }: { children: React.ReactNode }) => (
+        <HealthModeProvider>{children}</HealthModeProvider>
+      ),
+    });
+
+    await act(async () => {
+      await flushPromises();
+    });
+
+    // For not_supported, it should auto-switch to manual mode
+    expect(result.current.shouldUseManualEntry).toBe(true);
+    expect(result.current.suggestion).toBe('none'); // After auto-switch
+    expect(result.current.canRetryHealthKit).toBe(true);
+  });
+});

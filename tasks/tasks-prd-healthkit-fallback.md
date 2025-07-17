@@ -64,12 +64,12 @@
   - [x] 5.3 Create manual entry history display in settings
   - [x] 5.4 Add clear manual entries functionality for testing
   - [x] 5.5 Implement step entry frequency controls (daily vs multiple times)
-  - [ ] 5.6 Add visual indicators for current entry mode (HealthKit vs Manual)
+  - [x] 5.6 Add visual indicators for current entry mode (HealthKit vs Manual)
 
 - [ ] 6.0 Testing and Error Handling (#137)
-  - [ ] 6.1 Write unit tests for manual entry validation logic
-  - [ ] 6.2 Create integration tests for manual entry flow
-  - [ ] 6.3 Test fallback scenarios when HealthKit is unavailable
+  - [x] 6.1 Write unit tests for manual entry validation logic
+  - [x] 6.2 Create integration tests for manual entry flow
+  - [x] 6.3 Test fallback scenarios when HealthKit is unavailable
   - [ ] 6.4 Implement error boundaries for manual entry failures
   - [ ] 6.5 Test data structure compatibility with existing HealthKit hooks
 
