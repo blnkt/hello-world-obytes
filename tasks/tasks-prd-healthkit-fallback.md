@@ -59,7 +59,7 @@
 
 - [ ] 5.0 Settings Screen Integration and Developer Mode (#136)
 
-  - [ ] 5.1 Add manual entry section to settings screen
+  - [x] 5.1 Add manual entry section to settings screen
   - [ ] 5.2 Implement developer mode toggle in settings
   - [ ] 5.3 Create manual entry history display in settings
   - [ ] 5.4 Add clear manual entries functionality for testing
