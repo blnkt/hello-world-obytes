@@ -12,6 +12,7 @@ import {
   getDailyStepsGoal,
   getExperience,
   getFirstExperienceDate,
+  getManualStepsByDay,
   getStepsByDay,
   setCumulativeExperience,
   setExperience,
@@ -569,26 +570,52 @@ const getStepsGroupedByDay = async (
   const end = new Date(endDate);
   end.setHours(0, 0, 0, 0);
 
+  // Get stored HealthKit data
+  const storedHealthKitData = getStepsByDay();
+
   while (current <= end) {
     const dayStart = new Date(current);
     const dayEnd = new Date(current);
     dayEnd.setHours(23, 59, 59, 999);
 
-    try {
-      const result = await HealthKit.queryStatisticsForQuantity(
-        HKQuantityTypeIdentifier.stepCount,
-        [HKStatisticsOptions.cumulativeSum],
-        dayStart,
-        dayEnd,
-        HKUnits.Count
+    // Check if we have stored data for this date
+    const storedEntry = storedHealthKitData.find((entry) => {
+      const entryDate =
+        typeof entry.date === 'string' ? new Date(entry.date) : entry.date;
+      return (
+        entryDate.toISOString().split('T')[0] ===
+        dayStart.toISOString().split('T')[0]
       );
+    });
+
+    if (storedEntry) {
+      // Use stored data if available
+      const entryDate =
+        typeof storedEntry.date === 'string'
+          ? new Date(storedEntry.date)
+          : storedEntry.date;
       results.push({
-        date: new Date(dayStart),
-        steps: result.sumQuantity?.quantity ?? 0,
+        date: entryDate,
+        steps: storedEntry.steps,
       });
-    } catch (error) {
-      console.log(error);
-      results.push({ date: new Date(dayStart), steps: 0 });
+    } else {
+      // Query HealthKit for this date
+      try {
+        const result = await HealthKit.queryStatisticsForQuantity(
+          HKQuantityTypeIdentifier.stepCount,
+          [HKStatisticsOptions.cumulativeSum],
+          dayStart,
+          dayEnd,
+          HKUnits.Count
+        );
+        results.push({
+          date: new Date(dayStart),
+          steps: result.sumQuantity?.quantity ?? 0,
+        });
+      } catch (error) {
+        console.log(error);
+        results.push({ date: new Date(dayStart), steps: 0 });
+      }
     }
 
     current.setDate(current.getDate() + 1);
@@ -650,6 +677,96 @@ function mergeExperienceMMKV(
 // TODO: PHASE 1 - Implement mergeStepsByDayMMKV function for better step data management
 
 /**
+ * Merges HealthKit and manual step data, prioritizing manual entries
+ */
+const mergeStepData = (
+  healthKitResults: { date: Date; steps: number }[],
+  manualSteps: { date: string; steps: number; source: 'manual' }[]
+): { date: Date; steps: number }[] => {
+  const mergedResults = [...healthKitResults];
+
+  // Add manual entries, prioritizing them over HealthKit entries for the same date
+  manualSteps.forEach((manualEntry) => {
+    const manualDate = new Date(manualEntry.date);
+    const existingIndex = mergedResults.findIndex((day) => {
+      const dayDate =
+        typeof day.date === 'string' ? new Date(day.date) : day.date;
+      return (
+        dayDate.toISOString().split('T')[0] ===
+        manualDate.toISOString().split('T')[0]
+      );
+    });
+
+    if (existingIndex >= 0) {
+      // Replace HealthKit entry with manual entry (manual takes priority)
+      mergedResults[existingIndex] = {
+        date: manualDate,
+        steps: manualEntry.steps,
+      };
+    } else {
+      // Add new manual entry
+      mergedResults.push({
+        date: manualDate,
+        steps: manualEntry.steps,
+      });
+    }
+  });
+
+  // Sort by date
+  mergedResults.sort((a, b) => {
+    const dateA = typeof a.date === 'string' ? new Date(a.date) : a.date;
+    const dateB = typeof b.date === 'string' ? new Date(b.date) : b.date;
+    return dateA.getTime() - dateB.getTime();
+  });
+
+  return mergedResults;
+};
+
+/**
+ * Updates health data with new experience and step information
+ */
+const updateHealthData = async (params: {
+  totalSteps: number;
+  previousExperience: number;
+  newCumulativeExperience: number;
+  newFirstExperienceDate: string | null;
+  mergedResults: { date: Date; steps: number }[];
+  lastCheckedDateTime: Date;
+}) => {
+  const {
+    totalSteps,
+    previousExperience,
+    newCumulativeExperience,
+    newFirstExperienceDate,
+    mergedResults,
+    lastCheckedDateTime,
+  } = params;
+  const experienceDifference = totalSteps - previousExperience;
+  const currencyToAdd =
+    experienceDifference > 0
+      ? convertExperienceToCurrency(experienceDifference)
+      : 0;
+
+  const currentCurrency = getCurrency();
+  const batchUpdate = {
+    experience: totalSteps,
+    cumulativeExperience: newCumulativeExperience,
+    firstExperienceDate: newFirstExperienceDate,
+    stepsByDay: mergedResults,
+    currency: currentCurrency + currencyToAdd,
+    lastCheckedDate: lastCheckedDateTime.toISOString(),
+  };
+
+  await updateHealthCore(batchUpdate);
+
+  if (experienceDifference > 0) {
+    console.log(
+      `Auto-converted ${experienceDifference} XP to ${currencyToAdd} currency`
+    );
+  }
+};
+
+/**
  * Hook for tracking step count as experience points
  *
  * This hook converts step count data from HealthKit into experience points
@@ -708,8 +825,16 @@ export const useStepCountAsExperience = (lastCheckedDateTime: Date) => {
     const getExperienceFromSteps = async () => {
       try {
         const now = new Date();
-        const results = await getStepsGroupedByDay(lastCheckedDateTime, now);
-        const totalSteps = results.reduce(
+        const healthKitResults = await getStepsGroupedByDay(
+          lastCheckedDateTime,
+          now
+        );
+
+        // Get manual step entries and merge with HealthKit data
+        const manualSteps = getManualStepsByDay();
+        const mergedResults = mergeStepData(healthKitResults, manualSteps);
+
+        const totalSteps = mergedResults.reduce(
           (sum, day) => sum + (day.steps || 0),
           0
         );
@@ -726,32 +851,17 @@ export const useStepCountAsExperience = (lastCheckedDateTime: Date) => {
         setExperienceState(totalSteps);
         setCumulativeExperienceState(newCumulativeExperience);
         setFirstExperienceDateState(newFirstExperienceDate);
-        setStepsByDayState(results);
+        setStepsByDayState(mergedResults);
 
-        // Batch update all related health data
-        const experienceDifference = totalSteps - previousExperience;
-        const currencyToAdd =
-          experienceDifference > 0
-            ? convertExperienceToCurrency(experienceDifference)
-            : 0;
-
-        const currentCurrency = getCurrency();
-        const batchUpdate = {
-          experience: totalSteps,
-          cumulativeExperience: newCumulativeExperience,
-          firstExperienceDate: newFirstExperienceDate,
-          stepsByDay: results,
-          currency: currentCurrency + currencyToAdd,
-          lastCheckedDate: lastCheckedDateTime.toISOString(),
-        };
-
-        await updateHealthCore(batchUpdate);
-
-        if (experienceDifference > 0) {
-          console.log(
-            `Auto-converted ${experienceDifference} XP to ${currencyToAdd} currency`
-          );
-        }
+        // Update health data
+        await updateHealthData({
+          totalSteps,
+          previousExperience,
+          newCumulativeExperience,
+          newFirstExperienceDate,
+          mergedResults,
+          lastCheckedDateTime,
+        });
       } catch (error) {
         console.error('Error getting step count for experience:', error);
         await handleError();
