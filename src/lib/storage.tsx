@@ -393,6 +393,28 @@ export async function migrateToHealthCore() {
   }
 }
 
+// Manual Steps By Day Storage
+const MANUAL_STEPS_BY_DAY_KEY = 'MANUAL_STEPS_BY_DAY';
+
+export type ManualStepEntry = { date: string; steps: number; source: 'manual' };
+
+export function getManualStepsByDay(): ManualStepEntry[] {
+  const value = storage.getString(MANUAL_STEPS_BY_DAY_KEY);
+  try {
+    return value ? JSON.parse(value) || [] : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function setManualStepsByDay(stepsByDay: ManualStepEntry[]) {
+  await setItem(MANUAL_STEPS_BY_DAY_KEY, stepsByDay);
+}
+
+export async function clearManualStepsByDay() {
+  await removeItem(MANUAL_STEPS_BY_DAY_KEY);
+}
+
 export function clearAllStorage() {
   storage.clearAll();
 }

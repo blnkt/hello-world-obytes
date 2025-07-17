@@ -36,12 +36,12 @@
   - [x] 2.2 Implement step count validation to ensure data structure compatibility
   - [x] 2.3 Add input constraints (positive numbers, reasonable daily limits)
   - [x] 2.4 Create confirmation dialog for manual step entry submission
-  - [ ] 2.5 Implement error handling for invalid step entries
+  - [x] 2.5 Implement error handling for invalid step entries
   - [ ] 2.6 Add loading states during step entry processing
 
 - [ ] 3.0 Storage Integration for Manual Entries (#134)
 
-  - [ ] 3.1 Extend storage functions to handle manual step entries
+  - [x] 3.1 Extend storage functions to handle manual step entries
   - [ ] 3.2 Create `setManualStepEntry` function in storage.tsx
   - [ ] 3.3 Implement `getManualStepEntry` function for retrieving manual data
   - [ ] 3.4 Add manual entry tracking to prevent duplicate daily entries
