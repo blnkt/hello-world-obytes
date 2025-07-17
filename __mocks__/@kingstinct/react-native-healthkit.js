@@ -1,6 +1,25 @@
 /* eslint-disable no-undef */
 console.log('MOCK HealthKit loaded');
 
+// Internal store for test-injected step samples
+let _stepSamples = [];
+
+function __setStepSamples(samples) {
+  _stepSamples = samples;
+}
+
+function getStatisticsForQuantity({ startDate, endDate }) {
+  // Return only samples within the requested range
+  const start = new Date(startDate).getTime();
+  const end = new Date(endDate).getTime();
+  return Promise.resolve(
+    _stepSamples.filter((s) => {
+      const d = new Date(s.startDate).getTime();
+      return d >= start && d <= end;
+    })
+  );
+}
+
 module.exports = {
   isHealthDataAvailable: jest.fn().mockResolvedValue(true),
   getRequestStatusForAuthorization: jest.fn().mockResolvedValue('granted'),
@@ -11,9 +30,7 @@ module.exports = {
     startDate: new Date(),
     endDate: new Date(),
   }),
-  getStatisticsForQuantity: jest.fn().mockResolvedValue({
-    sumQuantity: { quantity: 1000 },
-  }),
+  getStatisticsForQuantity,
   queryStatisticsForQuantity: jest.fn().mockResolvedValue([]),
   HKQuantityTypeIdentifier: {
     stepCount: 'HKQuantityTypeIdentifierStepCount',
@@ -25,6 +42,6 @@ module.exports = {
     Count: 'count',
     count: 'count',
   },
-  // Add any other methods you need for your tests below
+  __setStepSamples,
 };
 module.exports.default = module.exports;

@@ -749,4 +749,488 @@ describe('useStepCountAsExperience with Manual Steps', () => {
       expect(manualResult.current.cumulativeExperience).toBe(18000);
     });
   });
+
+  // SUBTASK 4.6: Test experience/currency parity between HealthKit and manual entries
+  describe('Experience/Currency Parity Tests (Subtask 4.6)', () => {
+    beforeEach(async () => {
+      // Clear all storage before each test
+      await setExperience(0);
+      await setCumulativeExperience(0);
+      await setCurrency(0);
+      await setFirstExperienceDate('');
+      clearManualStepsByDay();
+      clearStepsByDay();
+      setManualEntryMode(false);
+      
+      // Clear HealthKit mock data
+      const HealthKit = require('@kingstinct/react-native-healthkit');
+      HealthKit.__setStepSamples([]);
+    });
+
+    afterEach(async () => {
+      // Clean up after each test
+      await setExperience(0);
+      await setCumulativeExperience(0);
+      await setCurrency(0);
+      await setFirstExperienceDate('');
+      clearManualStepsByDay();
+      clearStepsByDay();
+      setManualEntryMode(false);
+      
+      // Clear HealthKit mock data
+      const HealthKit = require('@kingstinct/react-native-healthkit');
+      HealthKit.__setStepSamples([]);
+    });
+
+    it('should calculate identical experience for identical step counts regardless of source', async () => {
+      // Test that same step counts produce same experience regardless of source
+      
+      const testSteps = [
+        { date: '2024-06-01', steps: 5000 },
+        { date: '2024-06-02', steps: 7500 },
+        { date: '2024-06-03', steps: 10000 },
+      ];
+
+      // Test with HealthKit data
+      const HealthKit = require('@kingstinct/react-native-healthkit');
+      const healthKitSamples = testSteps.map(step => ({
+        startDate: new Date(step.date),
+        endDate: new Date(step.date),
+        quantity: step.steps,
+      }));
+      HealthKit.__setStepSamples(healthKitSamples);
+
+      const healthKitSteps = testSteps.map(step => ({
+        date: new Date(step.date),
+        steps: step.steps,
+      }));
+      await setStepsByDay(healthKitSteps);
+
+      const lastCheckedDateTime = new Date('2024-06-01');
+      const { result: healthKitResult } = renderHook(() =>
+        useStepCountAsExperience(lastCheckedDateTime)
+      );
+
+      await waitFor(() => {
+        expect(healthKitResult.current.experience).toBe(22500); // 5000 + 7500 + 10000
+      });
+
+      // Clear and test with manual data
+      await setExperience(0);
+      await setCumulativeExperience(0);
+      await setCurrency(0);
+      await setFirstExperienceDate('');
+      await clearStepsByDay();
+      HealthKit.__setStepSamples([]);
+
+      const manualSteps = testSteps.map(step => ({
+        date: step.date,
+        steps: step.steps,
+        source: 'manual' as const,
+      }));
+      await setManualStepsByDay(manualSteps);
+
+      const { result: manualResult } = renderHook(() =>
+        useStepCountAsExperience(lastCheckedDateTime)
+      );
+
+      await waitFor(() => {
+        // Should have identical experience calculation
+        expect(manualResult.current.experience).toBe(22500);
+        expect(manualResult.current.experience).toBe(healthKitResult.current.experience);
+      });
+    });
+
+    it('should convert experience to currency identically regardless of source', async () => {
+      // Test that same experience produces same currency regardless of source
+      
+      const testSteps = [
+        { date: '2024-06-01', steps: 10000 }, // 10000 XP = 1000 currency
+        { date: '2024-06-02', steps: 5000 },  // 5000 XP = 500 currency
+      ];
+
+      // Test with HealthKit data
+      const HealthKit = require('@kingstinct/react-native-healthkit');
+      const healthKitSamples = testSteps.map(step => ({
+        startDate: new Date(step.date),
+        endDate: new Date(step.date),
+        quantity: step.steps,
+      }));
+      HealthKit.__setStepSamples(healthKitSamples);
+
+      const healthKitSteps = testSteps.map(step => ({
+        date: new Date(step.date),
+        steps: step.steps,
+      }));
+      await setStepsByDay(healthKitSteps);
+
+      const lastCheckedDateTime = new Date('2024-06-01');
+      const { result: healthKitResult } = renderHook(() =>
+        useStepCountAsExperience(lastCheckedDateTime)
+      );
+
+      await waitFor(() => {
+        expect(healthKitResult.current.experience).toBe(15000);
+      });
+
+      // Wait for currency to be updated
+      await waitFor(async () => {
+        const healthKitCurrency = await getCurrency();
+        expect(healthKitCurrency).toBe(1500); // 15000 XP * 0.1 = 1500 currency
+      });
+
+      // Clear and test with manual data
+      await setExperience(0);
+      await setCumulativeExperience(0);
+      await setCurrency(0);
+      await setFirstExperienceDate('');
+      await clearStepsByDay();
+      HealthKit.__setStepSamples([]);
+
+      const manualSteps = testSteps.map(step => ({
+        date: step.date,
+        steps: step.steps,
+        source: 'manual' as const,
+      }));
+      await setManualStepsByDay(manualSteps);
+
+      const { result: manualResult } = renderHook(() =>
+        useStepCountAsExperience(lastCheckedDateTime)
+      );
+
+      await waitFor(() => {
+        expect(manualResult.current.experience).toBe(15000);
+      });
+
+      // Wait for currency to be updated
+      await waitFor(async () => {
+        const manualCurrency = await getCurrency();
+        expect(manualCurrency).toBe(1500); // Should be identical to HealthKit
+        expect(manualCurrency).toBe(1500);
+      });
+    });
+
+    it('should calculate cumulative experience identically regardless of source', async () => {
+      // Test that cumulative experience is calculated identically regardless of source
+      
+      const testSteps = [
+        { date: '2024-06-01', steps: 8000 },
+        { date: '2024-06-02', steps: 12000 },
+        { date: '2024-06-03', steps: 6000 },
+      ];
+
+      // Test with HealthKit data
+      const HealthKit = require('@kingstinct/react-native-healthkit');
+      const healthKitSamples = testSteps.map(step => ({
+        startDate: new Date(step.date),
+        endDate: new Date(step.date),
+        quantity: step.steps,
+      }));
+      HealthKit.__setStepSamples(healthKitSamples);
+
+      const healthKitSteps = testSteps.map(step => ({
+        date: new Date(step.date),
+        steps: step.steps,
+      }));
+      await setStepsByDay(healthKitSteps);
+
+      const lastCheckedDateTime = new Date('2024-06-01');
+      const { result: healthKitResult } = renderHook(() =>
+        useStepCountAsExperience(lastCheckedDateTime)
+      );
+
+      await waitFor(() => {
+        expect(healthKitResult.current.experience).toBe(26000);
+        expect(healthKitResult.current.cumulativeExperience).toBe(26000);
+        expect(healthKitResult.current.firstExperienceDate).toBe('2024-06-01T00:00:00.000Z');
+      });
+
+      // Clear and test with manual data
+      await setExperience(0);
+      await setCumulativeExperience(0);
+      await setCurrency(0);
+      await setFirstExperienceDate('');
+      await clearStepsByDay();
+      HealthKit.__setStepSamples([]);
+
+      const manualSteps = testSteps.map(step => ({
+        date: step.date,
+        steps: step.steps,
+        source: 'manual' as const,
+      }));
+      await setManualStepsByDay(manualSteps);
+
+      const { result: manualResult } = renderHook(() =>
+        useStepCountAsExperience(lastCheckedDateTime)
+      );
+
+      await waitFor(() => {
+        // Should have identical cumulative experience calculation
+        expect(manualResult.current.experience).toBe(26000);
+        expect(manualResult.current.cumulativeExperience).toBe(26000);
+        expect(manualResult.current.firstExperienceDate).toBe('2024-06-01T00:00:00.000Z');
+        
+        // Verify parity
+        expect(manualResult.current.experience).toBe(healthKitResult.current.experience);
+        expect(manualResult.current.cumulativeExperience).toBe(healthKitResult.current.cumulativeExperience);
+        expect(manualResult.current.firstExperienceDate).toBe(healthKitResult.current.firstExperienceDate);
+      });
+    });
+
+    it('should detect streaks identically regardless of source', async () => {
+      // Test that streak detection works identically regardless of data source
+      
+      const dailyGoal = 7000;
+      await setDailyStepsGoal(dailyGoal);
+
+      const testSteps = [
+        { date: '2024-06-01', steps: 8000 }, // Above goal
+        { date: '2024-06-02', steps: 7500 }, // Above goal
+        { date: '2024-06-03', steps: 6500 }, // Below goal
+        { date: '2024-06-04', steps: 8500 }, // Above goal
+        { date: '2024-06-05', steps: 9000 }, // Above goal
+      ];
+
+      // Test with HealthKit data
+      const HealthKit = require('@kingstinct/react-native-healthkit');
+      const healthKitSamples = testSteps.map(step => ({
+        startDate: new Date(step.date),
+        endDate: new Date(step.date),
+        quantity: step.steps,
+      }));
+      HealthKit.__setStepSamples(healthKitSamples);
+
+      const healthKitSteps = testSteps.map(step => ({
+        date: new Date(step.date),
+        steps: step.steps,
+      }));
+      await setStepsByDay(healthKitSteps);
+
+      const lastCheckedDateTime = new Date('2024-06-01');
+      const { result: healthKitResult } = renderHook(() =>
+        useStreakTracking(lastCheckedDateTime)
+      );
+
+      await waitFor(() => {
+        expect(healthKitResult.current.streaks).toBeDefined();
+        expect(healthKitResult.current.streaks.length).toBeGreaterThan(0);
+      });
+
+      // Clear and test with manual data
+      await setExperience(0);
+      await setCumulativeExperience(0);
+      await setCurrency(0);
+      await setFirstExperienceDate('');
+      await clearStepsByDay();
+      HealthKit.__setStepSamples([]);
+
+      const manualSteps = testSteps.map(step => ({
+        date: step.date,
+        steps: step.steps,
+        source: 'manual' as const,
+      }));
+      await setManualStepsByDay(manualSteps);
+
+      const { result: manualResult } = renderHook(() =>
+        useStreakTracking(lastCheckedDateTime)
+      );
+
+      await waitFor(() => {
+        expect(manualResult.current.streaks).toBeDefined();
+        expect(manualResult.current.streaks.length).toBeGreaterThan(0);
+        
+        // Should have identical streak detection
+        expect(manualResult.current.streaks.length).toBe(healthKitResult.current.streaks.length);
+        
+        // Verify streak details are identical
+        for (let i = 0; i < manualResult.current.streaks.length; i++) {
+          expect(manualResult.current.streaks[i].daysCount).toBe(healthKitResult.current.streaks[i].daysCount);
+          expect(manualResult.current.streaks[i].averageSteps).toBe(healthKitResult.current.streaks[i].averageSteps);
+        }
+      });
+    });
+
+    it('should handle edge cases identically regardless of source', async () => {
+      // Test edge cases like zero steps, very high steps, etc.
+      
+      const edgeCases = [
+        { date: '2024-06-01', steps: 0 },      // Zero steps
+        { date: '2024-06-02', steps: 1 },      // Minimal steps
+        { date: '2024-06-03', steps: 99999 },  // Very high steps
+        { date: '2024-06-04', steps: 10000 },  // Normal steps
+      ];
+
+      // Test with HealthKit data
+      const HealthKit = require('@kingstinct/react-native-healthkit');
+      const healthKitSamples = edgeCases.map(step => ({
+        startDate: new Date(step.date),
+        endDate: new Date(step.date),
+        quantity: step.steps,
+      }));
+      HealthKit.__setStepSamples(healthKitSamples);
+
+      const healthKitSteps = edgeCases.map(step => ({
+        date: new Date(step.date),
+        steps: step.steps,
+      }));
+      await setStepsByDay(healthKitSteps);
+
+      const lastCheckedDateTime = new Date('2024-06-01');
+      const { result: healthKitResult } = renderHook(() =>
+        useStepCountAsExperience(lastCheckedDateTime)
+      );
+
+      await waitFor(() => {
+        expect(healthKitResult.current.experience).toBe(110000); // 0 + 1 + 99999 + 10000
+      });
+
+      // Clear and test with manual data
+      await setExperience(0);
+      await setCumulativeExperience(0);
+      await setCurrency(0);
+      await setFirstExperienceDate('');
+      await clearStepsByDay();
+      HealthKit.__setStepSamples([]);
+
+      const manualSteps = edgeCases.map(step => ({
+        date: step.date,
+        steps: step.steps,
+        source: 'manual' as const,
+      }));
+      await setManualStepsByDay(manualSteps);
+
+      const { result: manualResult } = renderHook(() =>
+        useStepCountAsExperience(lastCheckedDateTime)
+      );
+
+      await waitFor(() => {
+        // Should handle edge cases identically
+        expect(manualResult.current.experience).toBe(110000);
+        expect(manualResult.current.experience).toBe(healthKitResult.current.experience);
+      });
+    });
+
+    it('should maintain parity when switching between HealthKit and manual modes', async () => {
+      // Test that switching between modes maintains experience/currency parity
+      
+      const testSteps = [
+        { date: '2024-06-01', steps: 6000 },
+        { date: '2024-06-02', steps: 8000 },
+      ];
+
+      // Start with HealthKit mode
+      await setManualEntryMode(false);
+      const HealthKit = require('@kingstinct/react-native-healthkit');
+      const healthKitSamples = testSteps.map(step => ({
+        startDate: new Date(step.date),
+        endDate: new Date(step.date),
+        quantity: step.steps,
+      }));
+      HealthKit.__setStepSamples(healthKitSamples);
+
+      const healthKitSteps = testSteps.map(step => ({
+        date: new Date(step.date),
+        steps: step.steps,
+      }));
+      await setStepsByDay(healthKitSteps);
+
+      const lastCheckedDateTime = new Date('2024-06-01');
+      const { result: healthKitResult } = renderHook(() =>
+        useStepCountAsExperience(lastCheckedDateTime)
+      );
+
+      await waitFor(() => {
+        expect(healthKitResult.current.experience).toBe(14000);
+      });
+
+      // Switch to manual mode with same data
+      await setManualEntryMode(true);
+      await clearStepsByDay();
+      HealthKit.__setStepSamples([]);
+      
+      const manualSteps = testSteps.map(step => ({
+        date: step.date,
+        steps: step.steps,
+        source: 'manual' as const,
+      }));
+      await setManualStepsByDay(manualSteps);
+
+      const { result: manualResult } = renderHook(() =>
+        useStepCountAsExperience(lastCheckedDateTime)
+      );
+
+      await waitFor(() => {
+        // Should maintain parity when switching modes
+        expect(manualResult.current.experience).toBe(14000);
+        expect(manualResult.current.experience).toBe(healthKitResult.current.experience);
+      });
+    });
+
+    it('should handle mixed data sources with parity', async () => {
+      // Test that mixed HealthKit and manual data maintains parity
+      
+      const healthKitSteps = [
+        { date: new Date('2024-06-01'), steps: 5000 },
+        { date: new Date('2024-06-03'), steps: 7000 },
+      ];
+      await setStepsByDay(healthKitSteps);
+
+      // Set HealthKit mock data
+      const HealthKit = require('@kingstinct/react-native-healthkit');
+      const healthKitSamples = healthKitSteps.map(step => ({
+        startDate: step.date,
+        endDate: step.date,
+        quantity: step.steps,
+      }));
+      HealthKit.__setStepSamples(healthKitSamples);
+
+      const manualSteps = [
+        { date: '2024-06-02', steps: 6000, source: 'manual' as const },
+        { date: '2024-06-04', steps: 8000, source: 'manual' as const },
+      ];
+      await setManualStepsByDay(manualSteps);
+
+      const lastCheckedDateTime = new Date('2024-06-01');
+      const { result } = renderHook(() =>
+        useStepCountAsExperience(lastCheckedDateTime)
+      );
+
+      await waitFor(() => {
+        // Total experience should be sum of all entries
+        expect(result.current.experience).toBe(26000); // 5000 + 6000 + 7000 + 8000
+        
+        // Should have our specific entries present (among others from HealthKit mock)
+        const dates = result.current.stepsByDay.map(d => d.date.toISOString().split('T')[0]);
+        expect(dates).toContain('2024-06-01');
+        expect(dates).toContain('2024-06-02');
+        expect(dates).toContain('2024-06-03');
+        expect(dates).toContain('2024-06-04');
+        
+        // Verify the specific entries have correct step counts
+        const entry20240601 = result.current.stepsByDay.find(d => 
+          d.date.toISOString().split('T')[0] === '2024-06-01'
+        );
+        const entry20240602 = result.current.stepsByDay.find(d => 
+          d.date.toISOString().split('T')[0] === '2024-06-02'
+        );
+        const entry20240603 = result.current.stepsByDay.find(d => 
+          d.date.toISOString().split('T')[0] === '2024-06-03'
+        );
+        const entry20240604 = result.current.stepsByDay.find(d => 
+          d.date.toISOString().split('T')[0] === '2024-06-04'
+        );
+        
+        expect(entry20240601?.steps).toBe(5000);
+        expect(entry20240602?.steps).toBe(6000);
+        expect(entry20240603?.steps).toBe(7000);
+        expect(entry20240604?.steps).toBe(8000);
+      });
+
+      // Wait for currency to be updated
+      await waitFor(async () => {
+        const currency = await getCurrency();
+        expect(currency).toBe(2600); // 26000 XP * 0.1 = 2600 currency
+      });
+    });
+  });
 }); 

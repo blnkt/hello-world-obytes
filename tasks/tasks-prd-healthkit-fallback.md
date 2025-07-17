@@ -55,7 +55,7 @@
   - [x] 4.3 Integrate manual steps with streak detection system
   - [x] 4.4 Ensure manual entries trigger currency conversion identically to HealthKit entries
   - [x] 4.5 Update cumulative experience calculation to include manual entries
-  - [ ] 4.6 Test experience/currency parity between HealthKit and manual entries
+  - [x] 4.6 Test experience/currency parity between HealthKit and manual entries
 
 - [ ] 5.0 Settings Screen Integration and Developer Mode (#136)
 
