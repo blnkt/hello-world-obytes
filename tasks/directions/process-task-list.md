@@ -40,6 +40,26 @@ Guidelines for managing task lists in markdown files to track progress on comple
 ## Task Implementation
 
 - **One sub-task at a time:** Do **NOT** start the next sub‑task until you ask the user for permission and they say "yes" or "y"
+- **TDD Workflow for each sub-task:**
+
+  1. **Start with a failing test:**
+
+     - Write a test that describes the expected behavior for the sub-task
+     - The test should initially fail (red phase)
+     - Run `pnpm test` to confirm the test fails as expected
+     - Document what the test is verifying
+
+  2. **Implement the minimal code to make the test pass:**
+
+     - Write the minimal implementation needed to make the test pass (green phase)
+     - Focus on the specific sub-task requirements
+     - Run `pnpm test` to verify the test now passes
+
+  3. **Refactor if needed (refactor phase):**
+     - Clean up the implementation while keeping tests passing
+     - Ensure code follows project conventions
+     - Run `pnpm test` again to confirm tests still pass
+
 - **Completion protocol:**
 
   1. When you finish a **sub-task**, follow this sequence:
@@ -100,21 +120,28 @@ When working with task lists, the AI must:
    - Ensure branch name matches PRD filename: `feature/[prd-filename]`
    - If not on correct branch, instruct user to switch before proceeding
 
-2. Regularly update the task list file after finishing any significant work.
+2. **Follow TDD workflow for each sub-task:**
 
-3. Follow the completion protocol:
+   - **Red phase:** Start by writing a failing test that describes the expected behavior
+   - **Green phase:** Implement minimal code to make the test pass
+   - **Refactor phase:** Clean up code while keeping tests passing
+   - Run `pnpm test` at each phase to verify test status
+
+3. Regularly update the task list file after finishing any significant work.
+
+4. Follow the completion protocol:
 
    - Mark each finished **sub‑task** `[x]`.
    - Mark the **parent task** `[x]` once **all** its subtasks are `[x]`.
 
-4. Add newly discovered tasks.
+5. Add newly discovered tasks.
 
-5. Keep "Relevant Files" accurate and up to date.
+6. Keep "Relevant Files" accurate and up to date.
 
-6. Before starting work, check which sub‑task is next.
+7. Before starting work, check which sub‑task is next.
 
-7. After implementing a sub‑task, update the file and then pause for user approval.
+8. After implementing a sub‑task, update the file and then pause for user approval.
 
-8. **Extract GitHub issue numbers** from the parent task (format: `(#123)`) and include them in commit messages using `Related to #123`.
+9. **Extract GitHub issue numbers** from the parent task (format: `(#123)`) and include them in commit messages using `Related to #123`.
 
-9. **Ensure all commits are on the feature branch** and never on main/master.
+10. **Ensure all commits are on the feature branch** and never on main/master.
