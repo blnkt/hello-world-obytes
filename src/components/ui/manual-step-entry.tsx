@@ -3,7 +3,7 @@ import * as React from 'react';
 import type { TextInputProps } from 'react-native';
 import { TextInput, View } from 'react-native';
 
-import { Text } from './text';
+import { ManualEntryErrorBoundary, Text } from './index';
 
 export interface ManualStepEntryProps
   extends Omit<TextInputProps, 'onChangeText'> {
@@ -33,7 +33,7 @@ const useValidation = () => {
   return { validate };
 };
 
-export const ManualStepEntry = React.forwardRef<
+const ManualStepEntryComponent = React.forwardRef<
   TextInput,
   ManualStepEntryProps
 >((props, ref) => {
@@ -60,32 +60,51 @@ export const ManualStepEntry = React.forwardRef<
 
   const handleBlur = React.useCallback(
     (e: any) => {
-      const validationError = validate(value as string);
-      setError(validationError);
-      onBlur?.(e);
+      try {
+        const validationError = validate(value as string);
+        setError(validationError);
+        onBlur?.(e);
+      } catch (validationError) {
+        console.error(
+          'Validation error in manual step entry:',
+          validationError
+        );
+        setError('Invalid step count format');
+        onBlur?.(e);
+      }
     },
     [onBlur, validate, value]
   );
 
   const handleChangeText = React.useCallback(
     (text: string) => {
-      // Only allow positive numeric input
-      const numericText = text.replace(/[^0-9]/g, '');
-      onChangeText?.(numericText);
-      if (error) setError(undefined); // clear error on change
+      try {
+        // Only allow positive numeric input
+        const numericText = text.replace(/[^0-9]/g, '');
+        onChangeText?.(numericText);
+        if (error) setError(undefined); // clear error on change
+      } catch (changeError) {
+        console.error('Error handling text change:', changeError);
+        setError('Failed to process input');
+      }
     },
     [onChangeText, error]
   );
 
   const handleSubmitEditing = React.useCallback(
     (e: any) => {
-      const validationError = validate(value as string);
-      if (validationError) {
-        setError(validationError);
-        return;
-      }
-      if (props.onSubmitEditing) {
-        props.onSubmitEditing(e);
+      try {
+        const validationError = validate(value as string);
+        if (validationError) {
+          setError(validationError);
+          return;
+        }
+        if (props.onSubmitEditing) {
+          props.onSubmitEditing(e);
+        }
+      } catch (submitError) {
+        console.error('Error handling submit:', submitError);
+        setError('Failed to submit step count');
       }
     },
     [validate, value, props, setError]
@@ -133,5 +152,16 @@ export const ManualStepEntry = React.forwardRef<
         </Text>
       )}
     </View>
+  );
+});
+
+export const ManualStepEntry = React.forwardRef<
+  TextInput,
+  ManualStepEntryProps
+>((props, ref) => {
+  return (
+    <ManualEntryErrorBoundary>
+      <ManualStepEntryComponent {...props} ref={ref} />
+    </ManualEntryErrorBoundary>
   );
 });

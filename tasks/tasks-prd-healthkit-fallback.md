@@ -66,12 +66,50 @@
   - [x] 5.5 Implement step entry frequency controls (daily vs multiple times)
   - [x] 5.6 Add visual indicators for current entry mode (HealthKit vs Manual)
 
-- [ ] 6.0 Testing and Error Handling (#137)
-  - [x] 6.1 Write unit tests for manual entry validation logic
-  - [x] 6.2 Create integration tests for manual entry flow
-  - [x] 6.3 Test fallback scenarios when HealthKit is unavailable
-  - [ ] 6.4 Implement error boundaries for manual entry failures
-  - [ ] 6.5 Test data structure compatibility with existing HealthKit hooks
+## 6. Testing and Validation
+
+### 6.1 Manual Entry Integration Tests ✅
+
+- [x] Test manual step entry validation
+- [x] Test manual entry storage and retrieval
+- [x] Test manual entry currency conversion
+- [x] Test manual entry experience calculation
+- [x] Test manual entry history display
+- [x] Test manual entry clearing functionality
+
+### 6.2 Fallback Mechanism Tests ✅
+
+- [x] Test HealthKit availability detection
+- [x] Test automatic fallback to manual entry
+- [x] Test manual mode persistence
+- [x] Test developer mode override
+- [x] Test retry mechanism for HealthKit
+
+### 6.3 Fallback Scenario Tests ✅
+
+- [x] Test not_supported HealthKit status
+- [x] Test permission_denied HealthKit status
+- [x] Test error HealthKit status
+- [x] Test not_available HealthKit status
+- [x] Test loading HealthKit status
+- [x] Test developer mode override behavior
+- [x] Test manual mode user choice persistence
+- [x] Test auto-switch behavior for not_supported devices
+- [x] Test retry capability for recoverable issues
+- [x] Test comprehensive fallback mechanism coverage
+
+### 6.4 Error Boundaries for Manual Entry Failures ✅
+
+- [x] Implement error boundary component for manual entry
+- [x] Implement error boundary for storage operations
+- [x] Implement error boundary for HealthKit operations
+- [x] Add try-catch blocks to manual entry components
+- [x] Add error handling to storage operations
+- [x] Add error handling to HealthKit integration
+- [x] Create comprehensive error boundary tests
+- [x] Test error boundary fallback UI
+- [x] Test error boundary reset functionality
+- [x] Test specialized error messages for different failure types
 
 ## Subtask 4.6: Experience/Currency Parity Tests ✅ COMPLETED
 

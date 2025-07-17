@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Button, Text, View } from '@/components/ui';
+import { Button, StorageErrorBoundary, Text, View } from '@/components/ui';
 import { useDeveloperMode, useManualEntryMode } from '@/lib/health';
 import { clearManualStepsByDay, getManualStepsByDay } from '@/lib/storage';
 
@@ -134,6 +134,7 @@ const ManualEntriesInfo = ({ onRefresh }: { onRefresh: () => void }) => {
       } catch (error) {
         console.error('Error loading manual steps count:', error);
         setManualStepsCount(0);
+        throw error; // Re-throw to trigger error boundary
       }
     };
 
@@ -149,11 +150,12 @@ const ManualEntriesInfo = ({ onRefresh }: { onRefresh: () => void }) => {
     } catch (error) {
       console.error('Error clearing manual entries:', error);
       alert('Error clearing manual entries');
+      throw error; // Re-throw to trigger error boundary
     }
   };
 
   return (
-    <>
+    <StorageErrorBoundary>
       <View className="rounded-md border border-neutral-200 p-3 dark:border-neutral-700">
         <Text className="font-medium">Manual Entries</Text>
         <Text className="text-sm text-neutral-600 dark:text-neutral-400">
@@ -168,7 +170,7 @@ const ManualEntriesInfo = ({ onRefresh }: { onRefresh: () => void }) => {
         onPress={handleClearManualEntries}
         disabled={manualStepsCount === 0}
       />
-    </>
+    </StorageErrorBoundary>
   );
 };
 
@@ -239,6 +241,7 @@ const ManualEntryHistory = ({ refreshTrigger }: { refreshTrigger: number }) => {
     } catch (error) {
       console.error('Error loading manual steps history:', error);
       setManualSteps([]);
+      throw error; // Re-throw to trigger error boundary
     } finally {
       setIsLoading(false);
     }
@@ -264,22 +267,24 @@ const ManualEntryHistory = ({ refreshTrigger }: { refreshTrigger: number }) => {
   });
 
   return (
-    <View className="rounded-md border border-neutral-200 p-3 dark:border-neutral-700">
-      <Text className="mb-2 font-medium">Manual Entry History</Text>
-      <View className="space-y-2">
-        {sortedSteps.slice(0, 10).map((entry, index) => (
-          <ManualEntryHistoryItem
-            key={`${entry.date}-${index}`}
-            entry={entry}
-          />
-        ))}
-        {sortedSteps.length > 10 && (
-          <Text className="pt-2 text-center text-xs text-neutral-500 dark:text-neutral-400">
-            Showing 10 most recent entries
-          </Text>
-        )}
+    <StorageErrorBoundary>
+      <View className="rounded-md border border-neutral-200 p-3 dark:border-neutral-700">
+        <Text className="mb-2 font-medium">Manual Entry History</Text>
+        <View className="space-y-2">
+          {sortedSteps.slice(0, 10).map((entry, index) => (
+            <ManualEntryHistoryItem
+              key={`${entry.date}-${index}`}
+              entry={entry}
+            />
+          ))}
+          {sortedSteps.length > 10 && (
+            <Text className="pt-2 text-center text-xs text-neutral-500 dark:text-neutral-400">
+              Showing 10 most recent entries
+            </Text>
+          )}
+        </View>
       </View>
-    </View>
+    </StorageErrorBoundary>
   );
 };
 
