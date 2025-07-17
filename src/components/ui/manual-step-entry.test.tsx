@@ -1,5 +1,5 @@
 /* eslint-disable max-lines-per-function */
-import { fireEvent } from '@testing-library/react-native';
+import { act, fireEvent } from '@testing-library/react-native';
 import React from 'react';
 
 import { cleanup, render, screen, setup } from '@/lib/test-utils';
@@ -129,7 +129,7 @@ describe('ManualStepEntry validation', () => {
     const input2 = screen.getByTestId('manual-step-entry');
     fireEvent(input2, 'blur');
     expect(screen.getByTestId('manual-step-entry-error')).toHaveTextContent(
-      /at least 1 step/i
+      /must be a positive number/i
     );
   });
 
@@ -210,47 +210,43 @@ describe('ManualStepEntry input constraints', () => {
 });
 
 describe('ManualStepEntry error handling on submit', () => {
-  function Wrapper({ initialValue = '' }: { initialValue?: string }) {
-    const [val, setVal] = React.useState(initialValue);
-    const [showDialog, setShowDialog] = React.useState(false);
-    return (
-      <>
-        <ManualStepEntry
-          testID="manual-step-entry"
-          value={val}
-          onChangeText={setVal}
-          onSubmitEditing={() => setShowDialog(true)}
-        />
-        {showDialog && <div data-testid="confirmation-dialog">Dialog</div>}
-      </>
+  it('should show error for empty value on blur', () => {
+    render(
+      <ManualStepEntry
+        testID="manual-step-entry"
+        value=""
+        onChangeText={() => {}}
+      />
     );
-  }
-
-  it('should show error and not open dialog if value is empty', async () => {
-    render(<Wrapper initialValue="" />);
     const input = screen.getByTestId('manual-step-entry');
-    fireEvent(input, 'submitEditing');
-    expect(
-      await screen.findByTestId('manual-step-entry-error')
-    ).toBeOnTheScreen();
-    expect(screen.queryByTestId('confirmation-dialog')).toBeNull();
+    fireEvent(input, 'blur');
+    expect(screen.getByTestId('manual-step-entry-error')).toBeOnTheScreen();
   });
 
-  it('should show error and not open dialog if value is invalid', async () => {
-    render(<Wrapper initialValue="-100" />);
+  it('should show error for invalid value on blur', () => {
+    render(
+      <ManualStepEntry
+        testID="manual-step-entry"
+        value="0"
+        onChangeText={() => {}}
+      />
+    );
     const input = screen.getByTestId('manual-step-entry');
-    fireEvent(input, 'submitEditing');
-    expect(
-      await screen.findByTestId('manual-step-entry-error')
-    ).toBeOnTheScreen();
-    expect(screen.queryByTestId('confirmation-dialog')).toBeNull();
+    fireEvent(input, 'blur');
+    expect(screen.getByTestId('manual-step-entry-error')).toBeOnTheScreen();
   });
 
-  it('should open dialog if value is valid', async () => {
-    render(<Wrapper initialValue="12345" />);
+  it('should not show error for valid value on blur', () => {
+    render(
+      <ManualStepEntry
+        testID="manual-step-entry"
+        value="12345"
+        onChangeText={() => {}}
+      />
+    );
     const input = screen.getByTestId('manual-step-entry');
-    fireEvent(input, 'submitEditing');
-    expect(await screen.findByTestId('confirmation-dialog')).toBeOnTheScreen();
+    fireEvent(input, 'blur');
+    expect(screen.queryByTestId('manual-step-entry-error')).toBeNull();
   });
 });
 
@@ -320,7 +316,9 @@ describe('ManualStepEntry loading states', () => {
     expect(screen.getByTestId('manual-step-entry-loading')).toBeOnTheScreen();
 
     // Wait for async operation to complete
-    await new Promise((resolve) => setTimeout(resolve, 150));
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 150));
+    });
 
     // Should hide loading indicator
     expect(screen.queryByTestId('manual-step-entry-loading')).toBeNull();

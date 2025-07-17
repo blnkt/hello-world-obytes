@@ -108,7 +108,7 @@ describe('useHealthKitFallback - async state tests', () => {
     // Reset all storage and modes
     const { MMKV } = require('react-native-mmkv');
     MMKV.mockClear();
-    MMKV().clear();
+    MMKV().clearAll();
     await setManualEntryMode(false);
     await clearDeveloperMode();
 

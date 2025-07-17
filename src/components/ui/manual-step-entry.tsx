@@ -19,7 +19,7 @@ const useValidation = () => {
     if (!val || val.trim() === '') {
       return 'Step count is required';
     }
-    if (!/^[-]?[0-9]+$/.test(val)) {
+    if (!/^[0-9]+$/.test(val)) {
       if (/\./.test(val)) return 'Step count must be a whole number';
       return 'Step count must be a positive number';
     }
@@ -69,8 +69,8 @@ export const ManualStepEntry = React.forwardRef<
 
   const handleChangeText = React.useCallback(
     (text: string) => {
-      // Only allow numeric input
-      const numericText = text.replace(/[^0-9.\-]/g, '');
+      // Only allow positive numeric input
+      const numericText = text.replace(/[^0-9]/g, '');
       onChangeText?.(numericText);
       if (error) setError(undefined); // clear error on change
     },
