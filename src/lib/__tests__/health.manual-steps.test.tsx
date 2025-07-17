@@ -25,6 +25,10 @@ import {
   setCurrency,
   getExperience,
   setExperience,
+  getCumulativeExperience,
+  setCumulativeExperience,
+  getFirstExperienceDate,
+  setFirstExperienceDate,
 } from '../storage';
 
 describe('useStepCountAsExperience with Manual Steps', () => {
@@ -592,6 +596,157 @@ describe('useStepCountAsExperience with Manual Steps', () => {
       expect(secondStreak.daysCount).toBe(2);
       expect(secondStreak.startDate).toContain('2024-06-04');
       expect(secondStreak.endDate).toContain('2024-06-05');
+    });
+  });
+
+  it('should update cumulative experience calculation to include manual entries', async () => {
+    // Test that cumulative experience calculation properly includes manual entries
+    
+    // Clear any existing data
+    await setExperience(0);
+    await setCumulativeExperience(0);
+    await setFirstExperienceDate('');
+    
+    // Set up manual step entries
+    const manualSteps = [
+      { date: '2024-06-01', steps: 10000, source: 'manual' as const },
+      { date: '2024-06-02', steps: 8000, source: 'manual' as const },
+      { date: '2024-06-03', steps: 12000, source: 'manual' as const },
+    ];
+    await setManualStepsByDay(manualSteps);
+
+    const lastCheckedDateTime = new Date('2024-06-01');
+    const { result } = renderHook(() =>
+      useStepCountAsExperience(lastCheckedDateTime)
+    );
+
+    await waitFor(() => {
+      // Verify that manual entries are included in experience calculation
+      expect(result.current.experience).toBe(30000); // 10000 + 8000 + 12000
+      expect(result.current.cumulativeExperience).toBe(30000); // Should be equal to experience for first time
+      expect(result.current.firstExperienceDate).toBe('2024-06-01T00:00:00.000Z');
+    });
+
+    // Add more manual entries to test incremental cumulative experience
+    const updatedManualSteps = [
+      { date: '2024-06-01', steps: 10000, source: 'manual' as const },
+      { date: '2024-06-02', steps: 8000, source: 'manual' as const },
+      { date: '2024-06-03', steps: 12000, source: 'manual' as const },
+      { date: '2024-06-04', steps: 15000, source: 'manual' as const }, // New entry
+    ];
+    await setManualStepsByDay(updatedManualSteps);
+
+    // Create a new hook instance to trigger new calculation
+    const { result: updatedResult } = renderHook(() =>
+      useStepCountAsExperience(lastCheckedDateTime)
+    );
+
+    await waitFor(() => {
+      // Experience should be updated to include new entry
+      expect(updatedResult.current.experience).toBe(45000); // 10000 + 8000 + 12000 + 15000
+      // Cumulative experience should be updated with the difference
+      expect(updatedResult.current.cumulativeExperience).toBe(45000); // Previous 30000 + new 15000
+    });
+  });
+
+  it('should handle cumulative experience calculation with mixed HealthKit and manual entries', async () => {
+    // Test cumulative experience calculation with both HealthKit and manual data
+    
+    // Clear any existing data
+    await setExperience(0);
+    await setCumulativeExperience(0);
+    await setFirstExperienceDate('');
+    
+    // Set up HealthKit data
+    const healthKitSteps = [
+      { date: new Date('2024-06-01'), steps: 5000 },
+      { date: new Date('2024-06-03'), steps: 7000 },
+    ];
+    await setStepsByDay(healthKitSteps);
+
+    // Set up manual data (manual should take priority for same dates)
+    const manualSteps = [
+      { date: '2024-06-01', steps: 8000, source: 'manual' as const }, // Higher than HealthKit
+      { date: '2024-06-02', steps: 6000, source: 'manual' as const }, // New manual entry
+      { date: '2024-06-03', steps: 9000, source: 'manual' as const }, // Higher than HealthKit
+    ];
+    await setManualStepsByDay(manualSteps);
+
+    const lastCheckedDateTime = new Date('2024-06-01');
+    const { result } = renderHook(() =>
+      useStepCountAsExperience(lastCheckedDateTime)
+    );
+
+    await waitFor(() => {
+      // Total experience should be: 8000 (manual) + 6000 (manual) + 9000 (manual) = 23000
+      expect(result.current.experience).toBe(23000);
+      expect(result.current.cumulativeExperience).toBe(23000);
+      expect(result.current.firstExperienceDate).toBe('2024-06-01T00:00:00.000Z');
+    });
+
+    // Verify that manual entries take priority over HealthKit entries
+    const stepEntries = result.current.stepsByDay.filter(day => {
+      const dayDate = typeof day.date === 'string' ? new Date(day.date) : day.date;
+      const dateStr = dayDate.toISOString().split('T')[0];
+      return dateStr === '2024-06-01' || dateStr === '2024-06-03';
+    });
+
+    expect(stepEntries).toHaveLength(2);
+    expect(stepEntries.find(day => {
+      const dayDate = typeof day.date === 'string' ? new Date(day.date) : day.date;
+      return dayDate.toISOString().split('T')[0] === '2024-06-01';
+    })?.steps).toBe(8000); // Manual entry, not HealthKit (5000)
+    expect(stepEntries.find(day => {
+      const dayDate = typeof day.date === 'string' ? new Date(day.date) : day.date;
+      return dayDate.toISOString().split('T')[0] === '2024-06-03';
+    })?.steps).toBe(9000); // Manual entry, not HealthKit (7000)
+  });
+
+  it('should maintain cumulative experience consistency between manual and HealthKit entries', async () => {
+    // Test that cumulative experience is calculated consistently regardless of data source
+    
+    // Clear any existing data
+    await setExperience(0);
+    await setCumulativeExperience(0);
+    await setFirstExperienceDate('');
+    
+    // Scenario 1: Only HealthKit data
+    const healthKitSteps = [
+      { date: new Date('2024-06-01'), steps: 10000 },
+      { date: new Date('2024-06-02'), steps: 8000 },
+    ];
+    await setStepsByDay(healthKitSteps);
+    
+    const lastCheckedDateTime = new Date('2024-06-01');
+    const { result: healthKitResult } = renderHook(() =>
+      useStepCountAsExperience(lastCheckedDateTime)
+    );
+
+    await waitFor(() => {
+      expect(healthKitResult.current.experience).toBe(18000);
+      expect(healthKitResult.current.cumulativeExperience).toBe(18000);
+    });
+
+    // Clear and test with manual data
+    await setExperience(0);
+    await setCumulativeExperience(0);
+    await setFirstExperienceDate('');
+    await clearStepsByDay();
+    
+    const manualSteps = [
+      { date: '2024-06-01', steps: 10000, source: 'manual' as const },
+      { date: '2024-06-02', steps: 8000, source: 'manual' as const },
+    ];
+    await setManualStepsByDay(manualSteps);
+
+    const { result: manualResult } = renderHook(() =>
+      useStepCountAsExperience(lastCheckedDateTime)
+    );
+
+    await waitFor(() => {
+      // Should have identical cumulative experience calculation
+      expect(manualResult.current.experience).toBe(18000);
+      expect(manualResult.current.cumulativeExperience).toBe(18000);
     });
   });
 }); 
