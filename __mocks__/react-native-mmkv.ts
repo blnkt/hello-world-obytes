@@ -3,9 +3,10 @@
 
 interface MMKVInstance {
   getString: (key: string) => string | null;
+  setString: (key: string, value: string) => void;
   set: (key: string, value: string) => void;
   delete: (key: string) => void;
-  clear: () => void;
+  clearAll: () => void;
 }
 
 interface MMKVConstructor {
@@ -13,31 +14,37 @@ interface MMKVConstructor {
   (): MMKVInstance;
 }
 
-const store: Record<string, string> = {};
+// Global store that can be cleared between tests
+let store: Record<string, string> = {};
 
 // eslint-disable-next-line no-undef
 export const MMKV: MMKVConstructor = jest.fn(() => ({
   getString: (key: string): string | null => {
     const value = store[key] || null;
-    console.log(`[MMKV Mock] getString(${key}) = ${value}`);
     return value;
   },
+  setString: (key: string, value: string): void => {
+    store[key] = value;
+  },
   set: (key: string, value: string): void => {
-    console.log(`[MMKV Mock] set(${key}, ${value})`);
     store[key] = value;
   },
   delete: (key: string): void => {
-    console.log(`[MMKV Mock] delete(${key})`);
     delete store[key];
   },
-  clear: (): void => {
-    console.log(
-      `[MMKV Mock] clear() - clearing ${Object.keys(store).length} keys`
-    );
-    Object.keys(store).forEach((k) => delete store[k]);
+  clearAll: (): void => {
+    store = {};
   },
 })) as MMKVConstructor;
 
 // Add a flushPromises utility for tests
 export const flushPromises = () =>
   new Promise((resolve) => setImmediate(resolve));
+
+// Add a clearStore utility for tests
+export const clearMMKVStore = () => {
+  store = {};
+};
+
+// Add a getStore utility for debugging
+export const getMMKVStore = () => ({ ...store });

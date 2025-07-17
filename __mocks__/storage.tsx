@@ -375,3 +375,90 @@ export async function setDeveloperMode(enabled: boolean) {
 export async function clearDeveloperMode() {
   storage.delete('developerMode');
 }
+
+// Manual Step Entry Functions
+export type ManualStepEntry = { date: string; steps: number; source: 'manual' };
+
+export function getManualStepsByDay(): ManualStepEntry[] {
+  const value = storage.getString('manualStepsByDay');
+  try {
+    return value ? JSON.parse(value) || [] : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function setManualStepsByDay(stepsByDay: ManualStepEntry[]) {
+  await setItem('manualStepsByDay', stepsByDay);
+}
+
+export async function clearManualStepsByDay() {
+  await removeItem('manualStepsByDay');
+}
+
+export async function setManualStepEntry(entry: ManualStepEntry) {
+  const current = getManualStepsByDay();
+  const filtered = current.filter((e) => e.date !== entry.date);
+  const updated = [...filtered, entry].sort((a, b) =>
+    a.date.localeCompare(b.date)
+  );
+  await setManualStepsByDay(updated);
+}
+
+export function getManualStepEntry(date: string): ManualStepEntry | null {
+  const entries = getManualStepsByDay();
+  return entries.find((entry) => entry.date === date) || null;
+}
+
+export function hasManualEntryForDate(date: string): boolean {
+  const entries = getManualStepsByDay();
+  return entries.some((entry) => entry.date === date);
+}
+
+export async function migrateManualStepEntries() {
+  const existingSteps = getStepsByDay();
+  if (existingSteps.length === 0) {
+    return;
+  }
+
+  const manualEntries: ManualStepEntry[] = existingSteps.map((step) => ({
+    date: step.date.toISOString().split('T')[0],
+    steps: step.steps,
+    source: 'manual' as const,
+  }));
+
+  await setManualStepsByDay(manualEntries);
+}
+
+export function validateManualStepEntry(entry: any): entry is ManualStepEntry {
+  // Check if entry is an object
+  if (!entry || typeof entry !== 'object') {
+    return false;
+  }
+
+  // Check required fields
+  if (!entry.date || typeof entry.date !== 'string') {
+    return false;
+  }
+
+  if (typeof entry.steps !== 'number') {
+    return false;
+  }
+
+  if (entry.source !== 'manual') {
+    return false;
+  }
+
+  // Validate date format (YYYY-MM-DD)
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!dateRegex.test(entry.date)) {
+    return false;
+  }
+
+  // Validate steps (non-negative number)
+  if (entry.steps < 0) {
+    return false;
+  }
+
+  return true;
+}

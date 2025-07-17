@@ -16,80 +16,9 @@ import {
   clearStepsByDay,
 } from '../storage';
 
-// Mock the HealthKit functions
-jest.mock('@kingstinct/react-native-healthkit', () => ({
-  default: {
-    getMostRecentQuantitySample: jest.fn(),
-    getStatisticsForQuantity: jest.fn(),
-    queryStatisticsForQuantity: jest.fn().mockResolvedValue([]),
-  },
-  getMostRecentQuantitySample: jest.fn(),
-  getStatisticsForQuantity: jest.fn(),
-  queryStatisticsForQuantity: jest.fn().mockResolvedValue([]),
-  HKQuantityTypeIdentifier: {
-    stepCount: 'stepCount',
-  },
-  HKUnits: {
-    Count: 'count',
-  },
-  HKStatisticsOptions: {
-    cumulativeSum: 'cumulativeSum',
-  },
-}));
-
-// Mock the getStepsGroupedByDay function to return more reasonable data
-jest.mock('../health', () => {
-  const originalModule = jest.requireActual('../health');
-  return {
-    ...originalModule,
-    getStepsGroupedByDay: jest.fn().mockImplementation(async (startDate: Date, endDate: Date) => {
-      // Return a reasonable number of entries based on the date range
-      const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-      const results = [];
-      
-      for (let i = 0; i < days; i++) {
-        const date = new Date(startDate);
-        date.setDate(date.getDate() + i);
-        results.push({
-          date,
-          steps: 0, // Default to 0 steps for HealthKit data in tests
-        });
-      }
-      
-      return results;
-    }),
-  };
-});
-
-// Mock MMKV storage with persistent state
-const mockMMKVStorage = new Map();
-
-jest.mock('react-native-mmkv', () => ({
-  MMKV: jest.fn().mockImplementation(() => ({
-    getString: jest.fn((key) => {
-      const value = mockMMKVStorage.get(key);
-      return value || null;
-    }),
-    setString: jest.fn((key, value) => {
-      mockMMKVStorage.set(key, value);
-    }),
-    set: jest.fn((key, value) => {
-      mockMMKVStorage.set(key, value);
-    }),
-    delete: jest.fn((key) => {
-      mockMMKVStorage.delete(key);
-    }),
-    clearAll: jest.fn(() => {
-      mockMMKVStorage.clear();
-    }),
-  })),
-  useMMKVString: jest.fn(),
-}));
-
 describe('useStepCountAsExperience with Manual Steps', () => {
   beforeEach(() => {
     // Clear all storage before each test
-    mockMMKVStorage.clear();
     clearManualStepsByDay();
     clearStepsByDay();
     setManualEntryMode(false);
@@ -116,8 +45,6 @@ describe('useStepCountAsExperience with Manual Steps', () => {
       { date: new Date('2024-06-03'), steps: 4000 },
     ];
     await setStepsByDay(healthKitSteps);
-
-
 
     const lastCheckedDateTime = new Date('2024-06-01');
     const { result } = renderHook(() =>

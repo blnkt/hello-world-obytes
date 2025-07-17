@@ -50,7 +50,7 @@
 
 - [ ] 4.0 Experience and Currency System Integration (#135)
 
-  - [ ] 4.1 Modify `useStepCountAsExperience` to handle manual step data
+  - [x] 4.1 Modify `useStepCountAsExperience` to handle manual step data
   - [ ] 4.2 Update `mergeExperienceMMKV` to process manual entries identically to HealthKit
   - [ ] 4.3 Integrate manual steps with streak detection system
   - [ ] 4.4 Ensure manual entries trigger currency conversion correctly
