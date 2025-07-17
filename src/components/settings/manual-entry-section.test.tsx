@@ -94,6 +94,72 @@ describe('ManualEntrySection', () => {
     expect(screen.getByText('Clear All Manual Entries')).toBeOnTheScreen();
   });
 
+  describe('Entry Mode Indicator', () => {
+    it('should show HealthKit mode when manual mode is disabled', () => {
+      mockUseManualEntryMode.mockReturnValue({
+        ...defaultManualEntryMode,
+        isManualMode: false,
+      });
+
+      render(<ManualEntrySection />);
+      expect(screen.getByText('HealthKit')).toBeOnTheScreen();
+      expect(
+        screen.getByText('Using automatic HealthKit step tracking')
+      ).toBeOnTheScreen();
+    });
+
+    it('should show Manual Entry mode when manual mode is enabled', () => {
+      mockUseManualEntryMode.mockReturnValue({
+        ...defaultManualEntryMode,
+        isManualMode: true,
+      });
+
+      render(<ManualEntrySection />);
+      expect(screen.getByText('Manual Entry')).toBeOnTheScreen();
+      expect(
+        screen.getByText('You are manually entering step data')
+      ).toBeOnTheScreen();
+    });
+
+    it('should show DEV badge when developer mode is enabled', () => {
+      mockUseDeveloperMode.mockReturnValue({
+        ...defaultDeveloperMode,
+        isDeveloperMode: true,
+      });
+
+      render(<ManualEntrySection />);
+      expect(screen.getByText('DEV')).toBeOnTheScreen();
+    });
+
+    it('should not show DEV badge when developer mode is disabled', () => {
+      mockUseDeveloperMode.mockReturnValue({
+        ...defaultDeveloperMode,
+        isDeveloperMode: false,
+      });
+
+      render(<ManualEntrySection />);
+      expect(screen.queryByText('DEV')).not.toBeOnTheScreen();
+    });
+
+    it('should show both manual mode and DEV badge when both are enabled', () => {
+      mockUseManualEntryMode.mockReturnValue({
+        ...defaultManualEntryMode,
+        isManualMode: true,
+      });
+      mockUseDeveloperMode.mockReturnValue({
+        ...defaultDeveloperMode,
+        isDeveloperMode: true,
+      });
+
+      render(<ManualEntrySection />);
+      expect(screen.getByText('Manual Entry')).toBeOnTheScreen();
+      expect(
+        screen.getByText('You are manually entering step data')
+      ).toBeOnTheScreen();
+      expect(screen.getByText('DEV')).toBeOnTheScreen();
+    });
+  });
+
   describe('Manual Entry Mode Toggle', () => {
     it('should show correct state when manual mode is enabled', () => {
       mockUseManualEntryMode.mockReturnValue({

@@ -29,6 +29,8 @@ import {
   setCumulativeExperience,
   getFirstExperienceDate,
   setFirstExperienceDate,
+  getLastCheckedDate,
+  setLastCheckedDate,
 } from '../storage';
 
 describe('useStepCountAsExperience with Manual Steps', () => {
@@ -1231,6 +1233,108 @@ describe('useStepCountAsExperience with Manual Steps', () => {
         const currency = await getCurrency();
         expect(currency).toBe(2600); // 26000 XP * 0.1 = 2600 currency
       });
+    });
+  });
+
+  it('should demonstrate HealthKit vs local storage conflict behavior', async () => {
+    // This test demonstrates that the app prioritizes local storage over fresh HealthKit data
+    // which could lead to stale data being used instead of updated HealthKit data
+    
+    const today = new Date();
+    const todayString = today.toISOString().split('T')[0];
+    
+    // Step 1: Set up local storage with old data
+    const oldLocalData = [
+      { date: today, steps: 5000 }, // Old data in local storage
+    ];
+    await setStepsByDay(oldLocalData);
+    
+    // Step 2: Set up HealthKit mock with different (newer) data
+    const HealthKit = require('@kingstinct/react-native-healthkit');
+    const healthKitSamples = [
+      {
+        startDate: today,
+        endDate: today,
+        quantity: 8000, // Different (newer) data from HealthKit
+      },
+    ];
+    HealthKit.__setStepSamples(healthKitSamples);
+    
+    // Step 3: Use the hook that calls getStepsGroupedByDay
+    const lastCheckedDateTime = new Date(today);
+    lastCheckedDateTime.setHours(0, 0, 0, 0);
+    
+    const { result } = renderHook(() =>
+      useStepCountAsExperience(lastCheckedDateTime)
+    );
+    
+    await waitFor(() => {
+      // The app should use the local storage data (5000) instead of HealthKit data (8000)
+      // This demonstrates the potential conflict issue
+      const todayEntry = result.current.stepsByDay.find(day => {
+        const dayDate = typeof day.date === 'string' 
+          ? new Date(day.date) 
+          : day.date;
+        return dayDate.toISOString().split('T')[0] === todayString;
+      });
+      
+      // This will be 5000 (local storage) instead of 8000 (HealthKit)
+      expect(todayEntry?.steps).toBe(5000);
+      
+      // This demonstrates the conflict: HealthKit has 8000 steps but app uses 5000
+      // because local storage takes priority over fresh HealthKit data
+    });
+  });
+
+  it('should use fresh HealthKit data when local data is stale', async () => {
+    // This test demonstrates the desired behavior: when local data is old,
+    // the app should refresh from HealthKit and use the fresh data
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to midnight
+    const todayString = today.toISOString().split('T')[0];
+    
+    // Step 1: Set up old local data (simulating stale data)
+    const oldLocalData = [
+      { date: today, steps: 5000 }, // Old data in local storage
+    ];
+    await setStepsByDay(oldLocalData);
+    
+    // Step 2: Set up HealthKit mock with different (newer) data
+    const HealthKit = require('@kingstinct/react-native-healthkit');
+    const healthKitSamples = [
+      {
+        startDate: today,
+        endDate: today,
+        quantity: 8000, // Fresh data from HealthKit
+      },
+    ];
+    HealthKit.__setStepSamples(healthKitSamples);
+    
+    // Step 3: Set up stale lastCheckedDate (more than 1 hour old)
+    const staleDate = new Date(Date.now() - 2 * 60 * 60 * 1000); // 2 hours ago
+    staleDate.setHours(0, 0, 0, 0); // Set to midnight
+    await setLastCheckedDate(staleDate.toISOString());
+    
+    // Step 4: Use the hook that should detect stale data and refresh
+    const { result } = renderHook(() =>
+      useStepCountAsExperience(staleDate)
+    );
+    
+    await waitFor(() => {
+      // The app should use the fresh HealthKit data (8000) instead of stale local data (5000)
+      const todayEntry = result.current.stepsByDay.find(day => {
+        const dayDate = typeof day.date === 'string' 
+          ? new Date(day.date) 
+          : day.date;
+        return dayDate.toISOString().split('T')[0] === todayString;
+      });
+      
+      // This should be 8000 (fresh HealthKit data) instead of 5000 (stale local data)
+      expect(todayEntry?.steps).toBe(8000);
+      
+      // This demonstrates the desired conflict resolution: 
+      // Fresh HealthKit data (8000) overrides stale local data (5000)
     });
   });
 }); 

@@ -42,7 +42,7 @@ describe('setManualStepEntry', () => {
     ]);
   });
 
-  it('should update an existing manual step entry for the same date', async () => {
+  it('should combine step values when adding to an existing date', async () => {
     await clearManualStepsByDay();
     await setManualStepsByDay([
       { date: '2024-06-03', steps: 2222, source: 'manual' as const },
@@ -50,7 +50,7 @@ describe('setManualStepEntry', () => {
     await setManualStepEntry({ date: '2024-06-03', steps: 3333, source: 'manual' });
     const result = getManualStepsByDay();
     expect(result).toEqual([
-      { date: '2024-06-03', steps: 3333, source: 'manual' },
+      { date: '2024-06-03', steps: 5555, source: 'manual' }, // 2222 + 3333 = 5555
     ]);
   });
 

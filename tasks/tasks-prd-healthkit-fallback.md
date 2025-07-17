@@ -63,7 +63,7 @@
   - [x] 5.2 Implement developer mode toggle in settings
   - [x] 5.3 Create manual entry history display in settings
   - [x] 5.4 Add clear manual entries functionality for testing
-  - [ ] 5.5 Implement step entry frequency controls (daily vs multiple times)
+  - [x] 5.5 Implement step entry frequency controls (daily vs multiple times)
   - [ ] 5.6 Add visual indicators for current entry mode (HealthKit vs Manual)
 
 - [ ] 6.0 Testing and Error Handling (#137)

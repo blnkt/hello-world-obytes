@@ -4,6 +4,57 @@ import { Button, Text, View } from '@/components/ui';
 import { useDeveloperMode, useManualEntryMode } from '@/lib/health';
 import { clearManualStepsByDay, getManualStepsByDay } from '@/lib/storage';
 
+const EntryModeIndicator = () => {
+  const { isManualMode } = useManualEntryMode();
+  const { isDeveloperMode } = useDeveloperMode();
+
+  const getModeInfo = () => {
+    if (isManualMode) {
+      return {
+        icon: '✍️',
+        label: 'Manual Entry',
+        description: 'You are manually entering step data',
+        color: 'bg-blue-100 border-blue-300 text-blue-800',
+        dotColor: 'bg-blue-500',
+      };
+    } else {
+      return {
+        icon: '🦶',
+        label: 'HealthKit',
+        description: 'Using automatic HealthKit step tracking',
+        color: 'bg-green-100 border-green-300 text-green-800',
+        dotColor: 'bg-green-500',
+      };
+    }
+  };
+
+  const modeInfo = getModeInfo();
+
+  return (
+    <View
+      className={`rounded-lg border-2 p-4 ${modeInfo.color} dark:border-neutral-600 dark:bg-neutral-800`}
+    >
+      <View className="flex-row items-center space-x-3">
+        <Text className="text-2xl">{modeInfo.icon}</Text>
+        <View className="flex-1">
+          <View className="flex-row items-center space-x-2">
+            <View className={`size-3 rounded-full ${modeInfo.dotColor}`} />
+            <Text className="font-semibold">{modeInfo.label}</Text>
+            {isDeveloperMode && (
+              <View className="rounded-full bg-yellow-100 px-2 py-1 dark:bg-yellow-900">
+                <Text className="text-xs font-medium text-yellow-800 dark:text-yellow-200">
+                  DEV
+                </Text>
+              </View>
+            )}
+          </View>
+          <Text className="text-sm opacity-80">{modeInfo.description}</Text>
+        </View>
+      </View>
+    </View>
+  );
+};
+
 const ManualEntryModeToggle = () => {
   const { isManualMode, setManualMode, isLoading } = useManualEntryMode();
 
@@ -240,6 +291,7 @@ export const ManualEntrySection = () => {
       <Text className="text-lg font-semibold">Manual Entry Settings</Text>
 
       <View className="space-y-3">
+        <EntryModeIndicator />
         <ManualEntryModeToggle />
         <DeveloperModeToggle />
         <ManualEntriesInfo onRefresh={handleRefresh} />
