@@ -3,7 +3,7 @@ import HealthKit, {
   HKStatisticsOptions,
   HKUnits,
 } from '@kingstinct/react-native-healthkit';
-import React, { useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
 import {
   addStreak,
@@ -53,16 +53,35 @@ export async function clearManualEntryMode() {
   storage.delete(MANUAL_ENTRY_MODE_KEY);
 }
 
-// Manual Entry Mode Hook
-export const useManualEntryMode = () => {
+// Manual Entry Mode Context
+interface ManualModeContextType {
+  isManualMode: boolean;
+  setManualMode: (enabled: boolean) => Promise<void>;
+  isLoading: boolean;
+}
+
+const ManualModeContext = createContext<ManualModeContextType | undefined>(
+  undefined
+);
+
+export const ManualModeProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const [isManualMode, setIsManualMode] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  // Load from storage on mount
   useEffect(() => {
     const loadManualEntryMode = async () => {
       try {
         const mode = getManualEntryMode();
         setIsManualMode(mode);
+        console.log(
+          '[ManualModeProvider] Loaded manual mode from storage:',
+          mode
+        );
       } catch (error) {
         console.error('Error loading manual entry mode:', error);
         setIsManualMode(false);
@@ -74,20 +93,35 @@ export const useManualEntryMode = () => {
     loadManualEntryMode();
   }, []);
 
+  // Set manual mode (updates both context and storage)
   const setManualMode = async (enabled: boolean) => {
     try {
       await setManualEntryMode(enabled);
       setIsManualMode(enabled);
+      console.log('[ManualModeProvider] Set manual mode:', enabled);
     } catch (error) {
       console.error('Error setting manual entry mode:', error);
     }
   };
 
-  return {
-    isManualMode,
-    setManualMode,
-    isLoading,
-  };
+  return (
+    <ManualModeContext.Provider
+      value={{ isManualMode, setManualMode, isLoading }}
+    >
+      {children}
+    </ManualModeContext.Provider>
+  );
+};
+
+// Manual Entry Mode Hook
+export const useManualEntryMode = () => {
+  const context = useContext(ManualModeContext);
+  if (!context) {
+    throw new Error(
+      'useManualEntryMode must be used within ManualModeProvider'
+    );
+  }
+  return context;
 };
 
 // Developer Mode Storage
@@ -106,10 +140,26 @@ export async function clearDeveloperMode() {
   storage.delete(DEVELOPER_MODE_KEY);
 }
 
-export const useDeveloperMode = () => {
+// Developer Mode Context
+interface DeveloperModeContextType {
+  isDeveloperMode: boolean;
+  setDevMode: (enabled: boolean) => Promise<void>;
+  isLoading: boolean;
+}
+
+const DeveloperModeContext = createContext<
+  DeveloperModeContextType | undefined
+>(undefined);
+
+export const DeveloperModeProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const [isDeveloperMode, setIsDeveloperMode] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  // Load from storage on mount
   useEffect(() => {
     const loadDeveloperMode = async () => {
       try {
@@ -122,9 +172,11 @@ export const useDeveloperMode = () => {
         setIsLoading(false);
       }
     };
+
     loadDeveloperMode();
   }, []);
 
+  // Set developer mode (updates both context and storage)
   const setDevMode = async (enabled: boolean) => {
     try {
       await setDeveloperMode(enabled);
@@ -134,11 +186,36 @@ export const useDeveloperMode = () => {
     }
   };
 
-  return {
-    isDeveloperMode,
-    setDevMode,
-    isLoading,
-  };
+  return (
+    <DeveloperModeContext.Provider
+      value={{ isDeveloperMode, setDevMode, isLoading }}
+    >
+      {children}
+    </DeveloperModeContext.Provider>
+  );
+};
+
+// Combined provider for both manual and developer modes
+export const HealthModeProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
+  return (
+    <ManualModeProvider>
+      <DeveloperModeProvider>{children}</DeveloperModeProvider>
+    </ManualModeProvider>
+  );
+};
+
+export const useDeveloperMode = () => {
+  const context = useContext(DeveloperModeContext);
+  if (!context) {
+    throw new Error(
+      'useDeveloperMode must be used within DeveloperModeProvider'
+    );
+  }
+  return context;
 };
 
 // Enhanced HealthKit availability status types
@@ -179,10 +256,9 @@ const useHealthKitAvailability = (): HealthKitAvailabilityResult => {
 
         // HealthKit is available, now check authorization status
         try {
-          const _authorizationStatus =
-            await HealthKit.getRequestStatusForAuthorization([
-              HKQuantityTypeIdentifier.stepCount,
-            ]);
+          await HealthKit.getRequestStatusForAuthorization([
+            HKQuantityTypeIdentifier.stepCount,
+          ]);
 
           // For now, assume we can request permission if HealthKit is available
           // The actual permission request will be handled by the useHealthKit hook
@@ -328,37 +404,14 @@ const determineFallbackLogic = (params: {
   setCanRetryHealthKit(true);
 };
 
-// Comprehensive Fallback Logic Hook
-export const useHealthKitFallback = (): FallbackLogicResult => {
-  const availability = useHealthKitAvailability();
-  const {
-    isManualMode,
-    setManualMode,
-    isLoading: manualModeLoading,
-  } = useManualEntryMode();
-  const { isDeveloperMode, isLoading: developerModeLoading } =
-    useDeveloperMode();
-  const [suggestion, setSuggestion] = useState<FallbackSuggestion>('none');
-  const [reason, setReason] = useState<string>('');
-  const [canRetryHealthKit, setCanRetryHealthKit] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (isDeveloperMode) {
-      setSuggestion('force_manual');
-      setReason('Developer mode is enabled. HealthKit checks are bypassed.');
-      setCanRetryHealthKit(false);
-      return;
-    }
-    determineFallbackLogic({
-      availabilityStatus: availability.status,
-      isManualMode,
-      setSuggestion,
-      setReason,
-      setCanRetryHealthKit,
-    });
-  }, [availability.status, isManualMode, availability.error, isDeveloperMode]);
-
-  // Auto-switch to manual mode for certain scenarios
+// Auto-switch logic for manual mode
+const useAutoSwitchToManual = (params: {
+  availability: HealthKitAvailabilityResult;
+  isManualMode: boolean;
+  setManualMode: (enabled: boolean) => Promise<void>;
+  isDeveloperMode: boolean;
+}) => {
+  const { availability, isManualMode, setManualMode, isDeveloperMode } = params;
   useEffect(() => {
     const autoSwitchToManual = async () => {
       // Auto-switch to manual mode if HealthKit is not supported or developer mode is enabled
@@ -375,6 +428,62 @@ export const useHealthKitFallback = (): FallbackLogicResult => {
     };
     autoSwitchToManual();
   }, [availability.status, isManualMode, setManualMode, isDeveloperMode]);
+};
+
+// Comprehensive Fallback Logic Hook
+export const useHealthKitFallback = (): FallbackLogicResult => {
+  const availability = useHealthKitAvailability();
+  const {
+    isManualMode,
+    setManualMode,
+    isLoading: manualModeLoading,
+  } = useManualEntryMode();
+  const { isDeveloperMode, isLoading: developerModeLoading } =
+    useDeveloperMode();
+  const [suggestion, setSuggestion] = useState<FallbackSuggestion>('none');
+  const [reason, setReason] = useState<string>('');
+  const [canRetryHealthKit, setCanRetryHealthKit] = useState<boolean>(false);
+
+  useEffect(() => {
+    console.log(
+      '[useHealthKitFallback] availability.status:',
+      availability.status,
+      'isManualMode:',
+      isManualMode,
+      'isDeveloperMode:',
+      isDeveloperMode
+    );
+    if (isDeveloperMode) {
+      setSuggestion('force_manual');
+      setReason('Developer mode is enabled. HealthKit checks are bypassed.');
+      setCanRetryHealthKit(false);
+      return;
+    }
+    determineFallbackLogic({
+      availabilityStatus: availability.status,
+      isManualMode,
+      setSuggestion,
+      setReason,
+      setCanRetryHealthKit,
+    });
+  }, [availability.status, isManualMode, availability.error, isDeveloperMode]);
+
+  useEffect(() => {
+    console.log(
+      '[useHealthKitFallback] suggestion:',
+      suggestion,
+      'reason:',
+      reason
+    );
+  }, [suggestion, reason]);
+
+  // Auto-switch to manual mode for certain scenarios
+  useAutoSwitchToManual({
+    availability,
+    isManualMode,
+    setManualMode,
+    isDeveloperMode,
+  });
 
   const shouldUseManualEntry =
     isManualMode || suggestion === 'force_manual' || isDeveloperMode;
