@@ -429,6 +429,11 @@ export function getManualStepEntry(date: string): ManualStepEntry | null {
   return entries.find((entry) => entry.date === date) || null;
 }
 
+export function hasManualEntryForDate(date: string): boolean {
+  const entry = getManualStepEntry(date);
+  return entry !== null;
+}
+
 export function clearAllStorage() {
   storage.clearAll();
 }

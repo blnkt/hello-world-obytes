@@ -1,4 +1,4 @@
-import { getManualStepsByDay, setManualStepsByDay, clearManualStepsByDay, setManualStepEntry, getManualStepEntry } from '../storage';
+import { getManualStepsByDay, setManualStepsByDay, clearManualStepsByDay, setManualStepEntry, getManualStepEntry, hasManualEntryForDate } from '../storage';
 
 // MMKV is a singleton, so clear between tests
 beforeEach(() => {
@@ -92,5 +92,34 @@ describe('getManualStepEntry', () => {
     await clearManualStepsByDay();
     const result = getManualStepEntry('2024-06-01');
     expect(result).toBeNull();
+  });
+});
+
+describe('Manual Entry Tracking', () => {
+  it('should track when a manual entry has been made for a specific date', async () => {
+    await clearManualStepsByDay();
+    await setManualStepEntry({ date: '2024-06-01', steps: 1000, source: 'manual' });
+    expect(hasManualEntryForDate('2024-06-01')).toBe(true);
+  });
+
+  it('should return false for dates without manual entries', async () => {
+    await clearManualStepsByDay();
+    expect(hasManualEntryForDate('2024-06-01')).toBe(false);
+  });
+
+  it('should return false for dates that have been cleared', async () => {
+    await clearManualStepsByDay();
+    await setManualStepEntry({ date: '2024-06-01', steps: 1000, source: 'manual' });
+    await clearManualStepsByDay();
+    expect(hasManualEntryForDate('2024-06-01')).toBe(false);
+  });
+
+  it('should track multiple manual entries for different dates', async () => {
+    await clearManualStepsByDay();
+    await setManualStepEntry({ date: '2024-06-01', steps: 1000, source: 'manual' });
+    await setManualStepEntry({ date: '2024-06-02', steps: 2000, source: 'manual' });
+    expect(hasManualEntryForDate('2024-06-01')).toBe(true);
+    expect(hasManualEntryForDate('2024-06-02')).toBe(true);
+    expect(hasManualEntryForDate('2024-06-03')).toBe(false);
   });
 }); 
