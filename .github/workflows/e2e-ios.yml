@@ -39,19 +39,38 @@ jobs:
           ruby-version: '3.0'
           bundler-cache: true
 
+      - name: 📦 Set environment variables
+        run: |
+          echo "APP_ENV=development" >> $GITHUB_ENV
+          echo "EXPO_NO_DOTENV=1" >> $GITHUB_ENV
+
       - name: 📦 Install iOS dependencies
         run: |
           cd ios
           pod install
+
+      - name: 📦 Clean previous builds
+        run: |
+          cd ios
+          xcodebuild -workspace helloworldexpoownerexpoowner.xcworkspace \
+            -scheme helloworldexpoownerexpoowner \
+            clean
+
+      - name: 📦 Show bundle identifier
+        run: |
+          echo "Building for bundle identifier: com.hello-world-expo-owner.development"
+          echo "Environment: $APP_ENV"
 
       - name: 📦 Build iOS app for testing
         run: |
           cd ios
           xcodebuild -workspace helloworldexpoownerexpoowner.xcworkspace \
             -scheme helloworldexpoownerexpoowner \
-            -configuration Release \
+            -configuration Debug \
             -destination 'platform=iOS Simulator,name=iPhone 14,OS=latest' \
             -derivedDataPath build \
+            -allowProvisioningUpdates \
+            -skipPackagePluginValidation \
             build
 
       - name: 📦 Create IPA for testing
