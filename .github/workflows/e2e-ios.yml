@@ -44,6 +44,19 @@ jobs:
           echo "APP_ENV=development" >> $GITHUB_ENV
           echo "EXPO_NO_DOTENV=1" >> $GITHUB_ENV
 
+      - name: 📦 Generate iOS native code
+        run: |
+          pnpm expo prebuild --platform ios --clean
+
+      - name: 📦 Configure Xcode for simulator builds
+        run: |
+          # Set minimum deployment target to fix pod warnings
+          cd ios
+          sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = 9.0;/IPHONEOS_DEPLOYMENT_TARGET = 12.0;/g' Pods/Pods.xcodeproj/project.pbxproj || true
+
+          # Configure Xcode to skip signing for simulator builds
+          xcrun simctl list devices
+
       - name: 📦 Install iOS dependencies
         run: |
           cd ios
@@ -71,13 +84,14 @@ jobs:
             -derivedDataPath build \
             -allowProvisioningUpdates \
             -skipPackagePluginValidation \
+            -skipSigning \
             build
 
       - name: 📦 Create IPA for testing
         run: |
           cd ios
           mkdir -p Payload
-          cp -r build/Build/Products/Release-iphonesimulator/helloworldexpoownerexpoowner.app Payload/
+          cp -r build/Build/Products/Debug-iphonesimulator/helloworldexpoownerexpoowner.app Payload/
           zip -r test-app.ipa Payload
 
       - name: Upload Test IPA
@@ -99,6 +113,10 @@ jobs:
 
       - name: 📦 Install Maestro
         run: npm run install-maestro ## We use npm because we don't need to install deps again
+
+      - name: 📦 Generate iOS native code for test job
+        run: |
+          pnpm expo prebuild --platform ios --clean
 
       - name: Download Test IPA
         uses: actions/download-artifact@v4
