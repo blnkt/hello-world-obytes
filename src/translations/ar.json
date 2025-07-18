@@ -1,4 +1,7 @@
 {
+  "common": {
+    "loading": "جاري التحميل..."
+  },
   "onboarding": {
     "message": "مرحبا بكم في موقع تطبيق obytes"
   },
@@ -7,6 +10,11 @@
     "app_name": "اسم التطبيق",
     "arabic": "عربي",
     "english": "إنجليزي",
+    "entryMode": {
+      "healthkit": "HealthKit",
+      "manual": "إدخال يدوي",
+      "title": "وضع الإدخال"
+    },
     "generale": "عام",
     "github": "جيثب",
     "language": "لغة",

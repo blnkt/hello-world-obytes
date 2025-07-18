@@ -40,6 +40,11 @@ jobs:
       - name: 📦 Setup Node + PNPM + install deps
         uses: ./.github/actions/setup-node-pnpm-install
 
+      - name: Set environment variables
+        run: |
+          echo "APP_ENV=development" >> $GITHUB_ENV
+          echo "EXPO_NO_DOTENV=1" >> $GITHUB_ENV
+
       - name: Run prebuild
         run: pnpm run prebuild
 

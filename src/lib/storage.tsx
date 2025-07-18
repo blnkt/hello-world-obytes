@@ -393,6 +393,131 @@ export async function migrateToHealthCore() {
   }
 }
 
+// Manual Steps By Day Storage
+const MANUAL_STEPS_BY_DAY_KEY = 'MANUAL_STEPS_BY_DAY';
+
+export type ManualStepEntry = { date: string; steps: number; source: 'manual' };
+
+export function getManualStepsByDay(): ManualStepEntry[] {
+  const value = storage.getString(MANUAL_STEPS_BY_DAY_KEY);
+  try {
+    return value ? JSON.parse(value) || [] : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function setManualStepsByDay(stepsByDay: ManualStepEntry[]) {
+  // Validate all entries before storing
+  for (const entry of stepsByDay) {
+    if (!validateManualStepEntry(entry)) {
+      throw new Error(
+        `Invalid manual step entry structure: ${JSON.stringify(entry)}`
+      );
+    }
+  }
+  await setItem(MANUAL_STEPS_BY_DAY_KEY, stepsByDay);
+}
+
+export async function clearManualStepsByDay() {
+  await removeItem(MANUAL_STEPS_BY_DAY_KEY);
+}
+
+export async function setManualStepEntry(entry: ManualStepEntry) {
+  if (!validateManualStepEntry(entry)) {
+    throw new Error('Invalid manual step entry');
+  }
+  const existing = await getManualStepsByDay();
+  const idx = existing.findIndex((e) => e.date === entry.date);
+  if (idx !== -1) {
+    // Combine steps for the same date
+    existing[idx].steps += entry.steps;
+  } else {
+    existing.push(entry);
+  }
+  await setManualStepsByDay(existing);
+}
+
+export function getManualStepEntry(date: string): ManualStepEntry | null {
+  const entries = getManualStepsByDay();
+  return entries.find((entry) => entry.date === date) || null;
+}
+
+export function hasManualEntryForDate(date: string): boolean {
+  const entry = getManualStepEntry(date);
+  return entry !== null;
+}
+
+export async function migrateManualStepEntries() {
+  const existingSteps = getStepsByDay();
+  const existingManualSteps = getManualStepsByDay();
+
+  if (existingSteps.length === 0) {
+    return;
+  }
+
+  // Convert old step data to manual entry format
+  const migratedEntries: ManualStepEntry[] = existingSteps.map((step) => ({
+    date:
+      step.date instanceof Date
+        ? step.date.toISOString().split('T')[0]
+        : String(step.date).split('T')[0],
+    steps: step.steps,
+    source: 'manual' as const,
+  }));
+
+  // Merge with existing manual entries, avoiding duplicates
+  const allEntries = [...existingManualSteps, ...migratedEntries];
+  const uniqueEntries = allEntries.reduce((acc, entry) => {
+    const existing = acc.find((e) => e.date === entry.date);
+    if (!existing) {
+      acc.push(entry);
+    }
+    return acc;
+  }, [] as ManualStepEntry[]);
+
+  // Sort by date
+  uniqueEntries.sort((a, b) => a.date.localeCompare(b.date));
+
+  await setManualStepsByDay(uniqueEntries);
+}
+
 export function clearAllStorage() {
   storage.clearAll();
+}
+
+export function validateManualStepEntry(entry: any): entry is ManualStepEntry {
+  // Check if entry is an object
+  if (!entry || typeof entry !== 'object') {
+    return false;
+  }
+
+  // Check required fields
+  if (!entry.date || typeof entry.date !== 'string') {
+    return false;
+  }
+
+  if (typeof entry.steps !== 'number') {
+    return false;
+  }
+
+  if (entry.source !== 'manual') {
+    return false;
+  }
+
+  // Validate date format (YYYY-MM-DD)
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!dateRegex.test(entry.date)) {
+    return false;
+  }
+
+  // Validate steps (non-negative number, reasonable upper limit)
+  if (entry.steps < 0) {
+    return false;
+  }
+  if (entry.steps > 100000) {
+    return false;
+  }
+
+  return true;
 }

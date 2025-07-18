@@ -1,4 +1,7 @@
 {
+  "common": {
+    "loading": "Loading..."
+  },
   "onboarding": {
     "message": "Welcome to obytes app site"
   },
@@ -7,6 +10,11 @@
     "app_name": "App Name",
     "arabic": "Arabic",
     "english": "English",
+    "entryMode": {
+      "healthkit": "HealthKit",
+      "manual": "Manual Entry",
+      "title": "Entry Mode"
+    },
     "generale": "General",
     "github": "Github",
     "language": "Language",

@@ -7,6 +7,7 @@ import {
   MerchantIcon,
   Settings as SettingsIcon,
 } from '@/components/ui/icons';
+import { HealthModeProvider } from '@/lib/health';
 
 // TODO: PHASE 4 - Add animations - Smooth transitions between screens and interactions
 // TODO: PHASE 4 - Add character portraits - Visual representation of characters
@@ -88,14 +89,16 @@ export default function TabLayout() {
   }, [hideSplash]);
 
   return (
-    <Tabs>
-      {getTabScreens().map((screen) => (
-        <Tabs.Screen
-          key={screen.name}
-          name={screen.name}
-          options={screen.options}
-        />
-      ))}
-    </Tabs>
+    <HealthModeProvider>
+      <Tabs>
+        {getTabScreens().map((screen) => (
+          <Tabs.Screen
+            key={screen.name}
+            name={screen.name}
+            options={screen.options}
+          />
+        ))}
+      </Tabs>
+    </HealthModeProvider>
   );
 }

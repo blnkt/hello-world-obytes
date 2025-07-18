@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
+import { ManualEntrySection } from '@/components/settings/manual-entry-section';
 import { Button, Text, View } from '@/components/ui';
 import { useIsFirstTime } from '@/lib/hooks/use-is-first-time';
 import {
@@ -80,30 +81,34 @@ export default function Settings() {
     <View className="flex-1 p-4">
       <Text className="mb-4 text-2xl font-bold">Settings</Text>
 
-      <View className="space-y-4">
+      <View className="space-y-6">
         <DebugInfo isFirstTime={isFirstTime} forceUpdate={forceUpdate} />
 
-        <Button
-          fullWidth
-          variant="outline"
-          label="Update Step Count"
-          onPress={pressHandler}
-        />
-        <Text>Current Steps: {steps}</Text>
+        <ManualEntrySection />
 
-        <Button
-          fullWidth
-          variant="outline"
-          label="Reset First Time Flag"
-          onPress={resetFirstTimeHandler}
-        />
+        <View className="space-y-4">
+          <Button
+            fullWidth
+            variant="outline"
+            label="Update Step Count"
+            onPress={pressHandler}
+          />
+          <Text>Current Steps: {steps}</Text>
 
-        <Button
-          fullWidth
-          variant="outline"
-          label="Clear All Storage"
-          onPress={clearAllStorageHandler}
-        />
+          <Button
+            fullWidth
+            variant="outline"
+            label="Reset First Time Flag"
+            onPress={resetFirstTimeHandler}
+          />
+
+          <Button
+            fullWidth
+            variant="outline"
+            label="Clear All Storage"
+            onPress={clearAllStorageHandler}
+          />
+        </View>
       </View>
     </View>
   );

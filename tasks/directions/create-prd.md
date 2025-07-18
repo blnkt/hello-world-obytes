@@ -4,12 +4,60 @@
 
 To guide an AI assistant in creating a detailed Product Requirements Document (PRD) in Markdown format, based on an initial user prompt. The PRD should be clear, actionable, and suitable for a junior developer to understand and implement the feature.
 
+## File Naming Convention
+
+- **PRD files:** `prd-[descriptive-feature-name].md`
+- **Task files:** `tasks-prd-[descriptive-feature-name].md` (generated from this PRD)
+- **Branch names:** `feature/prd-[prd-filename]`
+
+**Example:**
+
+- PRD: `prd-user-profile-editing.md`
+- Tasks: `tasks-prd-user-profile-editing.md`
+- Branch: `feature/prd-user-profile-editing`
+
 ## Process
 
 1.  **Receive Initial Prompt:** The user provides a brief description or request for a new feature or functionality.
 2.  **Ask Clarifying Questions:** Before writing the PRD, the AI _must_ ask clarifying questions to gather sufficient detail. The goal is to understand the "what" and "why" of the feature, not necessarily the "how" (which the developer will figure out). Make sure to provide options in letter/number lists so I can respond easily with my selections.
 3.  **Generate PRD:** Based on the initial prompt and the user's answers to the clarifying questions, generate a PRD using the structure outlined below.
 4.  **Save PRD:** Save the generated document as `prd-[feature-name].md` inside the `/tasks` directory.
+5.  **Branch Management:** After creating the PRD, instruct the user to create a feature branch using the PRD filename as the branch name.
+
+## Branch Management
+
+After creating a PRD, the user must create a feature branch for all work related to that PRD:
+
+```bash
+# Create and switch to a new branch named after the PRD
+git checkout -b feature/[prd-filename]
+
+# Example: If PRD is saved as prd-user-profile-editing.md
+git checkout -b feature/prd-user-profile-editing
+```
+
+**Branch Naming Convention:**
+
+- Use the PRD filename (without .md extension) as the branch name
+- Prefix with `feature/` to indicate it's a feature branch
+- Use kebab-case for multi-word features
+
+**Branch Rules:**
+
+- All work related to a PRD must be done on its associated branch
+- Never work on the main branch for feature development
+- Each PRD gets its own dedicated branch
+- Branch names should be descriptive and match the PRD filename
+
+## Related Workflows
+
+This workflow is part of a larger development process:
+
+1. **PRD Creation** (this workflow) → Creates `prd-[feature-name].md`
+2. **Task Generation** (`@generate-tasks.md`) → Creates `tasks-prd-[feature-name].md` from the PRD
+3. **Task Implementation** (`@process-task-list.md`) → Implements the tasks using TDD workflow
+
+**Next Steps:** After creating the PRD, use the `@generate-tasks.md` workflow to create a detailed task list for implementation.
 
 ## Clarifying Questions (Examples)
 
@@ -54,3 +102,8 @@ Assume the primary reader of the PRD is a **junior developer**. Therefore, requi
 1. Do NOT start implementing the PRD
 2. Make sure to ask the user clarifying questions
 3. Take the user's answers to the clarifying questions and improve the PRD
+4. After creating the PRD, instruct the user to create a feature branch:
+   ```bash
+   git checkout -b feature/[prd-filename]
+   ```
+5. Remind the user that all work related to this PRD must be done on this feature branch
