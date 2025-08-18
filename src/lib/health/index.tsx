@@ -29,7 +29,6 @@ import {
   type Streak,
   updateHealthCore,
   useCurrency,
-  useLastCheckedDate,
 } from '../storage';
 
 // TODO: PHASE 1 - Fix unused merge functions - Implement mergeStepsByDayMMKV in the main hook (mergeExperienceMMKV implemented)
@@ -46,18 +45,107 @@ import {
 // Manual Entry Mode Storage
 const MANUAL_ENTRY_MODE_KEY = 'manualEntryMode';
 
-// Global refresh trigger for experience updates
-let refreshCallbacks: (() => void)[] = [];
-
-export const addExperienceRefreshCallback = (callback: () => void) => {
-  refreshCallbacks.push(callback);
-  return () => {
-    refreshCallbacks = refreshCallbacks.filter((cb) => cb !== callback);
-  };
+// Shared experience state to avoid circular dependencies
+let globalExperienceState: {
+  experience: number;
+  cumulativeExperience: number;
+  firstExperienceDate: string | null;
+  stepsByDay: { date: Date; steps: number }[];
+} = {
+  experience: 0,
+  cumulativeExperience: 0,
+  firstExperienceDate: null,
+  stepsByDay: [],
 };
 
-export const triggerExperienceRefresh = () => {
-  refreshCallbacks.forEach((callback) => callback());
+// Function to update global state
+const updateGlobalExperienceState = (
+  newState: Partial<typeof globalExperienceState>
+) => {
+  globalExperienceState = { ...globalExperienceState, ...newState };
+};
+
+// Function to get global state
+const getGlobalExperienceState = () => ({ ...globalExperienceState });
+
+// Main consolidated experience hook
+// eslint-disable-next-line max-lines-per-function
+export const useExperienceData = () => {
+  const [experience, setExperienceState] = useState<number>(0);
+  const [cumulativeExperience, setCumulativeExperienceState] =
+    useState<number>(0);
+  const [firstExperienceDate, setFirstExperienceDateState] = useState<
+    string | null
+  >(null);
+  const [stepsByDay, setStepsByDayState] = useState<
+    { date: Date; steps: number }[]
+  >([]);
+
+  // Guard against multiple simultaneous executions
+  const isUpdatingRef = React.useRef(false);
+
+  // Function to manually refresh experience data
+  const refreshExperience = useCallback(async () => {
+    if (isUpdatingRef.current) {
+      return;
+    }
+
+    isUpdatingRef.current = true;
+    try {
+      await getExperienceFromStepsHelper({
+        lastCheckedDateTime: new Date(), // Use current time for refresh
+        setExperienceState,
+        setCumulativeExperienceState,
+        setFirstExperienceDateState,
+        setStepsByDayState,
+      });
+    } finally {
+      isUpdatingRef.current = false;
+    }
+  }, []);
+
+  // Initialize from storage on mount
+  useEffect(() => {
+    const initializeFromStorage = () => {
+      const storedExperience = getExperience();
+      const storedCumulativeExperience = getCumulativeExperience();
+      const storedFirstExperienceDate = getFirstExperienceDate();
+      const storedStepsByDay = getStepsByDay();
+
+      setExperienceState(storedExperience);
+      setCumulativeExperienceState(storedCumulativeExperience);
+      setFirstExperienceDateState(storedFirstExperienceDate);
+      setStepsByDayState(storedStepsByDay);
+
+      // Update global state
+      updateGlobalExperienceState({
+        experience: storedExperience,
+        cumulativeExperience: storedCumulativeExperience,
+        firstExperienceDate: storedFirstExperienceDate,
+        stepsByDay: storedStepsByDay,
+      });
+    };
+
+    initializeFromStorage();
+  }, []);
+
+  // Update global state whenever local state changes
+  useEffect(() => {
+    updateGlobalExperienceState({
+      experience,
+      cumulativeExperience,
+      firstExperienceDate,
+      stepsByDay,
+    });
+  }, [experience, cumulativeExperience, firstExperienceDate, stepsByDay]);
+
+  return {
+    experience,
+    cumulativeExperience,
+    firstExperienceDate,
+    stepsByDay,
+    refreshExperience,
+  };
 };
 
 export function getManualEntryMode(): boolean {
@@ -966,104 +1054,6 @@ const getExperienceFromStepsHelper = async (params: {
   }
 };
 
-// eslint-disable-next-line max-lines-per-function
-export const useStepCountAsExperience = (lastCheckedDateTime: Date) => {
-  const [experience, setExperienceState] = useState<number>(0);
-  const [cumulativeExperience, setCumulativeExperienceState] =
-    useState<number>(0);
-  const [firstExperienceDate, setFirstExperienceDateState] = useState<
-    string | null
-  >(null);
-  const [stepsByDay, setStepsByDayState] = useState<
-    { date: Date; steps: number }[]
-  >([]);
-
-  // Guard against multiple simultaneous executions
-  const isUpdatingRef = React.useRef(false);
-
-  // Function to manually refresh experience data - memoized to prevent recreation
-  const refreshExperience = useCallback(async () => {
-    if (isUpdatingRef.current) {
-      return;
-    }
-
-    isUpdatingRef.current = true;
-    try {
-      await getExperienceFromStepsHelper({
-        lastCheckedDateTime,
-        setExperienceState,
-        setCumulativeExperienceState,
-        setFirstExperienceDateState,
-        setStepsByDayState,
-      });
-    } finally {
-      isUpdatingRef.current = false;
-    }
-  }, [lastCheckedDateTime]);
-
-  // Register refresh callback only once per hook instance
-  useEffect(() => {
-    const unsubscribe = addExperienceRefreshCallback(refreshExperience);
-    return unsubscribe;
-  }, []); // Empty dependency array - only register once
-
-  useEffect(() => {
-    const initializeFromStorage = () => {
-      const storedExperience = getExperience();
-      const storedCumulativeExperience = getCumulativeExperience();
-      const storedFirstExperienceDate = getFirstExperienceDate();
-
-      setExperienceState(storedExperience);
-      setCumulativeExperienceState(storedCumulativeExperience);
-      setFirstExperienceDateState(storedFirstExperienceDate);
-
-      const storedStepsByDay = getStepsByDay();
-      setStepsByDayState(storedStepsByDay);
-    };
-
-    // Initialize from storage on mount
-    initializeFromStorage();
-
-    // Get fresh experience data - always allow initial fetch
-    getExperienceFromStepsHelper({
-      lastCheckedDateTime,
-      setExperienceState,
-      setCumulativeExperienceState,
-      setFirstExperienceDateState,
-      setStepsByDayState,
-    });
-
-    const interval = setInterval(
-      () => {
-        // Only guard against simultaneous interval updates, not initial fetch
-        if (!isUpdatingRef.current) {
-          isUpdatingRef.current = true;
-          getExperienceFromStepsHelper({
-            lastCheckedDateTime,
-            setExperienceState,
-            setCumulativeExperienceState,
-            setFirstExperienceDateState,
-            setStepsByDayState,
-          }).finally(() => {
-            isUpdatingRef.current = false;
-          });
-        }
-      },
-      5 * 60 * 1000
-    );
-
-    return () => clearInterval(interval);
-  }, [lastCheckedDateTime]);
-
-  return {
-    experience,
-    cumulativeExperience,
-    firstExperienceDate,
-    stepsByDay,
-    refreshExperience,
-  };
-};
-
 /**
  * Creates a streak object from streak data
  */
@@ -1144,15 +1134,16 @@ export const detectStreaks = (
 /**
  * Hook to track and manage streaks
  *
- * @param lastCheckedDateTime - The date when experience was last checked
+ * This hook uses global experience state to avoid circular dependencies
  * @returns Object containing current streaks and streak detection function
  */
 // eslint-disable-next-line max-lines-per-function
-export const useStreakTracking = (lastCheckedDateTime: Date) => {
-  const { stepsByDay } = useStepCountAsExperience(lastCheckedDateTime);
-  const dailyGoal = getDailyStepsGoal();
-  // Use local state for detected streaks
+export const useStreakTracking = () => {
   const [streaks, setStreaks] = React.useState<Streak[]>([]);
+  const dailyGoal = getDailyStepsGoal();
+
+  // Use global state instead of calling useStepCountAsExperience
+  const { stepsByDay } = getGlobalExperienceState();
 
   React.useEffect(() => {
     if (stepsByDay.length > 0) {
@@ -1178,13 +1169,13 @@ export const useStreakTracking = (lastCheckedDateTime: Date) => {
  *
  * This hook provides easy access to cumulative experience tracking
  * from the first time the user started using the app.
+ * Uses global state to avoid circular dependencies.
  *
- * @param lastCheckedDateTime - The date when experience was last checked
  * @returns Object containing cumulative experience and first experience date
  */
-export const useCumulativeExperience = (lastCheckedDateTime: Date) => {
+export const useCumulativeExperience = () => {
   const { cumulativeExperience, firstExperienceDate } =
-    useStepCountAsExperience(lastCheckedDateTime);
+    getGlobalExperienceState();
 
   return {
     cumulativeExperience,
@@ -1197,24 +1188,13 @@ export const useCumulativeExperience = (lastCheckedDateTime: Date) => {
  *
  * This hook automatically uses the last checked date from storage
  * and provides easy access to cumulative experience tracking.
+ * Uses global state to avoid circular dependencies.
  *
  * @returns Object containing cumulative experience and first experience date
  */
 export const useCumulativeExperienceSimple = () => {
-  const [lastCheckedDate] = useLastCheckedDate();
-
-  // Default to start of today if not set - memoized to prevent infinite re-renders
-  const lastCheckedDateTime = React.useMemo(() => {
-    if (lastCheckedDate) {
-      return new Date(lastCheckedDate);
-    }
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }, [lastCheckedDate]);
-
   const { cumulativeExperience, firstExperienceDate } =
-    useStepCountAsExperience(lastCheckedDateTime);
+    getGlobalExperienceState();
 
   return {
     cumulativeExperience,
@@ -1246,13 +1226,12 @@ export const convertExperienceToCurrency = (experience: number): number => {
  * Since experience is now automatically converted to currency,
  * availableCurrency will always be 0 as all new experience
  * is immediately converted and stored.
+ * Uses global state to avoid circular dependencies.
  *
- * @param lastCheckedDateTime - The date when experience was last checked
  * @returns Object containing currency data and conversion functions
  */
-export const useCurrencySystem = (lastCheckedDateTime: Date) => {
-  const { cumulativeExperience } =
-    useStepCountAsExperience(lastCheckedDateTime);
+export const useCurrencySystem = () => {
+  const { cumulativeExperience } = getGlobalExperienceState();
   const [currency] = useCurrency();
 
   // Since experience is auto-converted, available currency is always 0

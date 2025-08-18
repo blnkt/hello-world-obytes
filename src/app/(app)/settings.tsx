@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { ManualEntrySection } from '@/components/settings/manual-entry-section';
+import ManualEntrySection from '@/components/settings/manual-entry-section';
 import { Button, Text, View } from '@/components/ui';
 import { useIsFirstTime } from '@/lib/hooks/use-is-first-time';
 import {

@@ -10,15 +10,15 @@ import {
 
 import {
   useCurrencySystem,
-  useStepCountAsExperience,
+  useExperienceData,
   useStreakTracking,
-} from '../../lib/health';
+} from '@/lib/health';
 import {
   getCharacter,
   useDailyStepsGoal,
   useLastCheckedDate,
-} from '../../lib/storage';
-import { useScenarioTrigger } from '../../lib/use-scenario-trigger';
+} from '@/lib/storage';
+import { useScenarioTrigger } from '@/lib/use-scenario-trigger';
 
 const MILESTONE_INTERVAL = 1000; // Every 1k steps
 
@@ -35,8 +35,7 @@ const StreakSection = ({ stepCount }: { stepCount: number }) => {
     return d;
   }, [lastCheckedDate]);
 
-  const { streaks, currentStreak, longestStreak } =
-    useStreakTracking(lastCheckedDateTime);
+  const { streaks, currentStreak, longestStreak } = useStreakTracking();
 
   if (streaks.length === 0) {
     return (
@@ -184,23 +183,13 @@ const ProgressDashboard = ({
   stepCount,
   experience,
   cumulativeExperience,
+  currency,
 }: {
   stepCount: number;
   experience: number;
   cumulativeExperience: number;
+  currency: number;
 }) => {
-  const [lastCheckedDate] = useLastCheckedDate();
-  // Default to start of today if not set - memoized to prevent infinite re-renders
-  const lastCheckedDateTime = React.useMemo(() => {
-    if (lastCheckedDate) {
-      return new Date(lastCheckedDate);
-    }
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }, [lastCheckedDate]);
-  const { currency } = useCurrencySystem(lastCheckedDateTime);
-
   return (
     <View className="relative mb-6 rounded-2xl bg-blue-500 p-6">
       <CurrencyDisplay currency={currency} />
@@ -369,8 +358,7 @@ export default function Home() {
     return d;
   }, [lastCheckedDate]);
 
-  const { stepsByDay, experience, cumulativeExperience } =
-    useStepCountAsExperience(lastCheckedDateTime);
+  const { stepsByDay, experience, cumulativeExperience } = useExperienceData();
 
   // Calculate today's step count - memoized to prevent infinite re-renders
   const today = React.useMemo(() => {
@@ -391,6 +379,12 @@ export default function Home() {
   // Trigger scenarios based on step count
   useScenarioTrigger(todaySteps);
 
+  // Get streak tracking data
+  const { currentStreak, longestStreak } = useStreakTracking();
+
+  // Get currency data
+  const { currency } = useCurrencySystem();
+
   return (
     <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-900">
       <View className="p-4">
@@ -402,6 +396,7 @@ export default function Home() {
           stepCount={todaySteps}
           experience={experience}
           cumulativeExperience={cumulativeExperience}
+          currency={currency}
         />
 
         <CharacterPreview />

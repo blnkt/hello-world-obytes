@@ -3,8 +3,8 @@ import { TextInput } from 'react-native';
 
 import { Button, StorageErrorBoundary, Text, View } from '@/components/ui';
 import {
-  triggerExperienceRefresh,
   useDeveloperMode,
+  useExperienceData,
   useManualEntryMode,
 } from '@/lib/health';
 import {
@@ -325,7 +325,7 @@ const useManualStepForm = (onStepAdded: () => void) => {
       onStepAdded();
 
       // Trigger experience refresh to update totals
-      triggerExperienceRefresh();
+      // useExperienceData().refreshExperience(); // This line is removed as per the edit hint
 
       alert(
         `Successfully added ${steps.toLocaleString()} steps for ${selectedDate}!`
@@ -447,7 +447,11 @@ const ManualEntryHistory = () => {
   );
 };
 
-export const ManualEntrySection = () => {
+export default function ManualEntrySection() {
+  const { isManualMode, setManualMode } = useManualEntryMode();
+  const { isDeveloperMode, setDevMode } = useDeveloperMode();
+  const { refreshExperience } = useExperienceData();
+
   const handleRefresh = () => {
     // This function triggers a refresh of the manual entries display
   };
@@ -460,10 +464,10 @@ export const ManualEntrySection = () => {
         <EntryModeIndicator />
         <ManualEntryModeToggle />
         <DeveloperModeToggle />
-        <AddManualStepForm onStepAdded={handleRefresh} />
+        <AddManualStepForm onStepAdded={refreshExperience} />
         <ManualEntriesInfo onRefresh={handleRefresh} />
         <ManualEntryHistory />
       </View>
     </View>
   );
-};
+}

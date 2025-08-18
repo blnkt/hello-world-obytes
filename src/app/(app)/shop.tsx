@@ -129,7 +129,7 @@ const ShopScreen = () => {
         d.setHours(0, 0, 0, 0);
         return d;
       })();
-  const { currency, spend } = useCurrencySystem(lastCheckedDateTime);
+  const { currency, spend } = useCurrencySystem();
   const [purchasedItems] = usePurchasedItems();
 
   const onPurchase = (item: (typeof SHOP_ITEMS)[0]) => {

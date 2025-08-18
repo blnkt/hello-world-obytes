@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import { CharacterSheet } from '../../components/character/character-sheet';
-import { useStepCountAsExperience } from '../../lib/health';
+import { useExperienceData } from '../../lib/health';
 import {
   getCharacter as getStoredCharacter,
   setCharacter as saveCharacterToStorage,
@@ -81,7 +81,7 @@ export default function CharacterSheetScreen() {
         return d;
       })();
 
-  const { experience } = useStepCountAsExperience(lastCheckedDateTime);
+  const { experience } = useExperienceData();
 
   return <CharacterSheet character={character} onChange={setCharacter} />;
 }
