@@ -1,6 +1,5 @@
+import { fireEvent, render, screen } from '@testing-library/react-native';
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import { TextInput } from 'react-native';
 
 import ManualEntrySection from './manual-entry-section';
 
@@ -20,6 +19,7 @@ jest.mock('@/lib/storage', () => {
 jest.mock('@/lib/health', () => ({
   useManualEntryMode: jest.fn(),
   useDeveloperMode: jest.fn(),
+  useExperienceData: jest.fn(),
 }));
 
 const mockUseManualEntryMode = jest.mocked(
@@ -27,6 +27,9 @@ const mockUseManualEntryMode = jest.mocked(
 );
 const mockUseDeveloperMode = jest.mocked(
   require('@/lib/health').useDeveloperMode
+);
+const mockUseExperienceData = jest.mocked(
+  require('@/lib/health').useExperienceData
 );
 const mockGetManualStepsByDay = jest.mocked(
   require('@/lib/storage').getManualStepsByDay
@@ -36,7 +39,6 @@ const mockClearManualStepsByDay = jest.mocked(
 );
 
 afterEach(() => {
-  cleanup();
   jest.clearAllMocks();
 });
 
@@ -56,6 +58,13 @@ describe('ManualEntrySection', () => {
   beforeEach(() => {
     mockUseManualEntryMode.mockReturnValue(defaultManualEntryMode);
     mockUseDeveloperMode.mockReturnValue(defaultDeveloperMode);
+    mockUseExperienceData.mockReturnValue({
+      experience: 0,
+      cumulativeExperience: 0,
+      firstExperienceDate: null,
+      stepsByDay: [],
+      refreshExperience: jest.fn(),
+    });
     mockGetManualStepsByDay.mockReturnValue([]);
     mockClearManualStepsByDay.mockResolvedValue(undefined);
   });
@@ -194,8 +203,8 @@ describe('ManualEntrySection', () => {
         setManualMode,
       });
 
-      const { user } = setup(<ManualEntrySection />);
-      await user.press(screen.getByText('Switch to Manual'));
+      render(<ManualEntrySection />);
+      fireEvent.press(screen.getByText('Switch to Manual'));
 
       expect(setManualMode).toHaveBeenCalledWith(true);
     });
@@ -246,8 +255,8 @@ describe('ManualEntrySection', () => {
         setDevMode,
       });
 
-      const { user } = setup(<ManualEntrySection />);
-      await user.press(screen.getByText('Enable'));
+      render(<ManualEntrySection />);
+      fireEvent.press(screen.getByText('Enable'));
 
       expect(setDevMode).toHaveBeenCalledWith(true);
     });
@@ -334,8 +343,8 @@ describe('ManualEntrySection', () => {
         { date: '2024-01-01', steps: 5000, source: 'manual' },
       ]);
 
-      const { user } = setup(<ManualEntrySection />);
-      await user.press(screen.getByText('Clear All Manual Entries'));
+      render(<ManualEntrySection />);
+      fireEvent.press(screen.getByText('Clear All Manual Entries'));
 
       expect(mockClearManualStepsByDay).toHaveBeenCalledTimes(1);
     });
@@ -346,8 +355,8 @@ describe('ManualEntrySection', () => {
       ]);
       mockClearManualStepsByDay.mockRejectedValue(new Error('Clear error'));
 
-      const { user } = setup(<ManualEntrySection />);
-      await user.press(screen.getByText('Clear All Manual Entries'));
+      render(<ManualEntrySection />);
+      fireEvent.press(screen.getByText('Clear All Manual Entries'));
 
       expect(mockClearManualStepsByDay).toHaveBeenCalledTimes(1);
 
@@ -367,8 +376,8 @@ describe('ManualEntrySection', () => {
         setManualMode,
       });
 
-      const { user } = setup(<ManualEntrySection />);
-      await user.press(screen.getByText('Switch to Manual'));
+      render(<ManualEntrySection />);
+      fireEvent.press(screen.getByText('Switch to Manual'));
 
       expect(setManualMode).toHaveBeenCalledWith(true);
     });
@@ -380,8 +389,8 @@ describe('ManualEntrySection', () => {
         setDevMode,
       });
 
-      const { user } = setup(<ManualEntrySection />);
-      await user.press(screen.getByText('Enable'));
+      render(<ManualEntrySection />);
+      fireEvent.press(screen.getByText('Enable'));
 
       expect(setDevMode).toHaveBeenCalledWith(true);
     });

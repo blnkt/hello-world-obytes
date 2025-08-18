@@ -15,7 +15,6 @@ import { useMMKVString } from 'react-native-mmkv';
 import {
   getCumulativeExperience,
   getCurrency,
-  getDailyStepsGoal,
   getExperience,
   getFirstExperienceDate,
   getLastCheckedDate,
@@ -55,8 +54,14 @@ const MANUAL_ENTRY_MODE_KEY = 'manualEntryMode';
 export const useExperienceData = () => {
   // Use MMKV hooks directly for reactive storage access
   const [experience, setExperience] = useMMKVString('experience', storage);
-  const [cumulativeExperience, setCumulativeExperience] = useMMKVString('cumulativeExperience', storage);
-  const [firstExperienceDate, setFirstExperienceDate] = useMMKVString('firstExperienceDate', storage);
+  const [cumulativeExperience, setCumulativeExperience] = useMMKVString(
+    'cumulativeExperience',
+    storage
+  );
+  const [firstExperienceDate, setFirstExperienceDate] = useMMKVString(
+    'firstExperienceDate',
+    storage
+  );
   const [stepsByDay, setStepsByDay] = useMMKVString('stepsByDay', storage);
 
   // Guard against multiple simultaneous executions
@@ -73,44 +78,61 @@ export const useExperienceData = () => {
       await getExperienceFromStepsHelper({
         lastCheckedDateTime: new Date(), // Use current time for refresh
         setExperienceState: (value: number) => setExperience(String(value)),
-        setCumulativeExperienceState: (value: number) => setCumulativeExperience(String(value)),
-        setFirstExperienceDateState: (value: string | null) => setFirstExperienceDate(value || ''),
-        setStepsByDayState: (value: { date: Date; steps: number }[]) => setStepsByDay(JSON.stringify(value)),
+        setCumulativeExperienceState: (value: number) =>
+          setCumulativeExperience(String(value)),
+        setFirstExperienceDateState: (value: string | null) =>
+          setFirstExperienceDate(value || ''),
+        setStepsByDayState: (value: { date: Date; steps: number }[]) =>
+          setStepsByDay(JSON.stringify(value)),
       });
     } finally {
       isUpdatingRef.current = false;
     }
-  }, [setExperience, setCumulativeExperience, setFirstExperienceDate, setStepsByDay]);
+  }, [
+    setExperience,
+    setCumulativeExperience,
+    setFirstExperienceDate,
+    setStepsByDay,
+  ]);
 
   // Parse the stored values to proper types with memoization
-  const parsedExperience = React.useMemo(() => 
-    experience ? Number(experience) : 0, 
+  const parsedExperience = React.useMemo(
+    () => (experience ? Number(experience) : 0),
     [experience]
   );
-  
-  const parsedCumulativeExperience = React.useMemo(() => 
-    cumulativeExperience ? Number(cumulativeExperience) : 0, 
+
+  const parsedCumulativeExperience = React.useMemo(
+    () => (cumulativeExperience ? Number(cumulativeExperience) : 0),
     [cumulativeExperience]
   );
-  
-  const parsedFirstExperienceDate = React.useMemo(() => 
-    firstExperienceDate || null, 
+
+  const parsedFirstExperienceDate = React.useMemo(
+    () => firstExperienceDate || null,
     [firstExperienceDate]
   );
-  
-  const parsedStepsByDay = React.useMemo(() => 
-    stepsByDay ? JSON.parse(stepsByDay) : [], 
+
+  const parsedStepsByDay = React.useMemo(
+    () => (stepsByDay ? JSON.parse(stepsByDay) : []),
     [stepsByDay]
   );
 
   // Memoize the return object to prevent infinite re-renders
-  const result = React.useMemo(() => ({
-    experience: parsedExperience,
-    cumulativeExperience: parsedCumulativeExperience,
-    firstExperienceDate: parsedFirstExperienceDate,
-    stepsByDay: parsedStepsByDay,
-    refreshExperience,
-  }), [parsedExperience, parsedCumulativeExperience, parsedFirstExperienceDate, parsedStepsByDay, refreshExperience]);
+  const result = React.useMemo(
+    () => ({
+      experience: parsedExperience,
+      cumulativeExperience: parsedCumulativeExperience,
+      firstExperienceDate: parsedFirstExperienceDate,
+      stepsByDay: parsedStepsByDay,
+      refreshExperience,
+    }),
+    [
+      parsedExperience,
+      parsedCumulativeExperience,
+      parsedFirstExperienceDate,
+      parsedStepsByDay,
+      refreshExperience,
+    ]
+  );
 
   return result;
 };
