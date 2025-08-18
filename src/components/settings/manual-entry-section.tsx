@@ -388,32 +388,7 @@ const AddManualStepForm = ({ onStepAdded }: { onStepAdded: () => void }) => {
   );
 };
 
-const ManualEntryHistory = () => {
-  const [manualSteps, setManualSteps] = React.useState<any[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
-
-  const loadManualSteps = React.useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const steps = getManualStepsByDay();
-      setManualSteps(steps || []);
-    } catch (error) {
-      console.error('Error loading manual steps history:', error);
-      setManualSteps([]);
-      // Don't re-throw - error boundaries don't catch async errors
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  React.useEffect(() => {
-    loadManualSteps();
-  }, [loadManualSteps]);
-
-  if (isLoading) {
-    return <ManualEntryHistoryLoading />;
-  }
-
+const ManualEntryHistory = ({ manualSteps }: { manualSteps: any[] }) => {
   if (manualSteps.length === 0) {
     return <ManualEntryHistoryEmpty />;
   }
@@ -452,9 +427,13 @@ export default function ManualEntrySection() {
   const { isDeveloperMode, setDevMode } = useDeveloperMode();
   const { refreshExperience } = useExperienceData();
 
-  const handleRefresh = () => {
-    // This function triggers a refresh of the manual entries display
-  };
+  const handleStepAdded = React.useCallback(async () => {
+    // Refresh experience data - this will trigger re-renders in components that use it
+    await refreshExperience();
+  }, [refreshExperience]);
+
+  // Get manual steps directly from storage
+  const manualSteps = getManualStepsByDay() || [];
 
   return (
     <View className="space-y-4">
@@ -464,9 +443,9 @@ export default function ManualEntrySection() {
         <EntryModeIndicator />
         <ManualEntryModeToggle />
         <DeveloperModeToggle />
-        <AddManualStepForm onStepAdded={refreshExperience} />
-        <ManualEntriesInfo onRefresh={handleRefresh} />
-        <ManualEntryHistory />
+        <AddManualStepForm onStepAdded={handleStepAdded} />
+        <ManualEntriesInfo onRefresh={() => {}} />
+        <ManualEntryHistory manualSteps={manualSteps} />
       </View>
     </View>
   );

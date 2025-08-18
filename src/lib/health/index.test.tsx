@@ -6,9 +6,11 @@ import { flushPromises } from '../../../__mocks__/react-native-mmkv';
 import {
   clearDeveloperMode,
   clearManualEntryMode,
-  HealthModeProvider,
   setDeveloperMode,
   setManualEntryMode,
+} from '../storage';
+import {
+  HealthModeProvider,
   useDeveloperMode,
   useHealthKitFallback,
   useManualEntryMode,

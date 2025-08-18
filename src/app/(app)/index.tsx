@@ -14,7 +14,7 @@ import {
   useStreakTracking,
 } from '@/lib/health';
 import {
-  getCharacter,
+  useCharacter,
   useDailyStepsGoal,
   useLastCheckedDate,
 } from '@/lib/storage';
@@ -283,7 +283,7 @@ const QuickNavigation = () => {
 };
 
 const CharacterPreview = () => {
-  const character = getCharacter();
+  const [character] = useCharacter();
 
   if (!character || !character.name) {
     return (

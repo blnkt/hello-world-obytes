@@ -1,5 +1,6 @@
+import React from 'react';
 import { MMKV } from 'react-native-mmkv';
-import { useMMKVString } from 'react-native-mmkv';
+import { useMMKVBoolean, useMMKVString } from 'react-native-mmkv';
 
 export const storage = new MMKV();
 
@@ -51,6 +52,85 @@ export async function setCharacter(character: any) {
 export async function clearCharacter() {
   await removeItem(CHARACTER_STORAGE_KEY);
 }
+
+// React Hook for Character
+export const useCharacter = () => {
+  const [characterString, setCharacterString] = useMMKVString(
+    CHARACTER_STORAGE_KEY,
+    storage
+  );
+
+  const character = characterString ? JSON.parse(characterString) : null;
+
+  const setCharacter = React.useCallback(
+    (newCharacter: any) => {
+      setCharacterString(JSON.stringify(newCharacter));
+    },
+    [setCharacterString]
+  );
+
+  return [character, setCharacter] as const;
+};
+
+// Manual Entry Mode Storage
+const MANUAL_ENTRY_MODE_KEY = 'manualEntryMode';
+
+export function getManualEntryMode(): boolean {
+  const value = storage.getString(MANUAL_ENTRY_MODE_KEY);
+  return value ? JSON.parse(value) : false;
+}
+
+export async function setManualEntryMode(enabled: boolean) {
+  storage.set(MANUAL_ENTRY_MODE_KEY, JSON.stringify(enabled));
+}
+
+export async function clearManualEntryMode() {
+  storage.delete(MANUAL_ENTRY_MODE_KEY);
+}
+
+// React Hook for Manual Entry Mode
+export const useManualEntryMode = () => {
+  const [isManualMode, setIsManualMode] = useMMKVBoolean(
+    MANUAL_ENTRY_MODE_KEY,
+    storage
+  );
+
+  // If the value is undefined, it means the key doesn't exist in storage
+  // This should be treated as false (HealthKit mode)
+  const mode = isManualMode === undefined ? false : isManualMode;
+
+  return [mode, setIsManualMode] as const;
+};
+
+// Developer Mode Storage
+const DEVELOPER_MODE_KEY = 'developerMode';
+
+export function getDeveloperMode(): boolean {
+  const value = storage.getString(DEVELOPER_MODE_KEY);
+  return value ? JSON.parse(value) : false;
+}
+
+export async function setDeveloperMode(enabled: boolean) {
+  storage.set(DEVELOPER_MODE_KEY, JSON.stringify(enabled));
+}
+
+export async function clearDeveloperMode() {
+  storage.delete(DEVELOPER_MODE_KEY);
+}
+
+// React Hook for Developer Mode
+export const useDeveloperMode = () => {
+  const [isDeveloperMode, setIsDeveloperMode] = useMMKVBoolean(
+    DEVELOPER_MODE_KEY,
+    storage
+  );
+
+  // If the value is undefined, it means the key doesn't exist in storage
+  // This should be treated as false (normal mode)
+  const mode = isDeveloperMode === undefined ? false : isDeveloperMode;
+
+  return [mode, setIsDeveloperMode] as const;
+};
 
 // First Time Storage
 const IS_FIRST_TIME_KEY = 'IS_FIRST_TIME';

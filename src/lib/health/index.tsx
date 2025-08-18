@@ -30,6 +30,8 @@ import {
   updateHealthCore,
   useCurrency,
   useDailyStepsGoal,
+  useDeveloperMode as useDeveloperModeStorage,
+  useManualEntryMode as useManualEntryModeStorage,
 } from '../storage';
 
 // TODO: PHASE 1 - Fix unused merge functions - Implement mergeStepsByDayMMKV in the main hook (mergeExperienceMMKV implemented)
@@ -150,54 +152,34 @@ export async function clearManualEntryMode() {
   storage.delete(MANUAL_ENTRY_MODE_KEY);
 }
 
-// Manual Entry Mode Context
-interface ManualModeContextType {
-  isManualMode: boolean;
-  setManualMode: (enabled: boolean) => Promise<void>;
-  isLoading: boolean;
-}
-
-const ManualModeContext = createContext<ManualModeContextType | undefined>(
-  undefined
-);
+// Manual Entry Mode Context - Now using reactive storage hooks
+const ManualModeContext = createContext<
+  | {
+      isManualMode: boolean;
+      setManualMode: (enabled: boolean) => Promise<void>;
+      isLoading: boolean;
+    }
+  | undefined
+>(undefined);
 
 export const ManualModeProvider = ({
   children,
 }: {
   children: React.ReactNode;
 }) => {
-  const [isManualMode, setIsManualMode] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isManualMode, setIsManualMode] = useManualEntryModeStorage();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Load from storage on mount
-  useEffect(() => {
-    const loadManualEntryMode = async () => {
-      try {
-        const mode = getManualEntryMode();
-        setIsManualMode(mode);
-        console.log(
-          '[ManualModeProvider] Loaded manual mode from storage:',
-          mode
-        );
-      } catch (error) {
-        console.error('Error loading manual entry mode:', error);
-        setIsManualMode(false);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadManualEntryMode();
-  }, []);
-
-  // Set manual mode (updates both context and storage)
+  // Set manual mode (updates storage via the reactive hook)
   const setManualMode = async (enabled: boolean) => {
     try {
-      await setManualEntryMode(enabled);
+      setIsLoading(true);
       setIsManualMode(enabled);
       console.log('[ManualModeProvider] Set manual mode:', enabled);
     } catch (error) {
       console.error('Error setting manual entry mode:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -213,39 +195,22 @@ export const ManualModeProvider = ({
 // Manual Entry Mode Hook
 export const useManualEntryMode = () => {
   const context = useContext(ManualModeContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error(
-      'useManualEntryMode must be used within ManualModeProvider'
+      'useManualEntryMode must be used within a ManualModeProvider'
     );
   }
   return context;
 };
 
-// Developer Mode Storage
-const DEVELOPER_MODE_KEY = 'developerMode';
-
-export function getDeveloperMode(): boolean {
-  const value = storage.getString(DEVELOPER_MODE_KEY);
-  return value ? JSON.parse(value) || false : false;
-}
-
-export async function setDeveloperMode(enabled: boolean) {
-  storage.set(DEVELOPER_MODE_KEY, JSON.stringify(enabled));
-}
-
-export async function clearDeveloperMode() {
-  storage.delete(DEVELOPER_MODE_KEY);
-}
-
-// Developer Mode Context
-interface DeveloperModeContextType {
-  isDeveloperMode: boolean;
-  setDevMode: (enabled: boolean) => Promise<void>;
-  isLoading: boolean;
-}
-
+// Developer Mode Context - Now using reactive storage hooks
 const DeveloperModeContext = createContext<
-  DeveloperModeContextType | undefined
+  | {
+      isDeveloperMode: boolean;
+      setDevMode: (enabled: boolean) => Promise<void>;
+      isLoading: boolean;
+    }
+  | undefined
 >(undefined);
 
 export const DeveloperModeProvider = ({
@@ -253,33 +218,19 @@ export const DeveloperModeProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [isDeveloperMode, setIsDeveloperMode] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isDeveloperMode, setIsDeveloperMode] = useDeveloperModeStorage();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Load from storage on mount
-  useEffect(() => {
-    const loadDeveloperMode = async () => {
-      try {
-        const mode = getDeveloperMode();
-        setIsDeveloperMode(mode);
-      } catch (error) {
-        console.error('Error loading developer mode:', error);
-        setIsDeveloperMode(false);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadDeveloperMode();
-  }, []);
-
-  // Set developer mode (updates both context and storage)
+  // Set developer mode (updates storage via the reactive hook)
   const setDevMode = async (enabled: boolean) => {
     try {
-      await setDeveloperMode(enabled);
+      setIsLoading(true);
       setIsDeveloperMode(enabled);
+      console.log('[DeveloperModeProvider] Set developer mode:', enabled);
     } catch (error) {
       console.error('Error setting developer mode:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -290,6 +241,17 @@ export const DeveloperModeProvider = ({
       {children}
     </DeveloperModeContext.Provider>
   );
+};
+
+// Developer Mode Hook
+export const useDeveloperMode = () => {
+  const context = useContext(DeveloperModeContext);
+  if (context === undefined) {
+    throw new Error(
+      'useDeveloperMode must be used within a DeveloperModeProvider'
+    );
+  }
+  return context;
 };
 
 // Combined provider for both manual and developer modes
@@ -303,16 +265,6 @@ export const HealthModeProvider = ({
       <DeveloperModeProvider>{children}</DeveloperModeProvider>
     </ManualModeProvider>
   );
-};
-
-export const useDeveloperMode = () => {
-  const context = useContext(DeveloperModeContext);
-  if (!context) {
-    throw new Error(
-      'useDeveloperMode must be used within DeveloperModeProvider'
-    );
-  }
-  return context;
 };
 
 // Enhanced HealthKit availability status types
