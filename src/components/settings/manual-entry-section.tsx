@@ -9,7 +9,6 @@ import {
 } from '@/lib/health';
 import {
   clearManualStepsByDay,
-  getManualStepsByDay,
   setManualStepEntry,
   useManualStepsByDay,
 } from '@/lib/storage';
@@ -302,27 +301,11 @@ const useManualStepForm = (onStepAdded: () => void) => {
 
       const steps = parseInt(stepCount, 10);
 
-      // Debug logging to see what's happening
-      console.log('=== MANUAL STEP ENTRY DEBUG ===');
-      console.log('Form selectedDate:', selectedDate);
-      console.log('Form stepCount:', stepCount);
-      console.log('Parsed steps:', steps);
-      console.log('Entry to be stored:', {
-        date: selectedDate,
-        steps,
-        source: 'manual',
-      });
-
       await setManualStepEntry({
         date: selectedDate,
         steps,
         source: 'manual',
       });
-
-      // Debug: Check what was actually stored
-      const storedEntries = await getManualStepsByDay();
-      console.log('Stored entries after submission:', storedEntries);
-      console.log('=== END DEBUG ===');
 
       // Reset form with timezone-safe date
       setStepCount('');
@@ -334,9 +317,6 @@ const useManualStepForm = (onStepAdded: () => void) => {
 
       // Notify parent to refresh
       onStepAdded();
-
-      // Trigger experience refresh to update totals
-      // useExperienceData().refreshExperience(); // This line is removed as per the edit hint
 
       alert(
         `Successfully added ${steps.toLocaleString()} steps for ${selectedDate}!`

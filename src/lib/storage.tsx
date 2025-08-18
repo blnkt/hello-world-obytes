@@ -167,12 +167,6 @@ export async function setManualStepEntry(entry: ManualStepEntry) {
     throw new Error('Invalid manual step entry');
   }
 
-  // Debug logging
-  console.log('=== STORAGE DEBUG ===');
-  console.log('setManualStepEntry called with:', entry);
-  console.log('Entry date type:', typeof entry.date);
-  console.log('Entry date value:', entry.date);
-
   // Get current manual steps from storage
   const existing = getManualStepsByDay();
   const idx = existing.findIndex((e) => e.date === entry.date);
@@ -180,14 +174,9 @@ export async function setManualStepEntry(entry: ManualStepEntry) {
   if (idx !== -1) {
     // Combine steps for the same date
     existing[idx].steps += entry.steps;
-    console.log('Updated existing entry at index:', idx);
   } else {
     existing.push(entry);
-    console.log('Added new entry to array');
   }
-
-  console.log('Final array to be stored:', existing);
-  console.log('=== END STORAGE DEBUG ===');
 
   // Update storage directly to ensure the reactive hook gets the update
   storage.set(MANUAL_STEPS_BY_DAY_KEY, JSON.stringify(existing));
