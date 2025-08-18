@@ -384,11 +384,10 @@ const ManualEntryHistory = ({ manualSteps }: { manualSteps: any[] }) => {
     return <ManualEntryHistoryEmpty />;
   }
 
-  // Sort by date (newest first)
+  // Sort by date (newest first) - using timezone-safe comparison
   const sortedSteps = [...manualSteps].sort((a, b) => {
-    const dateA = new Date(a.date);
-    const dateB = new Date(b.date);
-    return dateB.getTime() - dateA.getTime();
+    // Compare date strings directly to avoid timezone conversion issues
+    return b.date.localeCompare(a.date);
   });
 
   return (

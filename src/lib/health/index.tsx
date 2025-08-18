@@ -719,7 +719,11 @@ async function getStepsForDaySum({
 
   // Sum both sources
   return {
-    date: new Date(dateStr),
+    date: (() => {
+      // Create date in local timezone to avoid UTC conversion issues
+      const [year, month, day] = dateStr.split('-').map(Number);
+      return new Date(year, month - 1, day); // month is 0-indexed
+    })(),
     steps: healthKitSteps + manualStepsValue,
   };
 }
@@ -773,7 +777,11 @@ const getStepsGroupedByDay = async (
     }
 
     results.push({
-      date: new Date(dateStr),
+      date: (() => {
+        // Create date in local timezone to avoid UTC conversion issues
+        const [year, month, day] = dateStr.split('-').map(Number);
+        return new Date(year, month - 1, day); // month is 0-indexed
+      })(),
       steps: healthKitSteps,
     });
 
