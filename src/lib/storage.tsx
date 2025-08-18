@@ -132,6 +132,94 @@ export const useDeveloperMode = () => {
   return [mode, setIsDeveloperMode] as const;
 };
 
+// Manual Steps By Day Storage
+const MANUAL_STEPS_BY_DAY_KEY = 'MANUAL_STEPS_BY_DAY';
+
+export type ManualStepEntry = { date: string; steps: number; source: 'manual' };
+
+export function getManualStepsByDay(): ManualStepEntry[] {
+  const value = storage.getString(MANUAL_STEPS_BY_DAY_KEY);
+  try {
+    return value ? JSON.parse(value) || [] : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function setManualStepsByDay(stepsByDay: ManualStepEntry[]) {
+  // Validate all entries before storing
+  for (const entry of stepsByDay) {
+    if (!validateManualStepEntry(entry)) {
+      throw new Error(
+        `Invalid manual step entry structure: ${JSON.stringify(entry)}`
+      );
+    }
+  }
+  await setItem(MANUAL_STEPS_BY_DAY_KEY, stepsByDay);
+}
+
+export async function clearManualStepsByDay() {
+  await removeItem(MANUAL_STEPS_BY_DAY_KEY);
+}
+
+export async function setManualStepEntry(entry: ManualStepEntry) {
+  if (!validateManualStepEntry(entry)) {
+    throw new Error('Invalid manual step entry');
+  }
+
+  // Get current manual steps from storage
+  const existing = getManualStepsByDay();
+  const idx = existing.findIndex((e) => e.date === entry.date);
+
+  if (idx !== -1) {
+    // Combine steps for the same date
+    existing[idx].steps += entry.steps;
+  } else {
+    existing.push(entry);
+  }
+
+  // Update storage directly to ensure the reactive hook gets the update
+  storage.set(MANUAL_STEPS_BY_DAY_KEY, JSON.stringify(existing));
+}
+
+export function getManualStepEntry(date: string): ManualStepEntry | null {
+  const entries = getManualStepsByDay();
+  return entries.find((entry) => entry.date === entry.date) || null;
+}
+
+export function hasManualEntryForDate(date: string): boolean {
+  const entry = getManualStepEntry(date);
+  return entry !== null;
+}
+
+// React Hook for Manual Steps By Day
+export const useManualStepsByDay = () => {
+  const [manualStepsString, setManualStepsString] = useMMKVString(
+    MANUAL_STEPS_BY_DAY_KEY,
+    storage
+  );
+
+  const manualSteps = React.useMemo(() => {
+    if (!manualStepsString) return [];
+    try {
+      const parsed = JSON.parse(manualStepsString);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      console.error('Error parsing manual steps:', error);
+      return [];
+    }
+  }, [manualStepsString]);
+
+  const setManualSteps = React.useCallback(
+    (newSteps: ManualStepEntry[]) => {
+      setManualStepsString(JSON.stringify(newSteps));
+    },
+    [setManualStepsString]
+  );
+
+  return [manualSteps, setManualSteps] as const;
+};
+
 // First Time Storage
 const IS_FIRST_TIME_KEY = 'IS_FIRST_TIME';
 
@@ -471,61 +559,6 @@ export async function migrateToHealthCore() {
     await setHealthCore(coreData);
     console.log('Migrated health data to core batch storage');
   }
-}
-
-// Manual Steps By Day Storage
-const MANUAL_STEPS_BY_DAY_KEY = 'MANUAL_STEPS_BY_DAY';
-
-export type ManualStepEntry = { date: string; steps: number; source: 'manual' };
-
-export function getManualStepsByDay(): ManualStepEntry[] {
-  const value = storage.getString(MANUAL_STEPS_BY_DAY_KEY);
-  try {
-    return value ? JSON.parse(value) || [] : [];
-  } catch {
-    return [];
-  }
-}
-
-export async function setManualStepsByDay(stepsByDay: ManualStepEntry[]) {
-  // Validate all entries before storing
-  for (const entry of stepsByDay) {
-    if (!validateManualStepEntry(entry)) {
-      throw new Error(
-        `Invalid manual step entry structure: ${JSON.stringify(entry)}`
-      );
-    }
-  }
-  await setItem(MANUAL_STEPS_BY_DAY_KEY, stepsByDay);
-}
-
-export async function clearManualStepsByDay() {
-  await removeItem(MANUAL_STEPS_BY_DAY_KEY);
-}
-
-export async function setManualStepEntry(entry: ManualStepEntry) {
-  if (!validateManualStepEntry(entry)) {
-    throw new Error('Invalid manual step entry');
-  }
-  const existing = await getManualStepsByDay();
-  const idx = existing.findIndex((e) => e.date === entry.date);
-  if (idx !== -1) {
-    // Combine steps for the same date
-    existing[idx].steps += entry.steps;
-  } else {
-    existing.push(entry);
-  }
-  await setManualStepsByDay(existing);
-}
-
-export function getManualStepEntry(date: string): ManualStepEntry | null {
-  const entries = getManualStepsByDay();
-  return entries.find((entry) => entry.date === date) || null;
-}
-
-export function hasManualEntryForDate(date: string): boolean {
-  const entry = getManualStepEntry(date);
-  return entry !== null;
 }
 
 export async function migrateManualStepEntries() {

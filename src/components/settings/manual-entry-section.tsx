@@ -9,8 +9,8 @@ import {
 } from '@/lib/health';
 import {
   clearManualStepsByDay,
-  getManualStepsByDay,
   setManualStepEntry,
+  useManualStepsByDay,
 } from '@/lib/storage';
 
 if (typeof global.alert === 'undefined') {
@@ -133,27 +133,12 @@ const DeveloperModeToggle = () => {
 };
 
 const ManualEntriesInfo = ({ onRefresh }: { onRefresh: () => void }) => {
-  const [manualStepsCount, setManualStepsCount] = React.useState<number>(0);
-
-  React.useEffect(() => {
-    const loadManualStepsCount = async () => {
-      try {
-        const manualSteps = getManualStepsByDay();
-        setManualStepsCount(manualSteps?.length || 0);
-      } catch (error) {
-        console.error('Error loading manual steps count:', error);
-        setManualStepsCount(0);
-        // Don't re-throw - error boundaries don't catch async errors
-      }
-    };
-
-    loadManualStepsCount();
-  }, [onRefresh]);
+  const [manualSteps] = useManualStepsByDay();
+  const manualStepsCount = manualSteps?.length || 0;
 
   const handleClearManualEntries = async () => {
     try {
       await clearManualStepsByDay();
-      setManualStepsCount(0);
       onRefresh();
       alert('Manual entries cleared!');
     } catch (error) {
@@ -426,14 +411,12 @@ export default function ManualEntrySection() {
   const { isManualMode, setManualMode } = useManualEntryMode();
   const { isDeveloperMode, setDevMode } = useDeveloperMode();
   const { refreshExperience } = useExperienceData();
+  const [manualSteps] = useManualStepsByDay();
 
   const handleStepAdded = React.useCallback(async () => {
     // Refresh experience data - this will trigger re-renders in components that use it
     await refreshExperience();
   }, [refreshExperience]);
-
-  // Get manual steps directly from storage
-  const manualSteps = getManualStepsByDay() || [];
 
   return (
     <View className="space-y-4">
