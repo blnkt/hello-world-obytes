@@ -1,8 +1,13 @@
 import React from 'react';
+import { TextInput } from 'react-native';
 
 import { Button, StorageErrorBoundary, Text, View } from '@/components/ui';
 import { useDeveloperMode, useManualEntryMode } from '@/lib/health';
-import { clearManualStepsByDay, getManualStepsByDay } from '@/lib/storage';
+import {
+  clearManualStepsByDay,
+  getManualStepsByDay,
+  setManualStepEntry,
+} from '@/lib/storage';
 
 if (typeof global.alert === 'undefined') {
   global.alert = () => {};
@@ -139,7 +144,7 @@ const ManualEntriesInfo = ({ onRefresh }: { onRefresh: () => void }) => {
     };
 
     loadManualStepsCount();
-  }, []);
+  }, [onRefresh]);
 
   const handleClearManualEntries = async () => {
     try {
@@ -229,7 +234,153 @@ const ManualEntryHistoryEmpty = () => (
   </View>
 );
 
-const ManualEntryHistory = ({ refreshTrigger }: { refreshTrigger: number }) => {
+const DateInput = ({
+  value,
+  onChangeText,
+}: {
+  value: string;
+  onChangeText: (text: string) => void;
+}) => (
+  <View>
+    <Text className="mb-1 text-sm font-medium">Date</Text>
+    <TextInput
+      value={value}
+      onChangeText={onChangeText}
+      placeholder="YYYY-MM-DD"
+      className="rounded-md border border-neutral-300 bg-white px-3 py-2 dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
+      maxLength={10}
+    />
+  </View>
+);
+
+const StepCountInput = ({
+  value,
+  onChangeText,
+}: {
+  value: string;
+  onChangeText: (text: string) => void;
+}) => (
+  <View>
+    <Text className="mb-1 text-sm font-medium">Step Count</Text>
+    <TextInput
+      value={value}
+      onChangeText={onChangeText}
+      placeholder="Enter step count"
+      keyboardType="numeric"
+      className="rounded-md border border-neutral-300 bg-white px-3 py-2 dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
+    />
+  </View>
+);
+
+const useManualStepForm = (onStepAdded: () => void) => {
+  const [stepCount, setStepCount] = React.useState('');
+  const [selectedDate, setSelectedDate] = React.useState(() => {
+    const today = new Date();
+    return today.toISOString().split('T')[0]; // YYYY-MM-DD format
+  });
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [error, setError] = React.useState<string | undefined>();
+
+  const validateInput = () => {
+    if (!stepCount.trim()) {
+      setError('Please enter a step count');
+      return false;
+    }
+    const steps = parseInt(stepCount, 10);
+    if (isNaN(steps) || steps < 1) {
+      setError('Please enter a valid step count');
+      return false;
+    }
+    if (steps > 100000) {
+      setError('Step count cannot exceed 100,000');
+      return false;
+    }
+    return true;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateInput()) return;
+
+    try {
+      setIsSubmitting(true);
+      setError(undefined);
+
+      const steps = parseInt(stepCount, 10);
+      await setManualStepEntry({
+        date: selectedDate,
+        steps,
+        source: 'manual',
+      });
+
+      // Reset form
+      setStepCount('');
+      setSelectedDate(new Date().toISOString().split('T')[0]);
+
+      // Notify parent to refresh
+      onStepAdded();
+
+      alert(
+        `Successfully added ${steps.toLocaleString()} steps for ${selectedDate}!`
+      );
+    } catch (error) {
+      console.error('Error adding manual step entry:', error);
+      setError('Failed to add step entry. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return {
+    stepCount,
+    setStepCount,
+    selectedDate,
+    setSelectedDate,
+    isSubmitting,
+    error,
+    handleSubmit,
+  };
+};
+
+const AddManualStepForm = ({ onStepAdded }: { onStepAdded: () => void }) => {
+  const {
+    stepCount,
+    setStepCount,
+    selectedDate,
+    setSelectedDate,
+    isSubmitting,
+    error,
+    handleSubmit,
+  } = useManualStepForm(onStepAdded);
+
+  return (
+    <View className="rounded-md border border-neutral-200 p-3 dark:border-neutral-700">
+      <Text className="mb-3 font-medium">Add Manual Step Entry</Text>
+
+      <View className="space-y-3">
+        <DateInput value={selectedDate} onChangeText={setSelectedDate} />
+        <StepCountInput value={stepCount} onChangeText={setStepCount} />
+
+        {/* Error Display */}
+        {error && (
+          <Text className="text-sm text-red-600 dark:text-red-400">
+            {error}
+          </Text>
+        )}
+
+        {/* Submit Button */}
+        <Button
+          fullWidth
+          label={isSubmitting ? 'Adding...' : 'Add Step Entry'}
+          onPress={handleSubmit}
+          disabled={isSubmitting || !stepCount.trim()}
+          size="sm"
+        />
+      </View>
+    </View>
+  );
+};
+
+const ManualEntryHistory = () => {
   const [manualSteps, setManualSteps] = React.useState<any[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
 
@@ -289,10 +440,8 @@ const ManualEntryHistory = ({ refreshTrigger }: { refreshTrigger: number }) => {
 };
 
 export const ManualEntrySection = () => {
-  const [refreshTrigger, setRefreshTrigger] = React.useState(0);
-
   const handleRefresh = () => {
-    setRefreshTrigger((prev) => prev + 1);
+    // This function triggers a refresh of the manual entries display
   };
 
   return (
@@ -303,8 +452,9 @@ export const ManualEntrySection = () => {
         <EntryModeIndicator />
         <ManualEntryModeToggle />
         <DeveloperModeToggle />
+        <AddManualStepForm onStepAdded={handleRefresh} />
         <ManualEntriesInfo onRefresh={handleRefresh} />
-        <ManualEntryHistory refreshTrigger={refreshTrigger} />
+        <ManualEntryHistory />
       </View>
     </View>
   );
