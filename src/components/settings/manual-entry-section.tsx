@@ -9,7 +9,6 @@ import {
 } from '@/lib/health';
 import {
   clearManualStepsByDay,
-  getManualStepsByDay,
   setManualStepEntry,
   useManualStepsByDay,
 } from '@/lib/storage';
@@ -172,8 +171,11 @@ const ManualEntriesInfo = ({ onRefresh }: { onRefresh: () => void }) => {
 const ManualEntryHistoryItem = ({ entry }: { entry: any }) => {
   const formatDate = (dateString: string) => {
     try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('en-US', {
+      // Create date in local timezone to avoid UTC conversion issues
+      const [year, month, day] = dateString.split('-').map(Number);
+      const localDate = new Date(year, month - 1, day); // month is 0-indexed
+
+      return localDate.toLocaleDateString('en-US', {
         weekday: 'short',
         month: 'short',
         day: 'numeric',
@@ -302,44 +304,11 @@ const useManualStepForm = (onStepAdded: () => void) => {
 
       const steps = parseInt(stepCount, 10);
 
-      // Comprehensive debugging
-      console.log('=== MANUAL STEP ENTRY DEBUG START ===');
-      console.log('1. Form input - selectedDate:', selectedDate);
-      console.log('2. Form input - stepCount:', stepCount);
-      console.log('3. Form input - parsed steps:', steps);
-      console.log('4. Entry to be stored:', {
-        date: selectedDate,
-        steps,
-        source: 'manual',
-      });
-
-      // Check what's currently in storage before adding
-      const beforeEntries = await getManualStepsByDay();
-      console.log('5. Storage BEFORE submission:', beforeEntries);
-
       await setManualStepEntry({
         date: selectedDate,
         steps,
         source: 'manual',
       });
-
-      // Check what's in storage after adding
-      const afterEntries = await getManualStepsByDay();
-      console.log('6. Storage AFTER submission:', afterEntries);
-
-      // Check if the entry was added correctly
-      const addedEntry = afterEntries.find(
-        (entry) => entry.date === selectedDate
-      );
-      console.log('7. Added entry found:', addedEntry);
-
-      // Check if there are any entries with different dates
-      const differentDates = afterEntries.filter(
-        (entry) => entry.date !== selectedDate
-      );
-      console.log('8. Other entries with different dates:', differentDates);
-
-      console.log('=== MANUAL STEP ENTRY DEBUG END ===');
 
       // Reset form with timezone-safe date
       setStepCount('');
@@ -453,27 +422,8 @@ export default function ManualEntrySection() {
   const [manualSteps] = useManualStepsByDay();
 
   const handleStepAdded = React.useCallback(async () => {
-    // Debug: Check manual steps before refresh
-    console.log('=== REFRESH DEBUG START ===');
-    const beforeRefresh = await getManualStepsByDay();
-    console.log('1. Manual steps BEFORE refreshExperience:', beforeRefresh);
-
     // Refresh experience data - this will trigger re-renders in components that use it
     await refreshExperience();
-
-    // Debug: Check manual steps after refresh
-    const afterRefresh = await getManualStepsByDay();
-    console.log('2. Manual steps AFTER refreshExperience:', afterRefresh);
-
-    // Check if anything changed
-    if (JSON.stringify(beforeRefresh) !== JSON.stringify(afterRefresh)) {
-      console.log('3. WARNING: Manual steps changed during refresh!');
-      console.log('4. Before:', beforeRefresh);
-      console.log('5. After:', afterRefresh);
-    } else {
-      console.log('3. Manual steps unchanged during refresh');
-    }
-    console.log('=== REFRESH DEBUG END ===');
   }, [refreshExperience]);
 
   return (

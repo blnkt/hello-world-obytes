@@ -167,38 +167,16 @@ export async function setManualStepEntry(entry: ManualStepEntry) {
     throw new Error('Invalid manual step entry');
   }
 
-  // Comprehensive debugging
-  console.log('=== STORAGE DEBUG START ===');
-  console.log('1. setManualStepEntry called with:', entry);
-  console.log('2. Entry date type:', typeof entry.date);
-  console.log('3. Entry date value:', entry.date);
-  console.log('4. Entry steps:', entry.steps);
-
   // Get current manual steps from storage
   const existing = getManualStepsByDay();
-  console.log('5. Existing entries before modification:', existing);
-
   const idx = existing.findIndex((e) => e.date === entry.date);
-  console.log('6. Found existing entry at index:', idx);
 
   if (idx !== -1) {
     // Combine steps for the same date
-    const oldSteps = existing[idx].steps;
     existing[idx].steps += entry.steps;
-    console.log(
-      '7. Updated existing entry - old steps:',
-      oldSteps,
-      'new total:',
-      existing[idx].steps
-    );
   } else {
     existing.push(entry);
-    console.log('7. Added new entry to array');
   }
-
-  console.log('8. Final array to be stored:', existing);
-  console.log('9. JSON string to be stored:', JSON.stringify(existing));
-  console.log('=== STORAGE DEBUG END ===');
 
   // Update storage directly to ensure the reactive hook gets the update
   storage.set(MANUAL_STEPS_BY_DAY_KEY, JSON.stringify(existing));
@@ -222,23 +200,13 @@ export const useManualStepsByDay = () => {
   );
 
   const manualSteps = React.useMemo(() => {
-    console.log('=== HOOK DEBUG ===');
-    console.log('1. Raw manualStepsString:', manualStepsString);
-
     if (!manualStepsString) {
-      console.log('2. No string, returning empty array');
       return [];
     }
 
     try {
       const parsed = JSON.parse(manualStepsString);
-      console.log('3. Parsed result:', parsed);
-      console.log('4. Is array?', Array.isArray(parsed));
-
-      const result = Array.isArray(parsed) ? parsed : [];
-      console.log('5. Final result:', result);
-      console.log('=== END HOOK DEBUG ===');
-      return result;
+      return Array.isArray(parsed) ? parsed : [];
     } catch (error) {
       console.error('Error parsing manual steps:', error);
       return [];
