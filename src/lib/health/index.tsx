@@ -30,6 +30,7 @@ import {
   type Streak,
   updateHealthCore,
   useCurrency,
+  useDailyStepsGoal,
 } from '../storage';
 
 // TODO: PHASE 1 - Fix unused merge functions - Implement mergeStepsByDayMMKV in the main hook (mergeExperienceMMKV implemented)
@@ -1088,7 +1089,7 @@ export const detectStreaks = (
 // eslint-disable-next-line max-lines-per-function
 export const useStreakTracking = () => {
   const [streaks, setStreaks] = React.useState<Streak[]>([]);
-  const dailyGoal = getDailyStepsGoal();
+  const [dailyGoal] = useDailyStepsGoal();
 
   // Use global state instead of calling useStepCountAsExperience
   const { stepsByDay } = useExperienceData();
