@@ -10,6 +10,7 @@ import React, {
   useEffect,
   useState,
 } from 'react';
+import { useMMKVString } from 'react-native-mmkv';
 
 import {
   getCumulativeExperience,
@@ -46,57 +47,16 @@ import {
 const MANUAL_ENTRY_MODE_KEY = 'manualEntryMode';
 
 // Shared experience state to avoid circular dependencies
-let globalExperienceState: {
-  experience: number;
-  cumulativeExperience: number;
-  firstExperienceDate: string | null;
-  stepsByDay: { date: Date; steps: number }[];
-} = {
-  experience: 0,
-  cumulativeExperience: 0,
-  firstExperienceDate: null,
-  stepsByDay: [],
-};
-
-// Global state change listeners
-let globalStateListeners: (() => void)[] = [];
-
-// Function to update global state
-const updateGlobalExperienceState = (
-  newState: Partial<typeof globalExperienceState>
-) => {
-  globalExperienceState = { ...globalExperienceState, ...newState };
-  
-  // Notify all listeners that global state has changed
-  globalStateListeners.forEach(listener => listener());
-};
-
-// Function to get global state
-const getGlobalExperienceState = () => ({ ...globalExperienceState });
-
-// Function to subscribe to global state changes
-const subscribeToGlobalState = (listener: () => void) => {
-  globalStateListeners.push(listener);
-  return () => {
-    const index = globalStateListeners.indexOf(listener);
-    if (index > -1) {
-      globalStateListeners.splice(index, 1);
-    }
-  };
-};
+// REMOVED: Custom global state system - using MMKV hooks instead
 
 // Main consolidated experience hook
 // eslint-disable-next-line max-lines-per-function
 export const useExperienceData = () => {
-  const [experience, setExperienceState] = useState<number>(0);
-  const [cumulativeExperience, setCumulativeExperienceState] =
-    useState<number>(0);
-  const [firstExperienceDate, setFirstExperienceDateState] = useState<
-    string | null
-  >(null);
-  const [stepsByDay, setStepsByDayState] = useState<
-    { date: Date; steps: number }[]
-  >([]);
+  // Use MMKV hooks directly for reactive storage access
+  const [experience, setExperience] = useMMKVString('experience', storage);
+  const [cumulativeExperience, setCumulativeExperience] = useMMKVString('cumulativeExperience', storage);
+  const [firstExperienceDate, setFirstExperienceDate] = useMMKVString('firstExperienceDate', storage);
+  const [stepsByDay, setStepsByDay] = useMMKVString('stepsByDay', storage);
 
   // Guard against multiple simultaneous executions
   const isUpdatingRef = React.useRef(false);
@@ -111,69 +71,27 @@ export const useExperienceData = () => {
     try {
       await getExperienceFromStepsHelper({
         lastCheckedDateTime: new Date(), // Use current time for refresh
-        setExperienceState,
-        setCumulativeExperienceState,
-        setFirstExperienceDateState,
-        setStepsByDayState,
+        setExperienceState: (value: number) => setExperience(String(value)),
+        setCumulativeExperienceState: (value: number) => setCumulativeExperience(String(value)),
+        setFirstExperienceDateState: (value: string | null) => setFirstExperienceDate(value || ''),
+        setStepsByDayState: (value: { date: Date; steps: number }[]) => setStepsByDay(JSON.stringify(value)),
       });
     } finally {
       isUpdatingRef.current = false;
     }
-  }, []);
+  }, [setExperience, setCumulativeExperience, setFirstExperienceDate, setStepsByDay]);
 
-  // Initialize from storage on mount
-  useEffect(() => {
-    const initializeFromStorage = () => {
-      const storedExperience = getExperience();
-      const storedCumulativeExperience = getCumulativeExperience();
-      const storedFirstExperienceDate = getFirstExperienceDate();
-      const storedStepsByDay = getStepsByDay();
-
-      setExperienceState(storedExperience);
-      setCumulativeExperienceState(storedCumulativeExperience);
-      setFirstExperienceDateState(storedFirstExperienceDate);
-      setStepsByDayState(storedStepsByDay);
-
-      // Update global state
-      updateGlobalExperienceState({
-        experience: storedExperience,
-        cumulativeExperience: storedCumulativeExperience,
-        firstExperienceDate: storedFirstExperienceDate,
-        stepsByDay: storedStepsByDay,
-      });
-    };
-
-    initializeFromStorage();
-  }, []);
-
-  // Subscribe to global state changes
-  useEffect(() => {
-    const unsubscribe = subscribeToGlobalState(() => {
-      const globalState = getGlobalExperienceState();
-      setExperienceState(globalState.experience);
-      setCumulativeExperienceState(globalState.cumulativeExperience);
-      setFirstExperienceDateState(globalState.firstExperienceDate);
-      setStepsByDayState(globalState.stepsByDay);
-    });
-
-    return unsubscribe;
-  }, []);
-
-  // Update global state whenever local state changes
-  useEffect(() => {
-    updateGlobalExperienceState({
-      experience,
-      cumulativeExperience,
-      firstExperienceDate,
-      stepsByDay,
-    });
-  }, [experience, cumulativeExperience, firstExperienceDate, stepsByDay]);
+  // Parse the stored values to proper types
+  const parsedExperience = experience ? Number(experience) : 0;
+  const parsedCumulativeExperience = cumulativeExperience ? Number(cumulativeExperience) : 0;
+  const parsedFirstExperienceDate = firstExperienceDate || null;
+  const parsedStepsByDay = stepsByDay ? JSON.parse(stepsByDay) : [];
 
   return {
-    experience,
-    cumulativeExperience,
-    firstExperienceDate,
-    stepsByDay,
+    experience: parsedExperience,
+    cumulativeExperience: parsedCumulativeExperience,
+    firstExperienceDate: parsedFirstExperienceDate,
+    stepsByDay: parsedStepsByDay,
     refreshExperience,
   };
 };
@@ -1173,7 +1091,7 @@ export const useStreakTracking = () => {
   const dailyGoal = getDailyStepsGoal();
 
   // Use global state instead of calling useStepCountAsExperience
-  const { stepsByDay } = getGlobalExperienceState();
+  const { stepsByDay } = useExperienceData();
 
   React.useEffect(() => {
     if (stepsByDay.length > 0) {
@@ -1204,8 +1122,7 @@ export const useStreakTracking = () => {
  * @returns Object containing cumulative experience and first experience date
  */
 export const useCumulativeExperience = () => {
-  const { cumulativeExperience, firstExperienceDate } =
-    getGlobalExperienceState();
+  const { cumulativeExperience, firstExperienceDate } = useExperienceData();
 
   return {
     cumulativeExperience,
@@ -1223,8 +1140,7 @@ export const useCumulativeExperience = () => {
  * @returns Object containing cumulative experience and first experience date
  */
 export const useCumulativeExperienceSimple = () => {
-  const { cumulativeExperience, firstExperienceDate } =
-    getGlobalExperienceState();
+  const { cumulativeExperience, firstExperienceDate } = useExperienceData();
 
   return {
     cumulativeExperience,
@@ -1261,7 +1177,7 @@ export const convertExperienceToCurrency = (experience: number): number => {
  * @returns Object containing currency data and conversion functions
  */
 export const useCurrencySystem = () => {
-  const { cumulativeExperience } = getGlobalExperienceState();
+  const { cumulativeExperience } = useExperienceData();
   const [currency] = useCurrency();
 
   // Since experience is auto-converted, available currency is always 0
