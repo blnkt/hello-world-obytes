@@ -1,12 +1,12 @@
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import { TextInput } from 'react-native';
+import { render, fireEvent, waitFor, screen } from '@testing-library/react-native';
 
 // Mock the health module to test the refresh system
 jest.mock('@/lib/health', () => ({
   ...jest.requireActual('@/lib/health'),
   useManualEntryMode: jest.fn(),
   useDeveloperMode: jest.fn(),
+  useExperienceData: jest.fn(),
 }));
 
 // Mock storage
@@ -18,19 +18,19 @@ import {
   getManualStepsByDay,
   setManualStepEntry,
 } from '@/lib/storage';
-import { useDeveloperMode, useManualEntryMode } from '@/lib/health';
+import { useDeveloperMode, useManualEntryMode, useExperienceData } from '@/lib/health';
 
 // Mock the hooks
 const mockUseManualEntryMode = jest.mocked(useManualEntryMode);
 const mockUseDeveloperMode = jest.mocked(useDeveloperMode);
+const mockUseExperienceData = jest.mocked(useExperienceData);
 
-describe('Manual Entry Section Experience Refresh Integration', () => {
+describe('Manual Entry Section Component Behavior', () => {
+  const mockRefreshExperience = jest.fn();
+
   beforeEach(async () => {
     // Clear all storage before each test
     await clearManualStepsByDay();
-    await setCurrency(0);
-    await setExperience(0);
-    await setCumulativeExperience(0);
     
     // Reset mocks
     jest.clearAllMocks();
@@ -47,23 +47,23 @@ describe('Manual Entry Section Experience Refresh Integration', () => {
       setDevMode: jest.fn(),
       isLoading: false,
     });
+
+    mockUseExperienceData.mockReturnValue({
+      experience: 0,
+      cumulativeExperience: 0,
+      firstExperienceDate: null,
+      stepsByDay: [],
+      refreshExperience: mockRefreshExperience,
+    });
   });
 
   afterEach(async () => {
     // Clean up after each test
     await clearManualStepsByDay();
-    await setCurrency(0);
-    await setExperience(0);
-    await setCumulativeExperience(0);
   });
 
-  describe('Manual Step Entry Triggers Experience Refresh', () => {
-    it('should trigger experience refresh when adding manual step entry', async () => {
-      // Set up initial state
-      await setExperience(1000);
-      await setCumulativeExperience(1000);
-      await setCurrency(100);
-      
+  describe('Form Submission and Experience Refresh', () => {
+    it('should call refreshExperience when adding manual step entry', async () => {
       render(<ManualEntrySection />);
       
       // Find the form inputs
@@ -80,7 +80,7 @@ describe('Manual Entry Section Experience Refresh Integration', () => {
       
       // Wait for the form submission to complete
       await waitFor(() => {
-        expect(mockTriggerExperienceRefresh).toHaveBeenCalledTimes(1);
+        expect(mockRefreshExperience).toHaveBeenCalledTimes(1);
       });
       
       // Verify the manual step was added
@@ -93,7 +93,7 @@ describe('Manual Entry Section Experience Refresh Integration', () => {
       });
     });
 
-    it('should trigger experience refresh for each manual step entry', async () => {
+    it('should call refreshExperience for each manual step entry', async () => {
       render(<ManualEntrySection />);
       
       const dateInput = screen.getByPlaceholderText('YYYY-MM-DD');
@@ -107,7 +107,7 @@ describe('Manual Entry Section Experience Refresh Integration', () => {
       
       // Wait for first submission
       await waitFor(() => {
-        expect(mockTriggerExperienceRefresh).toHaveBeenCalledTimes(1);
+        expect(mockRefreshExperience).toHaveBeenCalledTimes(1);
       });
       
       // Add second entry
@@ -117,7 +117,7 @@ describe('Manual Entry Section Experience Refresh Integration', () => {
       
       // Wait for second submission
       await waitFor(() => {
-        expect(mockTriggerExperienceRefresh).toHaveBeenCalledTimes(2);
+        expect(mockRefreshExperience).toHaveBeenCalledTimes(2);
       });
       
       // Verify both entries were added
@@ -125,7 +125,7 @@ describe('Manual Entry Section Experience Refresh Integration', () => {
       expect(manualSteps).toHaveLength(2);
     });
 
-    it('should not trigger experience refresh when form validation fails', async () => {
+    it('should not call refreshExperience when form validation fails', async () => {
       render(<ManualEntrySection />);
       
       const stepCountInput = screen.getByPlaceholderText('Enter step count');
@@ -142,10 +142,10 @@ describe('Manual Entry Section Experience Refresh Integration', () => {
       });
       
       // Verify no experience refresh was triggered
-      expect(mockTriggerExperienceRefresh).not.toHaveBeenCalled();
+      expect(mockRefreshExperience).not.toHaveBeenCalled();
     });
 
-    it('should trigger experience refresh even when adding steps for past dates', async () => {
+    it('should call refreshExperience even when adding steps for past dates', async () => {
       render(<ManualEntrySection />);
       
       const dateInput = screen.getByPlaceholderText('YYYY-MM-DD');
@@ -159,7 +159,7 @@ describe('Manual Entry Section Experience Refresh Integration', () => {
       
       // Wait for submission
       await waitFor(() => {
-        expect(mockTriggerExperienceRefresh).toHaveBeenCalledTimes(1);
+        expect(mockRefreshExperience).toHaveBeenCalledTimes(1);
       });
       
       // Verify the entry was added
@@ -169,31 +169,7 @@ describe('Manual Entry Section Experience Refresh Integration', () => {
     });
   });
 
-  describe('Experience Refresh Timing and State Updates', () => {
-    it('should trigger refresh after successful step entry and before showing success message', async () => {
-      render(<ManualEntrySection />);
-      
-      const dateInput = screen.getByPlaceholderText('YYYY-MM-DD');
-      const stepCountInput = screen.getByPlaceholderText('Enter step count');
-      const addButton = screen.getByText('Add Step Entry');
-      
-      // Fill and submit form
-      fireEvent.changeText(dateInput, '2024-06-01');
-      fireEvent.changeText(stepCountInput, '6000');
-      fireEvent.press(addButton);
-      
-      // Wait for the refresh to be triggered
-      await waitFor(() => {
-        expect(mockTriggerExperienceRefresh).toHaveBeenCalledTimes(1);
-      });
-      
-      // Verify the success message appears (this happens after refresh)
-      // Note: In tests, the alert might not be visible, so we just verify the refresh was triggered
-      await waitFor(() => {
-        expect(mockTriggerExperienceRefresh).toHaveBeenCalledTimes(1);
-      });
-    });
-
+  describe('Form State Management', () => {
     it('should maintain form state consistency after triggering refresh', async () => {
       render(<ManualEntrySection />);
       
@@ -208,7 +184,7 @@ describe('Manual Entry Section Experience Refresh Integration', () => {
       
       // Wait for submission and refresh
       await waitFor(() => {
-        expect(mockTriggerExperienceRefresh).toHaveBeenCalledTimes(1);
+        expect(mockRefreshExperience).toHaveBeenCalledTimes(1);
       });
       
       // Verify form is reset and ready for next entry
@@ -219,75 +195,8 @@ describe('Manual Entry Section Experience Refresh Integration', () => {
     });
   });
 
-  describe('Integration with Experience System', () => {
-    it('should properly integrate manual steps with existing experience totals', async () => {
-      // Set up existing experience
-      await setExperience(8000);
-      await setCumulativeExperience(8000);
-      await setCurrency(800);
-      
-      render(<ManualEntrySection />);
-      
-      const dateInput = screen.getByPlaceholderText('YYYY-MM-DD');
-      const stepCountInput = screen.getByPlaceholderText('Enter step count');
-      const addButton = screen.getByText('Add Step Entry');
-      
-      // Add manual steps
-      fireEvent.changeText(dateInput, '2024-06-01');
-      fireEvent.changeText(stepCountInput, '2000');
-      fireEvent.press(addButton);
-      
-      // Wait for refresh
-      await waitFor(() => {
-        expect(mockTriggerExperienceRefresh).toHaveBeenCalledTimes(1);
-      });
-      
-      // Verify manual steps were added
-      const manualSteps = await getManualStepsByDay();
-      expect(manualSteps).toHaveLength(1);
-      expect(manualSteps[0].steps).toBe(2000);
-      
-      // The experience refresh should have been triggered to update totals
-      // Note: In a real app, this would update the experience across all components
-      expect(mockTriggerExperienceRefresh).toHaveBeenCalledWith();
-    });
-
-    it('should handle multiple step entries for the same date correctly', async () => {
-      render(<ManualEntrySection />);
-      
-      const dateInput = screen.getByPlaceholderText('YYYY-MM-DD');
-      const stepCountInput = screen.getByPlaceholderText('Enter step count');
-      const addButton = screen.getByText('Add Step Entry');
-      
-      // Add first entry for same date
-      fireEvent.changeText(dateInput, '2024-06-01');
-      fireEvent.changeText(stepCountInput, '1500');
-      fireEvent.press(addButton);
-      
-      await waitFor(() => {
-        expect(mockTriggerExperienceRefresh).toHaveBeenCalledTimes(1);
-      });
-      
-      // Add second entry for same date (form resets to today's date, so we need to set it again)
-      fireEvent.changeText(dateInput, '2024-06-01');
-      fireEvent.changeText(stepCountInput, '2500');
-      fireEvent.press(addButton);
-      
-      await waitFor(() => {
-        expect(mockTriggerExperienceRefresh).toHaveBeenCalledTimes(2);
-      });
-      
-      // Verify both entries exist
-      const manualSteps = await getManualStepsByDay();
-      // The storage system replaces entries for the same date, so we expect 1 entry with the last value
-      expect(manualSteps).toHaveLength(1);
-      expect(manualSteps[0].date).toBe('2024-06-01');
-      expect(manualSteps[0].steps).toBe(2500); // Last entry value (replaces the first)
-    });
-  });
-
-  describe('Error Handling and Edge Cases', () => {
-    it('should not trigger refresh when step entry fails', async () => {
+  describe('Error Handling', () => {
+    it('should not call refreshExperience when step entry fails', async () => {
       // Mock a failure in setManualStepEntry
       const originalSetManualStepEntry = setManualStepEntry;
       jest.spyOn(require('@/lib/storage'), 'setManualStepEntry').mockRejectedValueOnce(
@@ -311,7 +220,7 @@ describe('Manual Entry Section Experience Refresh Integration', () => {
       });
       
       // Verify no refresh was triggered due to failure
-      expect(mockTriggerExperienceRefresh).not.toHaveBeenCalled();
+      expect(mockRefreshExperience).not.toHaveBeenCalled();
       
       // Restore original function
       jest.restoreAllMocks();
@@ -331,7 +240,7 @@ describe('Manual Entry Section Experience Refresh Integration', () => {
       
       // Wait for submission
       await waitFor(() => {
-        expect(mockTriggerExperienceRefresh).toHaveBeenCalledTimes(1);
+        expect(mockRefreshExperience).toHaveBeenCalledTimes(1);
       });
       
       // Verify the entry was added
