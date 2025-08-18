@@ -453,8 +453,27 @@ export default function ManualEntrySection() {
   const [manualSteps] = useManualStepsByDay();
 
   const handleStepAdded = React.useCallback(async () => {
+    // Debug: Check manual steps before refresh
+    console.log('=== REFRESH DEBUG START ===');
+    const beforeRefresh = await getManualStepsByDay();
+    console.log('1. Manual steps BEFORE refreshExperience:', beforeRefresh);
+
     // Refresh experience data - this will trigger re-renders in components that use it
     await refreshExperience();
+
+    // Debug: Check manual steps after refresh
+    const afterRefresh = await getManualStepsByDay();
+    console.log('2. Manual steps AFTER refreshExperience:', afterRefresh);
+
+    // Check if anything changed
+    if (JSON.stringify(beforeRefresh) !== JSON.stringify(afterRefresh)) {
+      console.log('3. WARNING: Manual steps changed during refresh!');
+      console.log('4. Before:', beforeRefresh);
+      console.log('5. After:', afterRefresh);
+    } else {
+      console.log('3. Manual steps unchanged during refresh');
+    }
+    console.log('=== REFRESH DEBUG END ===');
   }, [refreshExperience]);
 
   return (
