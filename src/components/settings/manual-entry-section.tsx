@@ -2,7 +2,11 @@ import React from 'react';
 import { TextInput } from 'react-native';
 
 import { Button, StorageErrorBoundary, Text, View } from '@/components/ui';
-import { useDeveloperMode, useManualEntryMode } from '@/lib/health';
+import {
+  triggerExperienceRefresh,
+  useDeveloperMode,
+  useManualEntryMode,
+} from '@/lib/health';
 import {
   clearManualStepsByDay,
   getManualStepsByDay,
@@ -272,6 +276,7 @@ const StepCountInput = ({
   </View>
 );
 
+// eslint-disable-next-line max-lines-per-function
 const useManualStepForm = (onStepAdded: () => void) => {
   const [stepCount, setStepCount] = React.useState('');
   const [selectedDate, setSelectedDate] = React.useState(() => {
@@ -318,6 +323,9 @@ const useManualStepForm = (onStepAdded: () => void) => {
 
       // Notify parent to refresh
       onStepAdded();
+
+      // Trigger experience refresh to update totals
+      triggerExperienceRefresh();
 
       alert(
         `Successfully added ${steps.toLocaleString()} steps for ${selectedDate}!`
