@@ -859,10 +859,15 @@ const mergeStepData = (
 
   // Convert back to array of { date, steps }
   const mergedResults = Array.from(stepMap.entries()).map(
-    ([dateStr, steps]) => ({
-      date: new Date(dateStr),
-      steps,
-    })
+    ([dateStr, steps]) => {
+      // Create date in local timezone to avoid UTC conversion issues
+      const [year, month, day] = dateStr.split('-').map(Number);
+      const localDate = new Date(year, month - 1, day); // month is 0-indexed
+      return {
+        date: localDate,
+        steps,
+      };
+    }
   );
 
   // Sort by date
@@ -909,7 +914,7 @@ const updateHealthData = async (params: {
     firstExperienceDate: newFirstExperienceDate,
     stepsByDay: mergedResults,
     currency: currentCurrency + currencyToAdd,
-    lastCheckedDate: lastCheckedDateTime.toISOString(),
+    lastCheckedDate: getDateString(lastCheckedDateTime),
   };
 
   await updateHealthCore(batchUpdate);
