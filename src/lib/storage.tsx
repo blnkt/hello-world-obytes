@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { MMKV } from 'react-native-mmkv';
 import { useMMKVBoolean, useMMKVString } from 'react-native-mmkv';
 
@@ -184,7 +184,7 @@ export async function setManualStepEntry(entry: ManualStepEntry) {
 
 export function getManualStepEntry(date: string): ManualStepEntry | null {
   const entries = getManualStepsByDay();
-  return entries.find((entry) => entry.date === entry.date) || null;
+  return entries.find((entry) => entry.date === date) || null;
 }
 
 export function hasManualEntryForDate(date: string): boolean {
