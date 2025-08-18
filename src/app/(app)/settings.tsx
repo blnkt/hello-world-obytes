@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { ScrollView } from 'react-native';
 
 import ManualEntrySection from '@/components/settings/manual-entry-section';
 import { Button, Text, View } from '@/components/ui';
@@ -78,38 +79,40 @@ export default function Settings() {
   }, [steps]);
 
   return (
-    <View className="flex-1 p-4">
-      <Text className="mb-4 text-2xl font-bold">Settings</Text>
+    <View className="flex-1">
+      <ScrollView className="flex-1 p-4" showsVerticalScrollIndicator={false}>
+        <Text className="mb-4 text-2xl font-bold">Settings</Text>
 
-      <View className="space-y-6">
-        <DebugInfo isFirstTime={isFirstTime} forceUpdate={forceUpdate} />
+        <View className="space-y-6">
+          <DebugInfo isFirstTime={isFirstTime} forceUpdate={forceUpdate} />
 
-        <ManualEntrySection />
+          <ManualEntrySection />
 
-        <View className="space-y-4">
-          <Button
-            fullWidth
-            variant="outline"
-            label="Update Step Count"
-            onPress={pressHandler}
-          />
-          <Text>Current Steps: {steps}</Text>
+          <View className="space-y-4">
+            <Button
+              fullWidth
+              variant="outline"
+              label="Update Step Count"
+              onPress={pressHandler}
+            />
+            <Text>Current Steps: {steps}</Text>
 
-          <Button
-            fullWidth
-            variant="outline"
-            label="Reset First Time Flag"
-            onPress={resetFirstTimeHandler}
-          />
+            <Button
+              fullWidth
+              variant="outline"
+              label="Reset First Time Flag"
+              onPress={resetFirstTimeHandler}
+            />
 
-          <Button
-            fullWidth
-            variant="outline"
-            label="Clear All Storage"
-            onPress={clearAllStorageHandler}
-          />
+            <Button
+              fullWidth
+              variant="outline"
+              label="Clear All Storage"
+              onPress={clearAllStorageHandler}
+            />
+          </View>
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 }
