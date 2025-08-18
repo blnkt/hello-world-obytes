@@ -366,8 +366,12 @@ export default function Home() {
     d.setHours(0, 0, 0, 0);
     return d;
   }, []);
+  const stepsByDayTyped = stepsByDay as {
+    date: Date | string;
+    steps: number;
+  }[];
   const todaySteps =
-    stepsByDay.find((day) => {
+    stepsByDayTyped.find((day) => {
       if (!day || !day.date) return false;
 
       // Handle both Date objects and string dates
