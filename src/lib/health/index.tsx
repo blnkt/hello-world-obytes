@@ -3,7 +3,13 @@ import HealthKit, {
   HKStatisticsOptions,
   HKUnits,
 } from '@kingstinct/react-native-healthkit';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 
 import {
   getCumulativeExperience,
@@ -39,6 +45,20 @@ import {
 
 // Manual Entry Mode Storage
 const MANUAL_ENTRY_MODE_KEY = 'manualEntryMode';
+
+// Global refresh trigger for experience updates
+let refreshCallbacks: (() => void)[] = [];
+
+export const addExperienceRefreshCallback = (callback: () => void) => {
+  refreshCallbacks.push(callback);
+  return () => {
+    refreshCallbacks = refreshCallbacks.filter((cb) => cb !== callback);
+  };
+};
+
+export const triggerExperienceRefresh = () => {
+  refreshCallbacks.forEach((callback) => callback());
+};
 
 export function getManualEntryMode(): boolean {
   const value = storage.getString(MANUAL_ENTRY_MODE_KEY);
@@ -868,6 +888,73 @@ const updateHealthData = async (params: {
  *   - stepsByDay: Array of daily step counts
  */
 // eslint-disable-next-line max-lines-per-function
+// Helper function to get experience from steps
+const getExperienceFromStepsHelper = async (params: {
+  lastCheckedDateTime: Date;
+  setExperienceState: (value: number) => void;
+  setCumulativeExperienceState: (value: number) => void;
+  setFirstExperienceDateState: (value: string | null) => void;
+  setStepsByDayState: (value: { date: Date; steps: number }[]) => void;
+}) => {
+  const {
+    lastCheckedDateTime,
+    setExperienceState,
+    setCumulativeExperienceState,
+    setFirstExperienceDateState,
+    setStepsByDayState,
+  } = params;
+  try {
+    const now = new Date();
+    const healthKitResults = await getStepsGroupedByDay(
+      lastCheckedDateTime,
+      now
+    );
+
+    // Get manual step entries and merge with HealthKit data
+    const manualSteps = getManualStepsByDay();
+    const mergedResults = mergeStepData(healthKitResults, manualSteps);
+
+    const totalSteps = mergedResults.reduce(
+      (sum, day) => sum + (day.steps || 0),
+      0
+    );
+
+    // Get previous experience to calculate the difference
+    const previousExperience = getExperience();
+
+    // Use mergeExperienceMMKV to update cumulative experience
+    const {
+      cumulativeExperience: newCumulativeExperience,
+      firstExperienceDate: newFirstExperienceDate,
+    } = mergeExperienceMMKV(totalSteps, lastCheckedDateTime);
+
+    setExperienceState(totalSteps);
+    setCumulativeExperienceState(newCumulativeExperience);
+    setFirstExperienceDateState(newFirstExperienceDate);
+    setStepsByDayState(mergedResults);
+
+    // Update health data
+    await updateHealthData({
+      totalSteps,
+      previousExperience,
+      newCumulativeExperience,
+      newFirstExperienceDate,
+      mergedResults,
+      lastCheckedDateTime,
+    });
+  } catch (error) {
+    console.error('Error getting step count for experience:', error);
+    // Handle error by resetting state
+    setExperienceState(0);
+    setCumulativeExperienceState(0);
+    setFirstExperienceDateState(null);
+    setStepsByDayState([]);
+    await setExperience(0);
+    await setStepsByDay([]);
+  }
+};
+
+// eslint-disable-next-line max-lines-per-function
 export const useStepCountAsExperience = (lastCheckedDateTime: Date) => {
   const [experience, setExperienceState] = useState<number>(0);
   const [cumulativeExperience, setCumulativeExperienceState] =
@@ -879,7 +966,23 @@ export const useStepCountAsExperience = (lastCheckedDateTime: Date) => {
     { date: Date; steps: number }[]
   >([]);
 
-  // Initialize from storage on mount
+  // Function to manually refresh experience data
+  const refreshExperience = useCallback(async () => {
+    await getExperienceFromStepsHelper({
+      lastCheckedDateTime,
+      setExperienceState,
+      setCumulativeExperienceState,
+      setFirstExperienceDateState,
+      setStepsByDayState,
+    });
+  }, [lastCheckedDateTime]);
+
+  // Register refresh callback
+  useEffect(() => {
+    const unsubscribe = addExperienceRefreshCallback(refreshExperience);
+    return unsubscribe;
+  }, [refreshExperience]);
+
   useEffect(() => {
     const initializeFromStorage = () => {
       const storedExperience = getExperience();
@@ -894,69 +997,29 @@ export const useStepCountAsExperience = (lastCheckedDateTime: Date) => {
       setStepsByDayState(storedStepsByDay);
     };
 
+    // Initialize from storage on mount
     initializeFromStorage();
-  }, []);
 
-  useEffect(() => {
-    const handleError = async () => {
-      console.error('Error getting step count for experience');
-      setExperienceState(0);
-      setCumulativeExperienceState(0);
-      setFirstExperienceDateState(null);
-      setStepsByDayState([]);
-      await setExperience(0);
-      await setStepsByDay([]);
-    };
+    // Get fresh experience data
+    getExperienceFromStepsHelper({
+      lastCheckedDateTime,
+      setExperienceState,
+      setCumulativeExperienceState,
+      setFirstExperienceDateState,
+      setStepsByDayState,
+    });
 
-    const getExperienceFromSteps = async () => {
-      try {
-        const now = new Date();
-        const healthKitResults = await getStepsGroupedByDay(
+    const interval = setInterval(
+      () =>
+        getExperienceFromStepsHelper({
           lastCheckedDateTime,
-          now
-        );
-
-        // Get manual step entries and merge with HealthKit data
-        const manualSteps = getManualStepsByDay();
-        const mergedResults = mergeStepData(healthKitResults, manualSteps);
-
-        const totalSteps = mergedResults.reduce(
-          (sum, day) => sum + (day.steps || 0),
-          0
-        );
-
-        // Get previous experience to calculate the difference
-        const previousExperience = getExperience();
-
-        // Use mergeExperienceMMKV to update cumulative experience
-        const {
-          cumulativeExperience: newCumulativeExperience,
-          firstExperienceDate: newFirstExperienceDate,
-        } = mergeExperienceMMKV(totalSteps, lastCheckedDateTime);
-
-        setExperienceState(totalSteps);
-        setCumulativeExperienceState(newCumulativeExperience);
-        setFirstExperienceDateState(newFirstExperienceDate);
-        setStepsByDayState(mergedResults);
-
-        // Update health data
-        await updateHealthData({
-          totalSteps,
-          previousExperience,
-          newCumulativeExperience,
-          newFirstExperienceDate,
-          mergedResults,
-          lastCheckedDateTime,
-        });
-      } catch (error) {
-        console.error('Error getting step count for experience:', error);
-        await handleError();
-      }
-    };
-
-    getExperienceFromSteps();
-
-    const interval = setInterval(getExperienceFromSteps, 5 * 60 * 1000);
+          setExperienceState,
+          setCumulativeExperienceState,
+          setFirstExperienceDateState,
+          setStepsByDayState,
+        }),
+      5 * 60 * 1000
+    );
     return () => clearInterval(interval);
   }, [lastCheckedDateTime]);
 
@@ -965,6 +1028,7 @@ export const useStepCountAsExperience = (lastCheckedDateTime: Date) => {
     cumulativeExperience,
     firstExperienceDate,
     stepsByDay,
+    refreshExperience,
   };
 };
 
