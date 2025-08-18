@@ -922,7 +922,7 @@ const updateHealthData = async (params: {
     firstExperienceDate: newFirstExperienceDate,
     stepsByDay: mergedResults,
     currency: currentCurrency + currencyToAdd,
-    lastCheckedDate: getDateString(lastCheckedDateTime),
+    lastCheckedDate: lastCheckedDateTime.toISOString(), // Store actual timestamp
   };
 
   await updateHealthCore(batchUpdate);
