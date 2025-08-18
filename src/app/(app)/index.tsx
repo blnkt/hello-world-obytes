@@ -84,11 +84,15 @@ const StreakSection = ({ stepCount }: { stepCount: number }) => {
 
 const DailyGoalSection = ({ stepCount }: { stepCount: number }) => {
   const [dailyStepsGoal, setDailyStepsGoal] = useDailyStepsGoal();
-  const [goalInput, setGoalInput] = React.useState(dailyStepsGoal.toString());
+  // Ensure dailyStepsGoal is a valid number, fallback to default if needed
+  const safeDailyStepsGoal = dailyStepsGoal > 0 ? dailyStepsGoal : 10000;
+  const [goalInput, setGoalInput] = React.useState(
+    safeDailyStepsGoal.toString()
+  );
 
-  // Calculate progress towards daily goal
-  const goalProgress = Math.min((stepCount / dailyStepsGoal) * 100, 100);
-  const stepsToGoal = Math.max(dailyStepsGoal - stepCount, 0);
+  // Calculate progress towards daily goal - guard against division by zero
+  const goalProgress = Math.min((stepCount / safeDailyStepsGoal) * 100, 100);
+  const stepsToGoal = Math.max(safeDailyStepsGoal - stepCount, 0);
 
   const handleGoalChange = () => {
     const parsed = parseInt(goalInput, 10);
@@ -117,7 +121,7 @@ const DailyGoalSection = ({ stepCount }: { stepCount: number }) => {
       </View>
       <View className="mt-2 flex-row items-center justify-between">
         <Text className="text-xs text-white/80">
-          Goal: {dailyStepsGoal.toLocaleString()} steps
+          Goal: {safeDailyStepsGoal.toLocaleString()} steps
         </Text>
         <View className="flex-row items-center">
           <Text className="mr-2 text-xs text-white/80">Set goal:</Text>
@@ -168,7 +172,7 @@ const MilestoneProgressBar = ({ stepCount }: { stepCount: number }) => {
         <View
           className="h-3 rounded-full bg-white"
           style={{
-            width: `${((stepCount % MILESTONE_INTERVAL) / MILESTONE_INTERVAL) * 100}%`,
+            width: `${Math.max(0, Math.min(100, ((stepCount % MILESTONE_INTERVAL) / MILESTONE_INTERVAL) * 100))}%`,
           }}
         />
       </View>
