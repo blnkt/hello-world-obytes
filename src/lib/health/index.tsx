@@ -58,15 +58,32 @@ let globalExperienceState: {
   stepsByDay: [],
 };
 
+// Global state change listeners
+let globalStateListeners: (() => void)[] = [];
+
 // Function to update global state
 const updateGlobalExperienceState = (
   newState: Partial<typeof globalExperienceState>
 ) => {
   globalExperienceState = { ...globalExperienceState, ...newState };
+  
+  // Notify all listeners that global state has changed
+  globalStateListeners.forEach(listener => listener());
 };
 
 // Function to get global state
 const getGlobalExperienceState = () => ({ ...globalExperienceState });
+
+// Function to subscribe to global state changes
+const subscribeToGlobalState = (listener: () => void) => {
+  globalStateListeners.push(listener);
+  return () => {
+    const index = globalStateListeners.indexOf(listener);
+    if (index > -1) {
+      globalStateListeners.splice(index, 1);
+    }
+  };
+};
 
 // Main consolidated experience hook
 // eslint-disable-next-line max-lines-per-function
@@ -127,6 +144,19 @@ export const useExperienceData = () => {
     };
 
     initializeFromStorage();
+  }, []);
+
+  // Subscribe to global state changes
+  useEffect(() => {
+    const unsubscribe = subscribeToGlobalState(() => {
+      const globalState = getGlobalExperienceState();
+      setExperienceState(globalState.experience);
+      setCumulativeExperienceState(globalState.cumulativeExperience);
+      setFirstExperienceDateState(globalState.firstExperienceDate);
+      setStepsByDayState(globalState.stepsByDay);
+    });
+
+    return unsubscribe;
   }, []);
 
   // Update global state whenever local state changes
