@@ -451,6 +451,7 @@ const useAutoSwitchToManual = (params: {
 };
 
 // Comprehensive Fallback Logic Hook
+// eslint-disable-next-line max-lines-per-function
 export const useHealthKitFallback = (): FallbackLogicResult => {
   const availability = useHealthKitAvailability();
   const {
@@ -465,14 +466,6 @@ export const useHealthKitFallback = (): FallbackLogicResult => {
   const [canRetryHealthKit, setCanRetryHealthKit] = useState<boolean>(false);
 
   useEffect(() => {
-    console.log(
-      '[useHealthKitFallback] availability.status:',
-      availability.status,
-      'isManualMode:',
-      isManualMode,
-      'isDeveloperMode:',
-      isDeveloperMode
-    );
     if (isDeveloperMode) {
       setSuggestion('force_manual');
       setReason('Developer mode is enabled. HealthKit checks are bypassed.');
@@ -489,13 +482,26 @@ export const useHealthKitFallback = (): FallbackLogicResult => {
   }, [availability.status, isManualMode, availability.error, isDeveloperMode]);
 
   useEffect(() => {
-    console.log(
-      '[useHealthKitFallback] suggestion:',
-      suggestion,
-      'reason:',
-      reason
-    );
-  }, [suggestion, reason]);
+    if (suggestion === 'force_manual') {
+      setReason('Developer mode is enabled. HealthKit checks are bypassed.');
+    } else if (availability.status === 'not_supported') {
+      setReason('HealthKit is not supported on this device');
+    } else if (availability.status === 'permission_denied') {
+      setReason(
+        'HealthKit permissions have been denied. You can still track your steps manually.'
+      );
+    } else if (availability.status === 'loading') {
+      setReason('Checking HealthKit availability...');
+    } else if (availability.status === 'error') {
+      setReason(
+        'HealthKit is experiencing issues. You can track your steps manually.'
+      );
+    } else {
+      setReason(
+        'HealthKit is not available. You can track your steps manually.'
+      );
+    }
+  }, [suggestion, availability.status]);
 
   // Auto-switch to manual mode for certain scenarios
   useAutoSwitchToManual({
@@ -847,6 +853,12 @@ const updateHealthData = async (params: {
     mergedResults,
     lastCheckedDateTime,
   } = params;
+
+  // Prevent duplicate updates by checking if experience actually changed
+  if (totalSteps === previousExperience) {
+    return;
+  }
+
   const experienceDifference = totalSteps - previousExperience;
   const currencyToAdd =
     experienceDifference > 0
@@ -966,22 +978,34 @@ export const useStepCountAsExperience = (lastCheckedDateTime: Date) => {
     { date: Date; steps: number }[]
   >([]);
 
-  // Function to manually refresh experience data
+  // Guard against multiple simultaneous executions
+  const isUpdatingRef = React.useRef(false);
+
+  // Function to manually refresh experience data - memoized to prevent recreation
   const refreshExperience = useCallback(async () => {
-    await getExperienceFromStepsHelper({
-      lastCheckedDateTime,
-      setExperienceState,
-      setCumulativeExperienceState,
-      setFirstExperienceDateState,
-      setStepsByDayState,
-    });
+    if (isUpdatingRef.current) {
+      return;
+    }
+
+    isUpdatingRef.current = true;
+    try {
+      await getExperienceFromStepsHelper({
+        lastCheckedDateTime,
+        setExperienceState,
+        setCumulativeExperienceState,
+        setFirstExperienceDateState,
+        setStepsByDayState,
+      });
+    } finally {
+      isUpdatingRef.current = false;
+    }
   }, [lastCheckedDateTime]);
 
-  // Register refresh callback
+  // Register refresh callback only once per hook instance
   useEffect(() => {
     const unsubscribe = addExperienceRefreshCallback(refreshExperience);
     return unsubscribe;
-  }, [refreshExperience]);
+  }, []); // Empty dependency array - only register once
 
   useEffect(() => {
     const initializeFromStorage = () => {
@@ -1000,7 +1024,7 @@ export const useStepCountAsExperience = (lastCheckedDateTime: Date) => {
     // Initialize from storage on mount
     initializeFromStorage();
 
-    // Get fresh experience data
+    // Get fresh experience data - always allow initial fetch
     getExperienceFromStepsHelper({
       lastCheckedDateTime,
       setExperienceState,
@@ -1010,16 +1034,24 @@ export const useStepCountAsExperience = (lastCheckedDateTime: Date) => {
     });
 
     const interval = setInterval(
-      () =>
-        getExperienceFromStepsHelper({
-          lastCheckedDateTime,
-          setExperienceState,
-          setCumulativeExperienceState,
-          setFirstExperienceDateState,
-          setStepsByDayState,
-        }),
+      () => {
+        // Only guard against simultaneous interval updates, not initial fetch
+        if (!isUpdatingRef.current) {
+          isUpdatingRef.current = true;
+          getExperienceFromStepsHelper({
+            lastCheckedDateTime,
+            setExperienceState,
+            setCumulativeExperienceState,
+            setFirstExperienceDateState,
+            setStepsByDayState,
+          }).finally(() => {
+            isUpdatingRef.current = false;
+          });
+        }
+      },
       5 * 60 * 1000
     );
+
     return () => clearInterval(interval);
   }, [lastCheckedDateTime]);
 
