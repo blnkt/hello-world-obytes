@@ -9,6 +9,7 @@ import {
 } from '@/lib/health';
 import {
   clearManualStepsByDay,
+  getManualStepsByDay,
   setManualStepEntry,
   useManualStepsByDay,
 } from '@/lib/storage';
@@ -300,11 +301,28 @@ const useManualStepForm = (onStepAdded: () => void) => {
       setError(undefined);
 
       const steps = parseInt(stepCount, 10);
+
+      // Debug logging to see what's happening
+      console.log('=== MANUAL STEP ENTRY DEBUG ===');
+      console.log('Form selectedDate:', selectedDate);
+      console.log('Form stepCount:', stepCount);
+      console.log('Parsed steps:', steps);
+      console.log('Entry to be stored:', {
+        date: selectedDate,
+        steps,
+        source: 'manual',
+      });
+
       await setManualStepEntry({
         date: selectedDate,
         steps,
         source: 'manual',
       });
+
+      // Debug: Check what was actually stored
+      const storedEntries = await getManualStepsByDay();
+      console.log('Stored entries after submission:', storedEntries);
+      console.log('=== END DEBUG ===');
 
       // Reset form with timezone-safe date
       setStepCount('');
