@@ -1107,14 +1107,15 @@ export const useCumulativeExperience = (lastCheckedDateTime: Date) => {
 export const useCumulativeExperienceSimple = () => {
   const [lastCheckedDate] = useLastCheckedDate();
 
-  // Default to start of today if not set
-  const lastCheckedDateTime = lastCheckedDate
-    ? new Date(lastCheckedDate)
-    : (() => {
-        const d = new Date();
-        d.setHours(0, 0, 0, 0);
-        return d;
-      })();
+  // Default to start of today if not set - memoized to prevent infinite re-renders
+  const lastCheckedDateTime = React.useMemo(() => {
+    if (lastCheckedDate) {
+      return new Date(lastCheckedDate);
+    }
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, [lastCheckedDate]);
 
   const { cumulativeExperience, firstExperienceDate } =
     useStepCountAsExperience(lastCheckedDateTime);

@@ -1,6 +1,12 @@
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 import {
   useCurrencySystem,
@@ -19,14 +25,15 @@ const MILESTONE_INTERVAL = 1000; // Every 1k steps
 const StreakSection = ({ stepCount }: { stepCount: number }) => {
   const [lastCheckedDate] = useLastCheckedDate();
 
-  // Default to start of today if not set
-  const lastCheckedDateTime = lastCheckedDate
-    ? new Date(lastCheckedDate)
-    : (() => {
-        const d = new Date();
-        d.setHours(0, 0, 0, 0);
-        return d;
-      })();
+  // Default to start of today if not set - memoized to prevent infinite re-renders
+  const lastCheckedDateTime = React.useMemo(() => {
+    if (lastCheckedDate) {
+      return new Date(lastCheckedDate);
+    }
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, [lastCheckedDate]);
 
   const { streaks, currentStreak, longestStreak } =
     useStreakTracking(lastCheckedDateTime);
@@ -114,22 +121,21 @@ const DailyGoalSection = ({ stepCount }: { stepCount: number }) => {
         </Text>
         <View className="flex-row items-center">
           <Text className="mr-2 text-xs text-white/80">Set goal:</Text>
-          <input
-            type="number"
-            min={1}
+          <TextInput
+            keyboardType="numeric"
             value={goalInput}
-            onChange={(e) => setGoalInput(e.target.value)}
+            onChangeText={setGoalInput}
             onBlur={handleGoalChange}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') handleGoalChange();
-            }}
+            onSubmitEditing={handleGoalChange}
             style={{
               width: 80,
               borderRadius: 4,
               padding: 2,
-              border: '1px solid #fff',
-              background: 'rgba(255,255,255,0.1)',
+              borderWidth: 1,
+              borderColor: '#fff',
+              backgroundColor: 'rgba(255,255,255,0.1)',
               color: '#fff',
+              textAlign: 'center',
             }}
           />
         </View>
@@ -180,14 +186,15 @@ const ProgressDashboard = ({
   cumulativeExperience: number;
 }) => {
   const [lastCheckedDate] = useLastCheckedDate();
-  // Default to start of today if not set
-  const lastCheckedDateTime = lastCheckedDate
-    ? new Date(lastCheckedDate)
-    : (() => {
-        const d = new Date();
-        d.setHours(0, 0, 0, 0);
-        return d;
-      })();
+  // Default to start of today if not set - memoized to prevent infinite re-renders
+  const lastCheckedDateTime = React.useMemo(() => {
+    if (lastCheckedDate) {
+      return new Date(lastCheckedDate);
+    }
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, [lastCheckedDate]);
   const { currency } = useCurrencySystem(lastCheckedDateTime);
 
   return (
@@ -348,21 +355,25 @@ export default function Home() {
   // Use reactive hook for last checked date
   const [lastCheckedDate] = useLastCheckedDate();
 
-  // Default to start of today if not set
-  const lastCheckedDateTime = lastCheckedDate
-    ? new Date(lastCheckedDate)
-    : (() => {
-        const d = new Date();
-        d.setHours(0, 0, 0, 0);
-        return d;
-      })();
+  // Default to start of today if not set - memoized to prevent infinite re-renders
+  const lastCheckedDateTime = React.useMemo(() => {
+    if (lastCheckedDate) {
+      return new Date(lastCheckedDate);
+    }
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, [lastCheckedDate]);
 
   const { stepsByDay, experience, cumulativeExperience } =
     useStepCountAsExperience(lastCheckedDateTime);
 
-  // Calculate today's step count
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  // Calculate today's step count - memoized to prevent infinite re-renders
+  const today = React.useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, []);
   const todaySteps =
     stepsByDay.find((day) => {
       if (!day || !day.date) return false;
