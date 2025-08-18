@@ -53,18 +53,66 @@ const MANUAL_ENTRY_MODE_KEY = 'manualEntryMode';
 // Main consolidated experience hook
 // eslint-disable-next-line max-lines-per-function
 export const useExperienceData = () => {
-  // Temporarily return static data to debug infinite loop
-  const refreshExperience = useCallback(async () => {
-    console.log('refreshExperience called');
-  }, []);
+  // Use MMKV hooks directly for reactive storage access
+  const [experience, setExperience] = useMMKVString('experience', storage);
+  const [cumulativeExperience, setCumulativeExperience] = useMMKVString('cumulativeExperience', storage);
+  const [firstExperienceDate, setFirstExperienceDate] = useMMKVString('firstExperienceDate', storage);
+  const [stepsByDay, setStepsByDay] = useMMKVString('stepsByDay', storage);
 
-  return {
-    experience: 0,
-    cumulativeExperience: 0,
-    firstExperienceDate: null,
-    stepsByDay: [],
+  // Guard against multiple simultaneous executions
+  const isUpdatingRef = React.useRef(false);
+
+  // Function to manually refresh experience data
+  const refreshExperience = useCallback(async () => {
+    if (isUpdatingRef.current) {
+      return;
+    }
+
+    isUpdatingRef.current = true;
+    try {
+      await getExperienceFromStepsHelper({
+        lastCheckedDateTime: new Date(), // Use current time for refresh
+        setExperienceState: (value: number) => setExperience(String(value)),
+        setCumulativeExperienceState: (value: number) => setCumulativeExperience(String(value)),
+        setFirstExperienceDateState: (value: string | null) => setFirstExperienceDate(value || ''),
+        setStepsByDayState: (value: { date: Date; steps: number }[]) => setStepsByDay(JSON.stringify(value)),
+      });
+    } finally {
+      isUpdatingRef.current = false;
+    }
+  }, [setExperience, setCumulativeExperience, setFirstExperienceDate, setStepsByDay]);
+
+  // Parse the stored values to proper types with memoization
+  const parsedExperience = React.useMemo(() => 
+    experience ? Number(experience) : 0, 
+    [experience]
+  );
+  
+  const parsedCumulativeExperience = React.useMemo(() => 
+    cumulativeExperience ? Number(cumulativeExperience) : 0, 
+    [cumulativeExperience]
+  );
+  
+  const parsedFirstExperienceDate = React.useMemo(() => 
+    firstExperienceDate || null, 
+    [firstExperienceDate]
+  );
+  
+  const parsedStepsByDay = React.useMemo(() => 
+    stepsByDay ? JSON.parse(stepsByDay) : [], 
+    [stepsByDay]
+  );
+
+  // Memoize the return object to prevent infinite re-renders
+  const result = React.useMemo(() => ({
+    experience: parsedExperience,
+    cumulativeExperience: parsedCumulativeExperience,
+    firstExperienceDate: parsedFirstExperienceDate,
+    stepsByDay: parsedStepsByDay,
     refreshExperience,
-  };
+  }), [parsedExperience, parsedCumulativeExperience, parsedFirstExperienceDate, parsedStepsByDay, refreshExperience]);
+
+  return result;
 };
 
 export function getManualEntryMode(): boolean {
@@ -1058,11 +1106,28 @@ export const detectStreaks = (
  */
 // eslint-disable-next-line max-lines-per-function
 export const useStreakTracking = () => {
-  // Temporarily return static data to debug infinite loop
+  const [streaks, setStreaks] = React.useState<Streak[]>([]);
+  const [dailyGoal] = useDailyStepsGoal();
+
+  // Use global state instead of calling useStepCountAsExperience
+  const { stepsByDay } = useExperienceData();
+
+  React.useEffect(() => {
+    if (stepsByDay.length > 0) {
+      const detectedStreaks = detectStreaks(stepsByDay, dailyGoal);
+      setStreaks(detectedStreaks);
+      // Optionally, also update storage if needed
+      // setStreaksInStorage(detectedStreaks);
+    }
+  }, [stepsByDay, dailyGoal]);
+
   return {
-    streaks: [],
-    currentStreak: null,
-    longestStreak: 0,
+    streaks,
+    currentStreak: streaks.length > 0 ? streaks[streaks.length - 1] : null,
+    longestStreak:
+      streaks.length > 0
+        ? Math.max(...streaks.map((s: Streak) => s.daysCount))
+        : 0,
   };
 };
 
@@ -1131,17 +1196,31 @@ export const convertExperienceToCurrency = (experience: number): number => {
  * @returns Object containing currency data and conversion functions
  */
 export const useCurrencySystem = () => {
-  // Temporarily return static data to debug infinite loop
+  const { cumulativeExperience } = useExperienceData();
+  const [currency] = useCurrency();
+
+  // Since experience is auto-converted, available currency is always 0
+  const availableCurrency = 0;
+  const totalCurrencyEarned = convertExperienceToCurrency(cumulativeExperience);
+
+  // Function to convert current experience to currency (now just returns 0)
+  const convertCurrentExperience = async () => {
+    // Experience is automatically converted, so this function is deprecated
+    console.log('Experience is now automatically converted to currency');
+    return 0;
+  };
+
+  // Function to spend currency
   const spend = async (amount: number): Promise<boolean> => {
-    return true;
+    return await spendCurrency(amount);
   };
 
   return {
-    currency: 0,
-    availableCurrency: 0,
-    totalCurrencyEarned: 0,
-    convertCurrentExperience: async () => 0,
+    currency,
+    availableCurrency,
+    totalCurrencyEarned,
+    convertCurrentExperience,
     spend,
-    conversionRate: 0.1,
+    conversionRate: CURRENCY_CONVERSION_RATES.XP_TO_CURRENCY,
   };
 };
