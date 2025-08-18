@@ -265,8 +265,12 @@ const StepCountInput = ({
 const useManualStepForm = (onStepAdded: () => void) => {
   const [stepCount, setStepCount] = React.useState('');
   const [selectedDate, setSelectedDate] = React.useState(() => {
+    // Get today's date in local timezone without timezone conversion issues
     const today = new Date();
-    return today.toISOString().split('T')[0]; // YYYY-MM-DD format
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`; // YYYY-MM-DD format
   });
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | undefined>();
@@ -302,9 +306,13 @@ const useManualStepForm = (onStepAdded: () => void) => {
         source: 'manual',
       });
 
-      // Reset form
+      // Reset form with timezone-safe date
       setStepCount('');
-      setSelectedDate(new Date().toISOString().split('T')[0]);
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      setSelectedDate(`${year}-${month}-${day}`);
 
       // Notify parent to refresh
       onStepAdded();

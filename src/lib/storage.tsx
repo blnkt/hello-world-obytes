@@ -569,12 +569,21 @@ export async function migrateManualStepEntries() {
     return;
   }
 
+  // Helper function to get timezone-safe date string
+  const getDateString = (date: Date | string): string => {
+    if (date instanceof Date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    } else {
+      return String(date).split('T')[0];
+    }
+  };
+
   // Convert old step data to manual entry format
   const migratedEntries: ManualStepEntry[] = existingSteps.map((step) => ({
-    date:
-      step.date instanceof Date
-        ? step.date.toISOString().split('T')[0]
-        : String(step.date).split('T')[0],
+    date: getDateString(step.date),
     steps: step.steps,
     source: 'manual' as const,
   }));
