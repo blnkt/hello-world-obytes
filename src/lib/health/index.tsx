@@ -655,6 +655,25 @@ const queryHealthKitForDay = async (
   }
 };
 
+// Helper function to get timezone-safe date string
+const getDateString = (date: Date | string): string => {
+  if (date instanceof Date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  } else {
+    return String(date).split('T')[0];
+  }
+};
+
+// Helper function to check if two dates are the same day (timezone-safe)
+const isSameDay = (date1: Date | string, date2: Date | string): boolean => {
+  const dateStr1 = getDateString(date1);
+  const dateStr2 = getDateString(date2);
+  return dateStr1 === dateStr2;
+};
+
 async function getStepsForDaySum({
   dayStart,
   dayEnd,
@@ -668,14 +687,12 @@ async function getStepsForDaySum({
   manualSteps: { date: string; steps: number; source: 'manual' }[];
   dataIsFresh: boolean;
 }): Promise<{ date: Date; steps: number }> {
-  const dateStr = dayStart.toISOString().split('T')[0];
+  const dateStr = getDateString(dayStart);
 
   // HealthKit steps for this date
   let healthKitSteps = 0;
   const storedEntry = storedHealthKitData.find((entry) => {
-    const entryDate =
-      typeof entry.date === 'string' ? new Date(entry.date) : entry.date;
-    return entryDate.toISOString().split('T')[0] === dateStr;
+    return isSameDay(entry.date, dateStr);
   });
   if (storedEntry && dataIsFresh) {
     healthKitSteps = storedEntry.steps;
@@ -686,9 +703,7 @@ async function getStepsForDaySum({
       logDataConflict(dateStr, storedEntry.steps, healthKitSteps);
       storedEntry.steps = healthKitSteps;
       const updatedArray = storedHealthKitData.map((entry) => {
-        const entryDate =
-          typeof entry.date === 'string' ? new Date(entry.date) : entry.date;
-        if (entryDate.toISOString().split('T')[0] === dateStr) {
+        if (isSameDay(entry.date, dateStr)) {
           return { ...entry, steps: healthKitSteps };
         }
         return entry;
@@ -732,12 +747,10 @@ const getStepsGroupedByDay = async (
     dayEnd.setHours(23, 59, 59, 999);
 
     // Only get HealthKit data, not combined data
-    const dateStr = dayStart.toISOString().split('T')[0];
+    const dateStr = getDateString(dayStart);
     let healthKitSteps = 0;
     const storedEntry = storedHealthKitData.find((entry) => {
-      const entryDate =
-        typeof entry.date === 'string' ? new Date(entry.date) : entry.date;
-      return entryDate.toISOString().split('T')[0] === dateStr;
+      return isSameDay(entry.date, dateStr);
     });
     if (storedEntry && dataIsFresh) {
       healthKitSteps = storedEntry.steps;
@@ -748,9 +761,7 @@ const getStepsGroupedByDay = async (
         logDataConflict(dateStr, storedEntry.steps, healthKitSteps);
         storedEntry.steps = healthKitSteps;
         const updatedArray = storedHealthKitData.map((entry) => {
-          const entryDate =
-            typeof entry.date === 'string' ? new Date(entry.date) : entry.date;
-          if (entryDate.toISOString().split('T')[0] === dateStr) {
+          if (isSameDay(entry.date, dateStr)) {
             return { ...entry, steps: healthKitSteps };
           }
           return entry;
@@ -836,10 +847,7 @@ const mergeStepData = (
 
   // Add HealthKit steps
   healthKitResults.forEach((entry) => {
-    const dateStr =
-      entry.date instanceof Date
-        ? entry.date.toISOString().split('T')[0]
-        : new Date(entry.date).toISOString().split('T')[0];
+    const dateStr = getDateString(entry.date);
     stepMap.set(dateStr, (stepMap.get(dateStr) || 0) + entry.steps);
   });
 
