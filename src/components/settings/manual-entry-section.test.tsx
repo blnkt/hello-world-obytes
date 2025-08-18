@@ -1,8 +1,8 @@
 import React from 'react';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { TextInput } from 'react-native';
 
-import { cleanup, render, screen, setup } from '@/lib/test-utils';
-
-import { ManualEntrySection } from './manual-entry-section';
+import ManualEntrySection from './manual-entry-section';
 
 global.alert = jest.fn();
 

@@ -1,41 +1,28 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { TextInput } from 'react-native';
 
 // Mock the health module to test the refresh system
 jest.mock('@/lib/health', () => ({
   ...jest.requireActual('@/lib/health'),
   useManualEntryMode: jest.fn(),
   useDeveloperMode: jest.fn(),
-  triggerExperienceRefresh: jest.fn(),
 }));
 
 // Mock storage
 jest.mock('@/lib/storage', () => require('../../../../__mocks__/storage.tsx'));
 
-import { ManualEntrySection } from '../manual-entry-section';
+import ManualEntrySection from '../manual-entry-section';
 import {
-  getManualStepsByDay,
-  setManualStepsByDay,
   clearManualStepsByDay,
+  getManualStepsByDay,
   setManualStepEntry,
-  getCurrency,
-  setCurrency,
-  getExperience,
-  setExperience,
-  getCumulativeExperience,
-  setCumulativeExperience,
 } from '@/lib/storage';
-
-import {
-  useManualEntryMode,
-  useDeveloperMode,
-  triggerExperienceRefresh,
-} from '@/lib/health';
+import { useDeveloperMode, useManualEntryMode } from '@/lib/health';
 
 // Mock the hooks
 const mockUseManualEntryMode = jest.mocked(useManualEntryMode);
 const mockUseDeveloperMode = jest.mocked(useDeveloperMode);
-const mockTriggerExperienceRefresh = jest.mocked(triggerExperienceRefresh);
 
 describe('Manual Entry Section Experience Refresh Integration', () => {
   beforeEach(async () => {
