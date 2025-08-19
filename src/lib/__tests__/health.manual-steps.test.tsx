@@ -23,6 +23,7 @@ jest.mock('../storage', () => ({
   getCurrency: jest.fn(),
   setCurrency: jest.fn(),
   getDailyStepsGoal: jest.fn(() => 10000),
+  useDailyStepsGoal: jest.fn(() => [10000, jest.fn()]),
 }));
 
 // Mock MMKV
@@ -50,7 +51,7 @@ jest.mock('@kingstinct/react-native-healthkit', () => ({
   },
 }));
 
-describe('useStepCountAsExperience with Manual Steps', () => {
+describe('useExperienceData with Manual Steps', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     

@@ -1,12 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef } from 'react';
 
 import { CharacterSheet } from '../../components/character/character-sheet';
 import { useExperienceData } from '../../lib/health';
-import {
-  getCharacter as getStoredCharacter,
-  setCharacter as saveCharacterToStorage,
-  useLastCheckedDate,
-} from '../../lib/storage';
+import { useCharacter, useLastCheckedDate } from '../../lib/storage';
 import type { Character } from '../../types/character';
 import { getStartingAttributes } from '../../types/character';
 
@@ -22,52 +18,16 @@ const initialCharacter: Character = {
   notes: '',
 };
 
-const loadCharacterFromStorage = () => {
-  try {
-    const savedCharacter = getStoredCharacter();
-    if (savedCharacter) {
-      console.log('📱 Loaded character from storage:', savedCharacter.class);
-      return savedCharacter;
-    } else {
-      console.log('📱 No saved character found, using initial character');
-      return null;
-    }
-  } catch (error) {
-    console.error('Error loading character from storage:', error);
-    return null;
-  }
-};
-
-const saveCharacterToStorageAsync = async (character: Character) => {
-  try {
-    await saveCharacterToStorage(character);
-    console.log('💾 Saved character to storage:', character.class);
-  } catch (error) {
-    console.error('Error saving character to storage:', error);
-  }
-};
-
 export default function CharacterSheetScreen() {
-  const [character, setCharacter] = useState<Character>(initialCharacter);
-  const currentClassRef = useRef(character.class);
-
-  // Load character data from storage on mount
-  useEffect(() => {
-    const savedCharacter = loadCharacterFromStorage();
-    if (savedCharacter) {
-      setCharacter(savedCharacter);
-    }
-  }, []);
-
-  // Save character data whenever it changes
-  useEffect(() => {
-    saveCharacterToStorageAsync(character);
-  }, [character]);
+  const [character, setCharacter] = useCharacter();
+  const currentClassRef = useRef(character?.class || initialCharacter.class);
 
   // Update the ref when character class changes
-  useEffect(() => {
-    currentClassRef.current = character.class;
-  }, [character.class]);
+  React.useEffect(() => {
+    if (character?.class) {
+      currentClassRef.current = character.class;
+    }
+  }, [character?.class]);
 
   // Use reactive hook for last checked date
   const [lastCheckedDate] = useLastCheckedDate();
@@ -83,5 +43,13 @@ export default function CharacterSheetScreen() {
 
   const { experience } = useExperienceData();
 
-  return <CharacterSheet character={character} onChange={setCharacter} />;
+  // Use initial character if none exists in storage
+  const displayCharacter = {
+    ...(character || initialCharacter),
+    experience,
+  } as Character;
+
+  return (
+    <CharacterSheet character={displayCharacter} onChange={setCharacter} />
+  );
 }

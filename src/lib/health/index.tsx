@@ -15,13 +15,13 @@ import { useMMKVString } from 'react-native-mmkv';
 import {
   getCumulativeExperience,
   getCurrency,
-  getDailyStepsGoal,
   getExperience,
   getFirstExperienceDate,
   getLastCheckedDate,
   getManualStepsByDay,
   getStepsByDay,
   setCumulativeExperience,
+  setCurrency,
   setExperience,
   setFirstExperienceDate,
   setStepsByDay,
@@ -31,6 +31,8 @@ import {
   updateHealthCore,
   useCurrency,
   useDailyStepsGoal,
+  useDeveloperMode as useDeveloperModeStorage,
+  useManualEntryMode as useManualEntryModeStorage,
 } from '../storage';
 
 // TODO: PHASE 1 - Fix unused merge functions - Implement mergeStepsByDayMMKV in the main hook (mergeExperienceMMKV implemented)
@@ -55,8 +57,14 @@ const MANUAL_ENTRY_MODE_KEY = 'manualEntryMode';
 export const useExperienceData = () => {
   // Use MMKV hooks directly for reactive storage access
   const [experience, setExperience] = useMMKVString('experience', storage);
-  const [cumulativeExperience, setCumulativeExperience] = useMMKVString('cumulativeExperience', storage);
-  const [firstExperienceDate, setFirstExperienceDate] = useMMKVString('firstExperienceDate', storage);
+  const [cumulativeExperience, setCumulativeExperience] = useMMKVString(
+    'cumulativeExperience',
+    storage
+  );
+  const [firstExperienceDate, setFirstExperienceDate] = useMMKVString(
+    'firstExperienceDate',
+    storage
+  );
   const [stepsByDay, setStepsByDay] = useMMKVString('stepsByDay', storage);
 
   // Guard against multiple simultaneous executions
@@ -73,28 +81,64 @@ export const useExperienceData = () => {
       await getExperienceFromStepsHelper({
         lastCheckedDateTime: new Date(), // Use current time for refresh
         setExperienceState: (value: number) => setExperience(String(value)),
-        setCumulativeExperienceState: (value: number) => setCumulativeExperience(String(value)),
-        setFirstExperienceDateState: (value: string | null) => setFirstExperienceDate(value || ''),
-        setStepsByDayState: (value: { date: Date; steps: number }[]) => setStepsByDay(JSON.stringify(value)),
+        setCumulativeExperienceState: (value: number) =>
+          setCumulativeExperience(String(value)),
+        setFirstExperienceDateState: (value: string | null) =>
+          setFirstExperienceDate(value || ''),
+        setStepsByDayState: (value: { date: Date; steps: number }[]) =>
+          setStepsByDay(JSON.stringify(value)),
+        forceRefresh: true, // Force fresh HealthKit query for manual sync
       });
     } finally {
       isUpdatingRef.current = false;
     }
-  }, [setExperience, setCumulativeExperience, setFirstExperienceDate, setStepsByDay]);
+  }, [
+    setExperience,
+    setCumulativeExperience,
+    setFirstExperienceDate,
+    setStepsByDay,
+  ]);
 
-  // Parse the stored values to proper types
-  const parsedExperience = experience ? Number(experience) : 0;
-  const parsedCumulativeExperience = cumulativeExperience ? Number(cumulativeExperience) : 0;
-  const parsedFirstExperienceDate = firstExperienceDate || null;
-  const parsedStepsByDay = stepsByDay ? JSON.parse(stepsByDay) : [];
+  // Parse the stored values to proper types with memoization
+  const parsedExperience = React.useMemo(
+    () => (experience ? Number(experience) : 0),
+    [experience]
+  );
 
-  return {
-    experience: parsedExperience,
-    cumulativeExperience: parsedCumulativeExperience,
-    firstExperienceDate: parsedFirstExperienceDate,
-    stepsByDay: parsedStepsByDay,
-    refreshExperience,
-  };
+  const parsedCumulativeExperience = React.useMemo(
+    () => (cumulativeExperience ? Number(cumulativeExperience) : 0),
+    [cumulativeExperience]
+  );
+
+  const parsedFirstExperienceDate = React.useMemo(
+    () => firstExperienceDate || null,
+    [firstExperienceDate]
+  );
+
+  const parsedStepsByDay = React.useMemo(
+    () => (stepsByDay ? JSON.parse(stepsByDay) : []),
+    [stepsByDay]
+  );
+
+  // Memoize the return object to prevent infinite re-renders
+  const result = React.useMemo(
+    () => ({
+      experience: parsedExperience,
+      cumulativeExperience: parsedCumulativeExperience,
+      firstExperienceDate: parsedFirstExperienceDate,
+      stepsByDay: parsedStepsByDay,
+      refreshExperience,
+    }),
+    [
+      parsedExperience,
+      parsedCumulativeExperience,
+      parsedFirstExperienceDate,
+      parsedStepsByDay,
+      refreshExperience,
+    ]
+  );
+
+  return result;
 };
 
 export function getManualEntryMode(): boolean {
@@ -110,56 +154,39 @@ export async function clearManualEntryMode() {
   storage.delete(MANUAL_ENTRY_MODE_KEY);
 }
 
-// Manual Entry Mode Context
-interface ManualModeContextType {
-  isManualMode: boolean;
-  setManualMode: (enabled: boolean) => Promise<void>;
-  isLoading: boolean;
-}
-
-const ManualModeContext = createContext<ManualModeContextType | undefined>(
-  undefined
-);
+// Manual Entry Mode Context - Now using reactive storage hooks
+const ManualModeContext = createContext<
+  | {
+      isManualMode: boolean;
+      setManualMode: (enabled: boolean) => Promise<void>;
+      isLoading: boolean;
+    }
+  | undefined
+>(undefined);
 
 export const ManualModeProvider = ({
   children,
 }: {
   children: React.ReactNode;
 }) => {
-  const [isManualMode, setIsManualMode] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isManualMode, setIsManualMode] = useManualEntryModeStorage();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Load from storage on mount
-  useEffect(() => {
-    const loadManualEntryMode = async () => {
+  // Set manual mode (updates storage via the reactive hook)
+  const setManualMode = useCallback(
+    async (enabled: boolean) => {
       try {
-        const mode = getManualEntryMode();
-        setIsManualMode(mode);
-        console.log(
-          '[ManualModeProvider] Loaded manual mode from storage:',
-          mode
-        );
+        setIsLoading(true);
+        setIsManualMode(enabled);
+        // Removed excessive logging
       } catch (error) {
-        console.error('Error loading manual entry mode:', error);
-        setIsManualMode(false);
+        console.error('Error setting manual entry mode:', error);
       } finally {
         setIsLoading(false);
       }
-    };
-
-    loadManualEntryMode();
-  }, []);
-
-  // Set manual mode (updates both context and storage)
-  const setManualMode = async (enabled: boolean) => {
-    try {
-      await setManualEntryMode(enabled);
-      setIsManualMode(enabled);
-      console.log('[ManualModeProvider] Set manual mode:', enabled);
-    } catch (error) {
-      console.error('Error setting manual entry mode:', error);
-    }
-  };
+    },
+    [setIsManualMode]
+  );
 
   return (
     <ManualModeContext.Provider
@@ -173,39 +200,22 @@ export const ManualModeProvider = ({
 // Manual Entry Mode Hook
 export const useManualEntryMode = () => {
   const context = useContext(ManualModeContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error(
-      'useManualEntryMode must be used within ManualModeProvider'
+      'useManualEntryMode must be used within a ManualModeProvider'
     );
   }
   return context;
 };
 
-// Developer Mode Storage
-const DEVELOPER_MODE_KEY = 'developerMode';
-
-export function getDeveloperMode(): boolean {
-  const value = storage.getString(DEVELOPER_MODE_KEY);
-  return value ? JSON.parse(value) || false : false;
-}
-
-export async function setDeveloperMode(enabled: boolean) {
-  storage.set(DEVELOPER_MODE_KEY, JSON.stringify(enabled));
-}
-
-export async function clearDeveloperMode() {
-  storage.delete(DEVELOPER_MODE_KEY);
-}
-
-// Developer Mode Context
-interface DeveloperModeContextType {
-  isDeveloperMode: boolean;
-  setDevMode: (enabled: boolean) => Promise<void>;
-  isLoading: boolean;
-}
-
+// Developer Mode Context - Now using reactive storage hooks
 const DeveloperModeContext = createContext<
-  DeveloperModeContextType | undefined
+  | {
+      isDeveloperMode: boolean;
+      setDevMode: (enabled: boolean) => Promise<void>;
+      isLoading: boolean;
+    }
+  | undefined
 >(undefined);
 
 export const DeveloperModeProvider = ({
@@ -213,35 +223,24 @@ export const DeveloperModeProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [isDeveloperMode, setIsDeveloperMode] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isDeveloperMode, setIsDeveloperMode] = useDeveloperModeStorage();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Load from storage on mount
-  useEffect(() => {
-    const loadDeveloperMode = async () => {
+  // Set developer mode (updates storage via the reactive hook)
+  const setDevMode = useCallback(
+    async (enabled: boolean) => {
       try {
-        const mode = getDeveloperMode();
-        setIsDeveloperMode(mode);
+        setIsLoading(true);
+        setIsDeveloperMode(enabled);
+        // Removed excessive logging
       } catch (error) {
-        console.error('Error loading developer mode:', error);
-        setIsDeveloperMode(false);
+        console.error('Error setting developer mode:', error);
       } finally {
         setIsLoading(false);
       }
-    };
-
-    loadDeveloperMode();
-  }, []);
-
-  // Set developer mode (updates both context and storage)
-  const setDevMode = async (enabled: boolean) => {
-    try {
-      await setDeveloperMode(enabled);
-      setIsDeveloperMode(enabled);
-    } catch (error) {
-      console.error('Error setting developer mode:', error);
-    }
-  };
+    },
+    [setIsDeveloperMode]
+  );
 
   return (
     <DeveloperModeContext.Provider
@@ -250,6 +249,17 @@ export const DeveloperModeProvider = ({
       {children}
     </DeveloperModeContext.Provider>
   );
+};
+
+// Developer Mode Hook
+export const useDeveloperMode = () => {
+  const context = useContext(DeveloperModeContext);
+  if (context === undefined) {
+    throw new Error(
+      'useDeveloperMode must be used within a DeveloperModeProvider'
+    );
+  }
+  return context;
 };
 
 // Combined provider for both manual and developer modes
@@ -263,16 +273,6 @@ export const HealthModeProvider = ({
       <DeveloperModeProvider>{children}</DeveloperModeProvider>
     </ManualModeProvider>
   );
-};
-
-export const useDeveloperMode = () => {
-  const context = useContext(DeveloperModeContext);
-  if (!context) {
-    throw new Error(
-      'useDeveloperMode must be used within DeveloperModeProvider'
-    );
-  }
-  return context;
 };
 
 // Enhanced HealthKit availability status types
@@ -354,27 +354,45 @@ export const useHealthKit = () => {
     boolean | null
   >(null);
 
+  const requestAuthorization = useCallback(async () => {
+    if (
+      availability.status === 'available' &&
+      availability.canRequestPermission
+    ) {
+      try {
+        await HealthKit.requestAuthorization([
+          HKQuantityTypeIdentifier.stepCount,
+        ]);
+        setHasRequestedAuthorization(true);
+        return true;
+      } catch (error) {
+        console.error('Error requesting HealthKit authorization:', error);
+        setHasRequestedAuthorization(false);
+        return false;
+      }
+    }
+    return false;
+  }, [availability.status, availability.canRequestPermission]);
+
   useEffect(() => {
     if (
       availability.status === 'available' &&
       availability.canRequestPermission
     ) {
-      HealthKit.requestAuthorization([HKQuantityTypeIdentifier.stepCount])
-        .then(() => {
-          setHasRequestedAuthorization(true);
-        })
-        .catch((error) => {
-          console.error('Error requesting HealthKit authorization:', error);
-          setHasRequestedAuthorization(false);
-        });
+      requestAuthorization();
     }
-  }, [availability.status, availability.canRequestPermission]);
+  }, [
+    availability.status,
+    availability.canRequestPermission,
+    requestAuthorization,
+  ]);
 
   return {
     isAvailable: availability.status === 'available',
     hasRequestedAuthorization,
     availabilityStatus: availability.status,
     availabilityError: availability.error,
+    requestAuthorization,
   };
 };
 
@@ -637,8 +655,9 @@ const logDataConflict = (
   const difference = Math.abs(localSteps - healthKitSteps);
   const threshold = Math.max(100, localSteps * 0.1); // 10% or 100 steps
   if (difference > threshold) {
+    const preservedSteps = Math.max(localSteps, healthKitSteps);
     console.log(
-      `Data conflict detected for ${date}: Local=${localSteps}, HealthKit=${healthKitSteps}, using HealthKit data`
+      `Data conflict detected for ${date}: Local=${localSteps}, HealthKit=${healthKitSteps}, preserving higher count=${preservedSteps}`
     );
   }
 };
@@ -658,46 +677,68 @@ const queryHealthKitForDay = async (
     );
     return result.sumQuantity?.quantity ?? 0;
   } catch (error) {
-    console.log(error);
+    console.error('Error querying HealthKit for day:', error);
     return 0;
   }
 };
 
-async function getStepsForDaySum({
-  dayStart,
-  dayEnd,
-  storedHealthKitData,
-  manualSteps,
-  dataIsFresh,
-}: {
+// Helper function to get timezone-safe date string
+const getDateString = (date: Date | string): string => {
+  if (date instanceof Date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  } else {
+    return String(date).split('T')[0];
+  }
+};
+
+// Helper function to check if two dates are the same day (timezone-safe)
+const isSameDay = (date1: Date | string, date2: Date | string): boolean => {
+  const dateStr1 = getDateString(date1);
+  const dateStr2 = getDateString(date2);
+  return dateStr1 === dateStr2;
+};
+
+// Helper function to query and update HealthKit data for a day
+const processHealthKitData = async (params: {
+  dateStr: string;
   dayStart: Date;
   dayEnd: Date;
-  storedHealthKitData: { date: Date; steps: number }[];
-  manualSteps: { date: string; steps: number; source: 'manual' }[];
+  storedEntry: any;
   dataIsFresh: boolean;
-}): Promise<{ date: Date; steps: number }> {
-  const dateStr = dayStart.toISOString().split('T')[0];
-
-  // HealthKit steps for this date
+  storedHealthKitData: any[];
+}) => {
+  const {
+    dateStr,
+    dayStart,
+    dayEnd,
+    storedEntry,
+    dataIsFresh,
+    storedHealthKitData,
+  } = params;
   let healthKitSteps = 0;
-  const storedEntry = storedHealthKitData.find((entry) => {
-    const entryDate =
-      typeof entry.date === 'string' ? new Date(entry.date) : entry.date;
-    return entryDate.toISOString().split('T')[0] === dateStr;
-  });
+
   if (storedEntry && dataIsFresh) {
     healthKitSteps = storedEntry.steps;
+    // Debug logging removed
   } else {
+    // Debug logging removed
     healthKitSteps = await queryHealthKitForDay(dayStart, dayEnd);
+    // Debug logging removed
+
     // Optionally update storage if stale
     if (storedEntry && !dataIsFresh) {
       logDataConflict(dateStr, storedEntry.steps, healthKitSteps);
-      storedEntry.steps = healthKitSteps;
+
+      // Preserve the higher step count to avoid losing manual steps
+      const preservedSteps = Math.max(storedEntry.steps, healthKitSteps);
+      storedEntry.steps = preservedSteps;
+
       const updatedArray = storedHealthKitData.map((entry) => {
-        const entryDate =
-          typeof entry.date === 'string' ? new Date(entry.date) : entry.date;
-        if (entryDate.toISOString().split('T')[0] === dateStr) {
-          return { ...entry, steps: healthKitSteps };
+        if (isSameDay(entry.date, dateStr)) {
+          return { ...entry, steps: preservedSteps };
         }
         return entry;
       });
@@ -706,20 +747,14 @@ async function getStepsForDaySum({
       }
     }
   }
-  // Manual steps for this date
-  const manualEntry = manualSteps.find((entry) => entry.date === dateStr);
-  const manualStepsValue = manualEntry ? manualEntry.steps : 0;
 
-  // Sum both sources
-  return {
-    date: new Date(dateStr),
-    steps: healthKitSteps + manualStepsValue,
-  };
-}
+  return healthKitSteps;
+};
 
 const getStepsGroupedByDay = async (
   startDate: Date,
-  endDate: Date = new Date()
+  endDate: Date = new Date(),
+  forceRefresh: boolean = false
 ) => {
   const results: { date: Date; steps: number }[] = [];
   let current = new Date(startDate);
@@ -730,9 +765,9 @@ const getStepsGroupedByDay = async (
   // Get stored HealthKit data
   const storedHealthKitData = getStepsByDay();
 
-  // Check if data is fresh (less than 1 hour old)
+  // Check if data is fresh (less than 1 hour old) - unless force refresh is requested
   const lastCheckedDate = getLastCheckedDate();
-  const dataIsFresh = isDataFresh(lastCheckedDate);
+  const dataIsFresh = forceRefresh ? false : isDataFresh(lastCheckedDate);
 
   while (current <= end) {
     const dayStart = new Date(current);
@@ -740,37 +775,26 @@ const getStepsGroupedByDay = async (
     dayEnd.setHours(23, 59, 59, 999);
 
     // Only get HealthKit data, not combined data
-    const dateStr = dayStart.toISOString().split('T')[0];
-    let healthKitSteps = 0;
+    const dateStr = getDateString(dayStart);
     const storedEntry = storedHealthKitData.find((entry) => {
-      const entryDate =
-        typeof entry.date === 'string' ? new Date(entry.date) : entry.date;
-      return entryDate.toISOString().split('T')[0] === dateStr;
+      return isSameDay(entry.date, dateStr);
     });
-    if (storedEntry && dataIsFresh) {
-      healthKitSteps = storedEntry.steps;
-    } else {
-      healthKitSteps = await queryHealthKitForDay(dayStart, dayEnd);
-      // Optionally update storage if stale
-      if (storedEntry && !dataIsFresh) {
-        logDataConflict(dateStr, storedEntry.steps, healthKitSteps);
-        storedEntry.steps = healthKitSteps;
-        const updatedArray = storedHealthKitData.map((entry) => {
-          const entryDate =
-            typeof entry.date === 'string' ? new Date(entry.date) : entry.date;
-          if (entryDate.toISOString().split('T')[0] === dateStr) {
-            return { ...entry, steps: healthKitSteps };
-          }
-          return entry;
-        });
-        if (typeof setStepsByDay === 'function') {
-          await setStepsByDay(updatedArray);
-        }
-      }
-    }
+
+    const healthKitSteps = await processHealthKitData({
+      dateStr,
+      dayStart,
+      dayEnd,
+      storedEntry,
+      dataIsFresh,
+      storedHealthKitData,
+    });
 
     results.push({
-      date: new Date(dateStr),
+      date: (() => {
+        // Create date in local timezone to avoid UTC conversion issues
+        const [year, month, day] = dateStr.split('-').map(Number);
+        return new Date(year, month - 1, day); // month is 0-indexed
+      })(),
       steps: healthKitSteps,
     });
 
@@ -844,10 +868,7 @@ const mergeStepData = (
 
   // Add HealthKit steps
   healthKitResults.forEach((entry) => {
-    const dateStr =
-      entry.date instanceof Date
-        ? entry.date.toISOString().split('T')[0]
-        : new Date(entry.date).toISOString().split('T')[0];
+    const dateStr = getDateString(entry.date);
     stepMap.set(dateStr, (stepMap.get(dateStr) || 0) + entry.steps);
   });
 
@@ -859,10 +880,15 @@ const mergeStepData = (
 
   // Convert back to array of { date, steps }
   const mergedResults = Array.from(stepMap.entries()).map(
-    ([dateStr, steps]) => ({
-      date: new Date(dateStr),
-      steps,
-    })
+    ([dateStr, steps]) => {
+      // Create date in local timezone to avoid UTC conversion issues
+      const [year, month, day] = dateStr.split('-').map(Number);
+      const localDate = new Date(year, month - 1, day); // month is 0-indexed
+      return {
+        date: localDate,
+        steps,
+      };
+    }
   );
 
   // Sort by date
@@ -897,22 +923,28 @@ const updateHealthData = async (params: {
   }
 
   const experienceDifference = totalSteps - previousExperience;
+
   const currencyToAdd =
     experienceDifference > 0
       ? convertExperienceToCurrency(experienceDifference)
       : 0;
 
   const currentCurrency = getCurrency();
+
   const batchUpdate = {
     experience: totalSteps,
     cumulativeExperience: newCumulativeExperience,
     firstExperienceDate: newFirstExperienceDate,
     stepsByDay: mergedResults,
     currency: currentCurrency + currencyToAdd,
-    lastCheckedDate: lastCheckedDateTime.toISOString(),
+    lastCheckedDate: lastCheckedDateTime.toISOString(), // Store actual timestamp
   };
 
   await updateHealthCore(batchUpdate);
+  // Also update the standalone currency key used by useCurrency()
+  if (currencyToAdd !== 0) {
+    await setCurrency(currentCurrency + currencyToAdd);
+  }
 
   if (experienceDifference > 0) {
     console.log(
@@ -921,29 +953,36 @@ const updateHealthData = async (params: {
   }
 };
 
-/**
- * Hook for tracking step count as experience points
- *
- * This hook converts step count data from HealthKit into experience points
- * and tracks both current session experience and cumulative experience
- * from the first time the user started using the app. It also automatically
- * converts new experience to currency to avoid data loss.
- *
- * @param lastCheckedDateTime - The date when experience was last checked
- * @returns Object containing:
- *   - experience: Current session experience points
- *   - cumulativeExperience: Total experience from first use to now
- *   - firstExperienceDate: ISO string of when experience tracking started
- *   - stepsByDay: Array of daily step counts
- */
-// eslint-disable-next-line max-lines-per-function
+// Helper function to calculate earliest date from manual steps
+const calculateEarliestDate = (
+  manualSteps: any[],
+  lastCheckedDateTime: Date
+): Date => {
+  let earliestDate = lastCheckedDateTime;
+  if (manualSteps.length > 0) {
+    // Find the earliest manual step date
+    const manualDates = manualSteps.map((entry) => new Date(entry.date));
+    const earliestManualDate = new Date(
+      Math.min(...manualDates.map((d) => d.getTime()))
+    );
+
+    // Use the earlier of lastCheckedDateTime or earliest manual step date
+    if (earliestManualDate < earliestDate) {
+      earliestDate = earliestManualDate;
+    }
+  }
+  return earliestDate;
+};
+
 // Helper function to get experience from steps
+// eslint-disable-next-line max-lines-per-function
 const getExperienceFromStepsHelper = async (params: {
   lastCheckedDateTime: Date;
   setExperienceState: (value: number) => void;
   setCumulativeExperienceState: (value: number) => void;
   setFirstExperienceDateState: (value: string | null) => void;
   setStepsByDayState: (value: { date: Date; steps: number }[]) => void;
+  forceRefresh?: boolean;
 }) => {
   const {
     lastCheckedDateTime,
@@ -951,16 +990,28 @@ const getExperienceFromStepsHelper = async (params: {
     setCumulativeExperienceState,
     setFirstExperienceDateState,
     setStepsByDayState,
+    forceRefresh = false,
   } = params;
+
   try {
     const now = new Date();
-    const healthKitResults = await getStepsGroupedByDay(
-      lastCheckedDateTime,
-      now
+
+    // Get manual step entries first to determine the full date range
+    const manualSteps = getManualStepsByDay();
+
+    // Calculate the earliest date we need to consider
+    const earliestDate = calculateEarliestDate(
+      manualSteps,
+      lastCheckedDateTime
     );
 
-    // Get manual step entries and merge with HealthKit data
-    const manualSteps = getManualStepsByDay();
+    const healthKitResults = await getStepsGroupedByDay(
+      earliestDate, // Use the earlier date to include all relevant data
+      now,
+      forceRefresh // Pass the force refresh flag
+    );
+
+    // Merge manual steps with HealthKit data
     const mergedResults = mergeStepData(healthKitResults, manualSteps);
 
     const totalSteps = mergedResults.reduce(
@@ -1188,7 +1239,6 @@ export const useCurrencySystem = () => {
   // Function to convert current experience to currency (now just returns 0)
   const convertCurrentExperience = async () => {
     // Experience is automatically converted, so this function is deprecated
-    console.log('Experience is now automatically converted to currency');
     return 0;
   };
 

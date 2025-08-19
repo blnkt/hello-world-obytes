@@ -6,9 +6,11 @@ import { flushPromises } from '../../../__mocks__/react-native-mmkv';
 import {
   clearDeveloperMode,
   clearManualEntryMode,
-  HealthModeProvider,
   setDeveloperMode,
   setManualEntryMode,
+} from '../storage';
+import {
+  HealthModeProvider,
   useDeveloperMode,
   useHealthKitFallback,
   useManualEntryMode,
@@ -371,7 +373,7 @@ describe('useHealthKitFallback - fallback scenarios when HealthKit is unavailabl
     expect(result.current.shouldUseManualEntry).toBe(true);
     expect(result.current.suggestion).toBe('none');
     expect(result.current.reason).toContain(
-      'User has chosen manual entry mode'
+      'HealthKit is not available. You can track your steps manually.'
     );
     expect(result.current.canRetryHealthKit).toBe(true);
   });

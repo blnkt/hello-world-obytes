@@ -14,7 +14,7 @@ import {
   useStreakTracking,
 } from '@/lib/health';
 import {
-  getCharacter,
+  useCharacter,
   useDailyStepsGoal,
   useLastCheckedDate,
 } from '@/lib/storage';
@@ -283,7 +283,8 @@ const QuickNavigation = () => {
 };
 
 const CharacterPreview = () => {
-  const character = getCharacter();
+  const [character] = useCharacter();
+  const { experience } = useExperienceData();
 
   if (!character || !character.name) {
     return (
@@ -315,7 +316,7 @@ const CharacterPreview = () => {
           </Text>
         </View>
         <Text className="text-gray-500 dark:text-gray-400">
-          {character.experience.toLocaleString()} XP
+          {experience.toLocaleString()} XP
         </Text>
       </View>
     </View>
@@ -366,8 +367,12 @@ export default function Home() {
     d.setHours(0, 0, 0, 0);
     return d;
   }, []);
+  const stepsByDayTyped = stepsByDay as {
+    date: Date | string;
+    steps: number;
+  }[];
   const todaySteps =
-    stepsByDay.find((day) => {
+    stepsByDayTyped.find((day) => {
       if (!day || !day.date) return false;
 
       // Handle both Date objects and string dates

@@ -1,5 +1,6 @@
+import * as React from 'react';
 import { MMKV } from 'react-native-mmkv';
-import { useMMKVString } from 'react-native-mmkv';
+import { useMMKVBoolean, useMMKVString } from 'react-native-mmkv';
 
 export const storage = new MMKV();
 
@@ -51,6 +52,176 @@ export async function setCharacter(character: any) {
 export async function clearCharacter() {
   await removeItem(CHARACTER_STORAGE_KEY);
 }
+
+// React Hook for Character
+export const useCharacter = () => {
+  const [characterString, setCharacterString] = useMMKVString(
+    CHARACTER_STORAGE_KEY,
+    storage
+  );
+
+  const character = characterString ? JSON.parse(characterString) : null;
+
+  const setCharacter = React.useCallback(
+    (newCharacter: any) => {
+      setCharacterString(JSON.stringify(newCharacter));
+    },
+    [setCharacterString]
+  );
+
+  return [character, setCharacter] as const;
+};
+
+// Manual Entry Mode Storage
+const MANUAL_ENTRY_MODE_KEY = 'manualEntryMode';
+
+export function getManualEntryMode(): boolean {
+  const value = storage.getString(MANUAL_ENTRY_MODE_KEY);
+  return value ? JSON.parse(value) : false;
+}
+
+export async function setManualEntryMode(enabled: boolean) {
+  storage.set(MANUAL_ENTRY_MODE_KEY, JSON.stringify(enabled));
+}
+
+export async function clearManualEntryMode() {
+  storage.delete(MANUAL_ENTRY_MODE_KEY);
+}
+
+// React Hook for Manual Entry Mode
+export const useManualEntryMode = () => {
+  const [isManualMode, setIsManualMode] = useMMKVBoolean(
+    MANUAL_ENTRY_MODE_KEY,
+    storage
+  );
+
+  // If the value is undefined, it means the key doesn't exist in storage
+  // This should be treated as false (HealthKit mode)
+  const mode = isManualMode === undefined ? false : isManualMode;
+
+  return [mode, setIsManualMode] as const;
+};
+
+// Developer Mode Storage
+const DEVELOPER_MODE_KEY = 'developerMode';
+
+export function getDeveloperMode(): boolean {
+  const value = storage.getString(DEVELOPER_MODE_KEY);
+  return value ? JSON.parse(value) : false;
+}
+
+export async function setDeveloperMode(enabled: boolean) {
+  storage.set(DEVELOPER_MODE_KEY, JSON.stringify(enabled));
+}
+
+export async function clearDeveloperMode() {
+  storage.delete(DEVELOPER_MODE_KEY);
+}
+
+// React Hook for Developer Mode
+export const useDeveloperMode = () => {
+  const [isDeveloperMode, setIsDeveloperMode] = useMMKVBoolean(
+    DEVELOPER_MODE_KEY,
+    storage
+  );
+
+  // If the value is undefined, it means the key doesn't exist in storage
+  // This should be treated as false (normal mode)
+  const mode = isDeveloperMode === undefined ? false : isDeveloperMode;
+
+  return [mode, setIsDeveloperMode] as const;
+};
+
+// Manual Steps By Day Storage
+const MANUAL_STEPS_BY_DAY_KEY = 'MANUAL_STEPS_BY_DAY';
+
+export type ManualStepEntry = { date: string; steps: number; source: 'manual' };
+
+export function getManualStepsByDay(): ManualStepEntry[] {
+  const value = storage.getString(MANUAL_STEPS_BY_DAY_KEY);
+  try {
+    return value ? JSON.parse(value) || [] : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function setManualStepsByDay(stepsByDay: ManualStepEntry[]) {
+  // Validate all entries before storing
+  for (const entry of stepsByDay) {
+    if (!validateManualStepEntry(entry)) {
+      throw new Error(
+        `Invalid manual step entry structure: ${JSON.stringify(entry)}`
+      );
+    }
+  }
+  await setItem(MANUAL_STEPS_BY_DAY_KEY, stepsByDay);
+}
+
+export async function clearManualStepsByDay() {
+  await removeItem(MANUAL_STEPS_BY_DAY_KEY);
+}
+
+export async function setManualStepEntry(entry: ManualStepEntry) {
+  if (!validateManualStepEntry(entry)) {
+    throw new Error('Invalid manual step entry');
+  }
+
+  // Get current manual steps from storage
+  const existing = getManualStepsByDay();
+  const idx = existing.findIndex((e) => e.date === entry.date);
+
+  if (idx !== -1) {
+    // Combine steps for the same date
+    existing[idx].steps += entry.steps;
+  } else {
+    existing.push(entry);
+  }
+
+  // Update storage directly to ensure the reactive hook gets the update
+  storage.set(MANUAL_STEPS_BY_DAY_KEY, JSON.stringify(existing));
+}
+
+export function getManualStepEntry(date: string): ManualStepEntry | null {
+  const entries = getManualStepsByDay();
+  return entries.find((entry) => entry.date === date) || null;
+}
+
+export function hasManualEntryForDate(date: string): boolean {
+  const entry = getManualStepEntry(date);
+  return entry !== null;
+}
+
+// React Hook for Manual Steps By Day
+export const useManualStepsByDay = () => {
+  const [manualStepsString, setManualStepsString] = useMMKVString(
+    MANUAL_STEPS_BY_DAY_KEY,
+    storage
+  );
+
+  const manualSteps = React.useMemo(() => {
+    if (!manualStepsString) {
+      return [];
+    }
+
+    try {
+      const parsed = JSON.parse(manualStepsString);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      console.error('Error parsing manual steps:', error);
+      return [];
+    }
+  }, [manualStepsString]);
+
+  const setManualSteps = React.useCallback(
+    (newSteps: ManualStepEntry[]) => {
+      setManualStepsString(JSON.stringify(newSteps));
+    },
+    [setManualStepsString]
+  );
+
+  return [manualSteps, setManualSteps] as const;
+};
 
 // First Time Storage
 const IS_FIRST_TIME_KEY = 'IS_FIRST_TIME';
@@ -393,61 +564,6 @@ export async function migrateToHealthCore() {
   }
 }
 
-// Manual Steps By Day Storage
-const MANUAL_STEPS_BY_DAY_KEY = 'MANUAL_STEPS_BY_DAY';
-
-export type ManualStepEntry = { date: string; steps: number; source: 'manual' };
-
-export function getManualStepsByDay(): ManualStepEntry[] {
-  const value = storage.getString(MANUAL_STEPS_BY_DAY_KEY);
-  try {
-    return value ? JSON.parse(value) || [] : [];
-  } catch {
-    return [];
-  }
-}
-
-export async function setManualStepsByDay(stepsByDay: ManualStepEntry[]) {
-  // Validate all entries before storing
-  for (const entry of stepsByDay) {
-    if (!validateManualStepEntry(entry)) {
-      throw new Error(
-        `Invalid manual step entry structure: ${JSON.stringify(entry)}`
-      );
-    }
-  }
-  await setItem(MANUAL_STEPS_BY_DAY_KEY, stepsByDay);
-}
-
-export async function clearManualStepsByDay() {
-  await removeItem(MANUAL_STEPS_BY_DAY_KEY);
-}
-
-export async function setManualStepEntry(entry: ManualStepEntry) {
-  if (!validateManualStepEntry(entry)) {
-    throw new Error('Invalid manual step entry');
-  }
-  const existing = await getManualStepsByDay();
-  const idx = existing.findIndex((e) => e.date === entry.date);
-  if (idx !== -1) {
-    // Combine steps for the same date
-    existing[idx].steps += entry.steps;
-  } else {
-    existing.push(entry);
-  }
-  await setManualStepsByDay(existing);
-}
-
-export function getManualStepEntry(date: string): ManualStepEntry | null {
-  const entries = getManualStepsByDay();
-  return entries.find((entry) => entry.date === date) || null;
-}
-
-export function hasManualEntryForDate(date: string): boolean {
-  const entry = getManualStepEntry(date);
-  return entry !== null;
-}
-
 export async function migrateManualStepEntries() {
   const existingSteps = getStepsByDay();
   const existingManualSteps = getManualStepsByDay();
@@ -456,12 +572,21 @@ export async function migrateManualStepEntries() {
     return;
   }
 
+  // Helper function to get timezone-safe date string
+  const getDateString = (date: Date | string): string => {
+    if (date instanceof Date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    } else {
+      return String(date).split('T')[0];
+    }
+  };
+
   // Convert old step data to manual entry format
   const migratedEntries: ManualStepEntry[] = existingSteps.map((step) => ({
-    date:
-      step.date instanceof Date
-        ? step.date.toISOString().split('T')[0]
-        : String(step.date).split('T')[0],
+    date: getDateString(step.date),
     steps: step.steps,
     source: 'manual' as const,
   }));

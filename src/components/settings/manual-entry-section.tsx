@@ -9,8 +9,8 @@ import {
 } from '@/lib/health';
 import {
   clearManualStepsByDay,
-  getManualStepsByDay,
   setManualStepEntry,
+  useManualStepsByDay,
 } from '@/lib/storage';
 
 if (typeof global.alert === 'undefined') {
@@ -133,27 +133,12 @@ const DeveloperModeToggle = () => {
 };
 
 const ManualEntriesInfo = ({ onRefresh }: { onRefresh: () => void }) => {
-  const [manualStepsCount, setManualStepsCount] = React.useState<number>(0);
-
-  React.useEffect(() => {
-    const loadManualStepsCount = async () => {
-      try {
-        const manualSteps = getManualStepsByDay();
-        setManualStepsCount(manualSteps?.length || 0);
-      } catch (error) {
-        console.error('Error loading manual steps count:', error);
-        setManualStepsCount(0);
-        // Don't re-throw - error boundaries don't catch async errors
-      }
-    };
-
-    loadManualStepsCount();
-  }, [onRefresh]);
+  const [manualSteps] = useManualStepsByDay();
+  const manualStepsCount = manualSteps?.length || 0;
 
   const handleClearManualEntries = async () => {
     try {
       await clearManualStepsByDay();
-      setManualStepsCount(0);
       onRefresh();
       alert('Manual entries cleared!');
     } catch (error) {
@@ -186,8 +171,11 @@ const ManualEntriesInfo = ({ onRefresh }: { onRefresh: () => void }) => {
 const ManualEntryHistoryItem = ({ entry }: { entry: any }) => {
   const formatDate = (dateString: string) => {
     try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('en-US', {
+      // Create date in local timezone to avoid UTC conversion issues
+      const [year, month, day] = dateString.split('-').map(Number);
+      const localDate = new Date(year, month - 1, day); // month is 0-indexed
+
+      return localDate.toLocaleDateString('en-US', {
         weekday: 'short',
         month: 'short',
         day: 'numeric',
@@ -280,8 +268,12 @@ const StepCountInput = ({
 const useManualStepForm = (onStepAdded: () => void) => {
   const [stepCount, setStepCount] = React.useState('');
   const [selectedDate, setSelectedDate] = React.useState(() => {
+    // Get today's date in local timezone without timezone conversion issues
     const today = new Date();
-    return today.toISOString().split('T')[0]; // YYYY-MM-DD format
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`; // YYYY-MM-DD format
   });
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | undefined>();
@@ -311,21 +303,23 @@ const useManualStepForm = (onStepAdded: () => void) => {
       setError(undefined);
 
       const steps = parseInt(stepCount, 10);
+
       await setManualStepEntry({
         date: selectedDate,
         steps,
         source: 'manual',
       });
 
-      // Reset form
+      // Reset form with timezone-safe date
       setStepCount('');
-      setSelectedDate(new Date().toISOString().split('T')[0]);
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      setSelectedDate(`${year}-${month}-${day}`);
 
       // Notify parent to refresh
       onStepAdded();
-
-      // Trigger experience refresh to update totals
-      // useExperienceData().refreshExperience(); // This line is removed as per the edit hint
 
       alert(
         `Successfully added ${steps.toLocaleString()} steps for ${selectedDate}!`
@@ -388,41 +382,15 @@ const AddManualStepForm = ({ onStepAdded }: { onStepAdded: () => void }) => {
   );
 };
 
-const ManualEntryHistory = () => {
-  const [manualSteps, setManualSteps] = React.useState<any[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
-
-  const loadManualSteps = React.useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const steps = getManualStepsByDay();
-      setManualSteps(steps || []);
-    } catch (error) {
-      console.error('Error loading manual steps history:', error);
-      setManualSteps([]);
-      // Don't re-throw - error boundaries don't catch async errors
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  React.useEffect(() => {
-    loadManualSteps();
-  }, [loadManualSteps]);
-
-  if (isLoading) {
-    return <ManualEntryHistoryLoading />;
-  }
-
+const ManualEntryHistory = ({ manualSteps }: { manualSteps: any[] }) => {
   if (manualSteps.length === 0) {
     return <ManualEntryHistoryEmpty />;
   }
 
-  // Sort by date (newest first)
+  // Sort by date (newest first) - using timezone-safe comparison
   const sortedSteps = [...manualSteps].sort((a, b) => {
-    const dateA = new Date(a.date);
-    const dateB = new Date(b.date);
-    return dateB.getTime() - dateA.getTime();
+    // Compare date strings directly to avoid timezone conversion issues
+    return b.date.localeCompare(a.date);
   });
 
   return (
@@ -451,10 +419,12 @@ export default function ManualEntrySection() {
   const { isManualMode, setManualMode } = useManualEntryMode();
   const { isDeveloperMode, setDevMode } = useDeveloperMode();
   const { refreshExperience } = useExperienceData();
+  const [manualSteps] = useManualStepsByDay();
 
-  const handleRefresh = () => {
-    // This function triggers a refresh of the manual entries display
-  };
+  const handleStepAdded = React.useCallback(async () => {
+    // Refresh experience data - this will trigger re-renders in components that use it
+    await refreshExperience();
+  }, [refreshExperience]);
 
   return (
     <View className="space-y-4">
@@ -464,9 +434,9 @@ export default function ManualEntrySection() {
         <EntryModeIndicator />
         <ManualEntryModeToggle />
         <DeveloperModeToggle />
-        <AddManualStepForm onStepAdded={refreshExperience} />
-        <ManualEntriesInfo onRefresh={handleRefresh} />
-        <ManualEntryHistory />
+        <AddManualStepForm onStepAdded={handleStepAdded} />
+        <ManualEntriesInfo onRefresh={() => {}} />
+        <ManualEntryHistory manualSteps={manualSteps} />
       </View>
     </View>
   );
