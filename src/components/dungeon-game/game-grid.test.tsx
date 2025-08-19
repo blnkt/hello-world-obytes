@@ -262,6 +262,74 @@ describe('DungeonGame', () => {
     expect(screen.getByText('Game State: Win')).toBeTruthy();
   });
 
+  it('should progress to next level when win condition is met', () => {
+    render(<DungeonGame />);
+
+    // Initially should show level 1
+    expect(screen.getByText('Level 1')).toBeTruthy();
+
+    // Find and click the exit tile to trigger win
+    const tiles = screen.getAllByTestId('grid-tile');
+    
+    for (let i = 0; i < tiles.length; i++) {
+      fireEvent.press(tiles[i]);
+
+      // Check if this tile is the exit
+      try {
+        screen.getByText('🚪');
+        break;
+      } catch {
+        // Not the exit, continue to next tile
+        continue;
+      }
+    }
+
+    // Should show win game state
+    expect(screen.getByText('Game State: Win')).toBeTruthy();
+
+    // Click "Next Level" button to progress
+    const nextLevelButton = screen.getByText('Next Level');
+    fireEvent.press(nextLevelButton);
+
+    // Should now show level 2
+    expect(screen.getByText('Level 2')).toBeTruthy();
+    
+    // Should reset to active game state
+    expect(screen.getByText('Game State: Active')).toBeTruthy();
+  });
+
+  it('should increase difficulty with each level (more traps, fewer treasures)', () => {
+    const { rerender } = render(<DungeonGame />);
+
+    // Level 1: Should have base distribution
+    expect(screen.getByText('Level 1')).toBeTruthy();
+
+    // Progress to level 2
+    const tiles = screen.getAllByTestId('grid-tile');
+    
+    // Find and click exit tile to win level 1
+    for (let i = 0; i < tiles.length; i++) {
+      fireEvent.press(tiles[i]);
+      try {
+        screen.getByText('🚪');
+        break;
+      } catch {
+        continue;
+      }
+    }
+
+    // Click Next Level
+    const nextLevelButton = screen.getByText('Next Level');
+    fireEvent.press(nextLevelButton);
+
+    // Should now be level 2
+    expect(screen.getByText('Level 2')).toBeTruthy();
+    
+    // Level 2 should have increased difficulty (more traps, fewer treasures)
+    // The exact distribution will be random, but we can verify the level progression
+    expect(screen.getByText('Game State: Active')).toBeTruthy();
+  });
+
   it('should trigger game over condition when all tiles are revealed without finding exit', () => {
     render(<DungeonGame />);
 

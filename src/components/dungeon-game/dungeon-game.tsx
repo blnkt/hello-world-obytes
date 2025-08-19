@@ -20,6 +20,7 @@ interface DungeonGameLayoutProps {
   onHomePress: () => void;
   onExitFound: () => void;
   onGameOverFromTurns: () => void;
+  onNextLevel: () => void;
 }
 
 function DungeonGameLayout({
@@ -36,6 +37,7 @@ function DungeonGameLayout({
   onHomePress,
   onExitFound,
   onGameOverFromTurns,
+  onNextLevel,
 }: DungeonGameLayoutProps) {
   return (
     <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
@@ -57,6 +59,7 @@ function DungeonGameLayout({
       {/* Game Grid - Full Width */}
       <View className="mb-4">
         <GameGrid
+          level={level}
           onTurnsUpdate={onTurnsUpdate}
           onRevealedTilesUpdate={onRevealedTilesUpdate}
           onExitFound={onExitFound}
@@ -73,6 +76,11 @@ function DungeonGameLayout({
           <Button label="Reset Game" onPress={onResetGame} size="sm" />
         </View>
 
+        {/* Next Level Button - Only show when game state is Win */}
+        {gameState === 'Win' && (
+          <Button label="Next Level" onPress={onNextLevel} size="sm" />
+        )}
+
         <Button label="Home" onPress={onHomePress} size="sm" />
       </View>
     </ScrollView>
@@ -88,7 +96,7 @@ interface DungeonGameProps {
 
 export default function DungeonGame({ navigation }: DungeonGameProps) {
   // Game state management
-  const [level, _setLevel] = useState(1);
+  const [level, setLevel] = useState(1);
   const [turns, setTurns] = useState(0);
   const [gameState, setGameState] = useState<'Active' | 'Win' | 'Game Over'>(
     'Active'
@@ -138,6 +146,13 @@ export default function DungeonGame({ navigation }: DungeonGameProps) {
     setGameState('Game Over');
   }, []);
 
+  const handleNextLevel = React.useCallback(() => {
+    setLevel((prevLevel) => prevLevel + 1);
+    setGameState('Active');
+    setTurns(0);
+    setRevealedTiles(0);
+  }, []);
+
   return (
     <DungeonGameLayout
       level={level}
@@ -153,6 +168,7 @@ export default function DungeonGame({ navigation }: DungeonGameProps) {
       onHomePress={handleHomePress}
       onExitFound={handleExitFound}
       onGameOverFromTurns={handleGameOverFromTurns}
+      onNextLevel={handleNextLevel}
     />
   );
 }

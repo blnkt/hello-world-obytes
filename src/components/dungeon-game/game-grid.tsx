@@ -57,15 +57,22 @@ const useGameGridState = (callbacks: {
   };
 };
 
-// Helper function to generate level tiles
-const generateLevelTiles = () => {
+// Helper function to generate level tiles with difficulty scaling
+const generateLevelTiles = (level: number = 1) => {
+  // Difficulty scaling: more traps, fewer treasures as level increases
+  const baseTrapCount = 4;
+  const baseTreasureCount = 4;
+  const trapIncrease = Math.min(level - 1, 3); // Max 3 additional traps
+  const treasureDecrease = Math.min(level - 1, 2); // Max 2 fewer treasures
+  
   const tileDistribution = {
     exit: 1,
-    trap: 4,
-    treasure: 4,
+    trap: baseTrapCount + trapIncrease,
+    treasure: Math.max(1, baseTreasureCount - treasureDecrease), // Minimum 1 treasure
     bonus: 4,
-    neutral: 17,
+    neutral: 30 - 1 - (baseTrapCount + trapIncrease) - Math.max(1, baseTreasureCount - treasureDecrease) - 4,
   };
+  
   const tileTypesArray: ('treasure' | 'trap' | 'exit' | 'bonus' | 'neutral')[] =
     [];
 
@@ -126,6 +133,7 @@ const handleBonusReveal = (params: {
     >
   >;
   setTurnsUsed: React.Dispatch<React.SetStateAction<number>>;
+  onExitFound?: () => void;
 }) => {
   const {
     id,
@@ -136,6 +144,7 @@ const handleBonusReveal = (params: {
     setRevealedTiles,
     setTileTypes,
     setTurnsUsed,
+    onExitFound,
   } = params;
   const adjacentTile = findUnrevealedAdjacentTile({
     tileId: id,
@@ -155,12 +164,19 @@ const handleBonusReveal = (params: {
 
     setTileTypes((prev) => ({ ...prev, [adjacentTile]: adjacentTileType }));
 
-    // Apply effects for the auto-revealed tile
-    if (adjacentTileType === 'trap') {
-      setTurnsUsed((prev) => prev + 1);
-    } else if (adjacentTileType === 'treasure') {
-      setTurnsUsed((prev) => prev - 1);
-    }
+    // Handle tile effects for the auto-revealed tile (including win condition)
+    handleTileEffects({
+      tileType: adjacentTileType,
+      id: adjacentTile,
+      revealedTiles,
+      rows,
+      cols,
+      levelTiles,
+      setRevealedTiles,
+      setTileTypes,
+      setTurnsUsed,
+      onExitFound,
+    });
   }
 };
 
@@ -215,6 +231,7 @@ const handleTileEffects = (params: {
       setRevealedTiles,
       setTileTypes,
       setTurnsUsed,
+      onExitFound,
     });
   }
 
@@ -296,6 +313,7 @@ const createGridStructure = (rows: number, cols: number) => {
 };
 
 interface GameGridProps {
+  level: number;
   onTurnsUpdate?: (turns: number) => void;
   onRevealedTilesUpdate?: (count: number) => void;
   onExitFound?: () => void;
@@ -304,6 +322,7 @@ interface GameGridProps {
 
 // eslint-disable-next-line max-lines-per-function
 export default function GameGrid({
+  level,
   onTurnsUpdate,
   onRevealedTilesUpdate,
   onExitFound,
@@ -314,7 +333,7 @@ export default function GameGrid({
   const totalTiles = GRID_TOTAL_TILES;
 
   // Generate level tiles once when component mounts
-  const levelTiles = React.useMemo(() => generateLevelTiles(), []);
+  const levelTiles = React.useMemo(() => generateLevelTiles(level), [level]);
 
   // Use custom hook for state management
   const {
