@@ -2,8 +2,8 @@
 
 ## Relevant Files
 
-- `src/app/(app)/dungeon-game.tsx` - Main dungeon game screen component that manages game state and renders the game interface.
-- `src/app/(app)/dungeon-game.test.tsx` - Unit tests for the main dungeon game component.
+- `src/app/(app)/dungeon-game.tsx` - Main dungeon game screen component that manages game state and renders the game interface. ✅ **CREATED**
+- `src/app/(app)/dungeon-game.test.tsx` - Unit tests for the main dungeon game component. ✅ **CREATED**
 - `src/components/dungeon-game/game-grid.tsx` - Grid component that renders the 6x5 tile layout and handles tile interactions.
 - `src/components/dungeon-game/game-grid.test.tsx` - Unit tests for the game grid component.
 - `src/components/dungeon-game/grid-tile.tsx` - Individual tile component that displays tile states and handles click events.
@@ -28,7 +28,7 @@
 
 - [ ] 1.0 Core Game Infrastructure
 
-  - [ ] 1.1 Create main dungeon game screen component with basic navigation
+  - [x] 1.1 Create main dungeon game screen component with basic navigation
   - [ ] 1.2 Set up game state management (level, turns, revealed tiles, game state)
   - [ ] 1.3 Implement basic routing and navigation integration
   - [ ] 1.4 Add home button and return to main menu functionality
