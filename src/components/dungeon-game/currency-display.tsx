@@ -9,6 +9,7 @@ interface CurrencyDisplayProps {
   turnCost: number;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export default function CurrencyDisplay({
   currency,
   availableTurns,
@@ -45,7 +46,7 @@ export default function CurrencyDisplay({
   };
 
   return (
-    <View 
+    <View
       className="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800"
       accessible={true}
       accessibilityLabel={`Currency and Turns - ${availableTurns} turns available`}
@@ -53,13 +54,13 @@ export default function CurrencyDisplay({
     >
       {/* Header with Status Icon */}
       <View className="mb-3 flex-row items-center justify-between">
-        <Text 
+        <Text
           className="text-lg font-bold text-gray-900 dark:text-white"
           accessibilityRole="header"
         >
           Currency & Turns
         </Text>
-        <Text 
+        <Text
           className="text-2xl"
           accessibilityLabel={`Status icon: ${getStatusIcon()}`}
         >
@@ -77,7 +78,7 @@ export default function CurrencyDisplay({
             {currency} steps
           </Text>
         </View>
-        
+
         <View className="flex-row items-center justify-between">
           <Text className="text-sm text-gray-600 dark:text-gray-300">
             Turn Cost:
@@ -94,9 +95,7 @@ export default function CurrencyDisplay({
           <Text className="text-sm text-gray-600 dark:text-gray-300">
             Available Turns:
           </Text>
-          <Text
-            className={`text-xl font-bold ${getTurnStatusColor()}`}
-          >
+          <Text className={`text-xl font-bold ${getTurnStatusColor()}`}>
             {availableTurns}
           </Text>
         </View>
@@ -104,7 +103,7 @@ export default function CurrencyDisplay({
 
       {/* Status Indicator */}
       {availableTurns < 1 && (
-        <View 
+        <View
           className="rounded-lg bg-red-100 p-3 dark:bg-red-900/20"
           accessible={true}
           accessibilityLabel="Insufficient currency warning"
@@ -120,7 +119,7 @@ export default function CurrencyDisplay({
       )}
 
       {availableTurns >= 1 && availableTurns < 3 && (
-        <View 
+        <View
           className="rounded-lg bg-yellow-100 p-3 dark:bg-yellow-900/20"
           accessible={true}
           accessibilityLabel="Low currency warning"
@@ -136,11 +135,11 @@ export default function CurrencyDisplay({
       )}
 
       {availableTurns >= 3 && (
-        <View 
+        <View
           className="rounded-lg bg-green-100 p-3 dark:bg-green-900/20"
           accessible={true}
           accessibilityLabel="Ready to play status"
-          accessibilityRole="status"
+          accessibilityRole="text"
         >
           <Text className="text-center text-sm font-medium text-green-800 dark:text-green-200">
             Ready to play

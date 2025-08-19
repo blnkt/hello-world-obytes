@@ -10,7 +10,10 @@ jest.mock('@/lib/health', () => ({
 }));
 
 // Mock storage
-jest.mock('@/lib/storage', () => require('../../../../__mocks__/storage.tsx'));
+jest.mock('@/lib/storage', () => ({
+  ...require('../../../../__mocks__/storage.tsx'),
+  useManualStepsByDay: jest.fn(),
+}));
 
 import ManualEntrySection from '../manual-entry-section';
 import {
@@ -24,8 +27,11 @@ import { useDeveloperMode, useManualEntryMode, useExperienceData } from '@/lib/h
 const mockUseManualEntryMode = jest.mocked(useManualEntryMode);
 const mockUseDeveloperMode = jest.mocked(useDeveloperMode);
 const mockUseExperienceData = jest.mocked(useExperienceData);
+const mockUseManualStepsByDay = jest.mocked(
+  require('@/lib/storage').useManualStepsByDay
+);
 
-describe.skip('Manual Entry Section Component Behavior', () => {
+describe('Manual Entry Section Component Behavior', () => {
   const mockRefreshExperience = jest.fn();
 
   beforeEach(async () => {
@@ -55,6 +61,8 @@ describe.skip('Manual Entry Section Component Behavior', () => {
       stepsByDay: [],
       refreshExperience: mockRefreshExperience,
     });
+    
+    mockUseManualStepsByDay.mockReturnValue([[], jest.fn()]);
   });
 
   afterEach(async () => {

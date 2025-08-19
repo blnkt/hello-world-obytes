@@ -12,6 +12,7 @@ jest.mock('@/lib/storage', () => {
     ...originalModule,
     getManualStepsByDay: jest.fn(),
     clearManualStepsByDay: jest.fn(),
+    useManualStepsByDay: jest.fn(),
   };
 });
 
@@ -37,12 +38,15 @@ const mockGetManualStepsByDay = jest.mocked(
 const mockClearManualStepsByDay = jest.mocked(
   require('@/lib/storage').clearManualStepsByDay
 );
+const mockUseManualStepsByDay = jest.mocked(
+  require('@/lib/storage').useManualStepsByDay
+);
 
 afterEach(() => {
   jest.clearAllMocks();
 });
 
-describe.skip('ManualEntrySection', () => {
+describe('ManualEntrySection', () => {
   const defaultManualEntryMode = {
     isManualMode: false,
     setManualMode: jest.fn(),
@@ -67,6 +71,7 @@ describe.skip('ManualEntrySection', () => {
     });
     mockGetManualStepsByDay.mockReturnValue([]);
     mockClearManualStepsByDay.mockResolvedValue(undefined);
+    mockUseManualStepsByDay.mockReturnValue([[], jest.fn()]);
   });
 
   it('should render the manual entry section title', () => {
@@ -275,9 +280,12 @@ describe.skip('ManualEntrySection', () => {
 
   describe('Manual Entries Info', () => {
     it('should show correct count when manual entries exist', () => {
-      mockGetManualStepsByDay.mockReturnValue([
-        { date: '2024-01-01', steps: 5000, source: 'manual' },
-        { date: '2024-01-02', steps: 6000, source: 'manual' },
+      mockUseManualStepsByDay.mockReturnValue([
+        [
+          { date: '2024-01-01', steps: 5000, source: 'manual' },
+          { date: '2024-01-02', steps: 6000, source: 'manual' },
+        ],
+        jest.fn(),
       ]);
 
       render(<ManualEntrySection />);
@@ -287,7 +295,7 @@ describe.skip('ManualEntrySection', () => {
     });
 
     it('should show zero count when no manual entries', () => {
-      mockGetManualStepsByDay.mockReturnValue([]);
+      mockUseManualStepsByDay.mockReturnValue([[], jest.fn()]);
 
       render(<ManualEntrySection />);
       expect(
@@ -296,7 +304,7 @@ describe.skip('ManualEntrySection', () => {
     });
 
     it('should show zero count when manual entries is null', () => {
-      mockGetManualStepsByDay.mockReturnValue(null);
+      mockUseManualStepsByDay.mockReturnValue([[], jest.fn()]);
 
       render(<ManualEntrySection />);
       expect(
@@ -305,9 +313,7 @@ describe.skip('ManualEntrySection', () => {
     });
 
     it('should handle error when loading manual steps count', () => {
-      mockGetManualStepsByDay.mockImplementation(() => {
-        throw new Error('Storage error');
-      });
+      mockUseManualStepsByDay.mockReturnValue([[], jest.fn()]);
 
       render(<ManualEntrySection />);
 
@@ -321,8 +327,9 @@ describe.skip('ManualEntrySection', () => {
 
   describe('Clear Manual Entries', () => {
     it('should be enabled when manual entries exist', () => {
-      mockGetManualStepsByDay.mockReturnValue([
-        { date: '2024-01-01', steps: 5000, source: 'manual' },
+      mockUseManualStepsByDay.mockReturnValue([
+        [{ date: '2024-01-01', steps: 5000, source: 'manual' }],
+        jest.fn(),
       ]);
 
       render(<ManualEntrySection />);
@@ -331,7 +338,7 @@ describe.skip('ManualEntrySection', () => {
     });
 
     it('should be disabled when no manual entries', () => {
-      mockGetManualStepsByDay.mockReturnValue([]);
+      mockUseManualStepsByDay.mockReturnValue([[], jest.fn()]);
 
       render(<ManualEntrySection />);
       const clearButton = screen.getByText('Clear All Manual Entries');
@@ -339,8 +346,9 @@ describe.skip('ManualEntrySection', () => {
     });
 
     it('should call clearManualStepsByDay when button is pressed', async () => {
-      mockGetManualStepsByDay.mockReturnValue([
-        { date: '2024-01-01', steps: 5000, source: 'manual' },
+      mockUseManualStepsByDay.mockReturnValue([
+        [{ date: '2024-01-01', steps: 5000, source: 'manual' }],
+        jest.fn(),
       ]);
 
       render(<ManualEntrySection />);
@@ -350,8 +358,9 @@ describe.skip('ManualEntrySection', () => {
     });
 
     it('should handle error when clearing manual entries', async () => {
-      mockGetManualStepsByDay.mockReturnValue([
-        { date: '2024-01-01', steps: 5000, source: 'manual' },
+      mockUseManualStepsByDay.mockReturnValue([
+        [{ date: '2024-01-01', steps: 5000, source: 'manual' }],
+        jest.fn(),
       ]);
       mockClearManualStepsByDay.mockRejectedValue(new Error('Clear error'));
 

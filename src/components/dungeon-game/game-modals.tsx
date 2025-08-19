@@ -1,7 +1,7 @@
 import React from 'react';
-import { View } from 'react-native';
+import { Modal, View } from 'react-native';
 
-import { Button, Modal, Text } from '@/components/ui';
+import { Button, Text } from '@/components/ui';
 
 interface WinModalProps {
   visible: boolean;
@@ -18,7 +18,12 @@ interface GameOverModalProps {
   onRetry: () => void;
 }
 
-export function WinModal({ visible, level, onNextLevel, onMainMenu }: WinModalProps) {
+export function WinModal({
+  visible,
+  level,
+  onNextLevel,
+  onMainMenu,
+}: WinModalProps) {
   return (
     <Modal visible={visible} animationType="fade">
       <View className="flex-1 items-center justify-center bg-black/50 p-4">
@@ -65,12 +70,12 @@ export function WinModal({ visible, level, onNextLevel, onMainMenu }: WinModalPr
   );
 }
 
-export function GameOverModal({ 
-  visible, 
-  level, 
-  turnsUsed, 
-  onMainMenu, 
-  onRetry 
+export function GameOverModal({
+  visible,
+  level,
+  turnsUsed,
+  onMainMenu,
+  onRetry,
 }: GameOverModalProps) {
   return (
     <Modal visible={visible} animationType="fade">
