@@ -238,14 +238,12 @@ export default function DungeonGame({ navigation }: DungeonGameProps) {
 
   const handleNextLevel = React.useCallback(() => {
     setIsLoading(true);
-    // Simulate loading time for level transition
-    setTimeout(() => {
-      setLevel((prevLevel) => prevLevel + 1);
-      setGameState('Active');
-      setTurns(0);
-      setRevealedTiles(0);
-      setIsLoading(false);
-    }, 500);
+    // Immediate state change for testing, can add delay later for production
+    setLevel((prevLevel) => prevLevel + 1);
+    setGameState('Active');
+    setTurns(0);
+    setRevealedTiles(0);
+    setIsLoading(false);
   }, []);
 
   const handleSpendCurrency = React.useCallback(async (amount: number) => {
