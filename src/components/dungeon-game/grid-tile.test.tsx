@@ -40,6 +40,45 @@ describe('GridTile', () => {
     expect(mockOnPress).toHaveBeenCalledWith('0-0', 0, 0);
   });
 
+  it('should handle tile reveal state changes', () => {
+    const mockOnPress = jest.fn();
+    const { rerender } = render(
+      <GridTile id="0-0" row={0} col={0} onPress={mockOnPress} />
+    );
+
+    // Initially face-down
+    expect(screen.queryByText('💎')).toBeNull();
+
+    // Reveal the tile
+    rerender(
+      <GridTile
+        id="0-0"
+        row={0}
+        col={0}
+        onPress={mockOnPress}
+        isRevealed={true}
+      />
+    );
+
+    // Should now show neutral content
+    expect(screen.getByText('·')).toBeTruthy();
+
+    // Change tile type
+    rerender(
+      <GridTile
+        id="0-0"
+        row={0}
+        col={0}
+        onPress={mockOnPress}
+        isRevealed={true}
+        tileType="treasure"
+      />
+    );
+
+    // Should show treasure content
+    expect(screen.getByText('💎')).toBeTruthy();
+  });
+
   it('should display tile type when revealed', () => {
     render(
       <GridTile

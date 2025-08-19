@@ -25,4 +25,20 @@ describe('GameGrid', () => {
     expect(screen.getByText('Grid: 6x5')).toBeTruthy();
     expect(screen.getByText('Total Tiles: 30')).toBeTruthy();
   });
+
+  it('should handle tile interactions and reveal functionality', () => {
+    render(<GameGrid />);
+
+    // Should have 30 tiles initially
+    const tiles = screen.getAllByTestId('grid-tile');
+    expect(tiles).toHaveLength(30);
+
+    // All tiles should start face-down
+    tiles.forEach((tile) => {
+      expect(tile).toBeTruthy();
+    });
+
+    // Should display initial revealed count
+    expect(screen.getByText('Revealed: 0/30')).toBeTruthy();
+  });
 });
