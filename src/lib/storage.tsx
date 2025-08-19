@@ -462,7 +462,12 @@ export const useCurrency = () => {
 // Purchased Items Storage
 const PURCHASED_ITEMS_KEY = 'purchasedItems';
 
-export function getPurchasedItems(): string[] {
+export type PurchasedItem = {
+  id: string;
+  quantity: number;
+};
+
+export function getPurchasedItems(): PurchasedItem[] {
   const value = storage.getString(PURCHASED_ITEMS_KEY);
   try {
     return value ? JSON.parse(value) || [] : [];
@@ -471,14 +476,21 @@ export function getPurchasedItems(): string[] {
   }
 }
 
-export async function setPurchasedItems(items: string[]) {
+export async function setPurchasedItems(items: PurchasedItem[]) {
   await setItem(PURCHASED_ITEMS_KEY, items);
 }
 
 export async function addPurchasedItem(itemId: string) {
   const currentItems = getPurchasedItems();
-  if (!currentItems.includes(itemId)) {
-    const updatedItems = [...currentItems, itemId];
+  const existingItem = currentItems.find((item) => item.id === itemId);
+
+  if (existingItem) {
+    // Increment quantity if item already exists
+    existingItem.quantity += 1;
+    await setPurchasedItems(currentItems);
+  } else {
+    // Add new item with quantity 1
+    const updatedItems = [...currentItems, { id: itemId, quantity: 1 }];
     await setPurchasedItems(updatedItems);
   }
 }

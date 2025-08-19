@@ -1,6 +1,7 @@
 import React from 'react';
 import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
+import { PurchasedItemsGrid } from '../../components/dungeon-game/purchased-items-grid';
 import { useCurrencySystem } from '../../lib/health';
 import {
   addPurchasedItem,
@@ -96,30 +97,6 @@ const handlePurchase = async (
   }
 };
 
-const PurchasedItemsSection = ({
-  purchasedItems,
-}: {
-  purchasedItems: string[];
-}) => {
-  if (purchasedItems.length === 0) return null;
-
-  return (
-    <View className="rounded-xl bg-green-500/20 p-4">
-      <Text className="mb-2 text-center font-semibold text-green-300">
-        🎉 Purchased Items
-      </Text>
-      {purchasedItems.map((itemId) => {
-        const item = SHOP_ITEMS.find((i) => i.id === itemId);
-        return (
-          <Text key={itemId} className="text-center text-sm text-green-200">
-            {item?.icon} {item?.name}
-          </Text>
-        );
-      })}
-    </View>
-  );
-};
-
 const ShopScreen = () => {
   const [lastCheckedDate] = useLastCheckedDate();
   const lastCheckedDateTime = lastCheckedDate
@@ -163,7 +140,11 @@ const ShopScreen = () => {
           ))}
         </View>
 
-        <PurchasedItemsSection purchasedItems={purchasedItems} />
+        <PurchasedItemsGrid
+          purchasedItems={purchasedItems}
+          title="🎉 Purchased Items"
+          className="rounded-xl bg-green-500/20 p-4"
+        />
       </View>
     </ScrollView>
   );

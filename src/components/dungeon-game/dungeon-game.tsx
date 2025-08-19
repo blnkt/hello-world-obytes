@@ -5,9 +5,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, LoadingOverlay, Text } from '@/components/ui';
 import { useCurrencySystem } from '@/lib/health';
+import { usePurchasedItems } from '@/lib/storage';
 
 import GameGrid from './game-grid';
 import { GameOverModal, WinModal } from './game-modals';
+import { PurchasedItemsGrid } from './purchased-items-grid';
 
 interface DungeonGameLayoutProps {
   level: number;
@@ -119,6 +121,8 @@ function GameGridSection({
   onGameOverFromTurns,
   onSpendCurrency,
 }: GameGridSectionProps) {
+  const [purchasedItems] = usePurchasedItems();
+
   return (
     <View className="mb-3">
       {availableTurns < 1 ? (
@@ -144,6 +148,9 @@ function GameGridSection({
             message="Ready to play! Click tiles to reveal them."
             type="info"
           />
+
+          {/* Purchased Items Grid */}
+          <PurchasedItemsGrid purchasedItems={purchasedItems} />
         </>
       )}
     </View>
