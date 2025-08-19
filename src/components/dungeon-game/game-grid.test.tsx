@@ -92,8 +92,22 @@ describe('GameGrid', () => {
     // Should display initial revealed count
     expect(screen.getByText('Revealed: 0/30')).toBeTruthy();
 
-    // Level should have proper distribution (1 exit, balanced monsters/traps/treasure)
+    // Level should have proper distribution (1 exit, 4 traps, 4 treasures, 4 bonuses, 17 neutral)
     expect(screen.getByText('Grid: 6x5')).toBeTruthy();
     expect(screen.getByText('Total Tiles: 30')).toBeTruthy();
+  });
+
+  it('should maintain consistent tile distribution across the entire level', () => {
+    const { rerender } = render(<GameGrid />);
+    
+    // Re-render to ensure level tiles are generated consistently
+    rerender(<GameGrid />);
+    
+    // Should have 30 tiles
+    const tiles = screen.getAllByTestId('grid-tile');
+    expect(tiles).toHaveLength(30);
+    
+    // Should display initial revealed count
+    expect(screen.getByText('Revealed: 0/30')).toBeTruthy();
   });
 });

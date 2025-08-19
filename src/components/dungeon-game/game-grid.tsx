@@ -107,13 +107,15 @@ export default function GameGrid() {
     }))
   );
 
+  // Generate level tiles once when component mounts
+  const levelTiles = React.useMemo(() => generateLevelTiles(), []);
+
   const handleTilePress = (id: string, _row: number, _col: number) => {
     if (!revealedTiles.has(id)) {
       // Reveal the tile
       setRevealedTiles((prev) => new Set([...prev, id]));
 
-      // Use level generation algorithm for tile type
-      const levelTiles = generateLevelTiles();
+      // Get tile type from pre-generated level
       const tileIndex =
         parseInt(id.split('-')[0]) * cols + parseInt(id.split('-')[1]);
       const tileType = levelTiles[tileIndex];
