@@ -3,7 +3,14 @@ import { View } from 'react-native';
 
 import { Button, Text } from '@/components/ui';
 
-export default function DungeonGame() {
+interface DungeonGameProps {
+  navigation?: {
+    navigate: (screen: string) => void;
+    goBack: () => void;
+  };
+}
+
+export default function DungeonGame({ navigation }: DungeonGameProps) {
   // Game state management
   const [level, setLevel] = useState(1);
   const [turns, setTurns] = useState(0);
@@ -12,6 +19,12 @@ export default function DungeonGame() {
   );
   const [revealedTiles, setRevealedTiles] = useState(0);
   const totalTiles = 30; // 6x5 grid
+
+  const handleHomePress = () => {
+    if (navigation) {
+      navigation.navigate('index');
+    }
+  };
 
   return (
     <View className="flex-1 p-4">
@@ -27,7 +40,7 @@ export default function DungeonGame() {
         </Text>
       </View>
 
-      <Button label="Home" onPress={() => {}} size="sm" />
+      <Button label="Home" onPress={handleHomePress} size="sm" />
     </View>
   );
 }
