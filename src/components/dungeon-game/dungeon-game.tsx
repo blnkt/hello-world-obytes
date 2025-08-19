@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 
 import { Button, Text } from '@/components/ui';
 
@@ -46,7 +46,7 @@ export default function DungeonGame({ navigation }: DungeonGameProps) {
   };
 
   return (
-    <View className="flex-1">
+    <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
       {/* Header Section */}
       <View className="p-4">
         <Text className="mb-4 text-2xl font-bold">Dungeon Game</Text>
@@ -62,8 +62,8 @@ export default function DungeonGame({ navigation }: DungeonGameProps) {
         </View>
       </View>
 
-      {/* Game Grid - Full Width with Bottom Margin */}
-      <View className="mb-4 flex-1">
+      {/* Game Grid - Full Width */}
+      <View className="mb-4">
         <GameGrid />
       </View>
 
@@ -78,6 +78,6 @@ export default function DungeonGame({ navigation }: DungeonGameProps) {
 
         <Button label="Home" onPress={handleHomePress} size="sm" />
       </View>
-    </View>
+    </ScrollView>
   );
 }
