@@ -5,6 +5,37 @@ import { Text } from '@/components/ui';
 
 import GridTile from './grid-tile';
 
+// Custom hook for game grid state management
+const useGameGridState = (
+  onTurnsUpdate?: (turns: number) => void,
+  onRevealedTilesUpdate?: (count: number) => void
+) => {
+  const [revealedTiles, setRevealedTiles] = useState<Set<string>>(new Set());
+  const [tileTypes, setTileTypes] = useState<
+    Record<string, 'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral'>
+  >({});
+  const [turnsUsed, setTurnsUsed] = useState(0);
+
+  // Update parent component when state changes
+  const updateParentState = React.useCallback(() => {
+    onTurnsUpdate?.(turnsUsed);
+    onRevealedTilesUpdate?.(revealedTiles.size);
+  }, [turnsUsed, revealedTiles.size, onTurnsUpdate, onRevealedTilesUpdate]);
+
+  React.useEffect(() => {
+    updateParentState();
+  }, [updateParentState]);
+
+  return {
+    revealedTiles,
+    setRevealedTiles,
+    tileTypes,
+    setTileTypes,
+    turnsUsed,
+    setTurnsUsed,
+  };
+};
+
 // Helper function to generate level tiles
 const generateLevelTiles = () => {
   const tileDistribution = {
@@ -127,6 +158,7 @@ const handleTileEffects = (params: {
     >
   >;
   setTurnsUsed: React.Dispatch<React.SetStateAction<number>>;
+  onExitFound?: () => void;
 }) => {
   const {
     tileType,
@@ -138,6 +170,7 @@ const handleTileEffects = (params: {
     setRevealedTiles,
     setTileTypes,
     setTurnsUsed,
+    onExitFound,
   } = params;
 
   // Additional turn penalty for trap tiles
@@ -163,6 +196,11 @@ const handleTileEffects = (params: {
       setTurnsUsed,
     });
   }
+
+  // Win condition when exit tile is revealed
+  if (tileType === 'exit') {
+    onExitFound?.();
+  }
 };
 
 // Helper function to handle tile press
@@ -178,6 +216,7 @@ const createTilePressHandler = (params: {
   >;
   setTurnsUsed: React.Dispatch<React.SetStateAction<number>>;
   rows: number;
+  onExitFound?: () => void;
 }) => {
   const {
     revealedTiles,
@@ -187,6 +226,7 @@ const createTilePressHandler = (params: {
     setTileTypes,
     setTurnsUsed,
     rows,
+    onExitFound,
   } = params;
 
   return (id: string, _row: number, _col: number) => {
@@ -215,6 +255,7 @@ const createTilePressHandler = (params: {
         setRevealedTiles,
         setTileTypes,
         setTurnsUsed,
+        onExitFound,
       });
     }
   };
@@ -278,22 +319,27 @@ function GameGridLayout({
 interface GameGridProps {
   onTurnsUpdate?: (turns: number) => void;
   onRevealedTilesUpdate?: (count: number) => void;
+  onExitFound?: () => void;
 }
 
 export default function GameGrid({
   onTurnsUpdate,
   onRevealedTilesUpdate,
+  onExitFound,
 }: GameGridProps) {
   const rows = 5;
   const cols = 6;
   const totalTiles = rows * cols;
 
-  // Game state for tile reveals and turns
-  const [revealedTiles, setRevealedTiles] = useState<Set<string>>(new Set());
-  const [tileTypes, setTileTypes] = useState<
-    Record<string, 'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral'>
-  >({});
-  const [turnsUsed, setTurnsUsed] = useState(0);
+  // Use custom hook for state management
+  const {
+    revealedTiles,
+    setRevealedTiles,
+    tileTypes,
+    setTileTypes,
+    turnsUsed,
+    setTurnsUsed,
+  } = useGameGridState(onTurnsUpdate, onRevealedTilesUpdate);
 
   const grid = Array.from({ length: rows }, (_, rowIndex) =>
     Array.from({ length: cols }, (_, colIndex) => ({
@@ -306,16 +352,6 @@ export default function GameGrid({
   // Generate level tiles once when component mounts
   const levelTiles = React.useMemo(() => generateLevelTiles(), []);
 
-  // Update parent component when state changes
-  const updateParentState = React.useCallback(() => {
-    onTurnsUpdate?.(turnsUsed);
-    onRevealedTilesUpdate?.(revealedTiles.size);
-  }, [turnsUsed, revealedTiles.size, onTurnsUpdate, onRevealedTilesUpdate]);
-
-  React.useEffect(() => {
-    updateParentState();
-  }, [updateParentState]);
-
   const handleTilePress = React.useCallback(
     createTilePressHandler({
       revealedTiles,
@@ -325,6 +361,7 @@ export default function GameGrid({
       setTileTypes,
       setTurnsUsed,
       rows,
+      onExitFound,
     }),
     [
       revealedTiles,
@@ -334,6 +371,7 @@ export default function GameGrid({
       setTileTypes,
       setTurnsUsed,
       rows,
+      onExitFound,
     ]
   );
 

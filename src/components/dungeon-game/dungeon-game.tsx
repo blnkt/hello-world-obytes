@@ -18,6 +18,7 @@ interface DungeonGameLayoutProps {
   onGameOver: () => void;
   onResetGame: () => void;
   onHomePress: () => void;
+  onExitFound: () => void;
 }
 
 function DungeonGameLayout({
@@ -32,6 +33,7 @@ function DungeonGameLayout({
   onGameOver,
   onResetGame,
   onHomePress,
+  onExitFound,
 }: DungeonGameLayoutProps) {
   return (
     <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
@@ -50,11 +52,12 @@ function DungeonGameLayout({
         </View>
       </View>
 
-      {/* Game Grid - Full Width */}
+            {/* Game Grid - Full Width */}
       <View className="mb-4">
-        <GameGrid
+        <GameGrid 
           onTurnsUpdate={onTurnsUpdate}
           onRevealedTilesUpdate={onRevealedTilesUpdate}
+          onExitFound={onExitFound}
         />
       </View>
 
@@ -124,6 +127,10 @@ export default function DungeonGame({ navigation }: DungeonGameProps) {
     setRevealedTiles(0);
   }, []);
 
+  const handleExitFound = React.useCallback(() => {
+    setGameState('Win');
+  }, []);
+
   return (
     <DungeonGameLayout
       level={level}
@@ -137,6 +144,7 @@ export default function DungeonGame({ navigation }: DungeonGameProps) {
       onGameOver={handleGameOver}
       onResetGame={handleResetGame}
       onHomePress={handleHomePress}
+      onExitFound={handleExitFound}
     />
   );
 }

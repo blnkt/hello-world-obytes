@@ -229,4 +229,36 @@ describe('DungeonGame', () => {
     expect(screen.getByText(/Revealed: \d+\/30/)).toBeTruthy();
     expect(screen.getByText(/Turns: \d+/)).toBeTruthy();
   });
+
+  it('should trigger win condition when exit tile is revealed', () => {
+    render(<DungeonGame />);
+
+    // Initially should show active game state
+    expect(screen.getByText('Game State: Active')).toBeTruthy();
+
+    // Find and click the exit tile (we need to reveal tiles until we find one)
+    const tiles = screen.getAllByTestId('grid-tile');
+    let exitTileIndex = -1;
+
+    // Click tiles until we find the exit
+    for (let i = 0; i < tiles.length; i++) {
+      fireEvent.press(tiles[i]);
+
+      // Check if this tile is the exit by looking for the exit emoji
+      try {
+        screen.getByText('🚪');
+        exitTileIndex = i;
+        break;
+      } catch {
+        // Not the exit, continue to next tile
+        continue;
+      }
+    }
+
+    // Should have found the exit tile
+    expect(exitTileIndex).toBeGreaterThan(-1);
+
+    // Should show win game state
+    expect(screen.getByText('Game State: Win')).toBeTruthy();
+  });
 });

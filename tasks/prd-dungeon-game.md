@@ -51,7 +51,7 @@ The Dungeon Game is a grid-based puzzle game where players navigate through a 6x
 10. ✅ **Trap Effect**: When a trap tile is revealed, the system must deduct 1 additional turn and display "Trap! Lose 1 turn".
 11. ✅ **Treasure Effect**: When a treasure tile is revealed, the system must add 1 free turn and display "Treasure! Gain 1 turn".
 12. ✅ **Bonus Reveal Effect**: When a bonus reveal tile is revealed, the system must automatically reveal one random orthogonally adjacent tile and immediately resolve its effects.
-13. **Exit Win Condition**: When the exit tile is revealed, the system must display a win modal with options to continue to next level or return to main menu.
+13. ✅ **Exit Win Condition**: When the exit tile is revealed, the system must display a win modal with options to continue to next level or return to main menu.
 14. **Game Over Condition**: When turns reach 0, the system must display a game over modal and disable grid interaction.
 15. **Level Display**: The system must display the current level number prominently on the screen.
 16. **Navigation**: The system must provide a home button to return to the main menu.

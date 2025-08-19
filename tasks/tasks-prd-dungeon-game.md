@@ -48,8 +48,8 @@
   - [x] 3.1 Implement turn management system (deduct turns on tile reveal)
   - [x] 3.2 Add trap tile effect (lose 1 additional turn)
   - [x] 3.3 Add treasure tile effect (gain 1 free turn)
-  - [ ] 3.4 Implement bonus reveal tile effect (auto-reveal adjacent tiles)
-  - [ ] 3.5 Add win condition logic (exit tile revealed)
+  - [x] 3.4 Implement bonus reveal tile effect (auto-reveal adjacent tiles)
+  - [x] 3.5 Add win condition logic (exit tile revealed)
   - [ ] 3.6 Implement game over condition (no turns remaining)
 
   - [ ] 3.7 Add level progression system and difficulty scaling
