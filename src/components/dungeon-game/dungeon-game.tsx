@@ -4,6 +4,8 @@ import { View } from 'react-native';
 
 import { Button, Text } from '@/components/ui';
 
+import GameGrid from './game-grid';
+
 interface DungeonGameProps {
   navigation?: {
     navigate: (screen: string) => void;
@@ -56,6 +58,9 @@ export default function DungeonGame({ navigation }: DungeonGameProps) {
           Revealed: {revealedTiles}/{totalTiles}
         </Text>
       </View>
+
+      {/* Game Grid */}
+      <GameGrid />
 
       {/* Game State Test Buttons */}
       <View className="mb-4 space-y-2">
