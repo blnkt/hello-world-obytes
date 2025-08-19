@@ -93,4 +93,52 @@ describe('GridTile', () => {
     // Should show tile type indicator
     expect(screen.getByText('💎')).toBeTruthy();
   });
+
+  it('should display all tile types correctly when revealed', () => {
+    const { rerender } = render(
+      <GridTile id="0-0" row={0} col={0} isRevealed={true} tileType="monster" />
+    );
+
+    // Test monster
+    expect(screen.getByText('💀')).toBeTruthy();
+
+    // Test trap
+    rerender(
+      <GridTile id="0-0" row={0} col={0} isRevealed={true} tileType="trap" />
+    );
+    expect(screen.getByText('⚠️')).toBeTruthy();
+
+    // Test exit
+    rerender(
+      <GridTile id="0-0" row={0} col={0} isRevealed={true} tileType="exit" />
+    );
+    expect(screen.getByText('🚪')).toBeTruthy();
+
+    // Test bonus
+    rerender(
+      <GridTile id="0-0" row={0} col={0} isRevealed={true} tileType="bonus" />
+    );
+    expect(screen.getByText('⭐')).toBeTruthy();
+
+    // Test neutral
+    rerender(
+      <GridTile id="0-0" row={0} col={0} isRevealed={true} tileType="neutral" />
+    );
+    expect(screen.getByText('·')).toBeTruthy();
+  });
+
+  it('should handle undefined tile type gracefully', () => {
+    render(
+      <GridTile
+        id="0-0"
+        row={0}
+        col={0}
+        isRevealed={true}
+        tileType={undefined}
+      />
+    );
+
+    // Should show neutral content when tile type is undefined
+    expect(screen.getByText('·')).toBeTruthy();
+  });
 });

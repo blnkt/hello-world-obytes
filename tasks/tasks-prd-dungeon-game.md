@@ -39,7 +39,7 @@
   - [x] 2.1 Create GameGrid component with 6x5 grid layout
   - [x] 2.2 Implement GridTile component with face-down and face-up states
   - [x] 2.3 Add tile click handling and reveal functionality
-  - [ ] 2.4 Implement tile type display (exit, trap, treasure, bonus reveal, neutral)
+  - [x] 2.4 Implement tile type display (exit, trap, treasure, bonus reveal, neutral)
   - [ ] 2.5 Add visual styling and tile state transitions
   - [ ] 2.6 Implement random tile distribution algorithm for level generation
 
