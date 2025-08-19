@@ -3,47 +3,154 @@ import { View } from 'react-native';
 
 import { Text } from '@/components/ui';
 
+// Reusable InfoRow component for label-value pairs
+interface InfoRowProps {
+  label: string;
+  value: string | number;
+  valueClassName?: string;
+}
+
+function InfoRow({
+  label,
+  value,
+  valueClassName = 'text-lg font-semibold text-gray-900 dark:text-white',
+}: InfoRowProps) {
+  return (
+    <View className="flex-row items-center justify-between">
+      <Text className="text-sm text-gray-600 dark:text-gray-300">{label}</Text>
+      <Text className={valueClassName}>{value}</Text>
+    </View>
+  );
+}
+
+// Reusable StatusCard component for colored status indicators
+interface StatusCardProps {
+  type: 'error' | 'warning' | 'success';
+  title: string;
+  subtitle: string;
+  accessibilityLabel: string;
+}
+
+function StatusCard({
+  type,
+  title,
+  subtitle,
+  accessibilityLabel,
+}: StatusCardProps) {
+  const getStatusStyles = () => {
+    switch (type) {
+      case 'error':
+        return {
+          container: 'rounded-lg bg-red-100 p-3 dark:bg-red-900/20',
+          title:
+            'text-center text-sm font-medium text-red-800 dark:text-red-200',
+          subtitle: 'text-center text-xs text-red-600 dark:text-red-300',
+        };
+      case 'warning':
+        return {
+          container: 'rounded-lg bg-yellow-100 p-3 dark:bg-yellow-900/20',
+          title:
+            'text-center text-sm font-medium text-yellow-800 dark:text-yellow-200',
+          subtitle: 'text-center text-xs text-yellow-600 dark:text-yellow-300',
+        };
+      case 'success':
+        return {
+          container: 'rounded-lg bg-green-100 p-3 dark:bg-green-900/20',
+          title:
+            'text-center text-sm font-medium text-green-800 dark:text-green-200',
+          subtitle: 'text-center text-xs text-green-600 dark:text-green-300',
+        };
+    }
+  };
+
+  const styles = getStatusStyles();
+
+  return (
+    <View
+      className={styles.container}
+      accessible={true}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole="alert"
+    >
+      <Text className={styles.title}>{title}</Text>
+      <Text className={styles.subtitle}>{subtitle}</Text>
+    </View>
+  );
+}
+
+// Reusable SectionHeader component for headers with icons
+interface SectionHeaderProps {
+  title: string;
+  icon: string;
+  iconAccessibilityLabel: string;
+}
+
+function SectionHeader({
+  title,
+  icon,
+  iconAccessibilityLabel,
+}: SectionHeaderProps) {
+  return (
+    <View className="mb-3 flex-row items-center justify-between">
+      <Text
+        className="text-lg font-bold text-gray-900 dark:text-white"
+        accessibilityRole="header"
+      >
+        {title}
+      </Text>
+      <Text className="text-2xl" accessibilityLabel={iconAccessibilityLabel}>
+        {icon}
+      </Text>
+    </View>
+  );
+}
+
+// Reusable InfoSection component for grouped information
+interface InfoSectionProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+function InfoSection({
+  children,
+  className = 'mb-3 space-y-2',
+}: InfoSectionProps) {
+  return <View className={className}>{children}</View>;
+}
+
+const getTurnStatusColor = (availableTurns: number) => {
+  if (availableTurns < 1) {
+    return 'text-red-600 dark:text-red-400';
+  }
+  if (availableTurns < 3) {
+    return 'text-yellow-600 dark:text-yellow-400';
+  }
+  return 'text-green-600 dark:text-green-400';
+};
+
+const getStatusIcon = (availableTurns: number) => {
+  if (availableTurns < 1) {
+    return '⚠️';
+  }
+  if (availableTurns < 3) {
+    return '⚡';
+  }
+  return '💰';
+};
+
 interface CurrencyDisplayProps {
   currency: number;
   availableTurns: number;
   turnCost: number;
 }
 
-// eslint-disable-next-line max-lines-per-function
 export default function CurrencyDisplay({
   currency,
   availableTurns,
   turnCost,
 }: CurrencyDisplayProps) {
-  const getCurrencyStatusColor = () => {
-    if (availableTurns < 1) {
-      return 'text-red-600 dark:text-red-400';
-    }
-    if (availableTurns < 3) {
-      return 'text-yellow-600 dark:text-yellow-400';
-    }
-    return 'text-green-600 dark:text-green-400';
-  };
-
-  const getTurnStatusColor = () => {
-    if (availableTurns < 1) {
-      return 'text-red-600 dark:text-red-400';
-    }
-    if (availableTurns < 3) {
-      return 'text-yellow-600 dark:text-yellow-400';
-    }
-    return 'text-green-600 dark:text-green-400';
-  };
-
-  const getStatusIcon = () => {
-    if (availableTurns < 1) {
-      return '⚠️';
-    }
-    if (availableTurns < 3) {
-      return '⚡';
-    }
-    return '💰';
-  };
+  const statusIcon = getStatusIcon(availableTurns);
+  const turnStatusColor = getTurnStatusColor(availableTurns);
 
   return (
     <View
@@ -52,102 +159,50 @@ export default function CurrencyDisplay({
       accessibilityLabel={`Currency and Turns - ${availableTurns} turns available`}
       accessibilityRole="summary"
     >
-      {/* Header with Status Icon */}
-      <View className="mb-3 flex-row items-center justify-between">
-        <Text
-          className="text-lg font-bold text-gray-900 dark:text-white"
-          accessibilityRole="header"
-        >
-          Currency & Turns
-        </Text>
-        <Text
-          className="text-2xl"
-          accessibilityLabel={`Status icon: ${getStatusIcon()}`}
-        >
-          {getStatusIcon()}
-        </Text>
-      </View>
+      <SectionHeader
+        title="Currency & Turns"
+        icon={statusIcon}
+        iconAccessibilityLabel={`Status icon: ${statusIcon}`}
+      />
 
-      {/* Currency Information */}
-      <View className="mb-3 space-y-2">
-        <View className="flex-row items-center justify-between">
-          <Text className="text-sm text-gray-600 dark:text-gray-300">
-            Current Balance:
-          </Text>
-          <Text className="text-lg font-semibold text-gray-900 dark:text-white">
-            {currency} steps
-          </Text>
-        </View>
+      <InfoSection>
+        <InfoRow label="Current Balance:" value={`${currency} steps`} />
+        <InfoRow label="Turn Cost:" value={`${turnCost} steps`} />
+      </InfoSection>
 
-        <View className="flex-row items-center justify-between">
-          <Text className="text-sm text-gray-600 dark:text-gray-300">
-            Turn Cost:
-          </Text>
-          <Text className="text-lg font-semibold text-gray-900 dark:text-white">
-            {turnCost} steps
-          </Text>
-        </View>
-      </View>
+      <InfoSection className="mb-3">
+        <InfoRow
+          label="Available Turns:"
+          value={availableTurns}
+          valueClassName={`text-xl font-bold ${turnStatusColor}`}
+        />
+      </InfoSection>
 
-      {/* Available Turns */}
-      <View className="mb-3">
-        <View className="flex-row items-center justify-between">
-          <Text className="text-sm text-gray-600 dark:text-gray-300">
-            Available Turns:
-          </Text>
-          <Text className={`text-xl font-bold ${getTurnStatusColor()}`}>
-            {availableTurns}
-          </Text>
-        </View>
-      </View>
-
-      {/* Status Indicator */}
       {availableTurns < 1 && (
-        <View
-          className="rounded-lg bg-red-100 p-3 dark:bg-red-900/20"
-          accessible={true}
+        <StatusCard
+          type="error"
+          title="Insufficient currency to play"
+          subtitle={`Need at least ${turnCost} steps`}
           accessibilityLabel="Insufficient currency warning"
-          accessibilityRole="alert"
-        >
-          <Text className="text-center text-sm font-medium text-red-800 dark:text-red-200">
-            Insufficient currency to play
-          </Text>
-          <Text className="text-center text-xs text-red-600 dark:text-red-300">
-            Need at least {turnCost} steps
-          </Text>
-        </View>
+        />
       )}
 
       {availableTurns >= 1 && availableTurns < 3 && (
-        <View
-          className="rounded-lg bg-yellow-100 p-3 dark:bg-yellow-900/20"
-          accessible={true}
+        <StatusCard
+          type="warning"
+          title="Low currency warning"
+          subtitle={`Only ${availableTurns} turns remaining`}
           accessibilityLabel="Low currency warning"
-          accessibilityRole="alert"
-        >
-          <Text className="text-center text-sm font-medium text-yellow-800 dark:text-yellow-200">
-            Low currency warning
-          </Text>
-          <Text className="text-center text-xs text-yellow-600 dark:text-yellow-300">
-            Only {availableTurns} turns remaining
-          </Text>
-        </View>
+        />
       )}
 
       {availableTurns >= 3 && (
-        <View
-          className="rounded-lg bg-green-100 p-3 dark:bg-green-900/20"
-          accessible={true}
+        <StatusCard
+          type="success"
+          title="Ready to play"
+          subtitle={`${availableTurns} turns available`}
           accessibilityLabel="Ready to play status"
-          accessibilityRole="text"
-        >
-          <Text className="text-center text-sm font-medium text-green-800 dark:text-green-200">
-            Ready to play
-          </Text>
-          <Text className="text-center text-xs text-green-600 dark:text-green-300">
-            {availableTurns} turns available
-          </Text>
-        </View>
+        />
       )}
     </View>
   );
