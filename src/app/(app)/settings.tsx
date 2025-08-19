@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { ScrollView } from 'react-native';
 
+import HealthKitSyncSection from '@/components/settings/healthkit-sync-section';
 import ManualEntrySection from '@/components/settings/manual-entry-section';
 import { Button, Text, View } from '@/components/ui';
-import { useExperienceData } from '@/lib/health';
 import { useIsFirstTime } from '@/lib/hooks/use-is-first-time';
 import { clearAllStorage, resetFirstTime } from '@/lib/storage';
 
@@ -53,7 +53,6 @@ const createClearHandler =
 export default function Settings() {
   const [isFirstTime, setIsFirstTime] = useIsFirstTime();
   const [forceUpdate, setForceUpdate] = useState(0);
-  const { refreshExperience } = useExperienceData();
 
   const resetFirstTimeHandler = createResetHandler(
     isFirstTime,
@@ -75,6 +74,7 @@ export default function Settings() {
           <DebugInfo isFirstTime={isFirstTime} forceUpdate={forceUpdate} />
 
           <ManualEntrySection />
+          <HealthKitSyncSection />
 
           <View className="space-y-4">
             <Button

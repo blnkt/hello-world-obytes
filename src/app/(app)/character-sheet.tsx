@@ -44,7 +44,10 @@ export default function CharacterSheetScreen() {
   const { experience } = useExperienceData();
 
   // Use initial character if none exists in storage
-  const displayCharacter = character || initialCharacter;
+  const displayCharacter = {
+    ...(character || initialCharacter),
+    experience,
+  } as Character;
 
   return (
     <CharacterSheet character={displayCharacter} onChange={setCharacter} />

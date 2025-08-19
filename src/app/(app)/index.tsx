@@ -284,6 +284,7 @@ const QuickNavigation = () => {
 
 const CharacterPreview = () => {
   const [character] = useCharacter();
+  const { experience } = useExperienceData();
 
   if (!character || !character.name) {
     return (
@@ -315,7 +316,7 @@ const CharacterPreview = () => {
           </Text>
         </View>
         <Text className="text-gray-500 dark:text-gray-400">
-          {character.experience.toLocaleString()} XP
+          {experience.toLocaleString()} XP
         </Text>
       </View>
     </View>
