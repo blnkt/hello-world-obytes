@@ -4,8 +4,8 @@
 
 - `src/app/(app)/dungeon-game.tsx` - Main dungeon game screen component that manages game state and renders the game interface. ✅ **CREATED**
 - `src/app/(app)/dungeon-game.test.tsx` - Unit tests for the main dungeon game component. ✅ **CREATED**
-- `src/components/dungeon-game/game-grid.tsx` - Grid component that renders the 6x5 tile layout and handles tile interactions.
-- `src/components/dungeon-game/game-grid.test.tsx` - Unit tests for the game grid component.
+- `src/components/dungeon-game/game-grid.tsx` - Grid component that renders the 6x5 tile layout and handles tile interactions. ✅ **CREATED**
+- `src/components/dungeon-game/game-grid.test.tsx` - Unit tests for the game grid component. ✅ **CREATED**
 - `src/components/dungeon-game/grid-tile.tsx` - Individual tile component that displays tile states and handles click events.
 - `src/components/dungeon-game/grid-tile.test.tsx` - Unit tests for the grid tile component.
 - `src/components/dungeon-game/currency-display.tsx` - Component that shows current currency and available turns.
@@ -36,7 +36,7 @@
 
 - [ ] 2.0 Grid System and Tile Components
 
-  - [ ] 2.1 Create GameGrid component with 6x5 grid layout
+  - [x] 2.1 Create GameGrid component with 6x5 grid layout
   - [ ] 2.2 Implement GridTile component with face-down and face-up states
   - [ ] 2.3 Add tile click handling and reveal functionality
   - [ ] 2.4 Implement tile type display (exit, trap, treasure, bonus reveal, neutral)
