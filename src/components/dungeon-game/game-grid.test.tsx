@@ -132,4 +132,43 @@ describe('GameGrid', () => {
     // Should now show 2 turns used
     expect(screen.getByText('Turns: 2')).toBeTruthy();
   });
+
+  it('should lose additional turn when trap tile is revealed', () => {
+    render(<GameGrid />);
+    
+    // Initially should show 0 turns used
+    expect(screen.getByText('Turns: 0')).toBeTruthy();
+    
+    // Find and click a trap tile (we need to reveal tiles until we find one)
+    const tiles = screen.getAllByTestId('grid-tile');
+    let trapTileIndex = -1;
+    let turnsBeforeTrap = 0;
+    
+    // Click tiles until we find a trap
+    for (let i = 0; i < tiles.length; i++) {
+      // Get turns before clicking this tile
+      turnsBeforeTrap = parseInt(screen.getByText(/Turns: \d+/).children[1] as string);
+      
+      fireEvent.press(tiles[i]);
+      
+      // Check if this tile is a trap by looking for the trap emoji
+      try {
+        screen.getByText('⚠️');
+        trapTileIndex = i;
+        break;
+      } catch {
+        // Not a trap, continue to next tile
+        continue;
+      }
+    }
+    
+    // Should have found a trap tile
+    expect(trapTileIndex).toBeGreaterThan(-1);
+    
+    // Get the current turn count after revealing the trap
+    const turnsAfterTrap = parseInt(screen.getByText(/Turns: \d+/).children[1] as string);
+    
+    // Trap should cost 2 turns total: 1 for reveal + 1 additional penalty
+    expect(turnsAfterTrap).toBe(turnsBeforeTrap + 2);
+  });
 });

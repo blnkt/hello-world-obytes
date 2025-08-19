@@ -128,6 +128,11 @@ export default function GameGrid() {
       
       // Deduct a turn for revealing the tile
       setTurnsUsed((prev) => prev + 1);
+      
+      // Additional turn penalty for trap tiles
+      if (tileType === 'trap') {
+        setTurnsUsed((prev) => prev + 1);
+      }
     }
   };
 
