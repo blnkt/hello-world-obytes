@@ -19,6 +19,7 @@ interface DungeonGameLayoutProps {
   currency: number;
   availableTurns: number;
   turnCost: number;
+  isLoading: boolean;
   onTurnsUpdate: (turns: number) => void;
   onRevealedTilesUpdate: (count: number) => void;
   onWinGame: () => void;
@@ -40,6 +41,7 @@ function DungeonGameLayout({
   currency,
   availableTurns,
   turnCost,
+  isLoading,
   onTurnsUpdate,
   onRevealedTilesUpdate,
   onWinGame,
@@ -53,6 +55,33 @@ function DungeonGameLayout({
 }: DungeonGameLayoutProps) {
   return (
     <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
+      {/* Loading Overlay */}
+      {isLoading && (
+        <View className="absolute inset-0 z-50 flex-1 items-center justify-center bg-black/50">
+          <View className="rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
+            <Text className="mb-2 text-center text-lg font-semibold text-gray-900 dark:text-white">
+              Loading...
+            </Text>
+            <Text className="text-center text-sm text-gray-600 dark:text-gray-300">
+              Please wait while the game processes your action
+            </Text>
+          </View>
+        </View>
+      )}
+      {/* Loading Overlay */}
+      {isLoading && (
+        <View className="absolute inset-0 z-50 flex-1 items-center justify-center bg-black/50">
+          <View className="rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
+            <Text className="mb-2 text-center text-lg font-semibold text-gray-900 dark:text-white">
+              Loading...
+            </Text>
+            <Text className="text-center text-sm text-gray-600 dark:text-gray-300">
+              Please wait while the game processes your action
+            </Text>
+          </View>
+        </View>
+      )}
+
       {/* Header Section */}
       <View className="p-4">
         <Text className="mb-4 text-2xl font-bold">Dungeon Game</Text>
@@ -162,6 +191,7 @@ export default function DungeonGame({ navigation }: DungeonGameProps) {
     'Active'
   );
   const [revealedTiles, setRevealedTiles] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
   const totalTiles = 30; // 6x5 grid
 
   // Callbacks to update parent state from GameGrid
@@ -207,36 +237,48 @@ export default function DungeonGame({ navigation }: DungeonGameProps) {
   }, []);
 
   const handleNextLevel = React.useCallback(() => {
-    setLevel((prevLevel) => prevLevel + 1);
-    setGameState('Active');
-    setTurns(0);
-    setRevealedTiles(0);
+    setIsLoading(true);
+    // Simulate loading time for level transition
+    setTimeout(() => {
+      setLevel((prevLevel) => prevLevel + 1);
+      setGameState('Active');
+      setTurns(0);
+      setRevealedTiles(0);
+      setIsLoading(false);
+    }, 500);
   }, []);
 
   const handleSpendCurrency = React.useCallback(async (amount: number) => {
-    return await spend(amount);
+    setIsLoading(true);
+    try {
+      const result = await spend(amount);
+      return result;
+    } finally {
+      setIsLoading(false);
+    }
   }, [spend]);
 
-  return (
-    <DungeonGameLayout
-      level={level}
-      turns={turns}
-      gameState={gameState}
-      revealedTiles={revealedTiles}
-      totalTiles={totalTiles}
-      currency={currency}
-      availableTurns={availableTurns}
-      turnCost={turnCost}
-      onTurnsUpdate={handleTurnsUpdate}
-      onRevealedTilesUpdate={handleRevealedTilesUpdate}
-      onWinGame={handleWinGame}
-      onGameOver={handleGameOver}
-      onResetGame={handleResetGame}
-      onHomePress={handleHomePress}
-      onExitFound={handleExitFound}
-      onGameOverFromTurns={handleGameOverFromTurns}
-      onNextLevel={handleNextLevel}
-      onSpendCurrency={handleSpendCurrency}
-    />
-  );
+      return (
+      <DungeonGameLayout
+        level={level}
+        turns={turns}
+        gameState={gameState}
+        revealedTiles={revealedTiles}
+        totalTiles={totalTiles}
+        currency={currency}
+        availableTurns={availableTurns}
+        turnCost={turnCost}
+        isLoading={isLoading}
+        onTurnsUpdate={handleTurnsUpdate}
+        onRevealedTilesUpdate={handleRevealedTilesUpdate}
+        onWinGame={handleWinGame}
+        onGameOver={handleGameOver}
+        onResetGame={handleResetGame}
+        onHomePress={handleHomePress}
+        onExitFound={handleExitFound}
+        onGameOverFromTurns={handleGameOverFromTurns}
+        onNextLevel={handleNextLevel}
+        onSpendCurrency={handleSpendCurrency}
+      />
+    );
 }
