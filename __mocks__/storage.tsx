@@ -26,6 +26,24 @@ export const useMMKVString = (key: string, storageInstance?: any) => {
   return [value, setValueWithStorage] as const;
 };
 
+// Mock useMMKVBoolean hook
+export const useMMKVBoolean = (key: string, storageInstance?: any) => {
+  const [value, setValue] = React.useState<boolean | undefined>(() => {
+    const stored = mockStorage[key];
+    return stored ? JSON.parse(stored) : undefined;
+  });
+
+  const setValueWithStorage = React.useCallback(
+    (newValue: boolean) => {
+      mockStorage[key] = JSON.stringify(newValue);
+      setValue(newValue);
+    },
+    [key]
+  );
+
+  return [value, setValueWithStorage] as const;
+};
+
 export const storage = {
   getString: (key: string): string | null => {
     const value = mockStorage[key] || null;
@@ -429,6 +447,20 @@ export async function setDeveloperMode(enabled: boolean) {
 export async function clearDeveloperMode() {
   storage.delete('developerMode');
 }
+
+// Mock useManualEntryMode hook
+export const useManualEntryMode = () => {
+  const [isManualMode, setIsManualMode] = useMMKVBoolean('manualEntryMode');
+  const mode = isManualMode === undefined ? false : isManualMode;
+  return [mode, setIsManualMode] as const;
+};
+
+// Mock useDeveloperMode hook
+export const useDeveloperMode = () => {
+  const [isDeveloperMode, setIsDeveloperMode] = useMMKVBoolean('developerMode');
+  const mode = isDeveloperMode === undefined ? false : isDeveloperMode;
+  return [mode, setIsDeveloperMode] as const;
+};
 
 // Manual Step Entry Functions
 export type ManualStepEntry = { date: string; steps: number; source: 'manual' };
