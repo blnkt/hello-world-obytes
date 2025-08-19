@@ -16,4 +16,15 @@ describe('DungeonGame', () => {
     // Should have a home button to return to main menu
     expect(screen.getByText('Home')).toBeTruthy();
   });
+
+  it('should manage game state correctly', () => {
+    render(<DungeonGame />);
+
+    // Should display initial game state
+    expect(screen.getByText('Turns: 0')).toBeTruthy();
+    expect(screen.getByText('Game State: Active')).toBeTruthy();
+
+    // Should show revealed tiles count
+    expect(screen.getByText('Revealed: 0/30')).toBeTruthy();
+  });
 });
