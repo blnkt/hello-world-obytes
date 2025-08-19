@@ -290,7 +290,23 @@ export async function clearCurrency() {
 }
 
 export const useCurrency = () => {
-  const [currency, setCurrency] = React.useState<number>(getCurrencySync());
+  const [currency, setCurrencyState] = React.useState<number>(getCurrencySync());
+  
+  // Create a reactive setter that also updates storage
+  const setCurrency = React.useCallback(async (newCurrency: string | number) => {
+    const numericValue = typeof newCurrency === 'string' ? Number(newCurrency) : newCurrency;
+    storage.set('currency', String(numericValue));
+    setCurrencyState(numericValue);
+  }, []);
+  
+  // Update state when storage changes (for testing)
+  React.useEffect(() => {
+    const currentValue = getCurrencySync();
+    if (currentValue !== currency) {
+      setCurrencyState(currentValue);
+    }
+  }, [currency]);
+  
   return [currency, setCurrency] as const;
 };
 
