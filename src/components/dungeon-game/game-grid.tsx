@@ -42,51 +42,126 @@ const findUnrevealedAdjacentTile = (params: {
   const { tileId, revealedTiles, rows, cols } = params;
   const [row, col] = tileId.split('-').map(Number);
   const adjacentTiles: string[] = [];
-  
+
   // Check all four directions: up, right, down, left
   if (row > 0) adjacentTiles.push(`${row - 1}-${col}`); // up
   if (col < cols - 1) adjacentTiles.push(`${row}-${col + 1}`); // right
   if (row < rows - 1) adjacentTiles.push(`${row + 1}-${col}`); // down
   if (col > 0) adjacentTiles.push(`${row}-${col - 1}`); // left
-  
+
   // Filter to only unrevealed tiles
-  const unrevealedAdjacent = adjacentTiles.filter(id => !revealedTiles.has(id));
-  
+  const unrevealedAdjacent = adjacentTiles.filter(
+    (id) => !revealedTiles.has(id)
+  );
+
   // Return a random unrevealed adjacent tile, or null if none available
-  return unrevealedAdjacent.length > 0 
+  return unrevealedAdjacent.length > 0
     ? unrevealedAdjacent[Math.floor(Math.random() * unrevealedAdjacent.length)]
     : null;
 };
 
 // Helper function to handle bonus reveal tile effects
-const handleBonusReveal = (
-  id: string,
-  revealedTiles: Set<string>,
-  rows: number,
-  cols: number,
-  levelTiles: ('treasure' | 'trap' | 'exit' | 'bonus' | 'neutral')[],
-  setRevealedTiles: React.Dispatch<React.SetStateAction<Set<string>>>,
-  setTileTypes: React.Dispatch<React.SetStateAction<Record<string, 'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral'>>>,
-  setTurnsUsed: React.Dispatch<React.SetStateAction<number>>
-) => {
-  const adjacentTile = findUnrevealedAdjacentTile({ tileId: id, revealedTiles, rows, cols });
+const handleBonusReveal = (params: {
+  id: string;
+  revealedTiles: Set<string>;
+  rows: number;
+  cols: number;
+  levelTiles: ('treasure' | 'trap' | 'exit' | 'bonus' | 'neutral')[];
+  setRevealedTiles: React.Dispatch<React.SetStateAction<Set<string>>>;
+  setTileTypes: React.Dispatch<
+    React.SetStateAction<
+      Record<string, 'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral'>
+    >
+  >;
+  setTurnsUsed: React.Dispatch<React.SetStateAction<number>>;
+}) => {
+  const {
+    id,
+    revealedTiles,
+    rows,
+    cols,
+    levelTiles,
+    setRevealedTiles,
+    setTileTypes,
+    setTurnsUsed,
+  } = params;
+  const adjacentTile = findUnrevealedAdjacentTile({
+    tileId: id,
+    revealedTiles,
+    rows,
+    cols,
+  });
   if (adjacentTile) {
     // Reveal the adjacent tile
     setRevealedTiles((prev) => new Set([...prev, adjacentTile]));
-    
+
     // Get tile type for the adjacent tile
     const adjacentTileIndex =
-      parseInt(adjacentTile.split('-')[0]) * cols + parseInt(adjacentTile.split('-')[1]);
+      parseInt(adjacentTile.split('-')[0]) * cols +
+      parseInt(adjacentTile.split('-')[1]);
     const adjacentTileType = levelTiles[adjacentTileIndex];
-    
+
     setTileTypes((prev) => ({ ...prev, [adjacentTile]: adjacentTileType }));
-    
+
     // Apply effects for the auto-revealed tile
     if (adjacentTileType === 'trap') {
       setTurnsUsed((prev) => prev + 1);
     } else if (adjacentTileType === 'treasure') {
       setTurnsUsed((prev) => prev - 1);
     }
+  }
+};
+
+// Helper function to handle tile effects
+const handleTileEffects = (params: {
+  tileType: 'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral';
+  id: string;
+  revealedTiles: Set<string>;
+  rows: number;
+  cols: number;
+  levelTiles: ('treasure' | 'trap' | 'exit' | 'bonus' | 'neutral')[];
+  setRevealedTiles: React.Dispatch<React.SetStateAction<Set<string>>>;
+  setTileTypes: React.Dispatch<
+    React.SetStateAction<
+      Record<string, 'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral'>
+    >
+  >;
+  setTurnsUsed: React.Dispatch<React.SetStateAction<number>>;
+}) => {
+  const {
+    tileType,
+    id,
+    revealedTiles,
+    rows,
+    cols,
+    levelTiles,
+    setRevealedTiles,
+    setTileTypes,
+    setTurnsUsed,
+  } = params;
+
+  // Additional turn penalty for trap tiles
+  if (tileType === 'trap') {
+    setTurnsUsed((prev) => prev + 1);
+  }
+
+  // Free turn bonus for treasure tiles
+  if (tileType === 'treasure') {
+    setTurnsUsed((prev) => prev - 1);
+  }
+
+  // Auto-reveal adjacent tile for bonus reveal tiles
+  if (tileType === 'bonus') {
+    handleBonusReveal({
+      id,
+      revealedTiles,
+      rows,
+      cols,
+      levelTiles,
+      setRevealedTiles,
+      setTileTypes,
+      setTurnsUsed,
+    });
   }
 };
 
@@ -183,24 +258,22 @@ export default function GameGrid() {
       const tileType = levelTiles[tileIndex];
 
       setTileTypes((prev) => ({ ...prev, [id]: tileType }));
-      
+
       // Deduct a turn for revealing the tile
       setTurnsUsed((prev) => prev + 1);
-      
-      // Additional turn penalty for trap tiles
-      if (tileType === 'trap') {
-        setTurnsUsed((prev) => prev + 1);
-      }
-      
-      // Free turn bonus for treasure tiles
-      if (tileType === 'treasure') {
-        setTurnsUsed((prev) => prev - 1);
-      }
-      
-      // Auto-reveal adjacent tile for bonus reveal tiles
-      if (tileType === 'bonus') {
-        handleBonusReveal(id, revealedTiles, rows, cols, levelTiles, setRevealedTiles, setTileTypes, setTurnsUsed);
-      }
+
+      // Handle tile-specific effects
+      handleTileEffects({
+        tileType,
+        id,
+        revealedTiles,
+        rows,
+        cols,
+        levelTiles,
+        setRevealedTiles,
+        setTileTypes,
+        setTurnsUsed,
+      });
     }
   };
 
