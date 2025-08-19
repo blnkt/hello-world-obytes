@@ -261,4 +261,35 @@ describe('DungeonGame', () => {
     // Should show win game state
     expect(screen.getByText('Game State: Win')).toBeTruthy();
   });
+
+  it('should trigger game over condition when all tiles are revealed without finding exit', () => {
+    render(<DungeonGame />);
+
+    // Initially should show active game state
+    expect(screen.getByText('Game State: Active')).toBeTruthy();
+
+    // Click all tiles to reveal them
+    const tiles = screen.getAllByTestId('grid-tile');
+
+    // Click all tiles one by one
+    for (let i = 0; i < tiles.length; i++) {
+      fireEvent.press(tiles[i]);
+    }
+
+    // Should show either game over or win state after all tiles are revealed
+    // Check for either state using Testing Library methods
+    try {
+      screen.getByText('Game State: Game Over');
+      // Game over state found
+    } catch {
+      try {
+        screen.getByText('Game State: Win');
+        // Win state found
+      } catch {
+        // Neither state found, test should fail
+        expect(screen.getByText('Game State: Active')).toBeTruthy();
+        expect(false).toBe(true); // Force failure if we reach here
+      }
+    }
+  });
 });

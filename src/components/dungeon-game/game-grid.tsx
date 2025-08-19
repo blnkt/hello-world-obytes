@@ -6,10 +6,14 @@ import { Text } from '@/components/ui';
 import GridTile from './grid-tile';
 
 // Custom hook for game grid state management
-const useGameGridState = (
-  onTurnsUpdate?: (turns: number) => void,
-  onRevealedTilesUpdate?: (count: number) => void
-) => {
+const useGameGridState = (callbacks: {
+  onTurnsUpdate?: (turns: number) => void;
+  onRevealedTilesUpdate?: (count: number) => void;
+  onGameOver?: () => void;
+  levelTiles?: ('treasure' | 'trap' | 'exit' | 'bonus' | 'neutral')[];
+}) => {
+  const { onTurnsUpdate, onRevealedTilesUpdate, onGameOver, levelTiles } =
+    callbacks;
   const [revealedTiles, setRevealedTiles] = useState<Set<string>>(new Set());
   const [tileTypes, setTileTypes] = useState<
     Record<string, 'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral'>
@@ -25,6 +29,23 @@ const useGameGridState = (
   React.useEffect(() => {
     updateParentState();
   }, [updateParentState]);
+
+  // Check for game over condition when all tiles are revealed without finding exit
+  React.useEffect(() => {
+    if (revealedTiles.size === 30 && onGameOver && levelTiles) {
+      // Check if any revealed tile is an exit
+      const hasExit = Array.from(revealedTiles).some((tileId) => {
+        const tileIndex =
+          parseInt(tileId.split('-')[0]) * 6 + parseInt(tileId.split('-')[1]);
+        return levelTiles[tileIndex] === 'exit';
+      });
+
+      // If no exit was found, it's game over
+      if (!hasExit) {
+        onGameOver();
+      }
+    }
+  }, [revealedTiles.size, onGameOver, levelTiles]);
 
   return {
     revealedTiles,
@@ -203,64 +224,6 @@ const handleTileEffects = (params: {
   }
 };
 
-// Helper function to handle tile press
-const createTilePressHandler = (params: {
-  revealedTiles: Set<string>;
-  cols: number;
-  levelTiles: ('treasure' | 'trap' | 'exit' | 'bonus' | 'neutral')[];
-  setRevealedTiles: React.Dispatch<React.SetStateAction<Set<string>>>;
-  setTileTypes: React.Dispatch<
-    React.SetStateAction<
-      Record<string, 'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral'>
-    >
-  >;
-  setTurnsUsed: React.Dispatch<React.SetStateAction<number>>;
-  rows: number;
-  onExitFound?: () => void;
-}) => {
-  const {
-    revealedTiles,
-    cols,
-    levelTiles,
-    setRevealedTiles,
-    setTileTypes,
-    setTurnsUsed,
-    rows,
-    onExitFound,
-  } = params;
-
-  return (id: string, _row: number, _col: number) => {
-    if (!revealedTiles.has(id)) {
-      // Reveal the tile
-      setRevealedTiles((prev) => new Set([...prev, id]));
-
-      // Get tile type from pre-generated level
-      const tileIndex =
-        parseInt(id.split('-')[0]) * cols + parseInt(id.split('-')[1]);
-      const tileType = levelTiles[tileIndex];
-
-      setTileTypes((prev) => ({ ...prev, [id]: tileType }));
-
-      // Deduct a turn for revealing the tile
-      setTurnsUsed((prev) => prev + 1);
-
-      // Handle tile-specific effects
-      handleTileEffects({
-        tileType,
-        id,
-        revealedTiles,
-        rows,
-        cols,
-        levelTiles,
-        setRevealedTiles,
-        setTileTypes,
-        setTurnsUsed,
-        onExitFound,
-      });
-    }
-  };
-};
-
 interface GameGridLayoutProps {
   cols: number;
   rows: number;
@@ -316,20 +279,42 @@ function GameGridLayout({
   );
 }
 
+// Game grid constants
+const GRID_ROWS = 5;
+const GRID_COLS = 6;
+const GRID_TOTAL_TILES = GRID_ROWS * GRID_COLS;
+
+// Helper function to create grid structure
+const createGridStructure = (rows: number, cols: number) => {
+  return Array.from({ length: rows }, (_, rowIndex) =>
+    Array.from({ length: cols }, (_, colIndex) => ({
+      id: `${rowIndex}-${colIndex}`,
+      row: rowIndex,
+      col: colIndex,
+    }))
+  );
+};
+
 interface GameGridProps {
   onTurnsUpdate?: (turns: number) => void;
   onRevealedTilesUpdate?: (count: number) => void;
   onExitFound?: () => void;
+  onGameOver?: () => void;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export default function GameGrid({
   onTurnsUpdate,
   onRevealedTilesUpdate,
   onExitFound,
+  onGameOver,
 }: GameGridProps) {
-  const rows = 5;
-  const cols = 6;
-  const totalTiles = rows * cols;
+  const rows = GRID_ROWS;
+  const cols = GRID_COLS;
+  const totalTiles = GRID_TOTAL_TILES;
+
+  // Generate level tiles once when component mounts
+  const levelTiles = React.useMemo(() => generateLevelTiles(), []);
 
   // Use custom hook for state management
   const {
@@ -339,30 +324,49 @@ export default function GameGrid({
     setTileTypes,
     turnsUsed,
     setTurnsUsed,
-  } = useGameGridState(onTurnsUpdate, onRevealedTilesUpdate);
+  } = useGameGridState({
+    onTurnsUpdate,
+    onRevealedTilesUpdate,
+    onGameOver,
+    levelTiles,
+  });
 
-  const grid = Array.from({ length: rows }, (_, rowIndex) =>
-    Array.from({ length: cols }, (_, colIndex) => ({
-      id: `${rowIndex}-${colIndex}`,
-      row: rowIndex,
-      col: colIndex,
-    }))
+  const grid = React.useMemo(
+    () => createGridStructure(rows, cols),
+    [rows, cols]
   );
 
-  // Generate level tiles once when component mounts
-  const levelTiles = React.useMemo(() => generateLevelTiles(), []);
-
   const handleTilePress = React.useCallback(
-    createTilePressHandler({
-      revealedTiles,
-      cols,
-      levelTiles,
-      setRevealedTiles,
-      setTileTypes,
-      setTurnsUsed,
-      rows,
-      onExitFound,
-    }),
+    (id: string, _row: number, _col: number) => {
+      if (!revealedTiles.has(id)) {
+        // Reveal the tile
+        setRevealedTiles((prev) => new Set([...prev, id]));
+
+        // Get tile type from pre-generated level
+        const tileIndex =
+          parseInt(id.split('-')[0]) * cols + parseInt(id.split('-')[1]);
+        const tileType = levelTiles[tileIndex];
+
+        setTileTypes((prev) => ({ ...prev, [id]: tileType }));
+
+        // Deduct a turn for revealing the tile
+        setTurnsUsed((prev) => prev + 1);
+
+        // Handle tile-specific effects
+        handleTileEffects({
+          tileType,
+          id,
+          revealedTiles,
+          rows,
+          cols,
+          levelTiles,
+          setRevealedTiles,
+          setTileTypes,
+          setTurnsUsed,
+          onExitFound,
+        });
+      }
+    },
     [
       revealedTiles,
       cols,
