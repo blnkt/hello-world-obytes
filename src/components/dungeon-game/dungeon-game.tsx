@@ -32,6 +32,143 @@ interface DungeonGameLayoutProps {
   onSpendCurrency: (amount: number) => Promise<boolean>;
 }
 
+interface HeaderSectionProps {
+  level: number;
+  turns: number;
+  gameState: 'Active' | 'Win' | 'Game Over';
+  revealedTiles: number;
+  totalTiles: number;
+  currency: number;
+  availableTurns: number;
+  turnCost: number;
+}
+
+function HeaderSection({
+  level,
+  turns,
+  gameState,
+  revealedTiles,
+  totalTiles,
+  currency,
+  availableTurns,
+  turnCost,
+}: HeaderSectionProps) {
+  return (
+    <View className="p-4">
+      <Text className="mb-4 text-2xl font-bold">Dungeon Game</Text>
+
+      {/* Status Bar */}
+      <View className="mb-4">
+        <StatusBar
+          level={level}
+          turns={turns}
+          gameState={gameState}
+          revealedTiles={revealedTiles}
+          totalTiles={totalTiles}
+        />
+      </View>
+
+      {/* Currency Display */}
+      <View className="mb-4">
+        <CurrencyDisplay
+          currency={currency}
+          availableTurns={availableTurns}
+          turnCost={turnCost}
+        />
+      </View>
+    </View>
+  );
+}
+
+interface GameGridSectionProps {
+  availableTurns: number;
+  level: number;
+  onTurnsUpdate: (turns: number) => void;
+  onRevealedTilesUpdate: (count: number) => void;
+  onExitFound: () => void;
+  onGameOverFromTurns: () => void;
+  onSpendCurrency: (amount: number) => Promise<boolean>;
+}
+
+function GameGridSection({
+  availableTurns,
+  level,
+  onTurnsUpdate,
+  onRevealedTilesUpdate,
+  onExitFound,
+  onGameOverFromTurns,
+  onSpendCurrency,
+}: GameGridSectionProps) {
+  return (
+    <View className="mb-4">
+      {availableTurns < 1 ? (
+        <View className="rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
+          <Text className="text-center text-base text-gray-600 dark:text-gray-300">
+            Cannot play with insufficient currency
+          </Text>
+        </View>
+      ) : (
+        <GameGrid
+          level={level}
+          disabled={false}
+          onTurnsUpdate={onTurnsUpdate}
+          onRevealedTilesUpdate={onRevealedTilesUpdate}
+          onExitFound={onExitFound}
+          onGameOver={onGameOverFromTurns}
+          onSpendCurrency={onSpendCurrency}
+        />
+      )}
+    </View>
+  );
+}
+
+interface FooterSectionProps {
+  onResetGame: () => void;
+  onHomePress: () => void;
+  onWinGame: () => void;
+  onGameOver: () => void;
+}
+
+function FooterSection({
+  onResetGame,
+  onHomePress,
+  onWinGame,
+  onGameOver,
+}: FooterSectionProps) {
+  return (
+    <View className="space-y-4 p-4">
+      {/* Game Control Buttons */}
+      <View className="space-y-2">
+        <Button label="Reset Game" onPress={onResetGame} size="sm" />
+        <Button label="Home" onPress={onHomePress} size="sm" />
+      </View>
+
+      {/* Development Test Buttons - Remove in production */}
+      {__DEV__ && (
+        <View className="mt-4 space-y-2 rounded-lg bg-yellow-50 p-3 dark:bg-yellow-900/20">
+          <Text className="text-center text-sm font-medium text-yellow-800 dark:text-yellow-200">
+            Development Mode
+          </Text>
+          <View className="flex-row space-x-2">
+            <Button
+              label="Test Win"
+              onPress={onWinGame}
+              size="sm"
+              variant="outline"
+            />
+            <Button
+              label="Test Game Over"
+              onPress={onGameOver}
+              size="sm"
+              variant="outline"
+            />
+          </View>
+        </View>
+      )}
+    </View>
+  );
+}
+
 // eslint-disable-next-line max-lines-per-function
 function DungeonGameLayout({
   level,
@@ -57,85 +194,30 @@ function DungeonGameLayout({
   return (
     <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
       <LoadingOverlay visible={isLoading} />
-
-      {/* Header Section */}
-      <View className="p-4">
-        <Text className="mb-4 text-2xl font-bold">Dungeon Game</Text>
-
-        {/* Status Bar */}
-        <View className="mb-4">
-          <StatusBar
-            level={level}
-            turns={turns}
-            gameState={gameState}
-            revealedTiles={revealedTiles}
-            totalTiles={totalTiles}
-          />
-        </View>
-
-        {/* Currency Display */}
-        <View className="mb-4">
-          <CurrencyDisplay
-            currency={currency}
-            availableTurns={availableTurns}
-            turnCost={turnCost}
-          />
-        </View>
-      </View>
-
-      {/* Game Grid - Full Width */}
-      <View className="mb-4">
-        {availableTurns < 1 ? (
-          <View className="rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
-            <Text className="text-center text-base text-gray-600 dark:text-gray-300">
-              Cannot play with insufficient currency
-            </Text>
-          </View>
-        ) : (
-          <GameGrid
-            level={level}
-            disabled={false}
-            onTurnsUpdate={onTurnsUpdate}
-            onRevealedTilesUpdate={onRevealedTilesUpdate}
-            onExitFound={onExitFound}
-            onGameOver={onGameOverFromTurns}
-            onSpendCurrency={onSpendCurrency}
-          />
-        )}
-      </View>
-
-      {/* Footer Section */}
-      <View className="space-y-4 p-4">
-        {/* Game Control Buttons */}
-        <View className="space-y-2">
-          <Button label="Reset Game" onPress={onResetGame} size="sm" />
-          <Button label="Home" onPress={onHomePress} size="sm" />
-        </View>
-
-        {/* Development Test Buttons - Remove in production */}
-        {__DEV__ && (
-          <View className="mt-4 space-y-2 rounded-lg bg-yellow-50 p-3 dark:bg-yellow-900/20">
-            <Text className="text-center text-sm font-medium text-yellow-800 dark:text-yellow-200">
-              Development Mode
-            </Text>
-            <View className="flex-row space-x-2">
-              <Button
-                label="Test Win"
-                onPress={onWinGame}
-                size="sm"
-                variant="outline"
-              />
-              <Button
-                label="Test Game Over"
-                onPress={onGameOver}
-                size="sm"
-                variant="outline"
-              />
-            </View>
-          </View>
-        )}
-      </View>
-
+      <HeaderSection
+        {...{
+          level,
+          turns,
+          gameState,
+          revealedTiles,
+          totalTiles,
+          currency,
+          availableTurns,
+          turnCost,
+        }}
+      />
+      <GameGridSection
+        {...{
+          availableTurns,
+          level,
+          onTurnsUpdate,
+          onRevealedTilesUpdate,
+          onExitFound,
+          onGameOverFromTurns,
+          onSpendCurrency,
+        }}
+      />
+      <FooterSection {...{ onResetGame, onHomePress, onWinGame, onGameOver }} />
       {/* Game Modals */}
       <WinModal
         visible={gameState === 'Win'}
@@ -143,7 +225,6 @@ function DungeonGameLayout({
         onNextLevel={onNextLevel}
         onMainMenu={onHomePress}
       />
-
       <GameOverModal
         visible={gameState === 'Game Over'}
         level={level}

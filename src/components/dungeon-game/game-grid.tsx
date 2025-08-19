@@ -10,6 +10,11 @@ import {
   generateLevelTiles,
 } from './utils/game-utils';
 
+// Game grid constants
+const GRID_ROWS = 5;
+const GRID_COLS = 6;
+const GRID_TOTAL_TILES = GRID_ROWS * GRID_COLS;
+
 // Helper function to handle bonus reveal tile effects
 const handleBonusReveal = (params: {
   id: string;
@@ -148,7 +153,6 @@ function GameGridLayout({
   rows,
   totalTiles,
   revealedTiles,
-  turnsUsed,
   grid,
   tileTypes,
   onTilePress,
@@ -187,11 +191,6 @@ function GameGridLayout({
   );
 }
 
-// Game grid constants
-const GRID_ROWS = 5;
-const GRID_COLS = 6;
-const GRID_TOTAL_TILES = GRID_ROWS * GRID_COLS;
-
 // Helper function to create grid structure
 const createGridStructure = (rows: number, cols: number) => {
   return Array.from({ length: rows }, (_, rowIndex) =>
@@ -201,6 +200,73 @@ const createGridStructure = (rows: number, cols: number) => {
       col: colIndex,
     }))
   );
+};
+
+const getTileIndex = (id: string) => {
+  return parseInt(id.split('-')[0]) * GRID_COLS + parseInt(id.split('-')[1]);
+};
+
+const handleTilePressCallback = (
+  id: string,
+  _row: number,
+  _col: number,
+  params: {
+    disabled: boolean;
+    revealedTiles: Set<string>;
+    levelTiles: ('treasure' | 'trap' | 'exit' | 'bonus' | 'neutral')[];
+    setRevealedTiles: React.Dispatch<React.SetStateAction<Set<string>>>;
+    setTileTypes: React.Dispatch<
+      React.SetStateAction<
+        Record<string, 'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral'>
+      >
+    >;
+    setTurnsUsed: React.Dispatch<React.SetStateAction<number>>;
+    onSpendCurrency?: (amount: number) => Promise<boolean>;
+    onExitFound?: () => void;
+  }
+  // eslint-disable-next-line max-params
+) => {
+  const {
+    disabled,
+    revealedTiles,
+    levelTiles,
+    setRevealedTiles,
+    setTileTypes,
+    setTurnsUsed,
+    onSpendCurrency,
+    onExitFound,
+  } = params;
+  if (disabled) return; // Don't allow tile interaction if disabled
+  if (!revealedTiles.has(id)) {
+    // Reveal the tile
+    setRevealedTiles((prev) => new Set([...prev, id]));
+
+    // Get tile type from pre-generated level
+    const tileIndex = getTileIndex(id);
+    const tileType = levelTiles[tileIndex];
+
+    setTileTypes((prev) => ({ ...prev, [id]: tileType }));
+
+    // Deduct a turn for revealing the tile
+    setTurnsUsed((prev) => prev + 1);
+
+    // Spend currency for the turn
+    onSpendCurrency?.(100);
+
+    // Handle tile-specific effects
+    handleTileEffects({
+      tileType,
+      id,
+      revealedTiles,
+      rows: GRID_ROWS,
+      cols: GRID_COLS,
+      levelTiles,
+      setRevealedTiles,
+      setTileTypes,
+      setTurnsUsed,
+      onExitFound,
+    });
+  }
 };
 
 interface GameGridProps {
@@ -213,7 +279,6 @@ interface GameGridProps {
   onSpendCurrency?: (amount: number) => Promise<boolean>;
 }
 
-// eslint-disable-next-line max-lines-per-function
 export default function GameGrid({
   level,
   disabled = false,
@@ -223,10 +288,6 @@ export default function GameGrid({
   onGameOver,
   onSpendCurrency,
 }: GameGridProps) {
-  const rows = GRID_ROWS;
-  const cols = GRID_COLS;
-  const totalTiles = GRID_TOTAL_TILES;
-
   // Generate level tiles once when component mounts
   const levelTiles = React.useMemo(() => generateLevelTiles(level), [level]);
 
@@ -246,62 +307,39 @@ export default function GameGrid({
   });
 
   const grid = React.useMemo(
-    () => createGridStructure(rows, cols),
-    [rows, cols]
+    () => createGridStructure(GRID_ROWS, GRID_COLS),
+    []
   );
 
   const handleTilePress = React.useCallback(
-    (id: string, _row: number, _col: number) => {
-      if (disabled) return; // Don't allow tile interaction if disabled
-      if (!revealedTiles.has(id)) {
-        // Reveal the tile
-        setRevealedTiles((prev) => new Set([...prev, id]));
-
-        // Get tile type from pre-generated level
-        const tileIndex =
-          parseInt(id.split('-')[0]) * cols + parseInt(id.split('-')[1]);
-        const tileType = levelTiles[tileIndex];
-
-        setTileTypes((prev) => ({ ...prev, [id]: tileType }));
-
-        // Deduct a turn for revealing the tile
-        setTurnsUsed((prev) => prev + 1);
-
-        // Spend currency for the turn
-        onSpendCurrency?.(100);
-
-        // Handle tile-specific effects
-        handleTileEffects({
-          tileType,
-          id,
-          revealedTiles,
-          rows,
-          cols,
-          levelTiles,
-          setRevealedTiles,
-          setTileTypes,
-          setTurnsUsed,
-          onExitFound,
-        });
-      }
-    },
+    (id: string, _row: number, _col: number) =>
+      handleTilePressCallback(id, _row, _col, {
+        disabled,
+        revealedTiles,
+        levelTiles,
+        setRevealedTiles,
+        setTileTypes,
+        setTurnsUsed,
+        onSpendCurrency,
+        onExitFound,
+      }),
     [
+      disabled,
       revealedTiles,
-      cols,
       levelTiles,
       setRevealedTiles,
       setTileTypes,
       setTurnsUsed,
-      rows,
+      onSpendCurrency,
       onExitFound,
     ]
   );
 
   return (
     <GameGridLayout
-      cols={cols}
-      rows={rows}
-      totalTiles={totalTiles}
+      cols={GRID_COLS}
+      rows={GRID_ROWS}
+      totalTiles={GRID_TOTAL_TILES}
       revealedTiles={revealedTiles}
       turnsUsed={turnsUsed}
       grid={grid}

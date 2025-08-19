@@ -25,10 +25,8 @@ describe('WinModal', () => {
   it('should not render when not visible', () => {
     render(<WinModal {...defaultProps} visible={false} />);
 
-    // When not visible, the modal should not show the main content
-    // Note: The modal is always rendered but hidden with CSS
-    // We can't easily test CSS visibility in Jest, so we'll test the visible case instead
-    expect(screen.getByText('Level 3 Complete!')).toBeTruthy();
+    // When not visible, the modal content should not be rendered
+    expect(screen.queryByText('Level 3 Complete!')).toBeNull();
   });
 
   it('should display correct level information', () => {
@@ -98,10 +96,8 @@ describe('GameOverModal', () => {
   it('should not render when not visible', () => {
     render(<GameOverModal {...defaultProps} visible={false} />);
 
-    // When not visible, the modal should not show the main content
-    // Note: The modal is always rendered but hidden with CSS
-    // We can't easily test CSS visibility in Jest, so we'll test the visible case instead
-    expect(screen.getByText('Game Over')).toBeTruthy();
+    // When not visible, the modal content should not be rendered
+    expect(screen.queryByText('Game Over')).toBeNull();
   });
 
   it('should display correct level information', () => {
