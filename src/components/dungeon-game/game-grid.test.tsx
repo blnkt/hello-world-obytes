@@ -3,6 +3,7 @@ import { fireEvent } from '@testing-library/react-native';
 import React from 'react';
 
 import { setCurrency } from '@/lib/storage';
+
 import DungeonGame from './dungeon-game';
 
 // Mock the useCurrencySystem hook to return predictable values
@@ -36,7 +37,7 @@ describe('DungeonGame', () => {
   beforeEach(async () => {
     // Reset mock currency for each test
     mockCurrency = 1000;
-    
+
     // Set up mock to return sufficient currency by default (1000 steps = 10 turns)
     mockUseCurrencySystem.mockReturnValue({
       currency: mockCurrency,
@@ -46,7 +47,7 @@ describe('DungeonGame', () => {
       totalCurrencyEarned: 100,
       convertCurrentExperience: jest.fn().mockResolvedValue(0),
     });
-    
+
     // Also set actual storage for consistency
     await setCurrency(1000);
   });
@@ -231,7 +232,7 @@ describe('DungeonGame', () => {
         // The test still passes if we can verify basic functionality
       }
     }
-    
+
     // Verify that the game maintains proper state
     expect(screen.getByText('Active')).toBeTruthy();
   });
@@ -258,7 +259,7 @@ describe('DungeonGame', () => {
         // The test still passes if we can verify basic functionality
       }
     }
-    
+
     // Verify that the game maintains proper state
     expect(screen.getByText('Active')).toBeTruthy();
   });
@@ -273,7 +274,7 @@ describe('DungeonGame', () => {
     // by using the test button that simulates winning
     const testWinButton = screen.getByText('Test Win');
     fireEvent.press(testWinButton);
-    
+
     // Should show win game state
     expect(screen.getByText('Win')).toBeTruthy();
   });
@@ -297,7 +298,7 @@ describe('DungeonGame', () => {
 
     // Should now show level 2
     expect(screen.getByText('Level 2')).toBeTruthy();
-    
+
     // Should reset to active game state
     expect(screen.getByText('Active')).toBeTruthy();
   });
@@ -318,7 +319,7 @@ describe('DungeonGame', () => {
 
     // Should now be level 2
     expect(screen.getByText('Level 2')).toBeTruthy();
-    
+
     // Level 2 should have increased difficulty (more traps, fewer treasures)
     // The exact distribution will be random, but we can verify the level progression
     expect(screen.getByText('Active')).toBeTruthy();
@@ -329,17 +330,17 @@ describe('DungeonGame', () => {
 
     // Should display current currency
     expect(screen.getByText('1000 steps')).toBeTruthy();
-    
+
     // Should display available turns (calculated as Math.floor(currency / 100))
     expect(screen.getByText('10')).toBeTruthy();
-    
+
     // Should display turn cost
     expect(screen.getByText('100 steps')).toBeTruthy();
   });
 
   it('should call spend function when turns are used', () => {
     const spendSpy = jest.fn().mockResolvedValue(true);
-    
+
     // Override mock for this test to use the spy
     mockUseCurrencySystem.mockReturnValue({
       currency: 1000,
@@ -355,11 +356,11 @@ describe('DungeonGame', () => {
     // Verify initial currency display
     expect(screen.getByText('1000 steps')).toBeTruthy();
     expect(screen.getByText('10')).toBeTruthy();
-    
+
     // Click a tile to reveal it and spend a turn
     const firstTile = screen.getAllByTestId('grid-tile')[0];
     fireEvent.press(firstTile);
-    
+
     // Verify that spend function was called with correct amount
     expect(spendSpy).toHaveBeenCalledWith(100);
   });
@@ -367,7 +368,7 @@ describe('DungeonGame', () => {
   it('should prevent game start if insufficient currency (less than 100 steps)', async () => {
     // Reset mock currency to 0 for this test
     mockCurrency = 0;
-    
+
     // Override mock to return 0 currency for this specific test
     mockUseCurrencySystem.mockReturnValue({
       currency: 0,
@@ -382,15 +383,17 @@ describe('DungeonGame', () => {
 
     // Should display insufficient currency message
     expect(screen.getByText('Insufficient currency to play')).toBeTruthy();
-    
+
     // Should display minimum requirement
     expect(screen.getByText('Need at least 100 steps')).toBeTruthy();
-    
+
     // Game grid should be completely hidden when insufficient currency
     expect(screen.queryByTestId('game-grid')).toBeNull();
-    
+
     // Should show a message that the game cannot be played
-    expect(screen.getByText(/Cannot play with insufficient currency/)).toBeTruthy();
+    expect(
+      screen.getByText(/Cannot play with insufficient currency/)
+    ).toBeTruthy();
   });
 
   it('should trigger game over condition when all tiles are revealed without finding exit', () => {
@@ -403,7 +406,7 @@ describe('DungeonGame', () => {
     // test the game over condition using the test button
     const testGameOverButton = screen.getByText('Test Game Over');
     fireEvent.press(testGameOverButton);
-    
+
     // Should show game over state
     expect(screen.getByText('You ran out of turns on Level 1.')).toBeTruthy();
   });

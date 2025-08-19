@@ -1,17 +1,25 @@
 import React from 'react';
-import { TextInput } from 'react-native';
 
-import { Button, StorageErrorBoundary, Text, View } from '@/components/ui';
+import {
+  Button,
+  FormInput,
+  FormSection,
+  HistoryItem,
+  InfoCard,
+  StatusIndicator,
+  StorageErrorBoundary,
+  Text,
+  ToggleCard,
+  View,
+} from '@/components/ui';
 import {
   useDeveloperMode,
   useExperienceData,
   useManualEntryMode,
 } from '@/lib/health';
-import {
-  clearManualStepsByDay,
-  setManualStepEntry,
-  useManualStepsByDay,
-} from '@/lib/storage';
+import { clearManualStepsByDay, useManualStepsByDay } from '@/lib/storage';
+
+import { useManualStepForm } from './use-manual-step-form';
 
 if (typeof global.alert === 'undefined') {
   global.alert = () => {};
@@ -44,27 +52,14 @@ const EntryModeIndicator = () => {
   const modeInfo = getModeInfo();
 
   return (
-    <View
-      className={`rounded-lg border-2 p-4 ${modeInfo.color} dark:border-neutral-600 dark:bg-neutral-800`}
-    >
-      <View className="flex-row items-center space-x-3">
-        <Text className="text-2xl">{modeInfo.icon}</Text>
-        <View className="flex-1">
-          <View className="flex-row items-center space-x-2">
-            <View className={`size-3 rounded-full ${modeInfo.dotColor}`} />
-            <Text className="font-semibold">{modeInfo.label}</Text>
-            {isDeveloperMode && (
-              <View className="rounded-full bg-yellow-100 px-2 py-1 dark:bg-yellow-900">
-                <Text className="text-xs font-medium text-yellow-800 dark:text-yellow-200">
-                  DEV
-                </Text>
-              </View>
-            )}
-          </View>
-          <Text className="text-sm opacity-80">{modeInfo.description}</Text>
-        </View>
-      </View>
-    </View>
+    <StatusIndicator
+      icon={modeInfo.icon}
+      label={modeInfo.label}
+      description={modeInfo.description}
+      color={modeInfo.color}
+      dotColor={modeInfo.dotColor}
+      showDevBadge={isDeveloperMode}
+    />
   );
 };
 
@@ -80,23 +75,17 @@ const ManualEntryModeToggle = () => {
   };
 
   return (
-    <View className="flex-row items-center justify-between rounded-md border border-neutral-200 p-3 dark:border-neutral-700">
-      <View className="flex-1">
-        <Text className="font-medium">Manual Entry Mode</Text>
-        <Text className="text-sm text-neutral-600 dark:text-neutral-400">
-          {isManualMode
-            ? 'Currently using manual step entry'
-            : 'Currently using HealthKit for step tracking'}
-        </Text>
-      </View>
-      <Button
-        variant="outline"
-        label={isManualMode ? 'Switch to HealthKit' : 'Switch to Manual'}
-        onPress={handleToggle}
-        disabled={isLoading}
-        size="sm"
-      />
-    </View>
+    <ToggleCard
+      title="Manual Entry Mode"
+      description={
+        isManualMode
+          ? 'Currently using manual step entry'
+          : 'Currently using HealthKit for step tracking'
+      }
+      buttonLabel={isManualMode ? 'Switch to HealthKit' : 'Switch to Manual'}
+      onPress={handleToggle}
+      isLoading={isLoading}
+    />
   );
 };
 
@@ -112,23 +101,17 @@ const DeveloperModeToggle = () => {
   };
 
   return (
-    <View className="flex-row items-center justify-between rounded-md border border-neutral-200 p-3 dark:border-neutral-700">
-      <View className="flex-1">
-        <Text className="font-medium">Developer Mode</Text>
-        <Text className="text-sm text-neutral-600 dark:text-neutral-400">
-          {isDeveloperMode
-            ? 'HealthKit checks bypassed for testing'
-            : 'Normal HealthKit availability checks'}
-        </Text>
-      </View>
-      <Button
-        variant="outline"
-        label={isDeveloperMode ? 'Disable' : 'Enable'}
-        onPress={handleToggle}
-        disabled={isLoading}
-        size="sm"
-      />
-    </View>
+    <ToggleCard
+      title="Developer Mode"
+      description={
+        isDeveloperMode
+          ? 'HealthKit checks bypassed for testing'
+          : 'Normal HealthKit availability checks'
+      }
+      buttonLabel={isDeveloperMode ? 'Disable' : 'Enable'}
+      onPress={handleToggle}
+      isLoading={isLoading}
+    />
   );
 };
 
@@ -150,12 +133,10 @@ const ManualEntriesInfo = ({ onRefresh }: { onRefresh: () => void }) => {
 
   return (
     <StorageErrorBoundary>
-      <View className="rounded-md border border-neutral-200 p-3 dark:border-neutral-700">
-        <Text className="font-medium">Manual Entries</Text>
-        <Text className="text-sm text-neutral-600 dark:text-neutral-400">
-          {manualStepsCount} manual step entries stored
-        </Text>
-      </View>
+      <InfoCard
+        title="Manual Entries"
+        description={`${manualStepsCount} manual step entries stored`}
+      />
 
       <Button
         fullWidth
@@ -191,39 +172,19 @@ const ManualEntryHistoryItem = ({ entry }: { entry: any }) => {
   };
 
   return (
-    <View className="flex-row items-center justify-between border-b border-neutral-100 py-2 last:border-b-0 dark:border-neutral-700">
-      <View className="flex-1">
-        <Text className="text-sm font-medium">{formatDate(entry.date)}</Text>
-        <Text className="text-xs text-neutral-500 dark:text-neutral-400">
-          {formatSteps(entry.steps)} steps
-        </Text>
-      </View>
-      <View className="flex-row items-center space-x-2">
-        <View className="size-2 rounded-full bg-blue-500" />
-        <Text className="text-xs text-neutral-500 dark:text-neutral-400">
-          Manual
-        </Text>
-      </View>
-    </View>
+    <HistoryItem
+      title={formatDate(entry.date)}
+      subtitle={`${formatSteps(entry.steps)} steps`}
+      badge={{ text: 'Manual', color: 'bg-blue-500' }}
+    />
   );
 };
 
-const ManualEntryHistoryLoading = () => (
-  <View className="rounded-md border border-neutral-200 p-3 dark:border-neutral-700">
-    <Text className="font-medium">Manual Entry History</Text>
-    <Text className="text-sm text-neutral-600 dark:text-neutral-400">
-      Loading...
-    </Text>
-  </View>
-);
-
 const ManualEntryHistoryEmpty = () => (
-  <View className="rounded-md border border-neutral-200 p-3 dark:border-neutral-700">
-    <Text className="font-medium">Manual Entry History</Text>
-    <Text className="text-sm text-neutral-600 dark:text-neutral-400">
-      No manual entries found
-    </Text>
-  </View>
+  <InfoCard
+    title="Manual Entry History"
+    description="No manual entries found"
+  />
 );
 
 const DateInput = ({
@@ -233,16 +194,13 @@ const DateInput = ({
   value: string;
   onChangeText: (text: string) => void;
 }) => (
-  <View>
-    <Text className="mb-1 text-sm font-medium">Date</Text>
-    <TextInput
-      value={value}
-      onChangeText={onChangeText}
-      placeholder="YYYY-MM-DD"
-      className="rounded-md border border-neutral-300 bg-white px-3 py-2 dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
-      maxLength={10}
-    />
-  </View>
+  <FormInput
+    label="Date"
+    value={value}
+    onChangeText={onChangeText}
+    placeholder="YYYY-MM-DD"
+    maxLength={10}
+  />
 );
 
 const StepCountInput = ({
@@ -252,96 +210,14 @@ const StepCountInput = ({
   value: string;
   onChangeText: (text: string) => void;
 }) => (
-  <View>
-    <Text className="mb-1 text-sm font-medium">Step Count</Text>
-    <TextInput
-      value={value}
-      onChangeText={onChangeText}
-      placeholder="Enter step count"
-      keyboardType="numeric"
-      className="rounded-md border border-neutral-300 bg-white px-3 py-2 dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
-    />
-  </View>
+  <FormInput
+    label="Step Count"
+    value={value}
+    onChangeText={onChangeText}
+    placeholder="Enter step count"
+    keyboardType="numeric"
+  />
 );
-
-// eslint-disable-next-line max-lines-per-function
-const useManualStepForm = (onStepAdded: () => void) => {
-  const [stepCount, setStepCount] = React.useState('');
-  const [selectedDate, setSelectedDate] = React.useState(() => {
-    // Get today's date in local timezone without timezone conversion issues
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`; // YYYY-MM-DD format
-  });
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [error, setError] = React.useState<string | undefined>();
-
-  const validateInput = () => {
-    if (!stepCount.trim()) {
-      setError('Please enter a step count');
-      return false;
-    }
-    const steps = parseInt(stepCount, 10);
-    if (isNaN(steps) || steps < 1) {
-      setError('Please enter a valid step count');
-      return false;
-    }
-    if (steps > 100000) {
-      setError('Step count cannot exceed 100,000');
-      return false;
-    }
-    return true;
-  };
-
-  const handleSubmit = async () => {
-    if (!validateInput()) return;
-
-    try {
-      setIsSubmitting(true);
-      setError(undefined);
-
-      const steps = parseInt(stepCount, 10);
-
-      await setManualStepEntry({
-        date: selectedDate,
-        steps,
-        source: 'manual',
-      });
-
-      // Reset form with timezone-safe date
-      setStepCount('');
-      const today = new Date();
-      const year = today.getFullYear();
-      const month = String(today.getMonth() + 1).padStart(2, '0');
-      const day = String(today.getDate()).padStart(2, '0');
-      setSelectedDate(`${year}-${month}-${day}`);
-
-      // Notify parent to refresh
-      onStepAdded();
-
-      alert(
-        `Successfully added ${steps.toLocaleString()} steps for ${selectedDate}!`
-      );
-    } catch (error) {
-      console.error('Error adding manual step entry:', error);
-      setError('Failed to add step entry. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  return {
-    stepCount,
-    setStepCount,
-    selectedDate,
-    setSelectedDate,
-    isSubmitting,
-    error,
-    handleSubmit,
-  };
-};
 
 const AddManualStepForm = ({ onStepAdded }: { onStepAdded: () => void }) => {
   const {
@@ -355,30 +231,24 @@ const AddManualStepForm = ({ onStepAdded }: { onStepAdded: () => void }) => {
   } = useManualStepForm(onStepAdded);
 
   return (
-    <View className="rounded-md border border-neutral-200 p-3 dark:border-neutral-700">
-      <Text className="mb-3 font-medium">Add Manual Step Entry</Text>
+    <FormSection title="Add Manual Step Entry">
+      <DateInput value={selectedDate} onChangeText={setSelectedDate} />
+      <StepCountInput value={stepCount} onChangeText={setStepCount} />
 
-      <View className="space-y-3">
-        <DateInput value={selectedDate} onChangeText={setSelectedDate} />
-        <StepCountInput value={stepCount} onChangeText={setStepCount} />
+      {/* Error Display */}
+      {error && (
+        <Text className="text-sm text-red-600 dark:text-red-400">{error}</Text>
+      )}
 
-        {/* Error Display */}
-        {error && (
-          <Text className="text-sm text-red-600 dark:text-red-400">
-            {error}
-          </Text>
-        )}
-
-        {/* Submit Button */}
-        <Button
-          fullWidth
-          label={isSubmitting ? 'Adding...' : 'Add Step Entry'}
-          onPress={handleSubmit}
-          disabled={isSubmitting || !stepCount.trim()}
-          size="sm"
-        />
-      </View>
-    </View>
+      {/* Submit Button */}
+      <Button
+        fullWidth
+        label={isSubmitting ? 'Adding...' : 'Add Step Entry'}
+        onPress={handleSubmit}
+        disabled={isSubmitting || !stepCount.trim()}
+        size="sm"
+      />
+    </FormSection>
   );
 };
 
@@ -395,8 +265,7 @@ const ManualEntryHistory = ({ manualSteps }: { manualSteps: any[] }) => {
 
   return (
     <StorageErrorBoundary>
-      <View className="rounded-md border border-neutral-200 p-3 dark:border-neutral-700">
-        <Text className="mb-2 font-medium">Manual Entry History</Text>
+      <InfoCard title="Manual Entry History" description="">
         <View className="space-y-2">
           {sortedSteps.slice(0, 10).map((entry, index) => (
             <ManualEntryHistoryItem
@@ -410,14 +279,16 @@ const ManualEntryHistory = ({ manualSteps }: { manualSteps: any[] }) => {
             </Text>
           )}
         </View>
-      </View>
+      </InfoCard>
     </StorageErrorBoundary>
   );
 };
 
 export default function ManualEntrySection() {
-  const { isManualMode, setManualMode } = useManualEntryMode();
-  const { isDeveloperMode, setDevMode } = useDeveloperMode();
+  const { isManualMode: _isManualMode, setManualMode: _setManualMode } =
+    useManualEntryMode();
+  const { isDeveloperMode: _isDeveloperMode, setDevMode: _setDevMode } =
+    useDeveloperMode();
   const { refreshExperience } = useExperienceData();
   const [manualSteps] = useManualStepsByDay();
 

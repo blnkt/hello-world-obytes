@@ -13,6 +13,7 @@ interface GridTileProps {
   disabled?: boolean;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export default function GridTile({
   id,
   row,
@@ -48,7 +49,7 @@ export default function GridTile({
 
   const getTileDescription = () => {
     if (!isRevealed) return 'Hidden tile';
-    
+
     switch (tileType) {
       case 'treasure':
         return 'Treasure tile - Gain a free turn';
@@ -68,7 +69,7 @@ export default function GridTile({
     if (disabled) {
       return 'bg-gray-300 border-gray-400 opacity-50'; // Disabled state
     }
-    
+
     if (!isRevealed) {
       return 'bg-gray-400 border-gray-500 hover:bg-gray-300'; // Darker gray for face-down
     }
@@ -91,7 +92,7 @@ export default function GridTile({
 
   const getTileAnimation = () => {
     if (!isRevealed) return '';
-    
+
     // Add animation classes for revealed tiles
     switch (tileType) {
       case 'treasure':

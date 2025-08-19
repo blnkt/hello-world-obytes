@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 
-import { Button, Text } from '@/components/ui';
+import { Button, LoadingOverlay, Text } from '@/components/ui';
 import { useCurrencySystem } from '@/lib/health';
 
 import CurrencyDisplay from './currency-display';
@@ -32,6 +32,7 @@ interface DungeonGameLayoutProps {
   onSpendCurrency: (amount: number) => Promise<boolean>;
 }
 
+// eslint-disable-next-line max-lines-per-function
 function DungeonGameLayout({
   level,
   turns,
@@ -55,37 +56,12 @@ function DungeonGameLayout({
 }: DungeonGameLayoutProps) {
   return (
     <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
-      {/* Loading Overlay */}
-      {isLoading && (
-        <View className="absolute inset-0 z-50 flex-1 items-center justify-center bg-black/50">
-          <View className="rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
-            <Text className="mb-2 text-center text-lg font-semibold text-gray-900 dark:text-white">
-              Loading...
-            </Text>
-            <Text className="text-center text-sm text-gray-600 dark:text-gray-300">
-              Please wait while the game processes your action
-            </Text>
-          </View>
-        </View>
-      )}
-      {/* Loading Overlay */}
-      {isLoading && (
-        <View className="absolute inset-0 z-50 flex-1 items-center justify-center bg-black/50">
-          <View className="rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
-            <Text className="mb-2 text-center text-lg font-semibold text-gray-900 dark:text-white">
-              Loading...
-            </Text>
-            <Text className="text-center text-sm text-gray-600 dark:text-gray-300">
-              Please wait while the game processes your action
-            </Text>
-          </View>
-        </View>
-      )}
+      <LoadingOverlay visible={isLoading} />
 
       {/* Header Section */}
       <View className="p-4">
         <Text className="mb-4 text-2xl font-bold">Dungeon Game</Text>
-        
+
         {/* Status Bar */}
         <View className="mb-4">
           <StatusBar
@@ -107,26 +83,26 @@ function DungeonGameLayout({
         </View>
       </View>
 
-              {/* Game Grid - Full Width */}
-        <View className="mb-4">
-          {availableTurns < 1 ? (
-            <View className="rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
-              <Text className="text-center text-base text-gray-600 dark:text-gray-300">
-                Cannot play with insufficient currency
-              </Text>
-            </View>
-          ) : (
-            <GameGrid
-              level={level}
-              disabled={false}
-              onTurnsUpdate={onTurnsUpdate}
-              onRevealedTilesUpdate={onRevealedTilesUpdate}
-              onExitFound={onExitFound}
-              onGameOver={onGameOverFromTurns}
-              onSpendCurrency={onSpendCurrency}
-            />
-          )}
-        </View>
+      {/* Game Grid - Full Width */}
+      <View className="mb-4">
+        {availableTurns < 1 ? (
+          <View className="rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
+            <Text className="text-center text-base text-gray-600 dark:text-gray-300">
+              Cannot play with insufficient currency
+            </Text>
+          </View>
+        ) : (
+          <GameGrid
+            level={level}
+            disabled={false}
+            onTurnsUpdate={onTurnsUpdate}
+            onRevealedTilesUpdate={onRevealedTilesUpdate}
+            onExitFound={onExitFound}
+            onGameOver={onGameOverFromTurns}
+            onSpendCurrency={onSpendCurrency}
+          />
+        )}
+      </View>
 
       {/* Footer Section */}
       <View className="space-y-4 p-4">
@@ -143,8 +119,18 @@ function DungeonGameLayout({
               Development Mode
             </Text>
             <View className="flex-row space-x-2">
-              <Button label="Test Win" onPress={onWinGame} size="sm" variant="outline" />
-              <Button label="Test Game Over" onPress={onGameOver} size="sm" variant="outline" />
+              <Button
+                label="Test Win"
+                onPress={onWinGame}
+                size="sm"
+                variant="outline"
+              />
+              <Button
+                label="Test Game Over"
+                onPress={onGameOver}
+                size="sm"
+                variant="outline"
+              />
             </View>
           </View>
         )}
@@ -157,7 +143,7 @@ function DungeonGameLayout({
         onNextLevel={onNextLevel}
         onMainMenu={onHomePress}
       />
-      
+
       <GameOverModal
         visible={gameState === 'Game Over'}
         level={level}
@@ -176,14 +162,15 @@ interface DungeonGameProps {
   };
 }
 
+// eslint-disable-next-line max-lines-per-function
 export default function DungeonGame({ navigation }: DungeonGameProps) {
   // Currency system integration
   const { currency, spend } = useCurrencySystem();
-  
+
   // Calculate available turns based on currency
   const availableTurns = Math.floor(currency / 100);
   const turnCost = 100;
-  
+
   // Game state management
   const [level, setLevel] = useState(1);
   const [turns, setTurns] = useState(0);
@@ -246,37 +233,40 @@ export default function DungeonGame({ navigation }: DungeonGameProps) {
     setIsLoading(false);
   }, []);
 
-  const handleSpendCurrency = React.useCallback(async (amount: number) => {
-    setIsLoading(true);
-    try {
-      const result = await spend(amount);
-      return result;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [spend]);
+  const handleSpendCurrency = React.useCallback(
+    async (amount: number) => {
+      setIsLoading(true);
+      try {
+        const result = await spend(amount);
+        return result;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [spend]
+  );
 
-      return (
-      <DungeonGameLayout
-        level={level}
-        turns={turns}
-        gameState={gameState}
-        revealedTiles={revealedTiles}
-        totalTiles={totalTiles}
-        currency={currency}
-        availableTurns={availableTurns}
-        turnCost={turnCost}
-        isLoading={isLoading}
-        onTurnsUpdate={handleTurnsUpdate}
-        onRevealedTilesUpdate={handleRevealedTilesUpdate}
-        onWinGame={handleWinGame}
-        onGameOver={handleGameOver}
-        onResetGame={handleResetGame}
-        onHomePress={handleHomePress}
-        onExitFound={handleExitFound}
-        onGameOverFromTurns={handleGameOverFromTurns}
-        onNextLevel={handleNextLevel}
-        onSpendCurrency={handleSpendCurrency}
-      />
-    );
+  return (
+    <DungeonGameLayout
+      level={level}
+      turns={turns}
+      gameState={gameState}
+      revealedTiles={revealedTiles}
+      totalTiles={totalTiles}
+      currency={currency}
+      availableTurns={availableTurns}
+      turnCost={turnCost}
+      isLoading={isLoading}
+      onTurnsUpdate={handleTurnsUpdate}
+      onRevealedTilesUpdate={handleRevealedTilesUpdate}
+      onWinGame={handleWinGame}
+      onGameOver={handleGameOver}
+      onResetGame={handleResetGame}
+      onHomePress={handleHomePress}
+      onExitFound={handleExitFound}
+      onGameOverFromTurns={handleGameOverFromTurns}
+      onNextLevel={handleNextLevel}
+      onSpendCurrency={handleSpendCurrency}
+    />
+  );
 }

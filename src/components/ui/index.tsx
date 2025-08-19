@@ -6,13 +6,20 @@ export * from './checkbox';
 export { default as colors } from './colors';
 export * from './error-boundary';
 export * from './focus-aware-status-bar';
+export * from './form-input';
+export * from './form-section';
+export * from './history-item';
 export * from './image';
+export * from './info-card';
 export * from './input';
 export * from './list';
+export * from './loading-overlay';
 export * from './modal';
 export * from './progress-bar';
 export * from './select';
+export * from './status-indicator';
 export * from './text';
+export * from './toggle-card';
 export * from './utils';
 
 // export base components from react-native

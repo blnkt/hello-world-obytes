@@ -11,6 +11,7 @@ interface StatusBarProps {
   totalTiles: number;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export default function StatusBar({
   level,
   turns,
@@ -41,7 +42,7 @@ export default function StatusBar({
   };
 
   return (
-    <View 
+    <View
       className="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800"
       accessible={true}
       accessibilityLabel={`Game Status - Level ${level}, ${gameState} state`}
@@ -50,13 +51,13 @@ export default function StatusBar({
       {/* Level and Game State Row */}
       <View className="mb-3 flex-row items-center justify-between">
         <View className="flex-row items-center space-x-2">
-          <Text 
+          <Text
             className="text-lg font-bold text-gray-900 dark:text-white"
             accessibilityRole="header"
           >
             Level {level}
           </Text>
-          <View 
+          <View
             className="rounded-full bg-blue-100 px-2 py-1 dark:bg-blue-900/20"
             accessible={true}
             accessibilityLabel={`Game state: ${gameState}`}
@@ -66,7 +67,7 @@ export default function StatusBar({
             </Text>
           </View>
         </View>
-        <Text 
+        <Text
           className="text-2xl"
           accessibilityLabel={`Game state icon: ${getGameStateIcon()}`}
         >
@@ -75,7 +76,7 @@ export default function StatusBar({
       </View>
 
       {/* Game Progress Row */}
-      <View 
+      <View
         className="mb-3 flex-row items-center justify-between"
         accessible={true}
         accessibilityLabel={`Game Progress - ${turns} turns used, ${revealedTiles} out of ${totalTiles} tiles revealed`}
@@ -84,7 +85,7 @@ export default function StatusBar({
           <Text className="text-sm text-gray-600 dark:text-gray-300">
             Turns Used:
           </Text>
-          <Text 
+          <Text
             className="text-lg font-semibold text-gray-900 dark:text-white"
             accessibilityLabel={`${turns} turns used`}
           >
@@ -95,7 +96,7 @@ export default function StatusBar({
           <Text className="text-sm text-gray-600 dark:text-gray-300">
             Progress:
           </Text>
-          <Text 
+          <Text
             className="text-lg font-semibold text-gray-900 dark:text-white"
             accessibilityLabel={`${revealedTiles} out of ${totalTiles} tiles revealed`}
           >
@@ -105,7 +106,7 @@ export default function StatusBar({
       </View>
 
       {/* Progress Bar */}
-      <View 
+      <View
         className="h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700"
         accessible={true}
         accessibilityLabel={`Progress bar showing ${Math.round((revealedTiles / totalTiles) * 100)}% completion`}
