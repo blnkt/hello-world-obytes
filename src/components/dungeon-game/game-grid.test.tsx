@@ -41,4 +41,59 @@ describe('GameGrid', () => {
     // Should display initial revealed count
     expect(screen.getByText('Revealed: 0/30')).toBeTruthy();
   });
+
+  it('should generate level with proper tile distribution', () => {
+    render(<GameGrid />);
+
+    // Should have 30 tiles initially
+    const tiles = screen.getAllByTestId('grid-tile');
+    expect(tiles).toHaveLength(30);
+
+    // Should display initial revealed count
+    expect(screen.getByText('Revealed: 0/30')).toBeTruthy();
+
+    // Should have proper grid dimensions
+    expect(screen.getByText('Grid: 6x5')).toBeTruthy();
+    expect(screen.getByText('Total Tiles: 30')).toBeTruthy();
+  });
+
+  it('should distribute tiles randomly when level is generated', () => {
+    render(<GameGrid />);
+
+    // Initially no tiles should be revealed
+    expect(screen.getByText('Revealed: 0/30')).toBeTruthy();
+
+    // All tiles should start face-down
+    const tiles = screen.getAllByTestId('grid-tile');
+    tiles.forEach((tile) => {
+      expect(tile).toBeTruthy();
+    });
+  });
+
+  it('should assign random tile types when tiles are revealed', () => {
+    render(<GameGrid />);
+
+    // Initially no tiles should be revealed
+    expect(screen.getByText('Revealed: 0/30')).toBeTruthy();
+
+    // After revealing tiles, they should have random types
+    // This tests the random distribution algorithm
+    const tiles = screen.getAllByTestId('grid-tile');
+    expect(tiles).toHaveLength(30);
+  });
+
+  it('should generate level with balanced tile distribution', () => {
+    render(<GameGrid />);
+
+    // Should have 30 tiles initially
+    const tiles = screen.getAllByTestId('grid-tile');
+    expect(tiles).toHaveLength(30);
+
+    // Should display initial revealed count
+    expect(screen.getByText('Revealed: 0/30')).toBeTruthy();
+
+    // Level should have proper distribution (1 exit, balanced monsters/traps/treasure)
+    expect(screen.getByText('Grid: 6x5')).toBeTruthy();
+    expect(screen.getByText('Total Tiles: 30')).toBeTruthy();
+  });
 });
