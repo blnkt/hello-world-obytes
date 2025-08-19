@@ -11,7 +11,7 @@ import {
   TabButtons,
   VisualizationSelector,
 } from '../../components/history';
-import { useStepCountAsExperience } from '../../lib/health';
+import { useExperienceData } from '../../lib/health';
 import { useScenarioHistory } from '../../lib/hooks/use-scenario-history';
 import { useLastCheckedDate } from '../../lib/storage';
 
@@ -98,7 +98,7 @@ export default function HistoryScreen() {
         d.setHours(0, 0, 0, 0);
         return d;
       })();
-  const { stepsByDay } = useStepCountAsExperience(lastCheckedDateTime);
+  const { stepsByDay } = useExperienceData();
 
   if (isLoading) {
     return (

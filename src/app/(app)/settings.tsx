@@ -1,13 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { ScrollView } from 'react-native';
 
+import HealthKitSyncSection from '@/components/settings/healthkit-sync-section';
+import ManualEntrySection from '@/components/settings/manual-entry-section';
 import { Button, Text, View } from '@/components/ui';
 import { useIsFirstTime } from '@/lib/hooks/use-is-first-time';
-import {
-  clearAllStorage,
-  getItem,
-  resetFirstTime,
-  setItem,
-} from '@/lib/storage';
+import { clearAllStorage, resetFirstTime } from '@/lib/storage';
 
 const DebugInfo = ({
   isFirstTime,
@@ -53,13 +51,8 @@ const createClearHandler =
   };
 
 export default function Settings() {
-  const [steps, setSteps] = useState(Number(getItem('stepCount')) || 0);
   const [isFirstTime, setIsFirstTime] = useIsFirstTime();
   const [forceUpdate, setForceUpdate] = useState(0);
-
-  const pressHandler = async () => {
-    setSteps(steps + 10);
-  };
 
   const resetFirstTimeHandler = createResetHandler(
     isFirstTime,
@@ -72,39 +65,34 @@ export default function Settings() {
     setForceUpdate
   );
 
-  useEffect(() => {
-    setItem('stepCount', steps);
-  }, [steps]);
-
   return (
-    <View className="flex-1 p-4">
-      <Text className="mb-4 text-2xl font-bold">Settings</Text>
+    <View className="flex-1">
+      <ScrollView className="flex-1 p-4" showsVerticalScrollIndicator={false}>
+        <Text className="mb-4 text-2xl font-bold">Settings</Text>
 
-      <View className="space-y-4">
-        <DebugInfo isFirstTime={isFirstTime} forceUpdate={forceUpdate} />
+        <View className="space-y-6">
+          <DebugInfo isFirstTime={isFirstTime} forceUpdate={forceUpdate} />
 
-        <Button
-          fullWidth
-          variant="outline"
-          label="Update Step Count"
-          onPress={pressHandler}
-        />
-        <Text>Current Steps: {steps}</Text>
+          <ManualEntrySection />
+          <HealthKitSyncSection />
 
-        <Button
-          fullWidth
-          variant="outline"
-          label="Reset First Time Flag"
-          onPress={resetFirstTimeHandler}
-        />
+          <View className="space-y-4">
+            <Button
+              fullWidth
+              variant="outline"
+              label="Reset First Time Flag"
+              onPress={resetFirstTimeHandler}
+            />
 
-        <Button
-          fullWidth
-          variant="outline"
-          label="Clear All Storage"
-          onPress={clearAllStorageHandler}
-        />
-      </View>
+            <Button
+              fullWidth
+              variant="outline"
+              label="Clear All Storage"
+              onPress={clearAllStorageHandler}
+            />
+          </View>
+        </View>
+      </ScrollView>
     </View>
   );
 }

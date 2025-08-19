@@ -4,22 +4,74 @@
 
 To guide an AI assistant in creating a detailed, step-by-step task list in Markdown format based on an existing Product Requirements Document (PRD). The task list should guide a developer through implementation.
 
+## File Naming Convention
+
+- **PRD files:** `prd-[descriptive-feature-name].md` (input)
+- **Task files:** `tasks-prd-[descriptive-feature-name].md` (output)
+- **Branch names:** `feature/prd-[descriptive-feature-name]`
+
+**Example:**
+
+- Input PRD: `prd-user-profile-editing.md`
+- Output Tasks: `tasks-prd-user-profile-editing.md`
+- Branch: `feature/prd-user-profile-editing`
+
 ## Output
 
 - **Format:** Markdown (`.md`)
 - **Location:** `/tasks/`
 - **Filename:** `tasks-[prd-file-name].md` (e.g., `tasks-prd-user-profile-editing.md`)
 
+## Related Workflows
+
+This workflow is part of a larger development process:
+
+1. **PRD Creation** (`@create-prd.md`) → Creates `prd-[feature-name].md`
+2. **Task Generation** (this workflow) → Creates `tasks-prd-[feature-name].md` from the PRD
+3. **Task Implementation** (`@process-task-list.md`) → Implements the tasks using TDD workflow
+
+**Prerequisites:** This workflow requires an existing PRD file created using the `@create-prd.md` workflow.
+
 ## Process
 
 1.  **Receive PRD Reference:** The user points the AI to a specific PRD file
-2.  **Analyze PRD:** The AI reads and analyzes the functional requirements, user stories, and other sections of the specified PRD.
-3.  **Phase 1: Generate Parent Tasks:** Based on the PRD analysis, create the file and generate the main, high-level tasks required to implement the feature. Use your judgement on how many high-level tasks to use. It's likely to be about 5. Present these tasks to the user in the specified format (without sub-tasks yet). Inform the user: "I have generated the high-level tasks based on the PRD. Ready to generate the sub-tasks? Respond with 'Go' to proceed."
-4.  **Wait for Confirmation:** Pause and wait for the user to respond with "Go".
-5.  **Phase 2: Generate Sub-Tasks:** Once the user confirms, break down each parent task into smaller, actionable sub-tasks necessary to complete the parent task. Ensure sub-tasks logically follow from the parent task and cover the implementation details implied by the PRD.
-6.  **Identify Relevant Files:** Based on the tasks and PRD, identify potential files that will need to be created or modified. List these under the `Relevant Files` section, including corresponding test files if applicable.
-7.  **Generate Final Output:** Combine the parent tasks, sub-tasks, relevant files, and notes into the final Markdown structure.
-8.  **Save Task List:** Save the generated document in the `/tasks/` directory with the filename `tasks-[prd-file-name].md`, where `[prd-file-name]` matches the base name of the input PRD file (e.g., if the input was `prd-user-profile-editing.md`, the output is `tasks-prd-user-profile-editing.md`).
+2.  **Verify Branch:** Ensure the user is working on the correct feature branch associated with the PRD
+3.  **Analyze PRD:** The AI reads and analyzes the functional requirements, user stories, and other sections of the specified PRD.
+4.  **Phase 1: Generate Parent Tasks:** Based on the PRD analysis, create the file and generate the main, high-level tasks required to implement the feature. Use your judgement on how many high-level tasks to use. It's likely to be about 5. Present these tasks to the user in the specified format (without sub-tasks yet). Inform the user: "I have generated the high-level tasks based on the PRD. Ready to generate the sub-tasks? Respond with 'Go' to proceed."
+5.  **Wait for Confirmation:** Pause and wait for the user to respond with "Go".
+6.  **Phase 2: Generate Sub-Tasks:** Once the user confirms, break down each parent task into smaller, actionable sub-tasks necessary to complete the parent task. Ensure sub-tasks logically follow from the parent task and cover the implementation details implied by the PRD.
+7.  **Identify Relevant Files:** Based on the tasks and PRD, identify potential files that will need to be created or modified. List these under the `Relevant Files` section, including corresponding test files if applicable.
+8.  **Generate Final Output:** Combine the parent tasks, sub-tasks, relevant files, and notes into the final Markdown structure.
+9.  **Save Task List:** Save the generated document in the `/tasks/` directory with the filename `tasks-[prd-file-name].md`, where `[prd-file-name]` matches the base name of the input PRD file (e.g., if the input was `prd-user-profile-editing.md`, the output is `tasks-prd-user-profile-editing.md`).
+
+## Branch Management
+
+Before generating tasks, verify the user is working on the correct feature branch:
+
+```bash
+# Check current branch
+git branch --show-current
+
+# Expected format: feature/[prd-filename]
+# Example: feature/prd-user-profile-editing
+```
+
+**Branch Requirements:**
+
+- All task implementation must be done on the feature branch associated with the PRD
+- The branch name should match the PRD filename: `feature/[prd-filename]`
+- If not on the correct branch, instruct the user to switch:
+  ```bash
+  git checkout feature/[prd-filename]
+  ```
+- Never generate tasks for implementation on the main branch
+
+**Branch Verification Process:**
+
+1. Check if the user is on a feature branch
+2. Verify the branch name matches the PRD filename
+3. If not, instruct the user to create or switch to the correct branch
+4. Only proceed with task generation after branch verification
 
 ## Output Format
 

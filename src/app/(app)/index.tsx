@@ -1,35 +1,41 @@
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 import {
   useCurrencySystem,
-  useStepCountAsExperience,
+  useExperienceData,
   useStreakTracking,
-} from '../../lib/health';
+} from '@/lib/health';
 import {
-  getCharacter,
+  useCharacter,
   useDailyStepsGoal,
   useLastCheckedDate,
-} from '../../lib/storage';
-import { useScenarioTrigger } from '../../lib/use-scenario-trigger';
+} from '@/lib/storage';
+import { useScenarioTrigger } from '@/lib/use-scenario-trigger';
 
 const MILESTONE_INTERVAL = 1000; // Every 1k steps
 
 const StreakSection = ({ stepCount }: { stepCount: number }) => {
   const [lastCheckedDate] = useLastCheckedDate();
 
-  // Default to start of today if not set
-  const lastCheckedDateTime = lastCheckedDate
-    ? new Date(lastCheckedDate)
-    : (() => {
-        const d = new Date();
-        d.setHours(0, 0, 0, 0);
-        return d;
-      })();
+  // Default to start of today if not set - memoized to prevent infinite re-renders
+  const lastCheckedDateTime = React.useMemo(() => {
+    if (lastCheckedDate) {
+      return new Date(lastCheckedDate);
+    }
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, [lastCheckedDate]);
 
-  const { streaks, currentStreak, longestStreak } =
-    useStreakTracking(lastCheckedDateTime);
+  const { streaks, currentStreak, longestStreak } = useStreakTracking();
 
   if (streaks.length === 0) {
     return (
@@ -77,11 +83,15 @@ const StreakSection = ({ stepCount }: { stepCount: number }) => {
 
 const DailyGoalSection = ({ stepCount }: { stepCount: number }) => {
   const [dailyStepsGoal, setDailyStepsGoal] = useDailyStepsGoal();
-  const [goalInput, setGoalInput] = React.useState(dailyStepsGoal.toString());
+  // Ensure dailyStepsGoal is a valid number, fallback to default if needed
+  const safeDailyStepsGoal = dailyStepsGoal > 0 ? dailyStepsGoal : 10000;
+  const [goalInput, setGoalInput] = React.useState(
+    safeDailyStepsGoal.toString()
+  );
 
-  // Calculate progress towards daily goal
-  const goalProgress = Math.min((stepCount / dailyStepsGoal) * 100, 100);
-  const stepsToGoal = Math.max(dailyStepsGoal - stepCount, 0);
+  // Calculate progress towards daily goal - guard against division by zero
+  const goalProgress = Math.min((stepCount / safeDailyStepsGoal) * 100, 100);
+  const stepsToGoal = Math.max(safeDailyStepsGoal - stepCount, 0);
 
   const handleGoalChange = () => {
     const parsed = parseInt(goalInput, 10);
@@ -110,26 +120,25 @@ const DailyGoalSection = ({ stepCount }: { stepCount: number }) => {
       </View>
       <View className="mt-2 flex-row items-center justify-between">
         <Text className="text-xs text-white/80">
-          Goal: {dailyStepsGoal.toLocaleString()} steps
+          Goal: {safeDailyStepsGoal.toLocaleString()} steps
         </Text>
         <View className="flex-row items-center">
           <Text className="mr-2 text-xs text-white/80">Set goal:</Text>
-          <input
-            type="number"
-            min={1}
+          <TextInput
+            keyboardType="numeric"
             value={goalInput}
-            onChange={(e) => setGoalInput(e.target.value)}
+            onChangeText={setGoalInput}
             onBlur={handleGoalChange}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') handleGoalChange();
-            }}
+            onSubmitEditing={handleGoalChange}
             style={{
               width: 80,
               borderRadius: 4,
               padding: 2,
-              border: '1px solid #fff',
-              background: 'rgba(255,255,255,0.1)',
+              borderWidth: 1,
+              borderColor: '#fff',
+              backgroundColor: 'rgba(255,255,255,0.1)',
               color: '#fff',
+              textAlign: 'center',
             }}
           />
         </View>
@@ -162,7 +171,7 @@ const MilestoneProgressBar = ({ stepCount }: { stepCount: number }) => {
         <View
           className="h-3 rounded-full bg-white"
           style={{
-            width: `${((stepCount % MILESTONE_INTERVAL) / MILESTONE_INTERVAL) * 100}%`,
+            width: `${Math.max(0, Math.min(100, ((stepCount % MILESTONE_INTERVAL) / MILESTONE_INTERVAL) * 100))}%`,
           }}
         />
       </View>
@@ -174,22 +183,13 @@ const ProgressDashboard = ({
   stepCount,
   experience,
   cumulativeExperience,
+  currency,
 }: {
   stepCount: number;
   experience: number;
   cumulativeExperience: number;
+  currency: number;
 }) => {
-  const [lastCheckedDate] = useLastCheckedDate();
-  // Default to start of today if not set
-  const lastCheckedDateTime = lastCheckedDate
-    ? new Date(lastCheckedDate)
-    : (() => {
-        const d = new Date();
-        d.setHours(0, 0, 0, 0);
-        return d;
-      })();
-  const { currency } = useCurrencySystem(lastCheckedDateTime);
-
   return (
     <View className="relative mb-6 rounded-2xl bg-blue-500 p-6">
       <CurrencyDisplay currency={currency} />
@@ -283,7 +283,8 @@ const QuickNavigation = () => {
 };
 
 const CharacterPreview = () => {
-  const character = getCharacter();
+  const [character] = useCharacter();
+  const { experience } = useExperienceData();
 
   if (!character || !character.name) {
     return (
@@ -315,7 +316,7 @@ const CharacterPreview = () => {
           </Text>
         </View>
         <Text className="text-gray-500 dark:text-gray-400">
-          {character.experience.toLocaleString()} XP
+          {experience.toLocaleString()} XP
         </Text>
       </View>
     </View>
@@ -348,23 +349,30 @@ export default function Home() {
   // Use reactive hook for last checked date
   const [lastCheckedDate] = useLastCheckedDate();
 
-  // Default to start of today if not set
-  const lastCheckedDateTime = lastCheckedDate
-    ? new Date(lastCheckedDate)
-    : (() => {
-        const d = new Date();
-        d.setHours(0, 0, 0, 0);
-        return d;
-      })();
+  // Default to start of today if not set - memoized to prevent infinite re-renders
+  const lastCheckedDateTime = React.useMemo(() => {
+    if (lastCheckedDate) {
+      return new Date(lastCheckedDate);
+    }
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, [lastCheckedDate]);
 
-  const { stepsByDay, experience, cumulativeExperience } =
-    useStepCountAsExperience(lastCheckedDateTime);
+  const { stepsByDay, experience, cumulativeExperience } = useExperienceData();
 
-  // Calculate today's step count
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  // Calculate today's step count - memoized to prevent infinite re-renders
+  const today = React.useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, []);
+  const stepsByDayTyped = stepsByDay as {
+    date: Date | string;
+    steps: number;
+  }[];
   const todaySteps =
-    stepsByDay.find((day) => {
+    stepsByDayTyped.find((day) => {
       if (!day || !day.date) return false;
 
       // Handle both Date objects and string dates
@@ -375,6 +383,12 @@ export default function Home() {
 
   // Trigger scenarios based on step count
   useScenarioTrigger(todaySteps);
+
+  // Get streak tracking data
+  const { currentStreak, longestStreak } = useStreakTracking();
+
+  // Get currency data
+  const { currency } = useCurrencySystem();
 
   return (
     <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-900">
@@ -387,6 +401,7 @@ export default function Home() {
           stepCount={todaySteps}
           experience={experience}
           cumulativeExperience={cumulativeExperience}
+          currency={currency}
         />
 
         <CharacterPreview />

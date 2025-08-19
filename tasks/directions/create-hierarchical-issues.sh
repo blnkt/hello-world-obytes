@@ -51,6 +51,7 @@ while [[ $# -gt 0 ]]; do
       echo "  - Subtask checklists within parent issues"
       echo "  - Updates task file with GitHub issue numbers for parent tasks only"
       echo "  - Adds issues to project with 'To Do' status"
+      echo "  - Ensures work is done on feature branches associated with PRDs"
       echo ""
       echo "Options:"
       echo "  --subtask-issues    Also create individual issues for each subtask (not recommended)"
@@ -81,6 +82,41 @@ if [ ! -f "$TASKS_FILE" ]; then
   echo "Error: File $TASKS_FILE not found"
   exit 1
 fi
+
+# Branch Management Check
+echo "=== Branch Management Check ==="
+CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
+
+if [ "$CURRENT_BRANCH" = "main" ] || [ "$CURRENT_BRANCH" = "master" ]; then
+  echo "⚠ Warning: You are on the main branch ($CURRENT_BRANCH)"
+  echo "All work should be done on feature branches associated with PRDs."
+  echo ""
+  echo "Please create a feature branch before creating issues:"
+  echo "  git checkout -b feature/[prd-filename]"
+  echo ""
+  echo "Example:"
+  echo "  git checkout -b feature/prd-user-profile-editing"
+  echo ""
+  echo "Then run this script again."
+  exit 1
+fi
+
+if [[ ! "$CURRENT_BRANCH" =~ ^feature/ ]]; then
+  echo "⚠ Warning: You are not on a feature branch ($CURRENT_BRANCH)"
+  echo "Feature branches should be named: feature/[prd-filename]"
+  echo ""
+  echo "Please switch to a feature branch:"
+  echo "  git checkout -b feature/[prd-filename]"
+  echo ""
+  echo "Example:"
+  echo "  git checkout -b feature/prd-user-profile-editing"
+  echo ""
+  echo "Then run this script again."
+  exit 1
+fi
+
+echo "✓ Working on feature branch: $CURRENT_BRANCH"
+echo ""
 
 # Check if gh CLI is installed and authenticated
 if ! command -v gh &> /dev/null; then

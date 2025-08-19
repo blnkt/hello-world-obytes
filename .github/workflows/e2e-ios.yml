@@ -1,0 +1,165 @@
+# 🔗 Links:
+# Source file: https://github.com/obytes/react-native-template-obytes/blob/master/.github/workflows/e2e-android.yml
+# End-to-end testing: https://starter.obytes.com/testing/end-to-end-testing/
+
+# ✍️ Description:
+# This workflow is used to run end-to-end tests on iOS using Maestro.
+# As a first step, it will generate a test IPA using Xcode build and then upload it as an artifact.
+# A new job will be started to run the tests using the test IPA generated in the previous job.
+# To test the app, we set up an iOS simulator using the `react-native-community/ios-simulator-runner` action.
+# This workflow will be triggered on pull requests (PRs) with the label "ios-test-github" or can be manually triggered from the Actions tab.
+
+# 🚨 GITHUB SECRETS REQUIRED: None
+
+name: E2E Tests iOS (Maestro + Github Action)
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  generate-test-ipa:
+    if: github.event_name != 'pull_request' || ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'ios-test-github'))
+    name: Generate Test IPA (Xcode)
+    runs-on: macos-latest
+
+    steps:
+      - name: 📦 Checkout project repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 📦 Setup Node + PNPM + install deps
+        uses: ./.github/actions/setup-node-pnpm-install
+
+      - name: 📦 Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+
+      - name: 📦 Set environment variables
+        run: |
+          echo "APP_ENV=development" >> $GITHUB_ENV
+          echo "EXPO_NO_DOTENV=1" >> $GITHUB_ENV
+
+      - name: 📦 Generate iOS native code
+        run: |
+          pnpm expo prebuild --platform ios --clean
+
+      - name: 📦 Configure Xcode for simulator builds
+        run: |
+          # Set minimum deployment target to fix pod warnings
+          cd ios
+          sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = 9.0;/IPHONEOS_DEPLOYMENT_TARGET = 12.0;/g' Pods/Pods.xcodeproj/project.pbxproj || true
+
+          # Configure Xcode to skip signing for simulator builds
+          xcrun simctl list devices
+
+      - name: 📦 Install iOS dependencies
+        run: |
+          cd ios
+          pod install
+
+      - name: 📦 Clean previous builds
+        run: |
+          cd ios
+          xcodebuild -workspace helloworldexpoownerexpoowner.xcworkspace \
+            -scheme helloworldexpoownerexpoowner \
+            clean
+
+      - name: 📦 Show bundle identifier
+        run: |
+          echo "Building for bundle identifier: com.hello-world-expo-owner.development"
+          echo "Environment: $APP_ENV"
+
+      - name: 📦 Build iOS app for testing
+        run: |
+          cd ios
+          xcodebuild -workspace helloworldexpoownerexpoowner.xcworkspace \
+            -scheme helloworldexpoownerexpoowner \
+            -configuration Debug \
+            -destination 'platform=iOS Simulator,name=iPhone 14,OS=latest' \
+            -derivedDataPath build \
+            -allowProvisioningUpdates \
+            -skipPackagePluginValidation \
+            -skipSigning \
+            build
+
+      - name: 📦 Create IPA for testing
+        run: |
+          cd ios
+          mkdir -p Payload
+          cp -r build/Build/Products/Debug-iphonesimulator/helloworldexpoownerexpoowner.app Payload/
+          zip -r test-app.ipa Payload
+
+      - name: Upload Test IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-ipa
+          path: ./ios/test-app.ipa
+
+  test-ios:
+    name: Run iOS E2E Tests (Maestro + Github Action)
+    needs: generate-test-ipa
+    runs-on: macos-latest
+
+    steps:
+      - name: 📦 Checkout project repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 📦 Install Maestro
+        run: npm run install-maestro ## We use npm because we don't need to install deps again
+
+      - name: 📦 Generate iOS native code for test job
+        run: |
+          pnpm expo prebuild --platform ios --clean
+
+      - name: Download Test IPA
+        uses: actions/download-artifact@v4
+        with:
+          name: test-ipa
+          path: ${{ github.workspace }}
+
+      - name: 📦 Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+
+      - name: 📦 Install iOS dependencies
+        run: |
+          cd ios
+          pod install
+
+      - name: 📦 Start iOS Simulator
+        uses: react-native-community/ios-simulator-runner@v1
+        with:
+          simulator: 'iPhone 14'
+          os: 'latest'
+          timeout: 10
+
+      - name: 📦 Install app on simulator
+        run: |
+          xcrun simctl install booted ${{ github.workspace }}/test-app.ipa
+
+      - name: Run tests with Maestro
+        run: |
+          $HOME/.maestro/bin/maestro test .maestro/ --env=APP_ID=com.hello-world-expo-owner.development --format junit
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-logs
+          path: ~/.maestro/tests/**/*
+
+      - name: Store tests result
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e_ios_report
+          path: |
+            report.xml
