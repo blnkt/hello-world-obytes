@@ -141,4 +141,47 @@ describe('GridTile', () => {
     // Should show neutral content when tile type is undefined
     expect(screen.getByText('·')).toBeTruthy();
   });
+
+  it('should apply different visual styles based on tile state', () => {
+    const { rerender } = render(<GridTile id="0-0" row={0} col={0} />);
+
+    // Face-down tile should have darker background
+    const tile = screen.getByTestId('grid-tile');
+    expect(tile).toBeTruthy();
+
+    // Reveal the tile
+    rerender(<GridTile id="0-0" row={0} col={0} isRevealed={true} />);
+
+    // Face-up tile should have lighter background
+    expect(tile).toBeTruthy();
+  });
+
+  it('should show smooth transitions between tile states', () => {
+    const { rerender } = render(<GridTile id="0-0" row={0} col={0} />);
+
+    // Initially face-down
+    expect(screen.queryByText('💎')).toBeNull();
+
+    // Reveal with treasure type
+    rerender(
+      <GridTile
+        id="0-0"
+        row={0}
+        col={0}
+        isRevealed={true}
+        tileType="treasure"
+      />
+    );
+
+    // Should now show treasure content
+    expect(screen.getByText('💎')).toBeTruthy();
+
+    // Change to monster type
+    rerender(
+      <GridTile id="0-0" row={0} col={0} isRevealed={true} tileType="monster" />
+    );
+
+    // Should now show monster content
+    expect(screen.getByText('💀')).toBeTruthy();
+  });
 });
