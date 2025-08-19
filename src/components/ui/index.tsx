@@ -1,13 +1,17 @@
 import { cssInterop } from 'nativewind';
 import Svg from 'react-native-svg';
 
+export * from './attribute-list';
 export * from './button';
 export * from './checkbox';
+export * from './class-card';
 export { default as colors } from './colors';
 export * from './error-boundary';
+export * from './feature-list';
 export * from './focus-aware-status-bar';
 export * from './form-input';
 export * from './form-section';
+export * from './game-progress';
 export * from './history-item';
 export * from './image';
 export * from './info-card';
