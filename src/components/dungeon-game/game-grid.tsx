@@ -1,8 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
 
-import { Text } from '@/components/ui';
-
 import GridTile from './grid-tile';
 import { useGameGridState } from './hooks/use-game-grid-state';
 import {
@@ -159,33 +157,25 @@ function GameGridLayout({
 }: GameGridLayoutProps) {
   return (
     <View className="px-4 pb-2">
-      <Text className="mb-4 text-xl font-bold">Game Grid</Text>
-
-      {/* Grid Information */}
-      <View className="mb-4 space-y-1">
-        <Text className="text-base">
-          Grid: {cols}x{rows}
-        </Text>
-        <Text className="text-base">Total Tiles: {totalTiles}</Text>
-      </View>
-
-      {/* Game Grid */}
-      <View testID="game-grid" className="w-full pb-4">
-        {grid.map((row, rowIndex) => (
-          <View key={rowIndex} className="w-full flex-row">
-            {row.map((tile) => (
-              <GridTile
-                key={tile.id}
-                id={tile.id}
-                row={tile.row}
-                col={tile.col}
-                isRevealed={revealedTiles.has(tile.id)}
-                tileType={tileTypes[tile.id]}
-                onPress={onTilePress}
-              />
-            ))}
-          </View>
-        ))}
+      {/* Game Grid with light brown frame */}
+      <View className="rounded-lg bg-[#E0D9CE] p-4">
+        <View testID="game-grid" className="w-full">
+          {grid.map((row, rowIndex) => (
+            <View key={rowIndex} className="w-full flex-row">
+              {row.map((tile) => (
+                <GridTile
+                  key={tile.id}
+                  id={tile.id}
+                  row={tile.row}
+                  col={tile.col}
+                  isRevealed={revealedTiles.has(tile.id)}
+                  tileType={tileTypes[tile.id]}
+                  onPress={onTilePress}
+                />
+              ))}
+            </View>
+          ))}
+        </View>
       </View>
     </View>
   );

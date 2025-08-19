@@ -13,11 +13,11 @@ interface InfoRowProps {
 function InfoRow({
   label,
   value,
-  valueClassName = 'text-lg font-semibold text-gray-900 dark:text-white',
+  valueClassName = 'text-lg font-semibold text-[#6B5F57]',
 }: InfoRowProps) {
   return (
     <View className="flex-row items-center justify-between">
-      <Text className="text-sm text-gray-600 dark:text-gray-300">{label}</Text>
+      <Text className="text-sm text-[#7A6F66]">{label}</Text>
       <Text className={valueClassName}>{value}</Text>
     </View>
   );
@@ -93,7 +93,7 @@ function SectionHeader({
   return (
     <View className="mb-3 flex-row items-center justify-between">
       <Text
-        className="text-lg font-bold text-gray-900 dark:text-white"
+        className="text-lg font-bold text-[#6B5F57]"
         accessibilityRole="header"
       >
         {title}
@@ -120,12 +120,12 @@ function InfoSection({
 
 const getTurnStatusColor = (availableTurns: number) => {
   if (availableTurns < 1) {
-    return 'text-red-600 dark:text-red-400';
+    return 'text-[#D96B5E]';
   }
   if (availableTurns < 3) {
-    return 'text-yellow-600 dark:text-yellow-400';
+    return 'text-[#F7D17B]';
   }
-  return 'text-green-600 dark:text-green-400';
+  return 'text-[#5EC0C0]';
 };
 
 const getStatusIcon = (availableTurns: number) => {
@@ -154,7 +154,7 @@ export default function CurrencyDisplay({
 
   return (
     <View
-      className="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800"
+      className="rounded-lg border border-[#E0D9CE] bg-[#F5F0E8] p-4"
       accessible={true}
       accessibilityLabel={`Currency and Turns - ${availableTurns} turns available`}
       accessibilityRole="summary"

@@ -26,7 +26,7 @@ const GameStateHeader = ({
   <View className="mb-3 flex-row items-center justify-between">
     <View>
       <Text
-        className="text-lg font-bold text-gray-800 dark:text-gray-200"
+        className="text-lg font-bold text-[#6B5F57]"
         accessibilityRole="header"
       >
         Level {level}
@@ -63,22 +63,18 @@ const GameProgressInfo = ({
     accessibilityLabel={`Game Progress - ${turns} turns used, ${revealedTiles} out of ${totalTiles} tiles revealed`}
   >
     <View className="flex-row items-center justify-between">
-      <Text className="text-sm text-gray-600 dark:text-gray-400">
-        Turns Used:
-      </Text>
+      <Text className="text-sm text-[#7A6F66]">Turns Used:</Text>
       <Text
-        className="text-lg font-semibold text-gray-800 dark:text-gray-200"
+        className="text-lg font-semibold text-[#6B5F57]"
         accessibilityLabel={`${turns} turns used`}
       >
         {turns}
       </Text>
     </View>
     <View className="flex-row items-center justify-between">
-      <Text className="text-sm text-gray-600 dark:text-gray-400">
-        Progress:
-      </Text>
+      <Text className="text-sm text-[#7A6F66]">Progress:</Text>
       <Text
-        className="text-lg font-semibold text-gray-800 dark:text-gray-200"
+        className="text-lg font-semibold text-[#6B5F57]"
         accessibilityLabel={`${revealedTiles} out of ${totalTiles} tiles revealed`}
       >
         {revealedTiles}/{totalTiles}
@@ -98,7 +94,7 @@ const GameProgressBar = ({
 
   return (
     <View
-      className="h-3 rounded-full bg-gray-200 dark:bg-gray-700"
+      className="h-3 rounded-full bg-[#E0D9CE]"
       accessible={true}
       accessibilityLabel={`Progress bar showing ${Math.round(progressPercentage)}% completion`}
       accessibilityRole="progressbar"
@@ -109,7 +105,7 @@ const GameProgressBar = ({
       }}
     >
       <View
-        className="h-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"
+        className="h-3 rounded-full bg-[#B06F5E]"
         style={{ width: `${progressPercentage}%` }}
         testID="progress-bar"
       />
@@ -139,17 +135,17 @@ export function GameProgress({
   const getGameStateColor = () => {
     switch (gameState) {
       case 'Win':
-        return 'bg-green-100 border-green-300 text-green-800';
+        return 'bg-[#F7D17B] border-[#E6C269] text-[#8B7355]';
       case 'Game Over':
-        return 'bg-red-100 border-red-300 text-red-800';
+        return 'bg-[#D96B5E] border-[#C55A4D] text-[#8B4A3F]';
       default:
-        return 'bg-blue-100 border-blue-300 text-blue-800';
+        return 'bg-[#E0D9CE] border-[#D1CABF] text-[#7A6F66]';
     }
   };
 
   return (
     <View
-      className={`rounded-lg border-2 p-4 ${getGameStateColor()} dark:border-neutral-600 dark:bg-neutral-800 ${className}`}
+      className={`rounded-lg border-2 p-4 ${getGameStateColor()} ${className}`}
       accessible={true}
       accessibilityLabel={`Game Status - Level ${level}, ${gameState} state`}
       accessibilityRole="summary"
