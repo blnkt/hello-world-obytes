@@ -51,6 +51,7 @@
   - [ ] 3.4 Implement bonus reveal tile effect (auto-reveal adjacent tiles)
   - [ ] 3.5 Add win condition logic (exit tile revealed)
   - [ ] 3.6 Implement game over condition (no turns remaining)
+
   - [ ] 3.7 Add level progression system and difficulty scaling
 
 - [ ] 4.0 Currency Integration
@@ -59,6 +60,7 @@
   - [ ] 4.2 Implement turn calculation: Math.floor(currentCurrency / 100)
   - [ ] 4.3 Add real-time currency updates as turns are spent
   - [ ] 4.4 Implement minimum playability check (100 steps minimum)
+
   - [ ] 4.5 Add currency display showing current balance and turn cost
   - [ ] 4.6 Implement economic feedback and turn cost indicators
 
