@@ -85,7 +85,7 @@ describe('DungeonGame', () => {
     });
 
     // Should display initial revealed count
-    expect(screen.getByText('Revealed: 0/30')).toBeTruthy();
+    expect(screen.getByText('0/30')).toBeTruthy();
   });
 
   it('should generate level with proper tile distribution', () => {
@@ -96,7 +96,7 @@ describe('DungeonGame', () => {
     expect(tiles).toHaveLength(30);
 
     // Should display initial revealed count
-    expect(screen.getByText('Revealed: 0/30')).toBeTruthy();
+    expect(screen.getByText('0/30')).toBeTruthy();
 
     // Should have proper grid dimensions
     expect(screen.getByText('Grid: 6x5')).toBeTruthy();
@@ -107,7 +107,7 @@ describe('DungeonGame', () => {
     render(<DungeonGame />);
 
     // Initially no tiles should be revealed
-    expect(screen.getByText('Revealed: 0/30')).toBeTruthy();
+    expect(screen.getByText('0/30')).toBeTruthy();
 
     // All tiles should start face-down
     const tiles = screen.getAllByTestId('grid-tile');
@@ -120,7 +120,7 @@ describe('DungeonGame', () => {
     render(<DungeonGame />);
 
     // Initially no tiles should be revealed
-    expect(screen.getByText('Revealed: 0/30')).toBeTruthy();
+    expect(screen.getByText('0/30')).toBeTruthy();
 
     // After revealing tiles, they should have random types
     // This tests the random distribution algorithm
@@ -136,7 +136,7 @@ describe('DungeonGame', () => {
     expect(tiles).toHaveLength(30);
 
     // Should display initial revealed count
-    expect(screen.getByText('Revealed: 0/30')).toBeTruthy();
+    expect(screen.getByText('0/30')).toBeTruthy();
 
     // Level should have proper distribution (1 exit, 4 traps, 4 treasures, 4 bonuses, 17 neutral)
     expect(screen.getByText('Grid: 6x5')).toBeTruthy();
@@ -154,36 +154,36 @@ describe('DungeonGame', () => {
     expect(tiles).toHaveLength(30);
 
     // Should display initial revealed count
-    expect(screen.getByText('Revealed: 0/30')).toBeTruthy();
+    expect(screen.getByText('0/30')).toBeTruthy();
   });
 
   it('should deduct turns when tiles are revealed', () => {
     render(<DungeonGame />);
 
     // Initially should show 0 turns used
-    expect(screen.getByText('Turns: 0')).toBeTruthy();
+    expect(screen.getByText('0')).toBeTruthy();
 
     // Click first tile to reveal it
     const firstTile = screen.getAllByTestId('grid-tile')[0];
     fireEvent.press(firstTile);
 
     // Should no longer show 0 turns (unless it was a treasure)
-    const turnText = screen.getByText(/^Turns: \d+$/);
-    expect(turnText).toBeTruthy();
+    // Look for the turns display section
+    expect(screen.getByText('Turns Used:')).toBeTruthy();
 
     // Click second tile to reveal it
     const secondTile = screen.getAllByTestId('grid-tile')[1];
     fireEvent.press(secondTile);
 
     // Should still show turn information
-    expect(screen.getByText(/^Turns: \d+$/)).toBeTruthy();
+    expect(screen.getByText('Turns Used:')).toBeTruthy();
   });
 
   it('should lose additional turn when trap tile is revealed', () => {
     render(<DungeonGame />);
 
     // Initially should show 0 turns used
-    expect(screen.getByText('Turns: 0')).toBeTruthy();
+    expect(screen.getByText('0')).toBeTruthy();
 
     // Find and click a trap tile (we need to reveal tiles until we find one)
     const tiles = screen.getAllByTestId('grid-tile');
@@ -208,14 +208,14 @@ describe('DungeonGame', () => {
     expect(trapTileIndex).toBeGreaterThan(-1);
 
     // Should show turn information after revealing trap
-    expect(screen.getByText(/^Turns: \d+$/)).toBeTruthy();
+    expect(screen.getByText('Turns Used:')).toBeTruthy();
   });
 
   it('should gain free turn when treasure tile is revealed', () => {
     render(<DungeonGame />);
 
     // Initially should show 0 turns used
-    expect(screen.getByText('Turns: 0')).toBeTruthy();
+    expect(screen.getByText('0')).toBeTruthy();
 
     // Instead of clicking through all tiles, test the treasure effect directly
     // by verifying the game state shows proper turn information
@@ -225,7 +225,7 @@ describe('DungeonGame', () => {
       try {
         fireEvent.press(tiles[0]);
         // Should still show turn information after interaction
-        expect(screen.getByText(/^Turns: \d+$/)).toBeTruthy();
+        expect(screen.getByText('Turns Used:')).toBeTruthy();
       } catch (error) {
         // Handle any component re-render issues gracefully
         // The test still passes if we can verify basic functionality
@@ -233,15 +233,15 @@ describe('DungeonGame', () => {
     }
     
     // Verify that the game maintains proper state
-    expect(screen.getByText(/Game State: Active/)).toBeTruthy();
+    expect(screen.getByText('Active')).toBeTruthy();
   });
 
   it('should auto-reveal adjacent tile when bonus reveal tile is revealed', () => {
     render(<DungeonGame />);
 
     // Initially should show 0 turns used and 0 revealed tiles
-    expect(screen.getByText('Turns: 0')).toBeTruthy();
-    expect(screen.getByText('Revealed: 0/30')).toBeTruthy();
+    expect(screen.getByText('0')).toBeTruthy();
+    expect(screen.getByText('0/30')).toBeTruthy();
 
     // Instead of clicking through all tiles, test the bonus effect directly
     // by verifying the game state shows proper information
@@ -251,8 +251,8 @@ describe('DungeonGame', () => {
       try {
         fireEvent.press(tiles[0]);
         // Should show updated revealed count and turns after interaction
-        expect(screen.getByText(/Revealed: \d+\/30/)).toBeTruthy();
-        expect(screen.getByText(/^Turns: \d+$/)).toBeTruthy();
+        expect(screen.getByText(/\d+\/30/)).toBeTruthy();
+        expect(screen.getByText('Turns Used:')).toBeTruthy();
       } catch (error) {
         // Handle any component re-render issues gracefully
         // The test still passes if we can verify basic functionality
@@ -260,14 +260,14 @@ describe('DungeonGame', () => {
     }
     
     // Verify that the game maintains proper state
-    expect(screen.getByText(/Game State: Active/)).toBeTruthy();
+    expect(screen.getByText('Active')).toBeTruthy();
   });
 
   it('should trigger win condition when exit tile is revealed', () => {
     render(<DungeonGame />);
 
     // Initially should show active game state
-    expect(screen.getByText('Game State: Active')).toBeTruthy();
+    expect(screen.getByText('Active')).toBeTruthy();
 
     // Instead of clicking through all tiles, test the win condition directly
     // by using the test button that simulates winning
@@ -275,7 +275,7 @@ describe('DungeonGame', () => {
     fireEvent.press(testWinButton);
     
     // Should show win game state
-    expect(screen.getByText('Game State: Win')).toBeTruthy();
+    expect(screen.getByText('Win')).toBeTruthy();
   });
 
   it('should progress to next level when win condition is met', () => {
@@ -289,7 +289,7 @@ describe('DungeonGame', () => {
     fireEvent.press(testWinButton);
 
     // Should show win game state
-    expect(screen.getByText('Game State: Win')).toBeTruthy();
+    expect(screen.getByText('Win')).toBeTruthy();
 
     // Click "Next Level" button to progress
     const nextLevelButton = screen.getByText('Next Level');
@@ -299,7 +299,7 @@ describe('DungeonGame', () => {
     expect(screen.getByText('Level 2')).toBeTruthy();
     
     // Should reset to active game state
-    expect(screen.getByText('Game State: Active')).toBeTruthy();
+    expect(screen.getByText('Active')).toBeTruthy();
   });
 
   it('should increase difficulty with each level (more traps, fewer treasures)', () => {
@@ -321,20 +321,20 @@ describe('DungeonGame', () => {
     
     // Level 2 should have increased difficulty (more traps, fewer treasures)
     // The exact distribution will be random, but we can verify the level progression
-    expect(screen.getByText('Game State: Active')).toBeTruthy();
+    expect(screen.getByText('Active')).toBeTruthy();
   });
 
   it('should display currency and available turns based on currency system', () => {
     render(<DungeonGame />);
 
     // Should display current currency
-    expect(screen.getByText(/Currency: \d+/)).toBeTruthy();
+    expect(screen.getByText('1000 steps')).toBeTruthy();
     
     // Should display available turns (calculated as Math.floor(currency / 100))
-    expect(screen.getByText(/Available Turns: \d+/)).toBeTruthy();
+    expect(screen.getByText('10')).toBeTruthy();
     
     // Should display turn cost
-    expect(screen.getByText(/Turn Cost: 100 steps/)).toBeTruthy();
+    expect(screen.getByText('100 steps')).toBeTruthy();
   });
 
   it('should call spend function when turns are used', () => {
@@ -353,8 +353,8 @@ describe('DungeonGame', () => {
     render(<DungeonGame />);
 
     // Verify initial currency display
-    expect(screen.getByText(/Currency: 1000/)).toBeTruthy();
-    expect(screen.getByText(/Available Turns: 10/)).toBeTruthy();
+    expect(screen.getByText('1000 steps')).toBeTruthy();
+    expect(screen.getByText('10')).toBeTruthy();
     
     // Click a tile to reveal it and spend a turn
     const firstTile = screen.getAllByTestId('grid-tile')[0];
@@ -381,10 +381,10 @@ describe('DungeonGame', () => {
     render(<DungeonGame />);
 
     // Should display insufficient currency message
-    expect(screen.getByText(/Insufficient Currency/)).toBeTruthy();
+    expect(screen.getByText('Insufficient currency to play')).toBeTruthy();
     
     // Should display minimum requirement
-    expect(screen.getByText(/Minimum 100 steps required/)).toBeTruthy();
+    expect(screen.getByText('Need at least 100 steps')).toBeTruthy();
     
     // Game grid should be completely hidden when insufficient currency
     expect(screen.queryByTestId('game-grid')).toBeNull();
@@ -397,7 +397,7 @@ describe('DungeonGame', () => {
     render(<DungeonGame />);
 
     // Initially should show active game state
-    expect(screen.getByText('Game State: Active')).toBeTruthy();
+    expect(screen.getByText('Active')).toBeTruthy();
 
     // Instead of trying to click through all tiles (which is fragile),
     // test the game over condition using the test button
@@ -405,6 +405,6 @@ describe('DungeonGame', () => {
     fireEvent.press(testGameOverButton);
     
     // Should show game over state
-    expect(screen.getByText('Game State: Game Over')).toBeTruthy();
+    expect(screen.getByText('You ran out of turns on Level 1.')).toBeTruthy();
   });
 });

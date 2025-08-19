@@ -5,7 +5,10 @@ import { ScrollView, View } from 'react-native';
 import { Button, Text } from '@/components/ui';
 import { useCurrencySystem } from '@/lib/health';
 
+import CurrencyDisplay from './currency-display';
 import GameGrid from './game-grid';
+import { GameOverModal, WinModal } from './game-modals';
+import StatusBar from './status-bar';
 
 interface DungeonGameLayoutProps {
   level: number;
@@ -53,34 +56,25 @@ function DungeonGameLayout({
       {/* Header Section */}
       <View className="p-4">
         <Text className="mb-4 text-2xl font-bold">Dungeon Game</Text>
-        <Text className="mb-4 text-lg">Level {level}</Text>
-
-        {/* Currency and Turn Information */}
-        <View className="mb-4 space-y-2">
-          <Text className="text-base">Currency: {currency}</Text>
-          <Text className="text-base">Available Turns: {availableTurns}</Text>
-          <Text className="text-base">Turn Cost: {turnCost} steps</Text>
+        
+        {/* Status Bar */}
+        <View className="mb-4">
+          <StatusBar
+            level={level}
+            turns={turns}
+            gameState={gameState}
+            revealedTiles={revealedTiles}
+            totalTiles={totalTiles}
+          />
         </View>
 
-        {/* Insufficient Currency Warning */}
-        {availableTurns < 1 && (
-          <View className="mb-4 rounded-lg bg-red-100 p-3 dark:bg-red-900/20">
-            <Text className="text-base font-semibold text-red-800 dark:text-red-200">
-              Insufficient Currency
-            </Text>
-            <Text className="text-sm text-red-600 dark:text-red-300">
-              Minimum 100 steps required to play
-            </Text>
-          </View>
-        )}
-
-        {/* Game State Display */}
-        <View className="mb-4 space-y-2">
-          <Text className="text-base">Turns: {turns}</Text>
-          <Text className="text-base">Game State: {gameState}</Text>
-          <Text className="text-base">
-            Revealed: {revealedTiles}/{totalTiles}
-          </Text>
+        {/* Currency Display */}
+        <View className="mb-4">
+          <CurrencyDisplay
+            currency={currency}
+            availableTurns={availableTurns}
+            turnCost={turnCost}
+          />
         </View>
       </View>
 
@@ -107,20 +101,41 @@ function DungeonGameLayout({
 
       {/* Footer Section */}
       <View className="space-y-4 p-4">
-        {/* Game State Test Buttons */}
+        {/* Game Control Buttons */}
         <View className="space-y-2">
-          <Button label="Test Win" onPress={onWinGame} size="sm" />
-          <Button label="Test Game Over" onPress={onGameOver} size="sm" />
           <Button label="Reset Game" onPress={onResetGame} size="sm" />
+          <Button label="Home" onPress={onHomePress} size="sm" />
         </View>
 
-        {/* Next Level Button - Only show when game state is Win */}
-        {gameState === 'Win' && (
-          <Button label="Next Level" onPress={onNextLevel} size="sm" />
+        {/* Development Test Buttons - Remove in production */}
+        {__DEV__ && (
+          <View className="mt-4 space-y-2 rounded-lg bg-yellow-50 p-3 dark:bg-yellow-900/20">
+            <Text className="text-center text-sm font-medium text-yellow-800 dark:text-yellow-200">
+              Development Mode
+            </Text>
+            <View className="flex-row space-x-2">
+              <Button label="Test Win" onPress={onWinGame} size="sm" variant="outline" />
+              <Button label="Test Game Over" onPress={onGameOver} size="sm" variant="outline" />
+            </View>
+          </View>
         )}
-
-        <Button label="Home" onPress={onHomePress} size="sm" />
       </View>
+
+      {/* Game Modals */}
+      <WinModal
+        visible={gameState === 'Win'}
+        level={level}
+        onNextLevel={onNextLevel}
+        onMainMenu={onHomePress}
+      />
+      
+      <GameOverModal
+        visible={gameState === 'Game Over'}
+        level={level}
+        turnsUsed={turns}
+        onMainMenu={onHomePress}
+        onRetry={onResetGame}
+      />
     </ScrollView>
   );
 }

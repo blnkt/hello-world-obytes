@@ -34,6 +34,7 @@
 <!-- - Use feature-based folder structure -->
 - Implement error boundaries for all major features
 - Follow atomic design principles
+  gs
 
 ## Testing
 

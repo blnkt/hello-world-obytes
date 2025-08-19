@@ -30,11 +30,11 @@ describe('DungeonGame', () => {
     render(<DungeonGame />);
 
     // Should display initial game state
-    expect(screen.getByText('Turns: 0')).toBeTruthy();
-    expect(screen.getByText('Game State: Active')).toBeTruthy();
+    expect(screen.getByText('Turns Used:')).toBeTruthy();
+    expect(screen.getByText('Active')).toBeTruthy();
 
     // Should show revealed tiles count
-    expect(screen.getByText('Revealed: 0/30')).toBeTruthy();
+    expect(screen.getByText('0/30')).toBeTruthy();
   });
 
   it('should handle navigation correctly', () => {
@@ -83,7 +83,7 @@ describe('DungeonGame', () => {
     render(<DungeonGame />);
 
     // Should start in Active state
-    expect(screen.getByText('Game State: Active')).toBeTruthy();
+    expect(screen.getByText('Active')).toBeTruthy();
 
     // Should have buttons to test state transitions
     expect(screen.getByText('Test Win')).toBeTruthy();
@@ -92,14 +92,14 @@ describe('DungeonGame', () => {
 
     // Test Win state transition
     fireEvent.press(screen.getByText('Test Win'));
-    expect(screen.getByText('Game State: Win')).toBeTruthy();
+    expect(screen.getByText('Win')).toBeTruthy();
 
     // Test Game Over state transition
     fireEvent.press(screen.getByText('Test Game Over'));
-    expect(screen.getByText('Game State: Game Over')).toBeTruthy();
+    expect(screen.getByText('You ran out of turns on Level 1.')).toBeTruthy();
 
     // Test Reset back to Active
     fireEvent.press(screen.getByText('Reset Game'));
-    expect(screen.getByText('Game State: Active')).toBeTruthy();
+    expect(screen.getByText('Active')).toBeTruthy();
   });
 });
