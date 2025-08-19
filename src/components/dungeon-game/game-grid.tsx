@@ -18,7 +18,7 @@ export default function GameGrid() {
   );
 
   return (
-    <View className="p-4">
+    <View className="px-4">
       <Text className="mb-4 text-xl font-bold">Game Grid</Text>
 
       {/* Grid Information */}
@@ -30,14 +30,15 @@ export default function GameGrid() {
       </View>
 
       {/* Game Grid */}
-      <View testID="game-grid" className="space-y-1">
+      <View testID="game-grid" className="w-full">
         {grid.map((row, rowIndex) => (
-          <View key={rowIndex} className="flex-row space-x-1">
+          <View key={rowIndex} className="w-full flex-row">
             {row.map((tile) => (
               <View
                 key={tile.id}
                 testID="grid-tile"
-                className="size-12 rounded border border-gray-400 bg-gray-300"
+                className="mx-0.5 aspect-square flex-1 rounded border border-gray-400 bg-gray-300"
+                style={{ minHeight: 40 }} // Ensure minimum tile size
               />
             ))}
           </View>

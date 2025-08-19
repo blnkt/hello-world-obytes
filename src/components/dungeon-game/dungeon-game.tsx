@@ -46,30 +46,38 @@ export default function DungeonGame({ navigation }: DungeonGameProps) {
   };
 
   return (
-    <View className="flex-1 p-4">
-      <Text className="mb-4 text-2xl font-bold">Dungeon Game</Text>
-      <Text className="mb-4 text-lg">Level {level}</Text>
+    <View className="flex-1">
+      {/* Header Section */}
+      <View className="p-4">
+        <Text className="mb-4 text-2xl font-bold">Dungeon Game</Text>
+        <Text className="mb-4 text-lg">Level {level}</Text>
 
-      {/* Game State Display */}
-      <View className="mb-4 space-y-2">
-        <Text className="text-base">Turns: {turns}</Text>
-        <Text className="text-base">Game State: {gameState}</Text>
-        <Text className="text-base">
-          Revealed: {revealedTiles}/{totalTiles}
-        </Text>
+        {/* Game State Display */}
+        <View className="mb-4 space-y-2">
+          <Text className="text-base">Turns: {turns}</Text>
+          <Text className="text-base">Game State: {gameState}</Text>
+          <Text className="text-base">
+            Revealed: {revealedTiles}/{totalTiles}
+          </Text>
+        </View>
       </View>
 
-      {/* Game Grid */}
-      <GameGrid />
-
-      {/* Game State Test Buttons */}
-      <View className="mb-4 space-y-2">
-        <Button label="Test Win" onPress={handleWinGame} size="sm" />
-        <Button label="Test Game Over" onPress={handleGameOver} size="sm" />
-        <Button label="Reset Game" onPress={handleResetGame} size="sm" />
+      {/* Game Grid - Full Width */}
+      <View className="flex-1">
+        <GameGrid />
       </View>
 
-      <Button label="Home" onPress={handleHomePress} size="sm" />
+      {/* Footer Section */}
+      <View className="space-y-4 p-4">
+        {/* Game State Test Buttons */}
+        <View className="space-y-2">
+          <Button label="Test Win" onPress={handleWinGame} size="sm" />
+          <Button label="Test Game Over" onPress={handleGameOver} size="sm" />
+          <Button label="Reset Game" onPress={handleResetGame} size="sm" />
+        </View>
+
+        <Button label="Home" onPress={handleHomePress} size="sm" />
+      </View>
     </View>
   );
 }
