@@ -8,7 +8,7 @@ interface GridTileProps {
   row: number;
   col: number;
   isRevealed?: boolean;
-  tileType?: 'monster' | 'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral';
+  tileType?: 'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral';
   onPress?: (id: string, row: number, col: number) => void;
 }
 
@@ -30,8 +30,6 @@ export default function GridTile({
     if (!isRevealed) return null;
 
     switch (tileType) {
-      case 'monster':
-        return '💀';
       case 'treasure':
         return '💎';
       case 'trap':

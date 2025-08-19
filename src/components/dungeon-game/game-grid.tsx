@@ -5,16 +5,40 @@ import { Text } from '@/components/ui';
 
 import GridTile from './grid-tile';
 
+// Helper function to generate level tiles
+const generateLevelTiles = () => {
+  const tileDistribution = {
+    exit: 1,
+    trap: 4,
+    treasure: 4,
+    bonus: 4,
+    neutral: 17,
+  };
+  const tileTypesArray: ('treasure' | 'trap' | 'exit' | 'bonus' | 'neutral')[] =
+    [];
+
+  Object.entries(tileDistribution).forEach(([type, count]) => {
+    for (let i = 0; i < count; i++) tileTypesArray.push(type as any);
+  });
+
+  for (let i = tileTypesArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [tileTypesArray[i], tileTypesArray[j]] = [
+      tileTypesArray[j],
+      tileTypesArray[i],
+    ];
+  }
+
+  return tileTypesArray;
+};
+
 interface GameGridLayoutProps {
   cols: number;
   rows: number;
   totalTiles: number;
   revealedTiles: Set<string>;
   grid: { id: string; row: number; col: number }[][];
-  tileTypes: Record<
-    string,
-    'monster' | 'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral'
-  >;
+  tileTypes: Record<string, 'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral'>;
   onTilePress: (id: string, row: number, col: number) => void;
 }
 
@@ -72,77 +96,16 @@ export default function GameGrid() {
   // Game state for tile reveals
   const [revealedTiles, setRevealedTiles] = useState<Set<string>>(new Set());
   const [tileTypes, setTileTypes] = useState<
-    Record<
-      string,
-      'monster' | 'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral'
-    >
+    Record<string, 'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral'>
   >({});
 
-  // Create a 2D array for the grid
-  const createGrid = () => {
-    return Array.from({ length: rows }, (_, rowIndex) =>
-      Array.from({ length: cols }, (_, colIndex) => ({
-        id: `${rowIndex}-${colIndex}`,
-        row: rowIndex,
-        col: colIndex,
-      }))
-    );
-  };
-
-  const grid = createGrid();
-
-  const generateLevelTiles = (_level: number) => {
-    const totalTiles = rows * cols;
-    const tileDistribution = {
-      exit: 1, // Always exactly 1 exit
-      monster: Math.floor(totalTiles * 0.3), // 30% monsters
-      trap: Math.floor(totalTiles * 0.2), // 20% traps
-      treasure: Math.floor(totalTiles * 0.15), // 15% treasure
-      bonus: Math.floor(totalTiles * 0.1), // 10% bonus
-      neutral:
-        totalTiles -
-        1 -
-        Math.floor(totalTiles * 0.3) -
-        Math.floor(totalTiles * 0.2) -
-        Math.floor(totalTiles * 0.15) -
-        Math.floor(totalTiles * 0.1), // Remaining neutral
-    };
-
-    // Create array of all tile types
-    const tileTypesArray: (
-      | 'monster'
-      | 'treasure'
-      | 'trap'
-      | 'exit'
-      | 'bonus'
-      | 'neutral'
-    )[] = [];
-
-    // Add guaranteed exit
-    tileTypesArray.push('exit');
-
-    // Add other tile types based on distribution
-    for (let i = 0; i < tileDistribution.monster; i++)
-      tileTypesArray.push('monster');
-    for (let i = 0; i < tileDistribution.trap; i++) tileTypesArray.push('trap');
-    for (let i = 0; i < tileDistribution.treasure; i++)
-      tileTypesArray.push('treasure');
-    for (let i = 0; i < tileDistribution.bonus; i++)
-      tileTypesArray.push('bonus');
-    for (let i = 0; i < tileDistribution.neutral; i++)
-      tileTypesArray.push('neutral');
-
-    // Shuffle the array (Fisher-Yates shuffle)
-    for (let i = tileTypesArray.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [tileTypesArray[i], tileTypesArray[j]] = [
-        tileTypesArray[j],
-        tileTypesArray[i],
-      ];
-    }
-
-    return tileTypesArray;
-  };
+  const grid = Array.from({ length: rows }, (_, rowIndex) =>
+    Array.from({ length: cols }, (_, colIndex) => ({
+      id: `${rowIndex}-${colIndex}`,
+      row: rowIndex,
+      col: colIndex,
+    }))
+  );
 
   const handleTilePress = (id: string, _row: number, _col: number) => {
     if (!revealedTiles.has(id)) {
@@ -150,7 +113,7 @@ export default function GameGrid() {
       setRevealedTiles((prev) => new Set([...prev, id]));
 
       // Use level generation algorithm for tile type
-      const levelTiles = generateLevelTiles(1); // Level 1 for now
+      const levelTiles = generateLevelTiles();
       const tileIndex =
         parseInt(id.split('-')[0]) * cols + parseInt(id.split('-')[1]);
       const tileType = levelTiles[tileIndex];

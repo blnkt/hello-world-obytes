@@ -96,16 +96,10 @@ describe('GridTile', () => {
 
   it('should display all tile types correctly when revealed', () => {
     const { rerender } = render(
-      <GridTile id="0-0" row={0} col={0} isRevealed={true} tileType="monster" />
-    );
-
-    // Test monster
-    expect(screen.getByText('💀')).toBeTruthy();
-
-    // Test trap
-    rerender(
       <GridTile id="0-0" row={0} col={0} isRevealed={true} tileType="trap" />
     );
+
+    // Test trap
     expect(screen.getByText('⚠️')).toBeTruthy();
 
     // Test exit
@@ -176,12 +170,12 @@ describe('GridTile', () => {
     // Should now show treasure content
     expect(screen.getByText('💎')).toBeTruthy();
 
-    // Change to monster type
+    // Change to trap type
     rerender(
-      <GridTile id="0-0" row={0} col={0} isRevealed={true} tileType="monster" />
+      <GridTile id="0-0" row={0} col={0} isRevealed={true} tileType="trap" />
     );
 
-    // Should now show monster content
-    expect(screen.getByText('💀')).toBeTruthy();
+    // Should now show trap content
+    expect(screen.getByText('⚠️')).toBeTruthy();
   });
 });
