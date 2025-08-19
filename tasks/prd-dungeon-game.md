@@ -34,21 +34,21 @@ The Dungeon Game is a grid-based puzzle game where players navigate through a 6x
 
 ## Functional Requirements
 
-1. **Grid System**: The system must display a 6x5 grid of tiles (30 total tiles).
-2. **Tile Types**: The system must support five tile types:
+1. ✅ **Grid System**: The system must display a 6x5 grid of tiles (30 total tiles).
+2. ✅ **Tile Types**: The system must support five tile types:
    - 1 exit tile (yellow with exit icon)
    - 4 trap tiles (red with skull icon)
    - 4 treasure tiles (teal with star icon)
    - 4 bonus reveal tiles (purple with target/eye icon)
    - 17 neutral tiles (no icon, no effect)
-3. **Random Distribution**: The system must randomly distribute all tiles across the grid for each new level.
-4. **Tile States**: Each tile must have two visual states: face-down (hidden) and face-up (revealed).
-5. **Tile Interaction**: The system must allow players to click on face-down tiles to reveal them.
+3. ✅ **Random Distribution**: The system must randomly distribute all tiles across the grid for each new level.
+4. ✅ **Tile States**: Each tile must have two visual states: face-down (hidden) and face-up (revealed).
+5. ✅ **Tile Interaction**: The system must allow players to click on face-down tiles to reveal them.
 6. **Currency Integration**: The system must integrate with the app's fitness currency system where each turn costs 100 steps.
 7. **Turn Calculation**: The system must calculate available turns as `Math.floor(currentCurrency / 100)` and display this prominently.
-8. **Turn Management**: The system must deduct 1 turn for each tile reveal and update the display accordingly.
+8. ✅ **Turn Management**: The system must deduct 1 turn for each tile reveal and update the display accordingly.
 9. **Currency Deduction**: The system must automatically deduct 100 steps from the player's currency for each turn spent.
-10. **Trap Effect**: When a trap tile is revealed, the system must deduct 1 additional turn and display "Trap! Lose 1 turn".
+10. ✅ **Trap Effect**: When a trap tile is revealed, the system must deduct 1 additional turn and display "Trap! Lose 1 turn".
 11. **Treasure Effect**: When a treasure tile is revealed, the system must add 1 free turn and display "Treasure! Gain 1 turn".
 12. **Bonus Reveal Effect**: When a bonus reveal tile is revealed, the system must automatically reveal one random orthogonally adjacent tile and immediately resolve its effects.
 13. **Exit Win Condition**: When the exit tile is revealed, the system must display a win modal with options to continue to next level or return to main menu.

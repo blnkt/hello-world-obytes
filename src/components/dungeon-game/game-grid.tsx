@@ -133,6 +133,11 @@ export default function GameGrid() {
       if (tileType === 'trap') {
         setTurnsUsed((prev) => prev + 1);
       }
+      
+      // Free turn bonus for treasure tiles
+      if (tileType === 'treasure') {
+        setTurnsUsed((prev) => prev - 1);
+      }
     }
   };
 
