@@ -3,6 +3,15 @@ import React from 'react';
 
 import DungeonGame from './dungeon-game';
 
+// Mock expo-router
+jest.mock('expo-router', () => ({
+  router: {
+    push: jest.fn(),
+    back: jest.fn(),
+    replace: jest.fn(),
+  },
+}));
+
 describe('DungeonGame', () => {
   it('should render the main dungeon game screen', () => {
     render(<DungeonGame />);
@@ -54,5 +63,19 @@ describe('DungeonGame', () => {
     // Test that pressing home button navigates to main menu
     fireEvent.press(homeButton);
     expect(mockNavigate).toHaveBeenCalledWith('index');
+  });
+
+  it('should use expo-router for navigation when no navigation prop is provided', () => {
+    const { router } = require('expo-router');
+
+    render(<DungeonGame />);
+
+    // Should have home button
+    const homeButton = screen.getByText('Home');
+    expect(homeButton).toBeTruthy();
+
+    // Test that pressing home button uses expo-router
+    fireEvent.press(homeButton);
+    expect(router.replace).toHaveBeenCalledWith('/');
   });
 });

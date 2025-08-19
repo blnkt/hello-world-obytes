@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { View } from 'react-native';
 
@@ -23,6 +24,8 @@ export default function DungeonGame({ navigation }: DungeonGameProps) {
   const handleHomePress = () => {
     if (navigation) {
       navigation.navigate('index');
+    } else {
+      router.replace('/');
     }
   };
 

@@ -31,7 +31,7 @@
   - [x] 1.1 Create main dungeon game screen component with basic navigation
   - [x] 1.2 Set up game state management (level, turns, revealed tiles, game state)
   - [x] 1.3 Implement basic routing and navigation integration
-  - [ ] 1.4 Add home button and return to main menu functionality
+  - [x] 1.4 Add home button and return to main menu functionality
   - [ ] 1.5 Set up basic game state transitions (active, win, game over)
 
 - [ ] 2.0 Grid System and Tile Components
