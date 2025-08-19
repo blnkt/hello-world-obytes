@@ -1,17 +1,7 @@
 import React from 'react';
+import { View } from 'react-native';
 
-import {
-  Button,
-  FormInput,
-  FormSection,
-  HistoryItem,
-  InfoCard,
-  StatusIndicator,
-  StorageErrorBoundary,
-  Text,
-  ToggleCard,
-  View,
-} from '@/components/ui';
+import { Button, Card, Input, StatusIndicator, Text } from '@/components/ui';
 import {
   useDeveloperMode,
   useExperienceData,
@@ -75,16 +65,15 @@ const ManualEntryModeToggle = () => {
   };
 
   return (
-    <ToggleCard
+    <Card
+      variant="toggle"
       title="Manual Entry Mode"
-      description={
-        isManualMode
-          ? 'Currently using manual step entry'
-          : 'Currently using HealthKit for step tracking'
-      }
-      buttonLabel={isManualMode ? 'Switch to HealthKit' : 'Switch to Manual'}
+      description="Enable manual step entry when HealthKit is unavailable"
+      buttonLabel={isManualMode ? 'Disable' : 'Enable'}
       onPress={handleToggle}
+      disabled={isLoading}
       isLoading={isLoading}
+      testID="manual-mode-toggle"
     />
   );
 };
@@ -101,16 +90,15 @@ const DeveloperModeToggle = () => {
   };
 
   return (
-    <ToggleCard
+    <Card
+      variant="toggle"
       title="Developer Mode"
-      description={
-        isDeveloperMode
-          ? 'HealthKit checks bypassed for testing'
-          : 'Normal HealthKit availability checks'
-      }
+      description="Enable additional debugging and development features"
       buttonLabel={isDeveloperMode ? 'Disable' : 'Enable'}
       onPress={handleToggle}
+      disabled={isLoading}
       isLoading={isLoading}
+      testID="developer-mode-toggle"
     />
   );
 };
@@ -132,12 +120,11 @@ const ManualEntriesInfo = ({ onRefresh }: { onRefresh: () => void }) => {
   };
 
   return (
-    <StorageErrorBoundary>
-      <InfoCard
-        title="Manual Entries"
-        description={`${manualStepsCount} manual step entries stored`}
-      />
-
+    <Card
+      variant="info"
+      title="Manual Entries"
+      description={`${manualStepsCount} manual step entries stored`}
+    >
       <Button
         fullWidth
         variant="outline"
@@ -145,7 +132,7 @@ const ManualEntriesInfo = ({ onRefresh }: { onRefresh: () => void }) => {
         onPress={handleClearManualEntries}
         disabled={manualStepsCount === 0}
       />
-    </StorageErrorBoundary>
+    </Card>
   );
 };
 
@@ -172,50 +159,19 @@ const ManualEntryHistoryItem = ({ entry }: { entry: any }) => {
   };
 
   return (
-    <HistoryItem
+    <Card
+      variant="info"
       title={formatDate(entry.date)}
-      subtitle={`${formatSteps(entry.steps)} steps`}
-      badge={{ text: 'Manual', color: 'bg-blue-500' }}
+      description={`${formatSteps(entry.steps)} steps`}
     />
   );
 };
 
 const ManualEntryHistoryEmpty = () => (
-  <InfoCard
+  <Card
+    variant="info"
     title="Manual Entry History"
     description="No manual entries found"
-  />
-);
-
-const DateInput = ({
-  value,
-  onChangeText,
-}: {
-  value: string;
-  onChangeText: (text: string) => void;
-}) => (
-  <FormInput
-    label="Date"
-    value={value}
-    onChangeText={onChangeText}
-    placeholder="YYYY-MM-DD"
-    maxLength={10}
-  />
-);
-
-const StepCountInput = ({
-  value,
-  onChangeText,
-}: {
-  value: string;
-  onChangeText: (text: string) => void;
-}) => (
-  <FormInput
-    label="Step Count"
-    value={value}
-    onChangeText={onChangeText}
-    placeholder="Enter step count"
-    keyboardType="numeric"
   />
 );
 
@@ -231,24 +187,43 @@ const AddManualStepForm = ({ onStepAdded }: { onStepAdded: () => void }) => {
   } = useManualStepForm(onStepAdded);
 
   return (
-    <FormSection title="Add Manual Step Entry">
-      <DateInput value={selectedDate} onChangeText={setSelectedDate} />
-      <StepCountInput value={stepCount} onChangeText={setStepCount} />
+    <Card variant="form" title="Add Manual Step Entry">
+      <View className="space-y-4">
+        <Input
+          simple={true}
+          label="Date"
+          value={selectedDate}
+          onChangeText={setSelectedDate}
+          placeholder="YYYY-MM-DD"
+          testID="manual-entry-date"
+        />
 
-      {/* Error Display */}
-      {error && (
-        <Text className="text-sm text-red-600 dark:text-red-400">{error}</Text>
-      )}
+        <Input
+          simple={true}
+          label="Step Count"
+          value={stepCount}
+          onChangeText={setStepCount}
+          placeholder="Enter step count"
+          testID="manual-entry-steps"
+        />
 
-      {/* Submit Button */}
-      <Button
-        fullWidth
-        label={isSubmitting ? 'Adding...' : 'Add Step Entry'}
-        onPress={handleSubmit}
-        disabled={isSubmitting || !stepCount.trim()}
-        size="sm"
-      />
-    </FormSection>
+        {/* Error Display */}
+        {error && (
+          <Text className="text-sm text-red-600 dark:text-red-400">
+            {error}
+          </Text>
+        )}
+
+        {/* Submit Button */}
+        <Button
+          fullWidth
+          label={isSubmitting ? 'Adding...' : 'Add Step Entry'}
+          onPress={handleSubmit}
+          disabled={isSubmitting || !stepCount.trim()}
+          size="sm"
+        />
+      </View>
+    </Card>
   );
 };
 
@@ -264,23 +239,21 @@ const ManualEntryHistory = ({ manualSteps }: { manualSteps: any[] }) => {
   });
 
   return (
-    <StorageErrorBoundary>
-      <InfoCard title="Manual Entry History" description="">
-        <View className="space-y-2">
-          {sortedSteps.slice(0, 10).map((entry, index) => (
-            <ManualEntryHistoryItem
-              key={`${entry.date}-${index}`}
-              entry={entry}
-            />
-          ))}
-          {sortedSteps.length > 10 && (
-            <Text className="pt-2 text-center text-xs text-neutral-500 dark:text-neutral-400">
-              Showing 10 most recent entries
-            </Text>
-          )}
-        </View>
-      </InfoCard>
-    </StorageErrorBoundary>
+    <Card variant="info" title="Manual Entry History" description="">
+      <View className="space-y-2">
+        {sortedSteps.slice(0, 10).map((entry, index) => (
+          <ManualEntryHistoryItem
+            key={`${entry.date}-${index}`}
+            entry={entry}
+          />
+        ))}
+        {sortedSteps.length > 10 && (
+          <Text className="pt-2 text-center text-xs text-neutral-500 dark:text-neutral-400">
+            Showing 10 most recent entries
+          </Text>
+        )}
+      </View>
+    </Card>
   );
 };
 

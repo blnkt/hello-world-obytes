@@ -3,18 +3,17 @@ import Svg from 'react-native-svg';
 
 export * from './attribute-list';
 export * from './button';
+export * from './card';
 export * from './checkbox';
-export * from './class-card';
+// Note: Individual card components are now consolidated into the Card component
+// Use Card with variant prop instead: <Card variant="info" title="..." />
 export { default as colors } from './colors';
 export * from './error-boundary';
 export * from './feature-list';
 export * from './focus-aware-status-bar';
-export * from './form-input';
-export * from './form-section';
 export * from './game-progress';
 export * from './history-item';
 export * from './image';
-export * from './info-card';
 export * from './input';
 export * from './list';
 export * from './loading-overlay';
@@ -23,7 +22,6 @@ export * from './progress-bar';
 export * from './select';
 export * from './status-indicator';
 export * from './text';
-export * from './toggle-card';
 export * from './utils';
 
 // export base components from react-native

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { AttributeList, ClassCard, FeatureList } from '@/components/ui';
+import { AttributeList, Card, FeatureList } from '@/components/ui';
 
 import { FITNESS_CLASSES } from '../../types/character';
 
@@ -69,10 +69,11 @@ export const ClassInfo: React.FC<ClassInfoProps> = ({
   if (!classData) return null;
 
   return (
-    <ClassCard
+    <Card
+      variant="class"
       title={characterClass}
       description={classData.description}
-      variant={variant}
+      variantStyle={variant}
     >
       {showAttributes && <ClassAttributes attributes={classData.attributes} />}
       <ClassStrengths strengths={classData.strengths} variant={variant} />
@@ -81,6 +82,6 @@ export const ClassInfo: React.FC<ClassInfoProps> = ({
         specialAbility={classData.specialAbility}
         variant={variant}
       />
-    </ClassCard>
+    </Card>
   );
 };
