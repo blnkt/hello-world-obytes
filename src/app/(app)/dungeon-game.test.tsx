@@ -78,4 +78,28 @@ describe('DungeonGame', () => {
     fireEvent.press(homeButton);
     expect(router.replace).toHaveBeenCalledWith('/');
   });
+
+  it('should handle game state transitions correctly', () => {
+    render(<DungeonGame />);
+
+    // Should start in Active state
+    expect(screen.getByText('Game State: Active')).toBeTruthy();
+
+    // Should have buttons to test state transitions
+    expect(screen.getByText('Test Win')).toBeTruthy();
+    expect(screen.getByText('Test Game Over')).toBeTruthy();
+    expect(screen.getByText('Reset Game')).toBeTruthy();
+
+    // Test Win state transition
+    fireEvent.press(screen.getByText('Test Win'));
+    expect(screen.getByText('Game State: Win')).toBeTruthy();
+
+    // Test Game Over state transition
+    fireEvent.press(screen.getByText('Test Game Over'));
+    expect(screen.getByText('Game State: Game Over')).toBeTruthy();
+
+    // Test Reset back to Active
+    fireEvent.press(screen.getByText('Reset Game'));
+    expect(screen.getByText('Game State: Active')).toBeTruthy();
+  });
 });

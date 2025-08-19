@@ -29,6 +29,20 @@ export default function DungeonGame({ navigation }: DungeonGameProps) {
     }
   };
 
+  const handleWinGame = () => {
+    setGameState('Win');
+  };
+
+  const handleGameOver = () => {
+    setGameState('Game Over');
+  };
+
+  const handleResetGame = () => {
+    setGameState('Active');
+    setTurns(0);
+    setRevealedTiles(0);
+  };
+
   return (
     <View className="flex-1 p-4">
       <Text className="mb-4 text-2xl font-bold">Dungeon Game</Text>
@@ -41,6 +55,13 @@ export default function DungeonGame({ navigation }: DungeonGameProps) {
         <Text className="text-base">
           Revealed: {revealedTiles}/{totalTiles}
         </Text>
+      </View>
+
+      {/* Game State Test Buttons */}
+      <View className="mb-4 space-y-2">
+        <Button label="Test Win" onPress={handleWinGame} size="sm" />
+        <Button label="Test Game Over" onPress={handleGameOver} size="sm" />
+        <Button label="Reset Game" onPress={handleResetGame} size="sm" />
       </View>
 
       <Button label="Home" onPress={handleHomePress} size="sm" />
