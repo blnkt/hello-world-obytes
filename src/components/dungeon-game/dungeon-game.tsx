@@ -62,8 +62,8 @@ export default function DungeonGame({ navigation }: DungeonGameProps) {
         </View>
       </View>
 
-      {/* Game Grid - Full Width */}
-      <View className="flex-1">
+      {/* Game Grid - Full Width with Bottom Margin */}
+      <View className="mb-4 flex-1">
         <GameGrid />
       </View>
 

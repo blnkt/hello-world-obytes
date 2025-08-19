@@ -18,7 +18,7 @@ export default function GameGrid() {
   );
 
   return (
-    <View className="px-4">
+    <View className="px-4 pb-2">
       <Text className="mb-4 text-xl font-bold">Game Grid</Text>
 
       {/* Grid Information */}
@@ -30,7 +30,7 @@ export default function GameGrid() {
       </View>
 
       {/* Game Grid */}
-      <View testID="game-grid" className="w-full">
+      <View testID="game-grid" className="w-full pb-4">
         {grid.map((row, rowIndex) => (
           <View key={rowIndex} className="w-full flex-row">
             {row.map((tile) => (
