@@ -314,19 +314,23 @@ const createGridStructure = (rows: number, cols: number) => {
 
 interface GameGridProps {
   level: number;
+  disabled?: boolean;
   onTurnsUpdate?: (turns: number) => void;
   onRevealedTilesUpdate?: (count: number) => void;
   onExitFound?: () => void;
   onGameOver?: () => void;
+  onSpendCurrency?: (amount: number) => Promise<boolean>;
 }
 
 // eslint-disable-next-line max-lines-per-function
 export default function GameGrid({
   level,
+  disabled = false,
   onTurnsUpdate,
   onRevealedTilesUpdate,
   onExitFound,
   onGameOver,
+  onSpendCurrency,
 }: GameGridProps) {
   const rows = GRID_ROWS;
   const cols = GRID_COLS;
@@ -355,9 +359,10 @@ export default function GameGrid({
     [rows, cols]
   );
 
-  const handleTilePress = React.useCallback(
-    (id: string, _row: number, _col: number) => {
-      if (!revealedTiles.has(id)) {
+           const handleTilePress = React.useCallback(
+           (id: string, _row: number, _col: number) => {
+             if (disabled) return; // Don't allow tile interaction if disabled
+             if (!revealedTiles.has(id)) {
         // Reveal the tile
         setRevealedTiles((prev) => new Set([...prev, id]));
 
@@ -368,8 +373,11 @@ export default function GameGrid({
 
         setTileTypes((prev) => ({ ...prev, [id]: tileType }));
 
-        // Deduct a turn for revealing the tile
-        setTurnsUsed((prev) => prev + 1);
+                       // Deduct a turn for revealing the tile
+               setTurnsUsed((prev) => prev + 1);
+               
+               // Spend currency for the turn
+               onSpendCurrency?.(100);
 
         // Handle tile-specific effects
         handleTileEffects({

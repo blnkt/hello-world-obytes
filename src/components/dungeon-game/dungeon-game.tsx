@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 
 import { Button, Text } from '@/components/ui';
+import { useCurrencySystem } from '@/lib/health';
 
 import GameGrid from './game-grid';
 
@@ -12,6 +13,9 @@ interface DungeonGameLayoutProps {
   gameState: 'Active' | 'Win' | 'Game Over';
   revealedTiles: number;
   totalTiles: number;
+  currency: number;
+  availableTurns: number;
+  turnCost: number;
   onTurnsUpdate: (turns: number) => void;
   onRevealedTilesUpdate: (count: number) => void;
   onWinGame: () => void;
@@ -21,6 +25,7 @@ interface DungeonGameLayoutProps {
   onExitFound: () => void;
   onGameOverFromTurns: () => void;
   onNextLevel: () => void;
+  onSpendCurrency: (amount: number) => Promise<boolean>;
 }
 
 function DungeonGameLayout({
@@ -29,6 +34,9 @@ function DungeonGameLayout({
   gameState,
   revealedTiles,
   totalTiles,
+  currency,
+  availableTurns,
+  turnCost,
   onTurnsUpdate,
   onRevealedTilesUpdate,
   onWinGame,
@@ -38,6 +46,7 @@ function DungeonGameLayout({
   onExitFound,
   onGameOverFromTurns,
   onNextLevel,
+  onSpendCurrency,
 }: DungeonGameLayoutProps) {
   return (
     <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
@@ -45,6 +54,25 @@ function DungeonGameLayout({
       <View className="p-4">
         <Text className="mb-4 text-2xl font-bold">Dungeon Game</Text>
         <Text className="mb-4 text-lg">Level {level}</Text>
+
+        {/* Currency and Turn Information */}
+        <View className="mb-4 space-y-2">
+          <Text className="text-base">Currency: {currency}</Text>
+          <Text className="text-base">Available Turns: {availableTurns}</Text>
+          <Text className="text-base">Turn Cost: {turnCost} steps</Text>
+        </View>
+
+        {/* Insufficient Currency Warning */}
+        {availableTurns < 1 && (
+          <View className="mb-4 rounded-lg bg-red-100 p-3 dark:bg-red-900/20">
+            <Text className="text-base font-semibold text-red-800 dark:text-red-200">
+              Insufficient Currency
+            </Text>
+            <Text className="text-sm text-red-600 dark:text-red-300">
+              Minimum 100 steps required to play
+            </Text>
+          </View>
+        )}
 
         {/* Game State Display */}
         <View className="mb-4 space-y-2">
@@ -56,16 +84,26 @@ function DungeonGameLayout({
         </View>
       </View>
 
-      {/* Game Grid - Full Width */}
-      <View className="mb-4">
-        <GameGrid
-          level={level}
-          onTurnsUpdate={onTurnsUpdate}
-          onRevealedTilesUpdate={onRevealedTilesUpdate}
-          onExitFound={onExitFound}
-          onGameOver={onGameOverFromTurns}
-        />
-      </View>
+              {/* Game Grid - Full Width */}
+        <View className="mb-4">
+          {availableTurns < 1 ? (
+            <View className="rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
+              <Text className="text-center text-base text-gray-600 dark:text-gray-300">
+                Cannot play with insufficient currency
+              </Text>
+            </View>
+          ) : (
+            <GameGrid
+              level={level}
+              disabled={false}
+              onTurnsUpdate={onTurnsUpdate}
+              onRevealedTilesUpdate={onRevealedTilesUpdate}
+              onExitFound={onExitFound}
+              onGameOver={onGameOverFromTurns}
+              onSpendCurrency={onSpendCurrency}
+            />
+          )}
+        </View>
 
       {/* Footer Section */}
       <View className="space-y-4 p-4">
@@ -95,6 +133,13 @@ interface DungeonGameProps {
 }
 
 export default function DungeonGame({ navigation }: DungeonGameProps) {
+  // Currency system integration
+  const { currency, spend } = useCurrencySystem();
+  
+  // Calculate available turns based on currency
+  const availableTurns = Math.floor(currency / 100);
+  const turnCost = 100;
+  
   // Game state management
   const [level, setLevel] = useState(1);
   const [turns, setTurns] = useState(0);
@@ -153,6 +198,10 @@ export default function DungeonGame({ navigation }: DungeonGameProps) {
     setRevealedTiles(0);
   }, []);
 
+  const handleSpendCurrency = React.useCallback(async (amount: number) => {
+    return await spend(amount);
+  }, [spend]);
+
   return (
     <DungeonGameLayout
       level={level}
@@ -160,6 +209,9 @@ export default function DungeonGame({ navigation }: DungeonGameProps) {
       gameState={gameState}
       revealedTiles={revealedTiles}
       totalTiles={totalTiles}
+      currency={currency}
+      availableTurns={availableTurns}
+      turnCost={turnCost}
       onTurnsUpdate={handleTurnsUpdate}
       onRevealedTilesUpdate={handleRevealedTilesUpdate}
       onWinGame={handleWinGame}
@@ -169,6 +221,7 @@ export default function DungeonGame({ navigation }: DungeonGameProps) {
       onExitFound={handleExitFound}
       onGameOverFromTurns={handleGameOverFromTurns}
       onNextLevel={handleNextLevel}
+      onSpendCurrency={handleSpendCurrency}
     />
   );
 }

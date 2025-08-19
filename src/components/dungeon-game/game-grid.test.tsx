@@ -330,6 +330,71 @@ describe('DungeonGame', () => {
     expect(screen.getByText('Game State: Active')).toBeTruthy();
   });
 
+  it('should display currency and available turns based on currency system', () => {
+    render(<DungeonGame />);
+
+    // Should display current currency
+    expect(screen.getByText(/Currency: \d+/)).toBeTruthy();
+    
+    // Should display available turns (calculated as Math.floor(currency / 100))
+    expect(screen.getByText(/Available Turns: \d+/)).toBeTruthy();
+    
+    // Should display turn cost
+    expect(screen.getByText(/Turn Cost: 100 steps/)).toBeTruthy();
+  });
+
+  it('should update currency in real-time as turns are spent', () => {
+    render(<DungeonGame />);
+
+    // Get initial currency and available turns
+    const initialCurrencyText = screen.getByText(/Currency: \d+/);
+    const initialAvailableTurnsText = screen.getByText(/Available Turns: \d+/);
+    
+    // Extract initial values
+    const initialCurrency = parseInt(initialCurrencyText.props.children[1]);
+    const initialAvailableTurns = parseInt(initialAvailableTurnsText.props.children[1]);
+    
+    // Click a tile to reveal it and spend a turn
+    const firstTile = screen.getAllByTestId('grid-tile')[0];
+    fireEvent.press(firstTile);
+    
+    // Currency should decrease by 100 (turn cost)
+    const newCurrencyText = screen.getByText(/Currency: \d+/);
+    const newCurrency = parseInt(newCurrencyText.props.children[1]);
+    expect(newCurrency).toBe(initialCurrency - 100);
+    
+    // Available turns should decrease by 1
+    const newAvailableTurnsText = screen.getByText(/Available Turns: \d+/);
+    const newAvailableTurns = parseInt(newAvailableTurnsText.props.children[1]);
+    expect(newAvailableTurns).toBe(initialAvailableTurns - 1);
+  });
+
+  it('should prevent game start if insufficient currency (less than 100 steps)', () => {
+    // Mock the currency system to return 0 currency
+    jest.doMock('@/lib/health', () => ({
+      ...jest.requireActual('@/lib/health'),
+      useCurrencySystem: () => ({
+        currency: 0,
+        spend: jest.fn(),
+        conversionRate: 0.1,
+      }),
+    }));
+
+    render(<DungeonGame />);
+
+    // Should display insufficient currency message
+    expect(screen.getByText(/Insufficient Currency/)).toBeTruthy();
+    
+    // Should display minimum requirement
+    expect(screen.getByText(/Minimum 100 steps required/)).toBeTruthy();
+    
+    // Game grid should be completely hidden when insufficient currency
+    expect(screen.queryByTestId('game-grid')).toBeNull();
+    
+    // Should show a message that the game cannot be played
+    expect(screen.getByText(/Cannot play with insufficient currency/)).toBeTruthy();
+  });
+
   it('should trigger game over condition when all tiles are revealed without finding exit', () => {
     render(<DungeonGame />);
 

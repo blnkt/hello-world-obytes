@@ -253,8 +253,13 @@ export const useStreaks = () => {
 
 export function getCurrencySync(): number {
   const value = storage.getString('currency');
-  const result = value ? Number(value) || 0 : 0;
-  return result;
+  if (value) {
+    return Number(value) || 0;
+  }
+  // Set default currency for testing (1000 steps = 10 turns)
+  const defaultCurrency = 1000;
+  storage.set('currency', String(defaultCurrency));
+  return defaultCurrency;
 }
 
 export function getCurrency(): number {
