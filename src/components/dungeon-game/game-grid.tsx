@@ -37,6 +37,7 @@ interface GameGridLayoutProps {
   rows: number;
   totalTiles: number;
   revealedTiles: Set<string>;
+  turnsUsed: number;
   grid: { id: string; row: number; col: number }[][];
   tileTypes: Record<string, 'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral'>;
   onTilePress: (id: string, row: number, col: number) => void;
@@ -47,6 +48,7 @@ function GameGridLayout({
   rows,
   totalTiles,
   revealedTiles,
+  turnsUsed,
   grid,
   tileTypes,
   onTilePress,
@@ -64,6 +66,7 @@ function GameGridLayout({
         <Text className="text-base">
           Revealed: {revealedTiles.size}/{totalTiles}
         </Text>
+        <Text className="text-base">Turns: {turnsUsed}</Text>
       </View>
 
       {/* Game Grid */}
@@ -93,11 +96,12 @@ export default function GameGrid() {
   const cols = 6;
   const totalTiles = rows * cols;
 
-  // Game state for tile reveals
+  // Game state for tile reveals and turns
   const [revealedTiles, setRevealedTiles] = useState<Set<string>>(new Set());
   const [tileTypes, setTileTypes] = useState<
     Record<string, 'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral'>
   >({});
+  const [turnsUsed, setTurnsUsed] = useState(0);
 
   const grid = Array.from({ length: rows }, (_, rowIndex) =>
     Array.from({ length: cols }, (_, colIndex) => ({
@@ -121,6 +125,9 @@ export default function GameGrid() {
       const tileType = levelTiles[tileIndex];
 
       setTileTypes((prev) => ({ ...prev, [id]: tileType }));
+      
+      // Deduct a turn for revealing the tile
+      setTurnsUsed((prev) => prev + 1);
     }
   };
 
@@ -130,6 +137,7 @@ export default function GameGrid() {
       rows={rows}
       totalTiles={totalTiles}
       revealedTiles={revealedTiles}
+      turnsUsed={turnsUsed}
       grid={grid}
       tileTypes={tileTypes}
       onTilePress={handleTilePress}

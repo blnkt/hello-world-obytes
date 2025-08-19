@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react-native';
 import React from 'react';
+import { fireEvent } from '@testing-library/react-native';
 
 import GameGrid from './game-grid';
 
@@ -109,5 +110,26 @@ describe('GameGrid', () => {
     
     // Should display initial revealed count
     expect(screen.getByText('Revealed: 0/30')).toBeTruthy();
+  });
+
+  it('should deduct turns when tiles are revealed', () => {
+    render(<GameGrid />);
+    
+    // Initially should show 0 turns used
+    expect(screen.getByText('Turns: 0')).toBeTruthy();
+    
+    // Click first tile to reveal it
+    const firstTile = screen.getAllByTestId('grid-tile')[0];
+    fireEvent.press(firstTile);
+    
+    // Should now show 1 turn used
+    expect(screen.getByText('Turns: 1')).toBeTruthy();
+    
+    // Click second tile to reveal it
+    const secondTile = screen.getAllByTestId('grid-tile')[1];
+    fireEvent.press(secondTile);
+    
+    // Should now show 2 turns used
+    expect(screen.getByText('Turns: 2')).toBeTruthy();
   });
 });
