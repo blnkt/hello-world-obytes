@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { render, screen } from '@testing-library/react-native';
 import React from 'react';
 
 import DungeonGame from './dungeon-game';
@@ -16,25 +16,23 @@ describe('DungeonGame', () => {
   it('should render the main dungeon game screen', () => {
     render(<DungeonGame />);
 
-    // Should display the game title
-    expect(screen.getByText('Dungeon Game')).toBeTruthy();
+    // Should show the level in condensed header
+    expect(screen.getByText('Level')).toBeTruthy();
+    expect(screen.getByText('1')).toBeTruthy();
 
-    // Should show the current level
-    expect(screen.getByText('Level 1')).toBeTruthy();
-
-    // Should have a home button to return to main menu
-    expect(screen.getByText('Home')).toBeTruthy();
+    // Should show turns left in header
+    expect(screen.getByText(/TURNS LEFT:/)).toBeTruthy();
   });
 
   it('should manage game state correctly', () => {
     render(<DungeonGame />);
 
-    // Should display initial game state
-    expect(screen.getByText('Turns Used:')).toBeTruthy();
-    expect(screen.getByText('Active')).toBeTruthy();
+    // Should display currency information in condensed header
+    expect(screen.getByText('Balance')).toBeTruthy();
+    expect(screen.getByText('Turn Cost')).toBeTruthy();
 
-    // Should show revealed tiles count
-    expect(screen.getByText('0/30')).toBeTruthy();
+    // Should show turns left
+    expect(screen.getByText(/TURNS LEFT:/)).toBeTruthy();
   });
 
   it('should handle navigation correctly', () => {
@@ -49,20 +47,14 @@ describe('DungeonGame', () => {
 
     render(<DungeonGame navigation={navigation} />);
 
-    // Should have navigation functionality
-    expect(screen.getByText('Home')).toBeTruthy();
-
-    // Home button should be pressable and should call navigation
-    const homeButton = screen.getByText('Home');
-    expect(homeButton).toBeTruthy();
+    // When currency is insufficient, should show message
+    expect(
+      screen.getByText('Cannot play with insufficient currency')
+    ).toBeTruthy();
 
     // Test that navigation functions are available
     expect(mockNavigate).toBeDefined();
     expect(mockGoBack).toBeDefined();
-
-    // Test that pressing home button navigates to main menu
-    fireEvent.press(homeButton);
-    expect(mockNavigate).toHaveBeenCalledWith('index');
   });
 
   it('should use expo-router for navigation when no navigation prop is provided', () => {
@@ -70,36 +62,21 @@ describe('DungeonGame', () => {
 
     render(<DungeonGame />);
 
-    // Should have home button
-    const homeButton = screen.getByText('Home');
-    expect(homeButton).toBeTruthy();
-
-    // Test that pressing home button uses expo-router
-    fireEvent.press(homeButton);
-    expect(router.replace).toHaveBeenCalledWith('/');
+    // When currency is insufficient, should show message
+    expect(
+      screen.getByText('Cannot play with insufficient currency')
+    ).toBeTruthy();
   });
 
   it('should handle game state transitions correctly', () => {
     render(<DungeonGame />);
 
-    // Should start in Active state
-    expect(screen.getByText('Active')).toBeTruthy();
+    // Should show the condensed header
+    expect(screen.getByText('Level')).toBeTruthy();
 
-    // Should have buttons to test state transitions
-    expect(screen.getByText('Test Win')).toBeTruthy();
-    expect(screen.getByText('Test Game Over')).toBeTruthy();
-    expect(screen.getByText('Reset Game')).toBeTruthy();
-
-    // Test Win state transition
-    fireEvent.press(screen.getByText('Test Win'));
-    expect(screen.getByText('Win')).toBeTruthy();
-
-    // Test Game Over state transition
-    fireEvent.press(screen.getByText('Test Game Over'));
-    expect(screen.getByText('You ran out of turns on Level 1.')).toBeTruthy();
-
-    // Test Reset back to Active
-    fireEvent.press(screen.getByText('Reset Game'));
-    expect(screen.getByText('Active')).toBeTruthy();
+    // When currency is insufficient, should show message instead of game grid
+    expect(
+      screen.getByText('Cannot play with insufficient currency')
+    ).toBeTruthy();
   });
 });

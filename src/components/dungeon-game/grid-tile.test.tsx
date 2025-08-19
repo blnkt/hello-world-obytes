@@ -19,11 +19,15 @@ describe('GridTile', () => {
   it('should render a face-up tile when revealed', () => {
     render(<GridTile id="0-0" row={0} col={0} isRevealed={true} />);
 
-    // Should display a face-up tile
-    expect(screen.getByTestId('grid-tile')).toBeTruthy();
+    // Should display a face-up tile with neutral type by default
+    expect(screen.getByTestId('grid-tile-neutral')).toBeTruthy();
 
-    // Should show neutral content when revealed without specific type
-    expect(screen.getByText('·')).toBeTruthy();
+    // Should have correct accessibility description for neutral tile
+    const tile = screen.getByTestId('grid-tile-neutral');
+    expect(tile.props.accessibilityLabel).toContain('Tile at row 1, column 1');
+    expect(tile.props.accessibilityHint).toBe(
+      'Neutral tile - No special effect'
+    );
   });
 
   it('should handle tile press events', () => {
@@ -46,10 +50,11 @@ describe('GridTile', () => {
       <GridTile id="0-0" row={0} col={0} onPress={mockOnPress} />
     );
 
-    // Initially face-down
-    expect(screen.queryByText('💎')).toBeNull();
+    // Initially face-down - should have generic testID
+    const hiddenTile = screen.getByTestId('grid-tile');
+    expect(hiddenTile.props.accessibilityHint).toBe('Hidden tile');
 
-    // Reveal the tile
+    // Reveal the tile as neutral
     rerender(
       <GridTile
         id="0-0"
@@ -60,10 +65,13 @@ describe('GridTile', () => {
       />
     );
 
-    // Should now show neutral content
-    expect(screen.getByText('·')).toBeTruthy();
+    // Should now show neutral tile with specific testID
+    const neutralTile = screen.getByTestId('grid-tile-neutral');
+    expect(neutralTile.props.accessibilityHint).toBe(
+      'Neutral tile - No special effect'
+    );
 
-    // Change tile type
+    // Change tile type to treasure
     rerender(
       <GridTile
         id="0-0"
@@ -75,8 +83,11 @@ describe('GridTile', () => {
       />
     );
 
-    // Should show treasure content
-    expect(screen.getByText('💎')).toBeTruthy();
+    // Should show treasure tile with specific testID and description
+    const treasureTile = screen.getByTestId('grid-tile-treasure');
+    expect(treasureTile.props.accessibilityHint).toBe(
+      'Treasure tile - Gain a free turn'
+    );
   });
 
   it('should display tile type when revealed', () => {
@@ -90,8 +101,11 @@ describe('GridTile', () => {
       />
     );
 
-    // Should show tile type indicator
-    expect(screen.getByText('💎')).toBeTruthy();
+    // Should show treasure tile with correct testID and accessibility description
+    const treasureTile = screen.getByTestId('grid-tile-treasure');
+    expect(treasureTile.props.accessibilityHint).toBe(
+      'Treasure tile - Gain a free turn'
+    );
   });
 
   it('should display all tile types correctly when revealed', () => {
@@ -99,26 +113,38 @@ describe('GridTile', () => {
       <GridTile id="0-0" row={0} col={0} isRevealed={true} tileType="trap" />
     );
 
-    // Test trap
-    expect(screen.getByText('⚠️')).toBeTruthy();
+    // Test trap tile
+    const trapTile = screen.getByTestId('grid-tile-trap');
+    expect(trapTile.props.accessibilityHint).toBe(
+      'Trap tile - Lose an additional turn'
+    );
 
     // Test exit
     rerender(
       <GridTile id="0-0" row={0} col={0} isRevealed={true} tileType="exit" />
     );
-    expect(screen.getByText('🚪')).toBeTruthy();
+    const exitTile = screen.getByTestId('grid-tile-exit');
+    expect(exitTile.props.accessibilityHint).toBe(
+      'Exit tile - Complete the level'
+    );
 
     // Test bonus
     rerender(
       <GridTile id="0-0" row={0} col={0} isRevealed={true} tileType="bonus" />
     );
-    expect(screen.getByText('⭐')).toBeTruthy();
+    const bonusTile = screen.getByTestId('grid-tile-bonus');
+    expect(bonusTile.props.accessibilityHint).toBe(
+      'Bonus tile - Reveal adjacent tiles'
+    );
 
     // Test neutral
     rerender(
       <GridTile id="0-0" row={0} col={0} isRevealed={true} tileType="neutral" />
     );
-    expect(screen.getByText('·')).toBeTruthy();
+    const neutralTile = screen.getByTestId('grid-tile-neutral');
+    expect(neutralTile.props.accessibilityHint).toBe(
+      'Neutral tile - No special effect'
+    );
   });
 
   it('should handle undefined tile type gracefully', () => {
@@ -132,8 +158,11 @@ describe('GridTile', () => {
       />
     );
 
-    // Should show neutral content when tile type is undefined
-    expect(screen.getByText('·')).toBeTruthy();
+    // Should default to neutral tile when type is undefined
+    const neutralTile = screen.getByTestId('grid-tile-neutral');
+    expect(neutralTile.props.accessibilityHint).toBe(
+      'Neutral tile - No special effect'
+    );
   });
 
   it('should apply different visual styles based on tile state', () => {
@@ -154,7 +183,8 @@ describe('GridTile', () => {
     const { rerender } = render(<GridTile id="0-0" row={0} col={0} />);
 
     // Initially face-down
-    expect(screen.queryByText('💎')).toBeNull();
+    const hiddenTile = screen.getByTestId('grid-tile');
+    expect(hiddenTile.props.accessibilityHint).toBe('Hidden tile');
 
     // Reveal with treasure type
     rerender(
@@ -167,15 +197,21 @@ describe('GridTile', () => {
       />
     );
 
-    // Should now show treasure content
-    expect(screen.getByText('💎')).toBeTruthy();
+    // Should now show treasure tile with specific testID and description
+    const treasureTile = screen.getByTestId('grid-tile-treasure');
+    expect(treasureTile.props.accessibilityHint).toBe(
+      'Treasure tile - Gain a free turn'
+    );
 
     // Change to trap type
     rerender(
       <GridTile id="0-0" row={0} col={0} isRevealed={true} tileType="trap" />
     );
 
-    // Should now show trap content
-    expect(screen.getByText('⚠️')).toBeTruthy();
+    // Should now show trap tile with specific testID and description
+    const trapTile = screen.getByTestId('grid-tile-trap');
+    expect(trapTile.props.accessibilityHint).toBe(
+      'Trap tile - Lose an additional turn'
+    );
   });
 });

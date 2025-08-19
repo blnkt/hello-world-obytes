@@ -103,27 +103,6 @@ const getTileStyle = (
   }
 };
 
-const getTileAnimation = (
-  tileType: 'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral',
-  isRevealed: boolean
-) => {
-  if (!isRevealed) return '';
-
-  // Add animation classes for revealed tiles
-  switch (tileType) {
-    case 'treasure':
-      return 'animate-pulse'; // Pulsing effect for treasure
-    case 'trap':
-      return 'animate-bounce'; // Bouncing effect for trap
-    case 'exit':
-      return 'animate-pulse'; // Pulsing effect for exit
-    case 'bonus':
-      return 'animate-spin'; // Spinning effect for bonus
-    default:
-      return '';
-  }
-};
-
 interface GridTileProps {
   id: string;
   row: number;
@@ -149,9 +128,17 @@ export default function GridTile({
     }
   };
 
+  // Create a specific testID that includes tile type when revealed for better testing
+  const getTestId = () => {
+    if (isRevealed) {
+      return `grid-tile-${tileType}`;
+    }
+    return 'grid-tile';
+  };
+
   return (
     <Pressable
-      testID="grid-tile"
+      testID={getTestId()}
       onPress={handlePress}
       disabled={disabled}
       accessible={true}

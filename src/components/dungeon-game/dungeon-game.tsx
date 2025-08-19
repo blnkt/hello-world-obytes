@@ -1,14 +1,13 @@
 import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, LoadingOverlay, Text } from '@/components/ui';
 import { useCurrencySystem } from '@/lib/health';
 
-import CurrencyDisplay from './currency-display';
 import GameGrid from './game-grid';
 import { GameOverModal, WinModal } from './game-modals';
-import StatusBar from './status-bar';
 
 interface DungeonGameLayoutProps {
   level: number;
@@ -53,33 +52,49 @@ function HeaderSection({
   availableTurns,
   turnCost,
 }: HeaderSectionProps) {
+  let topInset = 0;
+  try {
+    const insets = useSafeAreaInsets();
+    topInset = insets.top || 0;
+  } catch {
+    // Fallback for test environment
+    topInset = 0;
+  }
+
   return (
-    <View className="px-4 py-2">
-      {/* Main Header - Terracotta colored bar with turns left */}
-      <View className="mb-3 rounded-lg bg-[#B06F5E] px-4 py-3">
-        <Text className="text-center text-xl font-bold uppercase text-white">
-          TURNS LEFT: {availableTurns}
-        </Text>
-      </View>
+    <View className="px-4 py-2" style={{ paddingTop: topInset }}>
+      {/* Condensed Header - All essential info in one compact bar */}
+      <View className="rounded-lg bg-[#B06F5E] px-4 py-3">
+        {/* Top row: Turns Left */}
+        <View className="mb-2">
+          <Text className="text-center text-lg font-bold uppercase text-white">
+            TURNS LEFT: {availableTurns}
+          </Text>
+        </View>
 
-      {/* Status Bar */}
-      <View className="mb-3">
-        <StatusBar
-          level={level}
-          turns={turns}
-          gameState={gameState}
-          revealedTiles={revealedTiles}
-          totalTiles={totalTiles}
-        />
-      </View>
+        {/* Bottom row: Level, Currency, Turn Cost */}
+        <View className="flex-row items-center justify-between">
+          <View className="items-center">
+            <Text className="text-xs font-medium uppercase text-white/80">
+              Level
+            </Text>
+            <Text className="text-sm font-bold text-white">{level}</Text>
+          </View>
 
-      {/* Currency Display */}
-      <View className="mb-3">
-        <CurrencyDisplay
-          currency={currency}
-          availableTurns={availableTurns}
-          turnCost={turnCost}
-        />
+          <View className="items-center">
+            <Text className="text-xs font-medium uppercase text-white/80">
+              Balance
+            </Text>
+            <Text className="text-sm font-bold text-white">{currency} 💰</Text>
+          </View>
+
+          <View className="items-center">
+            <Text className="text-xs font-medium uppercase text-white/80">
+              Turn Cost
+            </Text>
+            <Text className="text-sm font-bold text-white">{turnCost} 💰</Text>
+          </View>
+        </View>
       </View>
     </View>
   );
@@ -176,8 +191,17 @@ function FooterSection({
   onWinGame,
   onGameOver,
 }: FooterSectionProps) {
+  let bottomInset = 0;
+  try {
+    const insets = useSafeAreaInsets();
+    bottomInset = insets.bottom || 0;
+  } catch {
+    // Fallback for test environment
+    bottomInset = 0;
+  }
+
   return (
-    <View className="px-4 pb-2">
+    <View className="px-4 pb-2" style={{ paddingBottom: bottomInset }}>
       {/* Main Navigation Bar - Terracotta background like mockup */}
       <View className="rounded-lg bg-[#7A6F66] px-6 py-3">
         <View className="flex-row items-center justify-between">
@@ -301,7 +325,7 @@ function DungeonGameLayout({
   onSpendCurrency,
 }: DungeonGameLayoutProps) {
   return (
-    <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
+    <View className="flex-1">
       <LoadingOverlay visible={isLoading} />
       <HeaderSection
         {...{
@@ -326,7 +350,7 @@ function DungeonGameLayout({
           onSpendCurrency,
         }}
       />
-      <FooterSection {...{ onResetGame, onHomePress, onWinGame, onGameOver }} />
+      {/* Footer removed to keep only MessageBar below game grid */}
       {/* Game Modals */}
       <WinModal
         visible={gameState === 'Win'}
@@ -341,7 +365,7 @@ function DungeonGameLayout({
         onMainMenu={onHomePress}
         onRetry={onResetGame}
       />
-    </ScrollView>
+    </View>
   );
 }
 
