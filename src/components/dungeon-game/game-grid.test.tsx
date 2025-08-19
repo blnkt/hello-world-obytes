@@ -220,4 +220,44 @@ describe('GameGrid', () => {
     // Treasure should cost 0 turns total: 1 for reveal - 1 free turn
     expect(turnsAfterTreasure).toBe(turnsBeforeTreasure + 1 - 1);
   });
+
+  it('should auto-reveal adjacent tile when bonus reveal tile is revealed', () => {
+    render(<GameGrid />);
+    
+    // Initially should show 0 turns used and 0 revealed tiles
+    expect(screen.getByText('Turns: 0')).toBeTruthy();
+    expect(screen.getByText('Revealed: 0/30')).toBeTruthy();
+    
+    // Find and click a bonus reveal tile (we need to reveal tiles until we find one)
+    const tiles = screen.getAllByTestId('grid-tile');
+    let bonusTileIndex = -1;
+    let revealedBeforeBonus = 0;
+    
+    // Click tiles until we find a bonus reveal
+    for (let i = 0; i < tiles.length; i++) {
+      // Get revealed count before clicking this tile
+      revealedBeforeBonus = parseInt(screen.getByText(/Revealed: \d+\/30/).children[1] as string);
+      
+      fireEvent.press(tiles[i]);
+      
+      // Check if this tile is a bonus reveal by looking for the bonus emoji
+      try {
+        screen.getByText('⭐');
+        bonusTileIndex = i;
+        break;
+      } catch {
+        // Not a bonus reveal, continue to next tile
+        continue;
+      }
+    }
+    
+    // Should have found a bonus reveal tile
+    expect(bonusTileIndex).toBeGreaterThan(-1);
+    
+    // Get the revealed count after revealing the bonus
+    const revealedAfterBonus = parseInt(screen.getByText(/Revealed: \d+\/30/).children[1] as string);
+    
+    // Bonus reveal should reveal 2 tiles total: 1 for the bonus tile + 1 auto-revealed adjacent
+    expect(revealedAfterBonus).toBe(revealedBeforeBonus + 2);
+  });
 });
