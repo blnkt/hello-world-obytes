@@ -165,6 +165,61 @@ const handleTileEffects = (params: {
   }
 };
 
+// Helper function to handle tile press
+const createTilePressHandler = (params: {
+  revealedTiles: Set<string>;
+  cols: number;
+  levelTiles: ('treasure' | 'trap' | 'exit' | 'bonus' | 'neutral')[];
+  setRevealedTiles: React.Dispatch<React.SetStateAction<Set<string>>>;
+  setTileTypes: React.Dispatch<
+    React.SetStateAction<
+      Record<string, 'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral'>
+    >
+  >;
+  setTurnsUsed: React.Dispatch<React.SetStateAction<number>>;
+  rows: number;
+}) => {
+  const {
+    revealedTiles,
+    cols,
+    levelTiles,
+    setRevealedTiles,
+    setTileTypes,
+    setTurnsUsed,
+    rows,
+  } = params;
+
+  return (id: string, _row: number, _col: number) => {
+    if (!revealedTiles.has(id)) {
+      // Reveal the tile
+      setRevealedTiles((prev) => new Set([...prev, id]));
+
+      // Get tile type from pre-generated level
+      const tileIndex =
+        parseInt(id.split('-')[0]) * cols + parseInt(id.split('-')[1]);
+      const tileType = levelTiles[tileIndex];
+
+      setTileTypes((prev) => ({ ...prev, [id]: tileType }));
+
+      // Deduct a turn for revealing the tile
+      setTurnsUsed((prev) => prev + 1);
+
+      // Handle tile-specific effects
+      handleTileEffects({
+        tileType,
+        id,
+        revealedTiles,
+        rows,
+        cols,
+        levelTiles,
+        setRevealedTiles,
+        setTileTypes,
+        setTurnsUsed,
+      });
+    }
+  };
+};
+
 interface GameGridLayoutProps {
   cols: number;
   rows: number;
@@ -196,10 +251,6 @@ function GameGridLayout({
           Grid: {cols}x{rows}
         </Text>
         <Text className="text-base">Total Tiles: {totalTiles}</Text>
-        <Text className="text-base">
-          Revealed: {revealedTiles.size}/{totalTiles}
-        </Text>
-        <Text className="text-base">Turns: {turnsUsed}</Text>
       </View>
 
       {/* Game Grid */}
@@ -224,7 +275,15 @@ function GameGridLayout({
   );
 }
 
-export default function GameGrid() {
+interface GameGridProps {
+  onTurnsUpdate?: (turns: number) => void;
+  onRevealedTilesUpdate?: (count: number) => void;
+}
+
+export default function GameGrid({
+  onTurnsUpdate,
+  onRevealedTilesUpdate,
+}: GameGridProps) {
   const rows = 5;
   const cols = 6;
   const totalTiles = rows * cols;
@@ -247,35 +306,36 @@ export default function GameGrid() {
   // Generate level tiles once when component mounts
   const levelTiles = React.useMemo(() => generateLevelTiles(), []);
 
-  const handleTilePress = (id: string, _row: number, _col: number) => {
-    if (!revealedTiles.has(id)) {
-      // Reveal the tile
-      setRevealedTiles((prev) => new Set([...prev, id]));
+  // Update parent component when state changes
+  const updateParentState = React.useCallback(() => {
+    onTurnsUpdate?.(turnsUsed);
+    onRevealedTilesUpdate?.(revealedTiles.size);
+  }, [turnsUsed, revealedTiles.size, onTurnsUpdate, onRevealedTilesUpdate]);
 
-      // Get tile type from pre-generated level
-      const tileIndex =
-        parseInt(id.split('-')[0]) * cols + parseInt(id.split('-')[1]);
-      const tileType = levelTiles[tileIndex];
+  React.useEffect(() => {
+    updateParentState();
+  }, [updateParentState]);
 
-      setTileTypes((prev) => ({ ...prev, [id]: tileType }));
-
-      // Deduct a turn for revealing the tile
-      setTurnsUsed((prev) => prev + 1);
-
-      // Handle tile-specific effects
-      handleTileEffects({
-        tileType,
-        id,
-        revealedTiles,
-        rows,
-        cols,
-        levelTiles,
-        setRevealedTiles,
-        setTileTypes,
-        setTurnsUsed,
-      });
-    }
-  };
+  const handleTilePress = React.useCallback(
+    createTilePressHandler({
+      revealedTiles,
+      cols,
+      levelTiles,
+      setRevealedTiles,
+      setTileTypes,
+      setTurnsUsed,
+      rows,
+    }),
+    [
+      revealedTiles,
+      cols,
+      levelTiles,
+      setRevealedTiles,
+      setTileTypes,
+      setTurnsUsed,
+      rows,
+    ]
+  );
 
   return (
     <GameGridLayout
