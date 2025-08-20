@@ -33,6 +33,42 @@ jest.mock('@/lib/health', () => ({
   useCurrencySystem: () => mockUseCurrencySystem(),
 }));
 
+// Mock the persistence hooks to prevent storage errors
+jest.mock('./hooks/use-dungeon-game-persistence', () => ({
+  useDungeonGamePersistence: () => ({
+    saveGameState: jest.fn(),
+    loadGameState: jest.fn(),
+    clearGameState: jest.fn(),
+    refreshSaveDataInfo: jest.fn(),
+    saveData: null,
+    saveDataInfo: null,
+    isLoading: false,
+    lastError: null,
+    hasExistingSaveData: false,
+    canResume: false,
+    lastSaveTime: null,
+    gameLevel: null,
+    gameState: null,
+  }),
+}));
+
+jest.mock('./hooks/use-auto-save', () => ({
+  useAutoSave: () => ({
+    triggerAutoSave: jest.fn(),
+    isEnabled: true,
+  }),
+}));
+
+jest.mock('./hooks/use-checkpoint-save', () => ({
+  useCheckpointSave: () => ({
+    saveNewGame: jest.fn(),
+    saveLevelCompletion: jest.fn(),
+    saveGameOver: jest.fn(),
+    saveLevelProgression: jest.fn(),
+    isEnabled: true,
+  }),
+}));
+
 describe('DungeonGame', () => {
   beforeEach(async () => {
     // Reset mock currency for each test
