@@ -25,6 +25,13 @@ export const useGameGridState = (callbacks: {
     updateParentState();
   }, [updateParentState]);
 
+  // Reset grid state when level changes (levelTiles changes)
+  React.useEffect(() => {
+    setRevealedTiles(new Set());
+    setTileTypes({});
+    setTurnsUsed(0);
+  }, [levelTiles]);
+
   // Check for game over condition when all tiles are revealed without finding exit
   React.useEffect(() => {
     if (revealedTiles.size === 30 && onGameOver && levelTiles) {
@@ -40,7 +47,7 @@ export const useGameGridState = (callbacks: {
         onGameOver();
       }
     }
-  }, [revealedTiles.size, onGameOver, levelTiles]);
+  }, [revealedTiles, onGameOver, levelTiles]);
 
   return {
     revealedTiles,

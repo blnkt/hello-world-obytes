@@ -20,15 +20,13 @@ const StarIcon = () => (
 
 const TargetIcon = () => (
   <Svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-    <Circle cx="12" cy="12" r="10" stroke="white" strokeWidth="2" fill="none" />
-    <Circle cx="12" cy="12" r="6" stroke="white" strokeWidth="2" fill="none" />
-    <Circle cx="12" cy="12" r="2" fill="white" />
+    <Path d="M18 4v16H6V4zm0-2H6c-1.1 0-2 .9-2 2v18h16V4c0-1.1-.9-2-2-2m-2.5 8.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5S17 12.83 17 12s-.67-1.5-1.5-1.5"></Path>
   </Svg>
 );
 
 const TreasureIcon = () => (
   <Svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-    <Path d="M12 2L13.09 8.26L20 9.27L14 14.14L15.18 21.02L12 17.77L8.82 21.02L10 14.14L4 9.27L10.91 8.26L12 2Z" />
+    <Path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
   </Svg>
 );
 
