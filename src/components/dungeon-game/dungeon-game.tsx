@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button, LoadingOverlay, Text } from '@/components/ui';
+import { LoadingOverlay, Text } from '@/components/ui';
 import { useCurrencySystem } from '@/lib/health';
 import { applyItemEffects, useItemEffects } from '@/lib/item-effects';
 import { usePurchasedItems } from '@/lib/storage';
@@ -257,29 +257,6 @@ function FooterSection({
           />
         </View>
       </View>
-
-      {/* Development Test Buttons - Remove in production */}
-      {__DEV__ && (
-        <View className="mt-3 space-y-2 rounded-lg bg-yellow-50 p-3 dark:bg-yellow-900/20">
-          <Text className="text-center text-sm font-medium text-yellow-800 dark:text-yellow-200">
-            Development Mode
-          </Text>
-          <View className="flex-row space-x-2">
-            <Button
-              label="Test Win"
-              onPress={onWinGame}
-              size="sm"
-              variant="outline"
-            />
-            <Button
-              label="Test Game Over"
-              onPress={onGameOver}
-              size="sm"
-              variant="outline"
-            />
-          </View>
-        </View>
-      )}
     </View>
   );
 }
