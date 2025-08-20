@@ -10,7 +10,11 @@ import { usePurchasedItems } from '@/lib/storage';
 
 import GameGrid from './game-grid';
 import { GameOverModal, WinModal } from './game-modals';
+import { useAutoSave } from './hooks/use-auto-save';
+import { useCheckpointSave } from './hooks/use-checkpoint-save';
+import { useDungeonGamePersistence } from './hooks/use-dungeon-game-persistence';
 import { PurchasedItemsGrid } from './purchased-items-grid';
+import { SaveStatusIndicator } from './save-status-indicator';
 
 interface DungeonGameLayoutProps {
   level: number;
@@ -33,6 +37,9 @@ interface DungeonGameLayoutProps {
   onNextLevel: () => void;
   onSpendCurrency: (amount: number) => Promise<boolean>;
   activeEffects: any[];
+  isSaving: boolean;
+  lastError: string | null;
+  lastSaveTime: number | null;
 }
 
 interface HeaderSectionProps {
@@ -333,6 +340,9 @@ function DungeonGameLayout({
   onNextLevel,
   onSpendCurrency,
   activeEffects,
+  isSaving,
+  lastError,
+  lastSaveTime,
 }: DungeonGameLayoutProps) {
   return (
     <View className="flex-1">
@@ -376,6 +386,13 @@ function DungeonGameLayout({
         onMainMenu={onHomePress}
         onRetry={onResetGame}
       />
+
+      {/* Save Status Indicator */}
+      <SaveStatusIndicator
+        isSaving={isSaving}
+        lastError={lastError}
+        lastSaveTime={lastSaveTime}
+      />
     </View>
   );
 }
@@ -393,6 +410,22 @@ export default function DungeonGame({ navigation }: DungeonGameProps) {
   const { currency, spend } = useCurrencySystem();
   const { activeEffects } = useItemEffects();
 
+  // Auto-save system integration
+  const { triggerAutoSave } = useAutoSave({ enabled: true, debounceMs: 500 });
+  const {
+    saveNewGame,
+    saveLevelCompletion,
+    saveGameOver,
+    saveLevelProgression,
+  } = useCheckpointSave({ enabled: true });
+
+  // Get save status from persistence hook
+  const {
+    isLoading: isSaving,
+    lastError,
+    lastSaveTime,
+  } = useDungeonGamePersistence();
+
   // Calculate available turns based on currency
   const availableTurns = Math.floor(currency / 100);
   const turnCost = 100;
@@ -408,15 +441,34 @@ export default function DungeonGame({ navigation }: DungeonGameProps) {
   const totalTiles = 30; // 6x5 grid
 
   // Callbacks to update parent state from GameGrid
-  const handleTurnsUpdate = React.useCallback((newTurns: number) => {
-    setTurns(newTurns);
-  }, []);
+  const handleTurnsUpdate = React.useCallback(
+    (newTurns: number) => {
+      setTurns(newTurns);
+
+      // Trigger auto-save when turns are updated
+      triggerAutoSave({
+        level,
+        gameState,
+        revealedTiles,
+        turnsUsed: newTurns,
+      });
+    },
+    [level, gameState, revealedTiles, triggerAutoSave]
+  );
 
   const handleRevealedTilesUpdate = React.useCallback(
     (newRevealedTiles: number) => {
       setRevealedTiles(newRevealedTiles);
+
+      // Trigger auto-save when tiles are revealed
+      triggerAutoSave({
+        level,
+        gameState,
+        revealedTiles: newRevealedTiles,
+        turnsUsed: turns,
+      });
     },
-    []
+    [level, gameState, turns, triggerAutoSave]
   );
 
   const handleHomePress = React.useCallback(() => {
@@ -429,17 +481,41 @@ export default function DungeonGame({ navigation }: DungeonGameProps) {
 
   const handleWinGame = React.useCallback(() => {
     setGameState('Win');
-  }, []);
+
+    // Checkpoint save for level completion
+    saveLevelCompletion({
+      level,
+      gameState: 'Win',
+      revealedTiles,
+      turnsUsed: turns,
+    });
+  }, [level, revealedTiles, turns, saveLevelCompletion]);
 
   const handleGameOver = React.useCallback(() => {
     setGameState('Game Over');
-  }, []);
+
+    // Checkpoint save for game over
+    saveGameOver({
+      level,
+      gameState: 'Game Over',
+      revealedTiles,
+      turnsUsed: turns,
+    });
+  }, [level, revealedTiles, turns, saveGameOver]);
 
   const handleResetGame = React.useCallback(() => {
     setGameState('Active');
     setTurns(0);
     setRevealedTiles(0);
-  }, []);
+
+    // Checkpoint save for new game
+    saveNewGame({
+      level,
+      gameState: 'Active',
+      revealedTiles: 0,
+      turnsUsed: 0,
+    });
+  }, [level, saveNewGame]);
 
   const handleExitFound = React.useCallback(() => {
     setGameState('Win');
@@ -457,7 +533,15 @@ export default function DungeonGame({ navigation }: DungeonGameProps) {
     setTurns(0);
     setRevealedTiles(0);
     setIsLoading(false);
-  }, []);
+
+    // Checkpoint save for level progression
+    saveLevelProgression({
+      level: level + 1,
+      gameState: 'Active',
+      revealedTiles: 0,
+      turnsUsed: 0,
+    });
+  }, [level, saveLevelProgression]);
 
   const handleSpendCurrency = React.useCallback(
     async (amount: number) => {
@@ -488,6 +572,9 @@ export default function DungeonGame({ navigation }: DungeonGameProps) {
       onNextLevel={handleNextLevel}
       onSpendCurrency={handleSpendCurrency}
       activeEffects={activeEffects}
+      isSaving={isSaving}
+      lastError={lastError}
+      lastSaveTime={lastSaveTime}
     />
   );
 }
