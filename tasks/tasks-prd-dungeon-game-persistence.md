@@ -16,7 +16,7 @@
 
 ## 3.0 Build Resume Choice System
 
-- [ ] 3.1 Create resume choice modal component with clean, non-intrusive design
+- [x] 3.1 Create resume choice modal component with clean, non-intrusive design
 - [ ] 3.2 Implement logic to detect existing save data on game entry
 - [ ] 3.3 Add user choice handling between resume previous game or start fresh
 - [ ] 3.4 Create smooth transitions and animations for the modal
