@@ -32,9 +32,9 @@
 
 - [ ] 2.0 Implement Real-Time Auto-Save System
 
-  - [ ] 2.1 Create auto-save triggers for tile reveals and state changes
-  - [ ] 2.2 Implement checkpoint saves for major game events (new game, level completion, game over)
-  - [ ] 2.3 Add save status indicators and error handling for save operations
+  - [x] 2.1 Create auto-save triggers for tile reveals and state changes
+  - [x] 2.2 Implement checkpoint saves for major game events (new game, level completion, game over)
+  - [x] 2.3 Add save status indicators and error handling for save operations
   - [ ] 2.4 Add unit tests for auto-save functionality
 
 - [ ] 3.0 Build Resume Choice System
