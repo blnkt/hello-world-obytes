@@ -1,0 +1,52 @@
+# Cursor Rules for hello-world-obytes
+
+## Linting Rules
+
+- **Function length**: Maximum 70 lines per function (`max-lines-per-function: 70`)
+- **Function parameters**: Maximum 3 parameters (`max-params: 3`). Use object parameters for more complex functions
+- **Filename convention**: Use kebab-case for all files
+- **Import sorting**: Follow `eslint-plugin-simple-import-sort` ordering
+- **TypeScript imports**: Use `import type` for type-only imports
+
+## Code Style
+
+- **Quotes**: Single quotes preferred
+- **Trailing commas**: ES5 style
+- **Line endings**: Auto
+- **React**: No inline styles, destructuring assignment allowed, default props not required
+
+## Commit Messages
+
+- **Format**: Follow conventional commits standard (`@commitlint/config-conventional`)
+- **Length**: Keep concise and under terminal width limits
+
+## Best Practices
+
+- Break down complex functions into smaller, focused functions
+- Use early returns to reduce nesting
+- Extract complex calculations into separate helper functions
+- Use object parameters for functions requiring more than 3 parameters
+- Follow the project's existing code patterns and structure
+
+# Architecture Rules
+
+- Keep components in src/components/
+<!-- - Use feature-based folder structure -->
+- Implement error boundaries for all major features
+- Follow atomic design principles
+  gs
+
+## Testing
+
+- Test files are exempt from function length limits
+- Use testing-library/react for React component tests
+- Use React Testing Library
+- Aim for 80%+ code coverage
+- Mock external dependencies (mocks are in **mocks**)
+
+<!-- # Security Rules
+
+- Never commit API keys or secrets
+- Validate all user inputs
+- Use HTTPS for external requests
+- Implement proper authentication checks -->

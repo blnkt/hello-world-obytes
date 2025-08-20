@@ -26,6 +26,24 @@ export const useMMKVString = (key: string, storageInstance?: any) => {
   return [value, setValueWithStorage] as const;
 };
 
+// Mock useMMKVBoolean hook
+export const useMMKVBoolean = (key: string, storageInstance?: any) => {
+  const [value, setValue] = React.useState<boolean | undefined>(() => {
+    const stored = mockStorage[key];
+    return stored ? JSON.parse(stored) : undefined;
+  });
+
+  const setValueWithStorage = React.useCallback(
+    (newValue: boolean) => {
+      mockStorage[key] = JSON.stringify(newValue);
+      setValue(newValue);
+    },
+    [key]
+  );
+
+  return [value, setValueWithStorage] as const;
+};
+
 export const storage = {
   getString: (key: string): string | null => {
     const value = mockStorage[key] || null;
@@ -253,8 +271,13 @@ export const useStreaks = () => {
 
 export function getCurrencySync(): number {
   const value = storage.getString('currency');
-  const result = value ? Number(value) || 0 : 0;
-  return result;
+  if (value) {
+    return Number(value) || 0;
+  }
+  // Set default currency for testing (1000 steps = 10 turns)
+  const defaultCurrency = 1000;
+  storage.set('currency', String(defaultCurrency));
+  return defaultCurrency;
 }
 
 export function getCurrency(): number {
@@ -285,25 +308,73 @@ export async function clearCurrency() {
 }
 
 export const useCurrency = () => {
-  const [currency, setCurrency] = React.useState<number>(getCurrencySync());
+  const [currency, setCurrencyState] =
+    React.useState<number>(getCurrencySync());
+
+  // Create a reactive setter that also updates storage
+  const setCurrency = React.useCallback(
+    async (newCurrency: string | number) => {
+      const numericValue =
+        typeof newCurrency === 'string' ? Number(newCurrency) : newCurrency;
+      storage.set('currency', String(numericValue));
+      setCurrencyState(numericValue);
+    },
+    []
+  );
+
+  // Update state when storage changes (for testing)
+  React.useEffect(() => {
+    const currentValue = getCurrencySync();
+    if (currentValue !== currency) {
+      setCurrencyState(currentValue);
+    }
+  }, [currency]);
+
   return [currency, setCurrency] as const;
 };
 
-export function getPurchasedItems(): string[] {
+export function getPurchasedItems(): any[] {
   const value = storage.getString('purchasedItems');
   return value ? JSON.parse(value) || [] : [];
 }
 
-export async function setPurchasedItems(items: string[]) {
+export async function setPurchasedItems(items: any[]) {
   await setItem('purchasedItems', items);
 }
 
 export async function addPurchasedItem(itemId: string) {
   const currentItems = getPurchasedItems();
-  if (!currentItems.includes(itemId)) {
-    const updatedItems = [...currentItems, itemId];
+  const existingItem = currentItems.find((item) => item.id === itemId);
+
+  if (existingItem) {
+    // Increment quantity if item already exists
+    existingItem.quantity += 1;
+    await setPurchasedItems(currentItems);
+  } else {
+    // Add new item with quantity 1
+    const updatedItems = [...currentItems, { id: itemId, quantity: 1 }];
     await setPurchasedItems(updatedItems);
   }
+}
+
+export async function useItem(itemId: string): Promise<boolean> {
+  const currentItems = getPurchasedItems();
+  const itemIndex = currentItems.findIndex((item) => item.id === itemId);
+
+  if (itemIndex === -1 || currentItems[itemIndex].quantity <= 0) {
+    return false; // Item not found or no quantity left
+  }
+
+  // Decrease quantity
+  currentItems[itemIndex].quantity -= 1;
+
+  // Remove item if quantity reaches 0
+  if (currentItems[itemIndex].quantity === 0) {
+    currentItems.splice(itemIndex, 1);
+  }
+
+  await setPurchasedItems(currentItems);
+  return true; // Item used successfully
 }
 
 export async function clearPurchasedItems() {
@@ -312,7 +383,7 @@ export async function clearPurchasedItems() {
 
 export const usePurchasedItems = () => {
   const [purchasedItems, setPurchasedItems] =
-    React.useState<string[]>(getPurchasedItems());
+    React.useState<any[]>(getPurchasedItems());
   return [purchasedItems, setPurchasedItems] as const;
 };
 
@@ -408,6 +479,20 @@ export async function setDeveloperMode(enabled: boolean) {
 export async function clearDeveloperMode() {
   storage.delete('developerMode');
 }
+
+// Mock useManualEntryMode hook
+export const useManualEntryMode = () => {
+  const [isManualMode, setIsManualMode] = useMMKVBoolean('manualEntryMode');
+  const mode = isManualMode === undefined ? false : isManualMode;
+  return [mode, setIsManualMode] as const;
+};
+
+// Mock useDeveloperMode hook
+export const useDeveloperMode = () => {
+  const [isDeveloperMode, setIsDeveloperMode] = useMMKVBoolean('developerMode');
+  const mode = isDeveloperMode === undefined ? false : isDeveloperMode;
+  return [mode, setIsDeveloperMode] as const;
+};
 
 // Manual Step Entry Functions
 export type ManualStepEntry = { date: string; steps: number; source: 'manual' };

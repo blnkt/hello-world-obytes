@@ -1,4 +1,3 @@
-/* eslint-disable max-lines-per-function */
 import * as React from 'react';
 import type { TextInputProps } from 'react-native';
 import { TextInput, View } from 'react-native';
@@ -33,11 +32,115 @@ const useValidation = () => {
   return { validate };
 };
 
+const blurHandler = (
+  e: any,
+  params: {
+    value: string;
+    validate: (val: string) => string | undefined;
+    setError: (error: string | undefined) => void;
+    onBlur?: (e: any) => void;
+  }
+) => {
+  const { value, validate, setError, onBlur } = params;
+
+  try {
+    const validationError = validate(value);
+    setError(validationError);
+    onBlur?.(e);
+  } catch (validationError) {
+    console.error('Validation error in manual step entry:', validationError);
+    setError('Invalid step count format');
+    onBlur?.(e);
+  }
+};
+
+const changeTextHandler = (
+  text: string,
+  params: {
+    onChangeText?: (text: string) => void;
+    setError: (error: string | undefined) => void;
+    error?: string;
+  }
+) => {
+  const { onChangeText, setError, error } = params;
+
+  try {
+    const numericText = text.replace(/[^0-9]/g, '');
+    onChangeText?.(numericText);
+    if (error) setError(undefined); // clear error on change
+  } catch (changeError) {
+    console.error('Error handling text change:', changeError);
+    setError('Failed to process input');
+  }
+};
+
+const submitEditingHandler = (
+  e: any,
+  params: {
+    value: string;
+    validate: (val: string) => string | undefined;
+    setError: (error: string | undefined) => void;
+    onSubmitEditing?: (e: any) => void;
+  }
+) => {
+  const { value, validate, setError, onSubmitEditing } = params;
+
+  try {
+    const validationError = validate(value);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+    onSubmitEditing?.(e);
+  } catch (submitError) {
+    console.error('Error handling submit:', submitError);
+    setError('Failed to submit step count');
+  }
+};
+
+const Label = ({ testID, label }: { testID?: string; label: string }) => {
+  return (
+    <Text
+      testID={testID ? `${testID}-label` : undefined}
+      className="text-grey-100 mb-1 text-lg dark:text-neutral-100"
+    >
+      {label}
+    </Text>
+  );
+};
+
+const LoadingMessage = ({ testID }: { testID?: string }) => {
+  return (
+    <Text
+      testID={testID ? `${testID}-loading` : undefined}
+      className="mt-1 text-sm text-neutral-500 dark:text-neutral-400"
+    >
+      Processing...
+    </Text>
+  );
+};
+
+const ErrorMessage = ({
+  testID,
+  error,
+}: {
+  testID?: string;
+  error: string;
+}) => {
+  return (
+    <Text
+      testID={testID ? `${testID}-error` : undefined}
+      className="text-sm text-danger-400 dark:text-danger-600"
+    >
+      {error}
+    </Text>
+  );
+};
+
 const ManualStepEntryComponent = React.forwardRef<
   TextInput,
   ManualStepEntryProps
 >((props, ref) => {
-  // eslint-disable-next-line max-lines-per-function
   const {
     label = 'Step Count',
     error: errorProp,
@@ -50,7 +153,6 @@ const ManualStepEntryComponent = React.forwardRef<
     value = '',
     ...inputProps
   } = props;
-
   const [error, setError] = React.useState<string | undefined>(errorProp);
   const { validate } = useValidation();
 
@@ -60,66 +162,30 @@ const ManualStepEntryComponent = React.forwardRef<
 
   const handleBlur = React.useCallback(
     (e: any) => {
-      try {
-        const validationError = validate(value as string);
-        setError(validationError);
-        onBlur?.(e);
-      } catch (validationError) {
-        console.error(
-          'Validation error in manual step entry:',
-          validationError
-        );
-        setError('Invalid step count format');
-        onBlur?.(e);
-      }
+      blurHandler(e, { value, validate, setError, onBlur });
     },
-    [onBlur, validate, value]
+    [value, validate, setError, onBlur]
   );
-
   const handleChangeText = React.useCallback(
     (text: string) => {
-      try {
-        // Only allow positive numeric input
-        const numericText = text.replace(/[^0-9]/g, '');
-        onChangeText?.(numericText);
-        if (error) setError(undefined); // clear error on change
-      } catch (changeError) {
-        console.error('Error handling text change:', changeError);
-        setError('Failed to process input');
-      }
+      changeTextHandler(text, { onChangeText, setError, error });
     },
-    [onChangeText, error]
+    [onChangeText, setError, error]
   );
-
   const handleSubmitEditing = React.useCallback(
-    (e: any) => {
-      try {
-        const validationError = validate(value as string);
-        if (validationError) {
-          setError(validationError);
-          return;
-        }
-        if (props.onSubmitEditing) {
-          props.onSubmitEditing(e);
-        }
-      } catch (submitError) {
-        console.error('Error handling submit:', submitError);
-        setError('Failed to submit step count');
-      }
-    },
-    [validate, value, props, setError]
+    (e: any) =>
+      submitEditingHandler(e, {
+        value,
+        validate,
+        setError,
+        onSubmitEditing: props.onSubmitEditing,
+      }),
+    [value, validate, setError, props.onSubmitEditing]
   );
 
   return (
     <View className="mb-2">
-      {label && (
-        <Text
-          testID={testID ? `${testID}-label` : undefined}
-          className="text-grey-100 mb-1 text-lg dark:text-neutral-100"
-        >
-          {label}
-        </Text>
-      )}
+      {label && <Label testID={testID} label={label} />}
       <TextInput
         testID={testID}
         ref={ref}
@@ -135,22 +201,8 @@ const ManualStepEntryComponent = React.forwardRef<
         onSubmitEditing={handleSubmitEditing}
         {...inputProps}
       />
-      {loading && (
-        <Text
-          testID={testID ? `${testID}-loading` : undefined}
-          className="mt-1 text-sm text-neutral-500 dark:text-neutral-400"
-        >
-          Processing...
-        </Text>
-      )}
-      {error && (
-        <Text
-          testID={testID ? `${testID}-error` : undefined}
-          className="text-sm text-danger-400 dark:text-danger-600"
-        >
-          {error}
-        </Text>
-      )}
+      {loading && <LoadingMessage testID={testID} />}
+      {error && <ErrorMessage testID={testID} error={error} />}
     </View>
   );
 });
