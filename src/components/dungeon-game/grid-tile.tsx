@@ -146,7 +146,7 @@ export default function GridTile({
       accessibilityHint={getTileDescription(tileType, isRevealed)}
       accessibilityRole="button"
       accessibilityState={{ disabled }}
-      className={`mx-0.5 aspect-square flex-1 rounded-md border ${getTileStyle(tileType, isRevealed, disabled)}`}
+      className={`m-0.5 aspect-square flex-1 rounded-md border ${getTileStyle(tileType, isRevealed, disabled)}`}
       style={{ minHeight: 35 }}
     >
       <View className="flex-1 items-center justify-center">

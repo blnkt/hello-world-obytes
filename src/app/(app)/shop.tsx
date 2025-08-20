@@ -144,6 +144,10 @@ const ShopScreen = () => {
           purchasedItems={purchasedItems}
           title="🎉 Purchased Items"
           className="rounded-xl bg-green-500/20 p-4"
+          showActiveEffects={true}
+          onItemActivated={(itemId) => {
+            console.log(`Item activated from shop: ${itemId}`);
+          }}
         />
       </View>
     </ScrollView>

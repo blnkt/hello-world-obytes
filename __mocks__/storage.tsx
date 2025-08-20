@@ -357,6 +357,26 @@ export async function addPurchasedItem(itemId: string) {
   }
 }
 
+export async function useItem(itemId: string): Promise<boolean> {
+  const currentItems = getPurchasedItems();
+  const itemIndex = currentItems.findIndex((item) => item.id === itemId);
+
+  if (itemIndex === -1 || currentItems[itemIndex].quantity <= 0) {
+    return false; // Item not found or no quantity left
+  }
+
+  // Decrease quantity
+  currentItems[itemIndex].quantity -= 1;
+
+  // Remove item if quantity reaches 0
+  if (currentItems[itemIndex].quantity === 0) {
+    currentItems.splice(itemIndex, 1);
+  }
+
+  await setPurchasedItems(currentItems);
+  return true; // Item used successfully
+}
+
 export async function clearPurchasedItems() {
   await removeItem('purchasedItems');
 }

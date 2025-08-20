@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, LoadingOverlay, Text } from '@/components/ui';
 import { useCurrencySystem } from '@/lib/health';
+import { applyItemEffects, useItemEffects } from '@/lib/item-effects';
 import { usePurchasedItems } from '@/lib/storage';
 
 import GameGrid from './game-grid';
@@ -31,6 +32,7 @@ interface DungeonGameLayoutProps {
   onGameOverFromTurns: () => void;
   onNextLevel: () => void;
   onSpendCurrency: (amount: number) => Promise<boolean>;
+  activeEffects: any[];
 }
 
 interface HeaderSectionProps {
@@ -42,6 +44,7 @@ interface HeaderSectionProps {
   currency: number;
   availableTurns: number;
   turnCost: number;
+  activeEffects?: any[];
 }
 
 function HeaderSection({
@@ -53,6 +56,7 @@ function HeaderSection({
   currency,
   availableTurns,
   turnCost,
+  activeEffects = [],
 }: HeaderSectionProps) {
   let topInset = 0;
   try {
@@ -94,7 +98,12 @@ function HeaderSection({
             <Text className="text-xs font-medium uppercase text-white/80">
               Turn Cost
             </Text>
-            <Text className="text-sm font-bold text-white">{turnCost} 💰</Text>
+            <Text className="text-sm font-bold text-white">
+              {turnCost} 💰
+              {activeEffects && activeEffects.length > 0 && (
+                <Text className="text-xs text-green-300">*</Text>
+              )}
+            </Text>
           </View>
         </View>
       </View>
@@ -122,10 +131,20 @@ function GameGridSection({
   onSpendCurrency,
 }: GameGridSectionProps) {
   const [purchasedItems] = usePurchasedItems();
+  const { activeEffects } = useItemEffects();
+
+  // Calculate effective turn cost with item effects
+  const baseTurnCost = 100;
+  const effectiveTurnCost = applyItemEffects.getTurnCost(
+    baseTurnCost,
+    activeEffects
+  );
+  const bonusTurns = applyItemEffects.getBonusTurns(activeEffects);
+  const effectiveAvailableTurns = availableTurns + bonusTurns;
 
   return (
     <View className="mb-3">
-      {availableTurns < 1 ? (
+      {effectiveAvailableTurns < 1 ? (
         <View className="rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
           <Text className="text-center text-base text-gray-600 dark:text-gray-300">
             Cannot play with insufficient currency
@@ -149,8 +168,14 @@ function GameGridSection({
             type="info"
           />
 
-          {/* Purchased Items Grid */}
-          <PurchasedItemsGrid purchasedItems={purchasedItems} />
+          {/* Purchased Items Grid with Active Effects */}
+          <PurchasedItemsGrid
+            purchasedItems={purchasedItems}
+            showActiveEffects={true}
+            onItemActivated={(itemId) => {
+              console.log(`Item activated: ${itemId}`);
+            }}
+          />
         </>
       )}
     </View>
@@ -330,6 +355,7 @@ function DungeonGameLayout({
   onGameOverFromTurns,
   onNextLevel,
   onSpendCurrency,
+  activeEffects,
 }: DungeonGameLayoutProps) {
   return (
     <View className="flex-1">
@@ -344,6 +370,7 @@ function DungeonGameLayout({
           currency,
           availableTurns,
           turnCost,
+          activeEffects,
         }}
       />
       <GameGridSection
@@ -387,6 +414,7 @@ interface DungeonGameProps {
 export default function DungeonGame({ navigation }: DungeonGameProps) {
   // Currency system integration
   const { currency, spend } = useCurrencySystem();
+  const { activeEffects } = useItemEffects();
 
   // Calculate available turns based on currency
   const availableTurns = Math.floor(currency / 100);
@@ -456,13 +484,7 @@ export default function DungeonGame({ navigation }: DungeonGameProps) {
 
   const handleSpendCurrency = React.useCallback(
     async (amount: number) => {
-      setIsLoading(true);
-      try {
-        const result = await spend(amount);
-        return result;
-      } finally {
-        setIsLoading(false);
-      }
+      return await spend(amount);
     },
     [spend]
   );
@@ -488,6 +510,7 @@ export default function DungeonGame({ navigation }: DungeonGameProps) {
       onGameOverFromTurns={handleGameOverFromTurns}
       onNextLevel={handleNextLevel}
       onSpendCurrency={handleSpendCurrency}
+      activeEffects={activeEffects}
     />
   );
 }
