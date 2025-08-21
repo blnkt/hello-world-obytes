@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { GameState } from '@/types/dungeon-game';
 
 import GameGrid from './game-grid';
+import { GameOverModal, WinModal } from './game-modals';
 import { useGameState } from './providers/game-state-provider';
 import { ResumeChoiceModal } from './resume-choice-modal';
 
@@ -81,6 +82,7 @@ export default function DungeonGame() {
     isLoading,
     lastError,
     startNewGame,
+    setLevel,
   } = useGameState();
 
   const [showResumeModal, setShowResumeModal] = useState(false);
@@ -97,8 +99,12 @@ export default function DungeonGame() {
   };
 
   const handleNextLevel = () => {
-    // TODO: Implement level progression
-    console.log('Next level not implemented yet');
+    // Progress to next level
+    const nextLevel = level + 1;
+    setLevel(nextLevel);
+
+    // Reset game state for the new level
+    startNewGame();
   };
 
   const availableTurns = Math.floor(currency / 100);
@@ -128,8 +134,6 @@ export default function DungeonGame() {
         onNextLevel={handleNextLevel}
       />
 
-      <GameStateDisplay gameState={gameState} />
-
       {lastError && (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>Error: {lastError}</Text>
@@ -139,6 +143,30 @@ export default function DungeonGame() {
       <ResumeChoiceModal
         isVisible={showResumeModal}
         onClose={() => setShowResumeModal(false)}
+      />
+
+      {/* Game State Modals */}
+      <WinModal
+        visible={gameState === 'Win'}
+        level={level}
+        onNextLevel={handleNextLevel}
+        onMainMenu={() => {
+          // TODO: Navigate to main menu
+          console.log('Main menu navigation not implemented yet');
+        }}
+      />
+
+      <GameOverModal
+        visible={gameState === 'Game Over'}
+        level={level}
+        turnsUsed={turnsUsed}
+        onMainMenu={() => {
+          // TODO: Navigate to main menu
+          console.log('Main menu navigation not implemented yet');
+        }}
+        onRetry={() => {
+          startNewGame();
+        }}
       />
     </View>
   );
