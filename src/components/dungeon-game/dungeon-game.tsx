@@ -98,11 +98,19 @@ export default function DungeonGame() {
   };
 
   const handleMainMenu = () => {
-    // TODO: Implement main menu navigation
+    // Navigate back to the main app screen
+    // For now, we'll just reset the game to a clean state
+    startNewGame();
+    setLevel(1);
   };
 
   const handleNextLevel = () => {
-    // TODO: Implement next level functionality
+    // Progress to next level
+    const nextLevel = level + 1;
+    setLevel(nextLevel);
+
+    // Reset game state for the new level
+    startNewGame();
   };
 
   const availableTurns = Math.floor(currency / 100);
