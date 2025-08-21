@@ -724,13 +724,9 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
     setLastError(null);
 
     // Increment level for next level progression
-    setLevel((prevLevel) => {
-      const newLevel = prevLevel + 1;
-      console.log(
-        `Level ${prevLevel} completed! Advancing to level ${newLevel}`
-      );
-      return newLevel;
-    });
+    const nextLevel = getNextLevel();
+    setLevel(nextLevel);
+    console.log(`Level ${level} completed! Advancing to level ${nextLevel}`);
 
     // Immediate save for level completion
     debouncedSave();
@@ -740,6 +736,8 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
     validateStateTransition,
     validateGameStateConsistency,
     validateTransitionTiming,
+    getNextLevel,
+    level,
   ]);
 
   const gameOver = useCallback(() => {

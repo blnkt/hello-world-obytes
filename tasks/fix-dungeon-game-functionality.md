@@ -57,7 +57,7 @@ The migration to GameStateProvider has broken several core dungeon game features
 
 ### 5.0 Implement Level Progression
 
-- [ ] 5.1 Add level increment logic in completeLevel function
+- [x] 5.1 Add level increment logic in completeLevel function
 - [ ] 5.2 Implement next level button functionality
 
 - [ ] 5.3 Add difficulty scaling for higher levels
