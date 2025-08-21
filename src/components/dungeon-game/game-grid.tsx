@@ -106,12 +106,12 @@ export default function GameGrid({ level, disabled = false }: GameGridProps) {
       const tileIndex = row * GRID_COLS + col;
       const tileType = levelTiles[tileIndex];
 
-      // Use the provider's revealTile action
-      revealTile(row, col, tileType);
+      // Use the provider's revealTile action and check if it succeeded
+      const revealSuccess = revealTile(row, col, tileType);
 
-      // Spend currency for the turn (100 per turn)
-      if (currency >= 100) {
-        setCurrency(currency - 100);
+      // Only proceed if tile reveal was successful (player had enough turns)
+      if (!revealSuccess) {
+        return; // Not enough turns, don't proceed with effects
       }
 
       // Handle tile-specific effects
@@ -131,7 +131,12 @@ export default function GameGrid({ level, disabled = false }: GameGridProps) {
           const [adjRow, adjCol] = adjacentTile.split('-').map(Number);
           const adjTileIndex = adjRow * GRID_COLS + adjCol;
           const adjTileType = levelTiles[adjTileIndex];
-          revealTile(adjRow, adjCol, adjTileType);
+          // Check if adjacent tile reveal succeeds
+          const adjacentRevealSuccess = revealTile(adjRow, adjCol, adjTileType);
+          if (!adjacentRevealSuccess) {
+            // If adjacent reveal fails, we might want to handle this case
+            // For now, just handle gracefully
+          }
         }
       }
     },

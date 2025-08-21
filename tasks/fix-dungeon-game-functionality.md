@@ -24,7 +24,7 @@ The migration to GameStateProvider has broken several core dungeon game features
 
 ### 1.0 Fix Turn Management System
 
-- [ ] 1.1 Add turn counting logic to GameStateProvider
+- [x] 1.1 Add turn counting logic to GameStateProvider
 - [ ] 1.2 Implement turn validation before tile reveal
 - [ ] 1.3 Add game over trigger when out of turns
 - [ ] 1.4 Fix turn display in game header
@@ -44,6 +44,7 @@ The migration to GameStateProvider has broken several core dungeon game features
 - [ ] 3.2 Implement treasure tile effect (gain 1 free turn)
 - [ ] 3.3 Fix bonus reveal tile effect (auto-reveal with turn management)
 - [ ] 3.4 Add proper turn cost for bonus reveals
+
 - [ ] 3.5 Ensure tile effects don't break turn counting
 
 ### 4.0 Fix Currency Integration
@@ -51,6 +52,7 @@ The migration to GameStateProvider has broken several core dungeon game features
 - [ ] 4.1 Add minimum playability check (100 steps minimum)
 - [ ] 4.2 Implement turn validation before game start
 - [ ] 4.3 Fix currency display to show accurate available turns
+
 - [ ] 4.4 Add currency validation in tile interactions
 - [ ] 4.5 Prevent game start with insufficient currency
 
@@ -58,6 +60,7 @@ The migration to GameStateProvider has broken several core dungeon game features
 
 - [ ] 5.1 Add level increment logic in completeLevel function
 - [ ] 5.2 Implement next level button functionality
+
 - [ ] 5.3 Add difficulty scaling for higher levels
 - [ ] 5.4 Reset game state properly for new levels
 - [ ] 5.5 Update level display and progression tracking
@@ -68,6 +71,7 @@ The migration to GameStateProvider has broken several core dungeon game features
 - [ ] 6.2 Validate game state transitions work correctly
 - [ ] 6.3 Test tile effects with proper turn counting
 - [ ] 6.4 Verify currency integration and validation
+
 - [ ] 6.5 Test level progression and difficulty scaling
 - [ ] 6.6 Ensure all existing tests still pass
 

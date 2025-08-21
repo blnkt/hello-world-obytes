@@ -29,7 +29,7 @@ interface GameStateContextValue {
   // Actions
   setLevel: (level: number) => void;
   setGameState: (state: GameState) => void;
-  revealTile: (x: number, y: number, type: string) => void;
+  revealTile: (x: number, y: number, type: string) => boolean;
   setTurnsUsed: (turns: number) => void;
   setCurrency: (amount: number) => void;
   incrementTurn: () => void;
@@ -240,13 +240,24 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
 
   const revealTile = useCallback(
     (x: number, y: number, type: string) => {
+      // Calculate available turns based on currency (100 currency per turn)
+      const availableTurns = Math.floor(currency / 100);
+
+      // Validate that player has enough turns to reveal a tile
+      if (availableTurns <= 0) {
+        // No turns available, don't allow tile reveal
+        return false;
+      }
+
       const tileKey = `${x}-${y}`;
       setRevealedTiles((prev) => new Set([...prev, tileKey]));
       setTileTypes((prev) => ({ ...prev, [tileKey]: type }));
       // Increment turn count when tile is revealed
       incrementTurn();
+
+      return true; // Tile reveal successful
     },
-    [incrementTurn]
+    [incrementTurn, currency]
   );
 
   const startNewGame = useCallback(() => {
