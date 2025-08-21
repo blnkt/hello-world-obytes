@@ -17,11 +17,11 @@ const GameHeader: React.FC<{
   <View style={styles.header}>
     <Text style={styles.title}>Dungeon Game</Text>
     <Text style={styles.levelText}>Level {level}</Text>
-    <Text style={styles.turnsText}>Turns: {turnsUsed}</Text>
-    <Text style={styles.currencyText}>Currency: {currency}</Text>
-    <Text style={styles.availableTurnsText}>
-      Available Turns: {availableTurns}
+    <Text style={styles.turnsText}>Turns Used: {turnsUsed}</Text>
+    <Text style={styles.turnsRemainingText}>
+      Turns Remaining: {availableTurns}
     </Text>
+    <Text style={styles.currencyText}>Currency: {currency}</Text>
   </View>
 );
 
@@ -181,15 +181,16 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     color: '#888',
   },
-  currencyText: {
+  turnsRemainingText: {
     fontSize: 16,
     textAlign: 'center',
     marginBottom: 4,
     color: '#888',
   },
-  availableTurnsText: {
+  currencyText: {
     fontSize: 16,
     textAlign: 'center',
+    marginBottom: 4,
     color: '#888',
   },
   controls: {

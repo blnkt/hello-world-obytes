@@ -26,7 +26,7 @@ The migration to GameStateProvider has broken several core dungeon game features
 
 - [x] 1.1 Add turn counting logic to GameStateProvider
 - [x] 1.2 Implement turn validation before tile reveal
-- [ ] 1.3 Add game over trigger when out of turns
+- [x] 1.3 Add game over trigger when out of turns
 - [ ] 1.4 Fix turn display in game header
 - [ ] 1.5 Add turn cost enforcement (100 currency per turn)
 
