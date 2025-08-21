@@ -1,12 +1,16 @@
 import React from 'react';
 
-import { GameStateProvider } from './providers/game-state-provider';
 import DungeonGame from './dungeon-game';
+import { GameStateProvider } from './providers/game-state-provider';
 
-export const DungeonGameWrapper: React.FC = () => {
+const DungeonGameWrapper: React.FC = () => {
   return (
-    <GameStateProvider>
+    <GameStateProvider initialCurrency={1000}>
       <DungeonGame />
     </GameStateProvider>
   );
 };
+
+DungeonGameWrapper.displayName = 'DungeonGameWrapper';
+
+export default DungeonGameWrapper;

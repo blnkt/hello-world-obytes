@@ -2,7 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 
 import GridTile from './grid-tile';
-import { useGameGridState } from './hooks/use-game-grid-state';
+import { useGameState } from './providers/game-state-provider';
 import {
   findUnrevealedAdjacentTile,
   generateLevelTiles,
@@ -13,132 +13,10 @@ const GRID_ROWS = 5;
 const GRID_COLS = 6;
 const GRID_TOTAL_TILES = GRID_ROWS * GRID_COLS;
 
-// Helper function to handle bonus reveal tile effects
-const handleBonusReveal = (params: {
-  id: string;
-  revealedTiles: Set<string>;
-  rows: number;
-  cols: number;
-  levelTiles: ('treasure' | 'trap' | 'exit' | 'bonus' | 'neutral')[];
-  setRevealedTiles: React.Dispatch<React.SetStateAction<Set<string>>>;
-  setTileTypes: React.Dispatch<
-    React.SetStateAction<
-      Record<string, 'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral'>
-    >
-  >;
-  setTurnsUsed: React.Dispatch<React.SetStateAction<number>>;
-  onExitFound?: () => void;
-}) => {
-  const {
-    id,
-    revealedTiles,
-    rows,
-    cols,
-    levelTiles,
-    setRevealedTiles,
-    setTileTypes,
-    setTurnsUsed,
-    onExitFound,
-  } = params;
-  const adjacentTile = findUnrevealedAdjacentTile({
-    tileId: id,
-    revealedTiles,
-    rows,
-    cols,
-  });
-  if (adjacentTile) {
-    // Reveal the adjacent tile
-    setRevealedTiles((prev) => new Set([...prev, adjacentTile]));
-
-    // Get tile type for the adjacent tile
-    const adjacentTileIndex =
-      parseInt(adjacentTile.split('-')[0]) * cols +
-      parseInt(adjacentTile.split('-')[1]);
-    const adjacentTileType = levelTiles[adjacentTileIndex];
-
-    setTileTypes((prev) => ({ ...prev, [adjacentTile]: adjacentTileType }));
-
-    // Handle tile effects for the auto-revealed tile (including win condition)
-    handleTileEffects({
-      tileType: adjacentTileType,
-      id: adjacentTile,
-      revealedTiles,
-      rows,
-      cols,
-      levelTiles,
-      setRevealedTiles,
-      setTileTypes,
-      setTurnsUsed,
-      onExitFound,
-    });
-  }
-};
-
-// Helper function to handle tile effects
-const handleTileEffects = (params: {
-  tileType: 'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral';
-  id: string;
-  revealedTiles: Set<string>;
-  rows: number;
-  cols: number;
-  levelTiles: ('treasure' | 'trap' | 'exit' | 'bonus' | 'neutral')[];
-  setRevealedTiles: React.Dispatch<React.SetStateAction<Set<string>>>;
-  setTileTypes: React.Dispatch<
-    React.SetStateAction<
-      Record<string, 'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral'>
-    >
-  >;
-  setTurnsUsed: React.Dispatch<React.SetStateAction<number>>;
-  onExitFound?: () => void;
-}) => {
-  const {
-    tileType,
-    id,
-    revealedTiles,
-    rows,
-    cols,
-    levelTiles,
-    setRevealedTiles,
-    setTileTypes,
-    setTurnsUsed,
-    onExitFound,
-  } = params;
-
-  // Additional turn penalty for trap tiles
-  if (tileType === 'trap') {
-    setTurnsUsed((prev) => prev + 1);
-  }
-
-  // Free turn bonus for treasure tiles
-  if (tileType === 'treasure') {
-    setTurnsUsed((prev) => prev - 1);
-  }
-
-  // Auto-reveal adjacent tile for bonus reveal tiles
-  if (tileType === 'bonus') {
-    handleBonusReveal({
-      id,
-      revealedTiles,
-      rows,
-      cols,
-      levelTiles,
-      setRevealedTiles,
-      setTileTypes,
-      setTurnsUsed,
-      onExitFound,
-    });
-  }
-
-  // Win condition when exit tile is revealed
-  if (tileType === 'exit') {
-    onExitFound?.();
-  }
-};
-
 interface GameGridLayoutProps {
-  cols: number;
-  rows: number;
-  totalTiles: number;
+  _cols: number;
+  _rows: number;
+  _totalTiles: number;
   revealedTiles: Set<string>;
   turnsUsed: number;
   grid: { id: string; row: number; col: number }[][];
@@ -147,9 +25,9 @@ interface GameGridLayoutProps {
 }
 
 function GameGridLayout({
-  cols,
-  rows,
-  totalTiles,
+  _cols,
+  _rows,
+  _totalTiles,
   revealedTiles,
   grid,
   tileTypes,
@@ -183,118 +61,42 @@ function GameGridLayout({
 
 // Helper function to create grid structure
 const createGridStructure = (rows: number, cols: number) => {
-  return Array.from({ length: rows }, (_, rowIndex) =>
-    Array.from({ length: cols }, (_, colIndex) => ({
-      id: `${rowIndex}-${colIndex}`,
-      row: rowIndex,
-      col: colIndex,
-    }))
-  );
-};
-
-const getTileIndex = (id: string) => {
-  return parseInt(id.split('-')[0]) * GRID_COLS + parseInt(id.split('-')[1]);
-};
-
-const handleTilePressCallback = (
-  id: string,
-  _row: number,
-  _col: number,
-  params: {
-    disabled: boolean;
-    revealedTiles: Set<string>;
-    levelTiles: ('treasure' | 'trap' | 'exit' | 'bonus' | 'neutral')[];
-    setRevealedTiles: React.Dispatch<React.SetStateAction<Set<string>>>;
-    setTileTypes: React.Dispatch<
-      React.SetStateAction<
-        Record<string, 'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral'>
-      >
-    >;
-    setTurnsUsed: React.Dispatch<React.SetStateAction<number>>;
-    onSpendCurrency?: (amount: number) => Promise<boolean>;
-    onExitFound?: () => void;
+  const grid = [];
+  for (let row = 0; row < rows; row++) {
+    const rowTiles = [];
+    for (let col = 0; col < cols; col++) {
+      rowTiles.push({
+        id: `${row}-${col}`,
+        row,
+        col,
+      });
+    }
+    grid.push(rowTiles);
   }
-  // eslint-disable-next-line max-params
-) => {
-  const {
-    disabled,
-    revealedTiles,
-    levelTiles,
-    setRevealedTiles,
-    setTileTypes,
-    setTurnsUsed,
-    onSpendCurrency,
-    onExitFound,
-  } = params;
-  if (disabled) return; // Don't allow tile interaction if disabled
-  if (!revealedTiles.has(id)) {
-    // Reveal the tile
-    setRevealedTiles((prev) => new Set([...prev, id]));
-
-    // Get tile type from pre-generated level
-    const tileIndex = getTileIndex(id);
-    const tileType = levelTiles[tileIndex];
-
-    setTileTypes((prev) => ({ ...prev, [id]: tileType }));
-
-    // Deduct a turn for revealing the tile
-    setTurnsUsed((prev) => prev + 1);
-
-    // Spend currency for the turn
-    onSpendCurrency?.(100);
-
-    // Handle tile-specific effects
-    handleTileEffects({
-      tileType,
-      id,
-      revealedTiles,
-      rows: GRID_ROWS,
-      cols: GRID_COLS,
-      levelTiles,
-      setRevealedTiles,
-      setTileTypes,
-      setTurnsUsed,
-      onExitFound,
-    });
-  }
+  return grid;
 };
 
 interface GameGridProps {
   level: number;
   disabled?: boolean;
-  onTurnsUpdate?: (turns: number) => void;
-  onRevealedTilesUpdate?: (count: number) => void;
-  onExitFound?: () => void;
-  onGameOver?: () => void;
-  onSpendCurrency?: (amount: number) => Promise<boolean>;
 }
 
-export default function GameGrid({
-  level,
-  disabled = false,
-  onTurnsUpdate,
-  onRevealedTilesUpdate,
-  onExitFound,
-  onGameOver,
-  onSpendCurrency,
-}: GameGridProps) {
+// eslint-disable-next-line max-lines-per-function
+export default function GameGrid({ level, disabled = false }: GameGridProps) {
   // Generate level tiles once when component mounts
   const levelTiles = React.useMemo(() => generateLevelTiles(level), [level]);
 
-  // Use custom hook for state management
+  // Use the new game state provider
   const {
     revealedTiles,
-    setRevealedTiles,
     tileTypes,
-    setTileTypes,
     turnsUsed,
-    setTurnsUsed,
-  } = useGameGridState({
-    onTurnsUpdate,
-    onRevealedTilesUpdate,
-    onGameOver,
-    levelTiles,
-  });
+    revealTile,
+    completeLevel,
+    gameOver,
+    currency,
+    setCurrency,
+  } = useGameState();
 
   const grid = React.useMemo(
     () => createGridStructure(GRID_ROWS, GRID_COLS),
@@ -302,38 +104,85 @@ export default function GameGrid({
   );
 
   const handleTilePress = React.useCallback(
-    (id: string, _row: number, _col: number) =>
-      handleTilePressCallback(id, _row, _col, {
-        disabled,
-        revealedTiles,
-        levelTiles,
-        setRevealedTiles,
-        setTileTypes,
-        setTurnsUsed,
-        onSpendCurrency,
-        onExitFound,
-      }),
+    (id: string, row: number, col: number) => {
+      if (disabled || revealedTiles.has(id)) {
+        return;
+      }
+
+      // Calculate tile index in the level tiles array
+      const tileIndex = row * GRID_COLS + col;
+      const tileType = levelTiles[tileIndex];
+
+      // Use the provider's revealTile action
+      revealTile(row, col, tileType);
+
+      // Spend currency for the turn (100 per turn)
+      if (currency >= 100) {
+        setCurrency(currency - 100);
+      }
+
+      // Handle tile-specific effects
+      if (tileType === 'exit') {
+        completeLevel();
+      } else if (tileType === 'trap') {
+        gameOver();
+      } else if (tileType === 'bonus') {
+        // Bonus tile - reveal adjacent tile
+        const adjacentTile = findUnrevealedAdjacentTile({
+          tileId: id,
+          revealedTiles,
+          rows: GRID_ROWS,
+          cols: GRID_COLS,
+        });
+        if (adjacentTile) {
+          const [adjRow, adjCol] = adjacentTile.split('-').map(Number);
+          const adjTileIndex = adjRow * GRID_COLS + adjCol;
+          const adjTileType = levelTiles[adjTileIndex];
+          revealTile(adjRow, adjCol, adjTileType);
+        }
+      }
+    },
     [
       disabled,
       revealedTiles,
       levelTiles,
-      setRevealedTiles,
-      setTileTypes,
-      setTurnsUsed,
-      onSpendCurrency,
-      onExitFound,
+      revealTile,
+      setCurrency,
+      currency,
+      completeLevel,
+      gameOver,
     ]
   );
 
+  // Convert tileTypes to the expected type for GameGridLayout
+  const typedTileTypes = React.useMemo(() => {
+    const result: Record<
+      string,
+      'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral'
+    > = {};
+    Object.entries(tileTypes).forEach(([key, value]) => {
+      if (
+        value === 'treasure' ||
+        value === 'trap' ||
+        value === 'exit' ||
+        value === 'bonus' ||
+        value === 'neutral'
+      ) {
+        result[key] = value;
+      }
+    });
+    return result;
+  }, [tileTypes]);
+
   return (
     <GameGridLayout
-      cols={GRID_COLS}
-      rows={GRID_ROWS}
-      totalTiles={GRID_TOTAL_TILES}
+      _cols={GRID_COLS}
+      _rows={GRID_ROWS}
+      _totalTiles={GRID_TOTAL_TILES}
       revealedTiles={revealedTiles}
       turnsUsed={turnsUsed}
       grid={grid}
-      tileTypes={tileTypes}
+      tileTypes={typedTileTypes}
       onTilePress={handleTilePress}
     />
   );

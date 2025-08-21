@@ -4,14 +4,16 @@ import React from 'react';
 
 import { setCurrency } from '@/lib/storage';
 
-import { GameStateProvider } from './providers/game-state-provider';
 import DungeonGame from './dungeon-game';
+import { GameStateProvider } from './providers/game-state-provider';
 
 // Mock the persistence hook to prevent storage errors
 jest.mock('./hooks/use-dungeon-game-persistence', () => ({
   useDungeonGamePersistence: () => ({
     saveGameState: jest.fn().mockResolvedValue({ success: true }),
-    loadGameState: jest.fn().mockResolvedValue({ success: false, error: 'No save data found' }),
+    loadGameState: jest
+      .fn()
+      .mockResolvedValue({ success: false, error: 'No save data found' }),
     clearGameState: jest.fn().mockResolvedValue(true),
     hasExistingSaveData: () => false,
   }),
@@ -26,9 +28,7 @@ describe('DungeonGame', () => {
   // Helper function to render with provider
   const renderWithProvider = (component: React.ReactElement) => {
     return render(
-      <GameStateProvider initialCurrency={1000}>
-        {component}
-      </GameStateProvider>
+      <GameStateProvider initialCurrency={1000}>{component}</GameStateProvider>
     );
   };
   it('should render a 6x5 grid layout', () => {
@@ -135,15 +135,15 @@ describe('DungeonGame', () => {
     // by verifying the game state shows proper turn information
     const tiles = screen.getAllByTestId('grid-tile');
     if (tiles.length > 0) {
-              // Click first tile safely to test basic functionality
-        try {
-          fireEvent.press(tiles[0]);
-          // Should still show turn information after interaction
-          expect(screen.getAllByText(/Turns:/)[0]).toBeTruthy();
-        } catch (_error) {
-          // Handle any component re-render issues gracefully
-          // The test still passes if we can verify basic functionality
-        }
+      // Click first tile safely to test basic functionality
+      try {
+        fireEvent.press(tiles[0]);
+        // Should still show turn information after interaction
+        expect(screen.getAllByText(/Turns:/)[0]).toBeTruthy();
+      } catch (_error) {
+        // Handle any component re-render issues gracefully
+        // The test still passes if we can verify basic functionality
+      }
     }
 
     // Verify that the game maintains proper state
@@ -237,14 +237,14 @@ describe('DungeonGame', () => {
   });
 
   // This test verifies that the game over condition can be triggered
-  // The actual game over logic is tested in the hook tests
+  // The actual game over logic is now handled by the GameStateProvider
   it('should handle game over conditions', () => {
     renderWithProvider(<DungeonGame />);
 
     // Initially should show the game in active state
     expect(screen.getAllByText(/Turns:/)[0]).toBeTruthy();
 
-    // The game over logic is tested in the useGameGridState hook tests
+    // The game over logic is now handled by the GameStateProvider
     // This test verifies the UI displays game state information correctly
     expect(screen.getAllByText(/Turns:/)[0]).toBeTruthy();
     expect(screen.getByText('Level 1')).toBeTruthy();
@@ -266,8 +266,8 @@ describe('DungeonGame', () => {
     // We can't easily see the modal when it's not visible, but we can verify
     // the game structure supports win conditions
 
-    // The complete win condition flow is tested across multiple test files:
-    // 1. useGameGridState.test.tsx - Tests exit detection and game over prevention
+    // The complete win condition flow is now handled by the GameStateProvider:
+    // 1. GameStateProvider - Handles all game state and win/lose logic
     // 2. game-modals.test.tsx - Tests WinModal behavior and level progression
     // 3. This test - Verifies the integration structure exists
 

@@ -84,7 +84,7 @@ describe('useDungeonGamePersistence', () => {
       expect(result.current.saveDataInfo).toBeNull();
       expect(result.current.isLoading).toBe(false);
       expect(result.current.lastError).toBeNull();
-      expect(result.current.hasExistingSaveData).toBe(false);
+      expect(result.current.hasExistingSaveData()).toBe(false);
       expect(result.current.canResume).toBe(false);
       expect(result.current.lastSaveTime).toBeNull();
       expect(result.current.gameLevel).toBeNull();
@@ -442,7 +442,7 @@ describe('useDungeonGamePersistence', () => {
 
       const { result } = renderHook(() => useDungeonGamePersistence());
 
-      expect(result.current.hasExistingSaveData).toBe(true);
+      expect(result.current.hasExistingSaveData()).toBe(true);
     });
 
     it('should return false when no save data exists', () => {
@@ -450,7 +450,7 @@ describe('useDungeonGamePersistence', () => {
 
       const { result } = renderHook(() => useDungeonGamePersistence());
 
-      expect(result.current.hasExistingSaveData).toBe(false);
+      expect(result.current.hasExistingSaveData()).toBe(false);
     });
   });
 

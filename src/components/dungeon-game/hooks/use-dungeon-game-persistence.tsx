@@ -63,7 +63,7 @@ export const useDungeonGamePersistence = () => {
     saveDataInfo,
     isLoading,
     lastError,
-    hasExistingSaveData: hasExistingSaveData(),
+    hasExistingSaveData,
 
     // Actions
     saveGameState,

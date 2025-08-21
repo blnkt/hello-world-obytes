@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import type { GameState } from '@/types/dungeon-game';
+
+import GameGrid from './game-grid';
 import { useGameState } from './providers/game-state-provider';
 import { ResumeChoiceModal } from './resume-choice-modal';
-import GameGrid from './game-grid';
-import type { GameState } from '@/types/dungeon-game';
 
 // Helper component for the game header
 const GameHeader: React.FC<{
@@ -31,10 +32,7 @@ const GameControls: React.FC<{
   onNextLevel: () => void;
 }> = ({ gameState, onReset, onNextLevel }) => (
   <View style={styles.controls}>
-    <Pressable
-      style={[styles.button, styles.resetButton]}
-      onPress={onReset}
-    >
+    <Pressable style={[styles.button, styles.resetButton]} onPress={onReset}>
       <Text style={styles.buttonText}>Reset Game</Text>
     </Pressable>
 
@@ -50,7 +48,9 @@ const GameControls: React.FC<{
 );
 
 // Helper component for game state display
-const GameStateDisplay: React.FC<{ gameState: GameState }> = ({ gameState }) => {
+const GameStateDisplay: React.FC<{ gameState: GameState }> = ({
+  gameState,
+}) => {
   if (gameState === 'Win') {
     return (
       <View style={styles.gameState}>
@@ -70,6 +70,7 @@ const GameStateDisplay: React.FC<{ gameState: GameState }> = ({ gameState }) => 
   return null;
 };
 
+// eslint-disable-next-line max-lines-per-function
 export default function DungeonGame() {
   const {
     level,
@@ -109,7 +110,7 @@ export default function DungeonGame() {
       </View>
     );
   }
-  
+
   return (
     <View style={styles.container}>
       <GameHeader

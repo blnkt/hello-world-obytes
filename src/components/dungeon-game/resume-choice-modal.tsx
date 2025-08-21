@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, View, Text, Pressable, StyleSheet } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useGameState } from './providers/game-state-provider';
 
@@ -25,17 +25,17 @@ const ModalContent: React.FC<{
 }> = ({ onResume, onNewGame, onClose, isLoading, lastSaveTime }) => (
   <View style={styles.modalContent}>
     <Text style={styles.title}>Resume Your Game?</Text>
-    
+
     <Text style={styles.description}>
       You have an existing game in progress.
     </Text>
-    
+
     {lastSaveTime && (
       <Text style={styles.saveInfo}>
         Last saved: {formatLastSaveTime(lastSaveTime)}
       </Text>
     )}
-    
+
     <View style={styles.buttonContainer}>
       <Pressable
         style={[styles.button, styles.resumeButton]}
@@ -46,7 +46,7 @@ const ModalContent: React.FC<{
           {isLoading ? 'Loading...' : 'Resume Game'}
         </Text>
       </Pressable>
-      
+
       <Pressable
         style={[styles.button, styles.newGameButton]}
         onPress={onNewGame}
@@ -55,7 +55,7 @@ const ModalContent: React.FC<{
         <Text style={styles.buttonText}>Start New Game</Text>
       </Pressable>
     </View>
-    
+
     <Pressable style={styles.closeButton} onPress={onClose}>
       <Text style={styles.closeButtonText}>Close</Text>
     </Pressable>
@@ -66,7 +66,8 @@ export const ResumeChoiceModal: React.FC<ResumeChoiceModalProps> = ({
   isVisible,
   onClose,
 }) => {
-  const { hasExistingSave, resumeGame, startNewGame, isLoading, lastSaveTime } = useGameState();
+  const { hasExistingSave, resumeGame, startNewGame, isLoading, lastSaveTime } =
+    useGameState();
 
   const handleResume = async () => {
     await resumeGame();
