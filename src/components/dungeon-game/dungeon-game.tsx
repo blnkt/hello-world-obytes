@@ -135,6 +135,7 @@ export default function DungeonGame() {
     startNewGame,
     startNextLevel,
     setLevel,
+    setGameState,
     canStartGame,
     getAvailableTurns,
     getTurnValidationMessage,
@@ -160,6 +161,8 @@ export default function DungeonGame() {
   };
 
   const handleMainMenu = () => {
+    // Close the modal by resetting game state
+    setGameState('Active');
     // Navigate back to the home screen
     router.push('/(app)');
   };
