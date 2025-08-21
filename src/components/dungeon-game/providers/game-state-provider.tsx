@@ -187,6 +187,25 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
   // Debounced save ref
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
 
+  // State transition validation helper
+  const validateStateTransition = useCallback(
+    (fromState: GameState, toState: GameState): boolean => {
+      const validTransitions: Record<GameState, GameState[]> = {
+        Active: ['Win', 'Game Over'],
+        Win: ['Active'], // Can transition back to Active when starting new level
+        'Game Over': ['Active'], // Can transition back to Active when retrying
+      };
+
+      // Special case: startNewGame can transition from any state to Active
+      if (toState === 'Active') {
+        return true;
+      }
+
+      return validTransitions[fromState]?.includes(toState) ?? false;
+    },
+    []
+  );
+
   // Convert current state to save data
   const createSaveData = useCallback((): Omit<
     DungeonGameSaveData,
@@ -271,20 +290,29 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
   );
 
   const startNewGame = useCallback(() => {
+    // Validate state transition (can start new game from any state)
+    if (!validateStateTransition(gameState, 'Active')) {
+      console.warn(`Cannot transition from ${gameState} to Active state`);
+      return;
+    }
+
+    // Reset all game state to initial values
     setLevel(1);
     setGameState('Active');
     setRevealedTiles(new Set());
     setTileTypes({});
     setTurnsUsed(0);
+    setCurrency(1000); // Reset to initial currency
     setLastError(null);
 
     // Immediate save for new game
     debouncedSave();
-  }, [debouncedSave]);
+  }, [debouncedSave, gameState, validateStateTransition]);
 
   const completeLevel = useCallback(() => {
-    // Prevent multiple win calls
-    if (gameState === 'Win') {
+    // Validate state transition
+    if (!validateStateTransition(gameState, 'Win')) {
+      console.warn(`Cannot transition from ${gameState} to Win state`);
       return;
     }
 
@@ -293,11 +321,12 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
 
     // Immediate save for level completion
     debouncedSave();
-  }, [debouncedSave, gameState]);
+  }, [debouncedSave, gameState, validateStateTransition]);
 
   const gameOver = useCallback(() => {
-    // Prevent multiple game over calls
-    if (gameState === 'Game Over') {
+    // Validate state transition
+    if (!validateStateTransition(gameState, 'Game Over')) {
+      console.warn(`Cannot transition from ${gameState} to Game Over state`);
       return;
     }
 
@@ -306,7 +335,7 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
 
     // Immediate save for game over
     debouncedSave();
-  }, [debouncedSave, gameState]);
+  }, [debouncedSave, gameState, validateStateTransition]);
 
   // Resume functionality
   const resumeGame = useCallback(async () => {
