@@ -3,7 +3,10 @@ import { View } from 'react-native';
 
 import GridTile from './grid-tile';
 import { useGameState } from './providers/game-state-provider';
-import { generateLevelTiles } from './utils/game-utils';
+import {
+  findUnrevealedAdjacentTile,
+  generateLevelTiles,
+} from './utils/game-utils';
 
 // Game grid constants
 const GRID_ROWS = 5;
@@ -82,13 +85,12 @@ export default function GameGrid({ level, disabled = false }: GameGridProps) {
     tileTypes,
     turnsUsed,
     revealTile,
+    revealAdjacentTile,
     completeLevel,
     gameOver,
     currency,
     addCurrency,
     deductCurrency,
-    updateRevealedTiles,
-    updateTileTypes,
   } = useGameState();
 
   const grid = React.useMemo(
@@ -98,7 +100,6 @@ export default function GameGrid({ level, disabled = false }: GameGridProps) {
 
   const handleTilePress = React.useCallback(
     (id: string, row: number, col: number) => {
-      return;
       if (disabled || revealedTiles.has(id)) {
         return;
       }
@@ -113,50 +114,49 @@ export default function GameGrid({ level, disabled = false }: GameGridProps) {
         return; // Not enough turns
       }
 
-      // Direct state updates - no function calls that could trigger navigation context
+      // Use revealTile method for safe state updates
       const tileKey = `${row}-${col}`;
+      const revealSuccess = revealTile(row, col, tileType);
 
-      // Update revealed tiles and tile types directly
-      // updateRevealedTiles(new Set([...revealedTiles, tileKey]));
-      // updateTileTypes({ ...tileTypes, [tileKey]: tileType });
-
-      // Deduct currency cost (100 per turn)
-      // deductCurrency(100);
+      if (!revealSuccess) {
+        return; // Tile reveal failed
+      }
 
       // Handle tile-specific effects
       if (tileType === 'exit') {
         // Exit tile - complete level
-        // completeLevel();
+        completeLevel();
       } else if (tileType === 'trap') {
         // Trap tile - lose 1 additional turn (deduct 100 more currency)
-        // deductCurrency(100);
+        deductCurrency(100);
       } else if (tileType === 'treasure') {
         // Treasure tile - gain 1 free turn (add 100 currency)
-        // addCurrency(100);
+        addCurrency(100);
       } else if (tileType === 'bonus') {
         // Bonus tile - reveal adjacent tile and give free turn
-        // Temporarily commented out to test navigation context fix
-        // const adjacentTile = findUnrevealedAdjacentTile({
-        //   tileId: id,
-        //   revealedTiles,
-        //   rows: GRID_ROWS,
-        //   cols: GRID_COLS,
-        // });
-        // if (adjacentTile && adjacentTile.includes('-')) {
-        //   const [adjRow, adjCol] = adjacentTile!.split('-').map(Number);
-        //   const adjTileIndex = adjRow * GRID_COLS + adjCol;
-        //   const adjTileType = levelTiles[adjTileIndex];
-        //   // Direct state update for adjacent tile
-        //   const adjTileKey = `${adjRow}-${adjCol}`;
-        //   updateRevealedTiles(new Set([...revealedTiles, tileKey, adjTileKey]));
-        //   updateTileTypes({
-        //     ...tileTypes,
-        //     [tileKey]: tileType,
-        //     [adjTileKey]: adjTileType,
-        //   });
-        //   // Give free turn for bonus tile (add 100 currency)
-        //   // addCurrency(100);
-        // }
+        const adjacentTile = findUnrevealedAdjacentTile({
+          tileId: id,
+          revealedTiles,
+          rows: GRID_ROWS,
+          cols: GRID_COLS,
+        });
+
+        if (adjacentTile) {
+          const [adjRow, adjCol] = adjacentTile.split('-').map(Number);
+          const adjTileIndex = adjRow * GRID_COLS + adjCol;
+          const adjTileType = levelTiles[adjTileIndex];
+
+          // Use revealAdjacentTile method for safe adjacent tile reveal
+          const adjacentRevealSuccess = revealAdjacentTile(
+            adjRow,
+            adjCol,
+            adjTileType
+          );
+          if (adjacentRevealSuccess) {
+            // Give free turn for bonus tile (add 100 currency)
+            addCurrency(100);
+          }
+        }
       }
     },
     [
@@ -167,8 +167,8 @@ export default function GameGrid({ level, disabled = false }: GameGridProps) {
       currency,
       addCurrency,
       deductCurrency,
-      updateRevealedTiles,
-      updateTileTypes,
+      revealTile,
+      revealAdjacentTile,
       completeLevel,
     ]
   );

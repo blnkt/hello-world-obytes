@@ -30,6 +30,7 @@ interface GameStateContextValue {
   setLevel: (level: number) => void;
   setGameState: (state: GameState) => void;
   revealTile: (x: number, y: number, type: string) => boolean;
+  revealAdjacentTile: (x: number, y: number, type: string) => boolean;
   setTurnsUsed: (turns: number) => void;
   setCurrency: (amount: number) => void;
   incrementTurn: () => void;
@@ -467,6 +468,17 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
     [incrementTurn, currency, setCurrency, validateGameAction, queueAction]
   );
 
+  // Safe method to reveal adjacent tile for bonus tiles (no turn cost)
+  const revealAdjacentTile = useCallback(
+    (x: number, y: number, type: string) => {
+      const tileKey = `${x}-${y}`;
+      setRevealedTiles((prev) => new Set([...prev, tileKey]));
+      setTileTypes((prev) => ({ ...prev, [tileKey]: type }));
+      return true;
+    },
+    []
+  );
+
   const startNewGame = useCallback(() => {
     // Validate state transition (can start new game from any state)
     if (!validateStateTransition(gameState, 'Active')) {
@@ -674,6 +686,7 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       setLevel,
       setGameState,
       revealTile,
+      revealAdjacentTile,
       setTurnsUsed,
       setCurrency,
       incrementTurn,
@@ -707,6 +720,7 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       setLevel,
       setGameState,
       revealTile,
+      revealAdjacentTile,
       setTurnsUsed,
       setCurrency,
       incrementTurn,
