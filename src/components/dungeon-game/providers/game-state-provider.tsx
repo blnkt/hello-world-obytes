@@ -37,10 +37,6 @@ interface GameStateContextValue {
   addCurrency: (amount: number) => void;
   deductCurrency: (amount: number) => void;
 
-  // Safe state update methods
-  updateRevealedTiles: (tiles: Set<string>) => void;
-  updateTileTypes: (types: Record<string, string>) => void;
-
   // Game flow
   startNewGame: () => void;
   completeLevel: () => void;
@@ -413,15 +409,6 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
     setCurrency((prev) => Math.max(0, prev - amount));
   }, []);
 
-  // Safe state update methods
-  const updateRevealedTiles = useCallback((tiles: Set<string>) => {
-    setRevealedTiles(tiles);
-  }, []);
-
-  const updateTileTypes = useCallback((types: Record<string, string>) => {
-    setTileTypes(types);
-  }, []);
-
   const revealTile = useCallback(
     (x: number, y: number, type: string) => {
       console.log('🔍 [DEBUG] revealTile called with:', { x, y, type });
@@ -692,8 +679,6 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       incrementTurn,
       addCurrency,
       deductCurrency,
-      updateRevealedTiles,
-      updateTileTypes,
 
       // Game flow
       startNewGame,
@@ -726,8 +711,6 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       incrementTurn,
       addCurrency,
       deductCurrency,
-      updateRevealedTiles,
-      updateTileTypes,
       startNewGame,
       completeLevel,
       gameOver,

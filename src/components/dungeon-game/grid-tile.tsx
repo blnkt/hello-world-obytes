@@ -124,14 +124,9 @@ export default function GridTile({
   disabled = false,
   showEffect = false,
 }: GridTileProps) {
-  const [isAnimating, setIsAnimating] = React.useState(false);
-
   const handlePress = () => {
     if (onPress && !disabled) {
-      setIsAnimating(true);
       onPress(id, row, col);
-      // Reset animation state after a short delay
-      setTimeout(() => setIsAnimating(false), 500);
     }
   };
 
@@ -153,9 +148,7 @@ export default function GridTile({
       accessibilityHint={getTileDescription(tileType, isRevealed)}
       accessibilityRole="button"
       accessibilityState={{ disabled }}
-      className={`m-0.5 aspect-square flex-1 rounded-md border ${getTileStyle(tileType, isRevealed, disabled)} ${
-        isAnimating ? 'scale-95 opacity-80' : ''
-      }`}
+      className={`m-0.5 aspect-square flex-1 rounded-md border ${getTileStyle(tileType, isRevealed, disabled)}`}
       style={{ minHeight: 35 }}
     >
       <View className="flex-1 items-center justify-center">
