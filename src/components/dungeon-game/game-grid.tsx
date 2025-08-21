@@ -101,52 +101,42 @@ export default function GameGrid({ level, disabled = false }: GameGridProps) {
 
   const handleTilePress = React.useCallback(
     (id: string, row: number, col: number) => {
-      console.log('🔍 [DEBUG] handleTilePress called for tile:', id);
-
       if (disabled || revealedTiles.has(id)) {
-        console.log(
-          '🔍 [DEBUG] tile press ignored - disabled or already revealed'
-        );
         return;
       }
 
       // Calculate tile index in the level tiles array
       const tileIndex = row * GRID_COLS + col;
       const tileType = levelTiles[tileIndex];
-      console.log('🔍 [DEBUG] tile type:', tileType);
 
-      // Use the provider's revealTile action and check if it succeeded
-      console.log('🔍 [DEBUG] calling revealTile...');
-      const revealSuccess = revealTile(row, col, tileType);
-      console.log('🔍 [DEBUG] revealTile result:', revealSuccess);
-
-      // Only proceed if tile reveal was successful (player had enough turns)
-      if (!revealSuccess) {
-        console.log('🔍 [DEBUG] tile reveal failed - not enough turns');
-        return; // Not enough turns, don't proceed with effects
+      // Check if player has enough turns (100 currency per turn)
+      const availableTurns = Math.floor(currency / 100);
+      if (availableTurns <= 0) {
+        return; // Not enough turns
       }
+
+      // Direct state updates - no function calls that could trigger navigation context
+      const tileKey = `${row}-${col}`;
+
+      // Update revealed tiles and tile types directly
+      updateRevealedTiles(new Set([...revealedTiles, tileKey]));
+      updateTileTypes({ ...tileTypes, [tileKey]: tileType });
+
+      // Deduct currency cost (100 per turn)
+      deductCurrency(100);
 
       // Handle tile-specific effects
       if (tileType === 'exit') {
         // Exit tile - complete level
-        console.log('🎯 Exit tile revealed! Level complete!');
-        console.log('🔍 [DEBUG] calling completeLevel...');
         completeLevel();
-        console.log('🔍 [DEBUG] completeLevel called successfully');
       } else if (tileType === 'trap') {
         // Trap tile - lose 1 additional turn (deduct 100 more currency)
-        console.log('💀 Trap tile revealed! Lost 1 additional turn!');
         deductCurrency(100);
-        // Don't call gameOver() immediately - let the turn system handle it
       } else if (tileType === 'treasure') {
         // Treasure tile - gain 1 free turn (add 100 currency)
-        console.log('💎 Treasure tile revealed! Gained 1 free turn!');
         addCurrency(100);
       } else if (tileType === 'bonus') {
         // Bonus tile - reveal adjacent tile and give free turn
-        console.log(
-          '⭐ Bonus tile revealed! Revealing adjacent tile and gaining free turn!'
-        );
         const adjacentTile = findUnrevealedAdjacentTile({
           tileId: id,
           revealedTiles,
@@ -157,27 +147,32 @@ export default function GameGrid({ level, disabled = false }: GameGridProps) {
           const [adjRow, adjCol] = adjacentTile.split('-').map(Number);
           const adjTileIndex = adjRow * GRID_COLS + adjCol;
           const adjTileType = levelTiles[adjTileIndex];
-          // Reveal adjacent tile without costing a turn using the provider's method
-          // This avoids calling state setters directly which can cause navigation context issues
-          revealTile(adjRow, adjCol, adjTileType);
+
+          // Direct state update for adjacent tile
+          const adjTileKey = `${adjRow}-${adjCol}`;
+          updateRevealedTiles(new Set([...revealedTiles, tileKey, adjTileKey]));
+          updateTileTypes({
+            ...tileTypes,
+            [tileKey]: tileType,
+            [adjTileKey]: adjTileType,
+          });
+
           // Give free turn for bonus tile (add 100 currency)
           addCurrency(100);
-          console.log(`🎁 Adjacent tile revealed: ${adjTileType}`);
         }
       }
     },
     [
       disabled,
       revealedTiles,
+      tileTypes,
       levelTiles,
-      revealTile,
+      currency,
       addCurrency,
       deductCurrency,
       updateRevealedTiles,
       updateTileTypes,
-      currency,
       completeLevel,
-      gameOver,
     ]
   );
 
