@@ -11,12 +11,8 @@ import {
 // Game grid constants
 const GRID_ROWS = 5;
 const GRID_COLS = 6;
-const GRID_TOTAL_TILES = GRID_ROWS * GRID_COLS;
 
 interface GameGridLayoutProps {
-  _cols: number;
-  _rows: number;
-  _totalTiles: number;
   revealedTiles: Set<string>;
   turnsUsed: number;
   grid: { id: string; row: number; col: number }[][];
@@ -25,9 +21,6 @@ interface GameGridLayoutProps {
 }
 
 function GameGridLayout({
-  _cols,
-  _rows,
-  _totalTiles,
   revealedTiles,
   grid,
   tileTypes,
@@ -176,9 +169,6 @@ export default function GameGrid({ level, disabled = false }: GameGridProps) {
 
   return (
     <GameGridLayout
-      _cols={GRID_COLS}
-      _rows={GRID_ROWS}
-      _totalTiles={GRID_TOTAL_TILES}
       revealedTiles={revealedTiles}
       turnsUsed={turnsUsed}
       grid={grid}

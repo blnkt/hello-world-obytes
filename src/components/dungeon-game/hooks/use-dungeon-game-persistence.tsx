@@ -15,10 +15,7 @@ import { useDungeonGameAsyncOperations } from './use-dungeon-game-async-operatio
 const DUNGEON_GAME_SAVE_KEY = 'DUNGEON_GAME_SAVE';
 
 export const useDungeonGamePersistence = () => {
-  const [saveDataString, _setSaveDataString] = useMMKVString(
-    DUNGEON_GAME_SAVE_KEY,
-    storage
-  );
+  const [saveDataString] = useMMKVString(DUNGEON_GAME_SAVE_KEY, storage);
 
   const [saveData, setSaveData] = useState<DungeonGameSaveData | null>(null);
   const [saveDataInfo, setSaveDataInfo] = useState<PersistenceMetadata | null>(

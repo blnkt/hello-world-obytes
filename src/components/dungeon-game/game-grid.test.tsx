@@ -136,14 +136,9 @@ describe('DungeonGame', () => {
     const tiles = screen.getAllByTestId('grid-tile');
     if (tiles.length > 0) {
       // Click first tile safely to test basic functionality
-      try {
-        fireEvent.press(tiles[0]);
-        // Should still show turn information after interaction
-        expect(screen.getAllByText(/Turns:/)[0]).toBeTruthy();
-      } catch (_error) {
-        // Handle any component re-render issues gracefully
-        // The test still passes if we can verify basic functionality
-      }
+      fireEvent.press(tiles[0]);
+      // Should still show turn information after interaction
+      expect(screen.getAllByText(/Turns:/)[0]).toBeTruthy();
     }
 
     // Verify that the game maintains proper state
