@@ -398,12 +398,16 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       }
 
       const tileKey = `${x}-${y}`;
-      setRevealedTiles((prev) => new Set([...prev, tileKey]));
-      setTileTypes((prev) => ({ ...prev, [tileKey]: type }));
 
-      // Increment turn count and deduct currency cost (100 per turn)
-      incrementTurn();
-      setCurrency((prev) => prev - 100);
+      // Defer state updates to avoid navigation context issues during tile press
+      setTimeout(() => {
+        setRevealedTiles((prev) => new Set([...prev, tileKey]));
+        setTileTypes((prev) => ({ ...prev, [tileKey]: type }));
+
+        // Increment turn count and deduct currency cost (100 per turn)
+        incrementTurn();
+        setCurrency((prev) => prev - 100);
+      }, 0);
 
       return true; // Tile reveal successful
     },
