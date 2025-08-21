@@ -72,8 +72,10 @@ const createSaveDataHelper = (params: {
   revealedTiles: Set<string>;
   tileTypes: Record<string, string>;
   turnsUsed: number;
+  currency: number;
 }): Omit<DungeonGameSaveData, 'version' | 'timestamp'> => {
-  const { gameState, level, revealedTiles, tileTypes, turnsUsed } = params;
+  const { gameState, level, revealedTiles, tileTypes, turnsUsed, currency } =
+    params;
   return {
     gameState,
     level,
@@ -89,6 +91,7 @@ const createSaveDataHelper = (params: {
       };
     }),
     turnsUsed,
+    currency,
     achievements: {
       totalGamesPlayed: 0,
       gamesWon: 0,
@@ -113,6 +116,7 @@ const restoreGameStateHelper = (params: {
   setLevel: (level: number) => void;
   setGameState: (state: GameState) => void;
   setTurnsUsed: (turns: number) => void;
+  setCurrency: (currency: number) => void;
   setRevealedTiles: (tiles: Set<string>) => void;
   setTileTypes: (types: Record<string, string>) => void;
   setLastSaveTime: (time: number) => void;
@@ -122,6 +126,7 @@ const restoreGameStateHelper = (params: {
     setLevel,
     setGameState,
     setTurnsUsed,
+    setCurrency,
     setRevealedTiles,
     setTileTypes,
     setLastSaveTime,
@@ -129,6 +134,7 @@ const restoreGameStateHelper = (params: {
   const {
     gridState,
     turnsUsed: savedTurns,
+    currency: savedCurrency,
     level: savedLevel,
     gameState: savedGameState,
   } = result.data;
@@ -137,6 +143,7 @@ const restoreGameStateHelper = (params: {
   setLevel(savedLevel);
   setGameState(savedGameState);
   setTurnsUsed(savedTurns);
+  setCurrency(savedCurrency || 1000); // Default to 1000 if not saved
 
   // Convert grid state back to our format
   const newRevealedTiles = new Set<string>();
@@ -191,8 +198,9 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       revealedTiles,
       tileTypes,
       turnsUsed,
+      currency,
     });
-  }, [gameState, level, revealedTiles, tileTypes, turnsUsed]);
+  }, [gameState, level, revealedTiles, tileTypes, turnsUsed, currency]);
 
   // Debounced save function
   const debouncedSave = useCallback(() => {
@@ -252,12 +260,14 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       const tileKey = `${x}-${y}`;
       setRevealedTiles((prev) => new Set([...prev, tileKey]));
       setTileTypes((prev) => ({ ...prev, [tileKey]: type }));
-      // Increment turn count when tile is revealed
+
+      // Increment turn count and deduct currency cost (100 per turn)
       incrementTurn();
+      setCurrency((prev) => prev - 100);
 
       return true; // Tile reveal successful
     },
-    [incrementTurn, currency]
+    [incrementTurn, currency, setCurrency]
   );
 
   const startNewGame = useCallback(() => {
@@ -301,6 +311,7 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
           setLevel,
           setGameState,
           setTurnsUsed,
+          setCurrency,
           setRevealedTiles,
           setTileTypes,
           setLastSaveTime,

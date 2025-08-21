@@ -191,6 +191,7 @@ describe('Dungeon Game Types', () => {
           level: 1,
           gridState: [],
           turnsUsed: 0,
+          currency: 1000,
           achievements: {
             totalGamesPlayed: 0,
             gamesWon: 0,
@@ -244,6 +245,7 @@ describe('Dungeon Game Types', () => {
           },
         ],
         turnsUsed: 0,
+        currency: 1000,
         achievements: {
           totalGamesPlayed: 0,
           gamesWon: 0,

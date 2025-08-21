@@ -5,6 +5,7 @@ export interface DungeonGameSaveData {
   level: number;
   gridState: GridTileState[];
   turnsUsed: number;
+  currency: number;
   achievements: AchievementProgress;
   statistics: GameStatistics;
   itemEffects: ActiveItemEffect[];

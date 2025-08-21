@@ -36,6 +36,7 @@ describe('DungeonGamePersistenceService', () => {
       },
     ],
     turnsUsed: 0,
+    currency: 1000,
     achievements: {
       totalGamesPlayed: 0,
       gamesWon: 0,
@@ -272,6 +273,7 @@ describe('DungeonGamePersistenceService', () => {
         level: 1,
         gridState: [],
         turnsUsed: 0,
+        currency: 1000,
         achievements: {
           totalGamesPlayed: 0,
           gamesWon: 0,
@@ -374,6 +376,7 @@ describe('Convenience Functions', () => {
         level: 1,
         gridState: [],
         turnsUsed: 0,
+        currency: 1000,
         achievements: {
           totalGamesPlayed: 0,
           gamesWon: 0,
