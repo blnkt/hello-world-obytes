@@ -10,6 +10,8 @@ const mockUseGameState = {
   startNewGame: jest.fn(),
   isLoading: false,
   lastSaveTime: Date.now() as number | null,
+  canStartGame: jest.fn(() => true), // Mock function that returns true by default
+  getTurnValidationMessage: jest.fn(() => 'Ready to play!'), // Mock function that returns success message
 };
 
 jest.mock('./providers/game-state-provider', () => ({
@@ -107,6 +109,22 @@ describe('ResumeChoiceModal', () => {
 
       expect(mockUseGameState.startNewGame).toHaveBeenCalledTimes(1);
       expect(mockOnClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not start new game when currency is insufficient', () => {
+      // Mock insufficient currency
+      mockUseGameState.canStartGame = jest.fn(() => false);
+      mockUseGameState.getTurnValidationMessage = jest.fn(
+        () => 'Need at least 100 steps'
+      );
+
+      render(<ResumeChoiceModal {...defaultProps} />);
+
+      fireEvent.press(screen.getByText('Start New Game'));
+
+      // Should not call startNewGame when currency is insufficient
+      expect(mockUseGameState.startNewGame).not.toHaveBeenCalled();
+      expect(mockOnClose).not.toHaveBeenCalled();
     });
 
     it('should call onClose when close button is pressed', () => {
