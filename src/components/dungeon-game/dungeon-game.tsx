@@ -66,9 +66,11 @@ export const GameStateDisplay: React.FC<{ gameState: GameState }> = ({
 }) => {
   if (gameState === 'Win') {
     return (
-      <View style={styles.gameState}>
-        <Text style={styles.winText}>🎉 Level Complete! 🎉</Text>
-        <Text style={styles.winSubtext}>
+      <View className="mx-4 mb-4 items-center rounded-xl bg-white p-4 shadow-lg">
+        <Text className="text-xl font-bold text-green-600">
+          🎉 Level Complete! 🎉
+        </Text>
+        <Text className="mt-1 text-center text-sm text-green-600">
           Congratulations! You've completed this level!
         </Text>
       </View>
@@ -77,18 +79,20 @@ export const GameStateDisplay: React.FC<{ gameState: GameState }> = ({
 
   if (gameState === 'Game Over') {
     return (
-      <View style={styles.gameState}>
-        <Text style={styles.gameOverText}>💀 Game Over 💀</Text>
-        <Text style={styles.gameOverSubtext}>Better luck next time!</Text>
+      <View className="mx-4 mb-4 items-center rounded-xl bg-white p-4 shadow-lg">
+        <Text className="text-xl font-bold text-red-600">💀 Game Over 💀</Text>
+        <Text className="mt-1 text-center text-sm text-red-600">
+          Better luck next time!
+        </Text>
       </View>
     );
   }
 
   if (gameState === 'Active') {
     return (
-      <View style={styles.gameState}>
-        <Text style={styles.activeText}>🎮 Game Active</Text>
-        <Text style={styles.activeSubtext}>
+      <View className="mx-4 mb-4 items-center rounded-xl bg-white p-4 shadow-lg">
+        <Text className="text-xl font-bold text-blue-600">🎮 Game Active</Text>
+        <Text className="mt-1 text-center text-sm text-blue-600">
           Explore the dungeon and find the exit!
         </Text>
       </View>
@@ -96,9 +100,13 @@ export const GameStateDisplay: React.FC<{ gameState: GameState }> = ({
   }
 
   return (
-    <View style={styles.gameState}>
-      <Text style={styles.defaultText}>🎲 Ready to Play</Text>
-      <Text style={styles.defaultSubtext}>Start your adventure!</Text>
+    <View className="mx-4 mb-4 items-center rounded-xl bg-white p-4 shadow-lg">
+      <Text className="text-xl font-bold text-purple-600">
+        🎲 Ready to Play
+      </Text>
+      <Text className="mt-1 text-center text-sm text-purple-600">
+        Start your adventure!
+      </Text>
     </View>
   );
 };
@@ -313,67 +321,7 @@ const styles = StyleSheet.create({
   disabledButtonText: {
     color: '#666666',
   },
-  gameState: {
-    backgroundColor: 'white',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 16,
-    marginHorizontal: 16,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  winText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#4CAF50',
-  },
-  gameOverText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#F44336',
-  },
-  winSubtext: {
-    fontSize: 14,
-    color: '#4CAF50',
-    marginTop: 4,
-    textAlign: 'center',
-  },
-  gameOverSubtext: {
-    fontSize: 14,
-    color: '#F44336',
-    marginTop: 4,
-    textAlign: 'center',
-  },
-  activeText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#2196F3',
-  },
-  activeSubtext: {
-    fontSize: 14,
-    color: '#2196F3',
-    marginTop: 4,
-    textAlign: 'center',
-  },
 
-  defaultText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#9C27B0',
-  },
-  defaultSubtext: {
-    fontSize: 14,
-    color: '#9C27B0',
-    marginTop: 4,
-    textAlign: 'center',
-  },
   errorContainer: {
     backgroundColor: '#FFEBEE',
     borderColor: '#F44336',
