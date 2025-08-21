@@ -314,23 +314,30 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
 
   // Debounced save function
   const debouncedSave = useCallback(() => {
+    console.log('🔍 [DEBUG] debouncedSave called');
+
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
     }
 
     saveTimeoutRef.current = setTimeout(async () => {
+      console.log('🔍 [DEBUG] debouncedSave timeout executing...');
       try {
         const saveData = createSaveData();
+        console.log('🔍 [DEBUG] saveData created, calling saveGameState...');
         const result = await saveGameState(saveData);
 
         if (result.success) {
           setLastError(null);
           setLastSaveTime(Date.now());
+          console.log('🔍 [DEBUG] save successful');
         } else {
           setLastError(result.error || 'Save failed');
+          console.log('🔍 [DEBUG] save failed:', result.error);
         }
       } catch (error) {
         setLastError(error instanceof Error ? error.message : 'Unknown error');
+        console.log('🔍 [DEBUG] save error:', error);
       }
     }, 1000); // 1 second debounce
   }, [createSaveData, saveGameState]);
@@ -437,6 +444,8 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
   ]);
 
   const completeLevel = useCallback(() => {
+    console.log('🔍 [DEBUG] completeLevel called - starting validation...');
+
     // Comprehensive validation before state transition
     if (!validateStateTransition(gameState, 'Win')) {
       console.warn(`Cannot transition from ${gameState} to Win state`);
@@ -453,13 +462,23 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       return;
     }
 
+    console.log(
+      '🔍 [DEBUG] completeLevel validation passed - updating state...'
+    );
+
     // Update timing and perform state transition
     setLastStateChange(Date.now());
     setGameState('Win');
     setLastError(null);
 
+    console.log(
+      '🔍 [DEBUG] completeLevel state updated - calling debouncedSave...'
+    );
+
     // Immediate save for level completion
     debouncedSave();
+
+    console.log('🔍 [DEBUG] completeLevel completed successfully');
   }, [
     debouncedSave,
     gameState,

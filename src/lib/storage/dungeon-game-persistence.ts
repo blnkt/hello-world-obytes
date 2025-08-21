@@ -24,6 +24,9 @@ export class DungeonGamePersistenceService {
   async saveGameState(
     saveData: Omit<DungeonGameSaveData, 'version' | 'timestamp'>
   ): Promise<SaveOperationResult> {
+    console.log(
+      '🔍 [DEBUG] DungeonGamePersistenceService.saveGameState called'
+    );
     try {
       const completeSaveData: DungeonGameSaveData = {
         ...saveData,
@@ -34,7 +37,9 @@ export class DungeonGamePersistenceService {
       const jsonString = JSON.stringify(completeSaveData);
       const dataSize = new Blob([jsonString]).size;
 
+      console.log('🔍 [DEBUG] calling storage.set...');
       storage.set(DUNGEON_GAME_SAVE_KEY, jsonString);
+      console.log('🔍 [DEBUG] storage.set completed');
       this.saveCount++;
 
       const metadata: PersistenceMetadata = {
@@ -44,11 +49,13 @@ export class DungeonGamePersistenceService {
         isValid: true,
       };
 
+      console.log('🔍 [DEBUG] saveGameState returning success');
       return {
         success: true,
         metadata,
       };
     } catch (error) {
+      console.log('🔍 [DEBUG] saveGameState error:', error);
       return {
         success: false,
         error:

@@ -101,19 +101,28 @@ export default function GameGrid({ level, disabled = false }: GameGridProps) {
 
   const handleTilePress = React.useCallback(
     (id: string, row: number, col: number) => {
+      console.log('🔍 [DEBUG] handleTilePress called for tile:', id);
+
       if (disabled || revealedTiles.has(id)) {
+        console.log(
+          '🔍 [DEBUG] tile press ignored - disabled or already revealed'
+        );
         return;
       }
 
       // Calculate tile index in the level tiles array
       const tileIndex = row * GRID_COLS + col;
       const tileType = levelTiles[tileIndex];
+      console.log('🔍 [DEBUG] tile type:', tileType);
 
       // Use the provider's revealTile action and check if it succeeded
+      console.log('🔍 [DEBUG] calling revealTile...');
       const revealSuccess = revealTile(row, col, tileType);
+      console.log('🔍 [DEBUG] revealTile result:', revealSuccess);
 
       // Only proceed if tile reveal was successful (player had enough turns)
       if (!revealSuccess) {
+        console.log('🔍 [DEBUG] tile reveal failed - not enough turns');
         return; // Not enough turns, don't proceed with effects
       }
 
@@ -121,7 +130,9 @@ export default function GameGrid({ level, disabled = false }: GameGridProps) {
       if (tileType === 'exit') {
         // Exit tile - complete level
         console.log('🎯 Exit tile revealed! Level complete!');
+        console.log('🔍 [DEBUG] calling completeLevel...');
         completeLevel();
+        console.log('🔍 [DEBUG] completeLevel called successfully');
       } else if (tileType === 'trap') {
         // Trap tile - lose 1 additional turn (deduct 100 more currency)
         console.log('💀 Trap tile revealed! Lost 1 additional turn!');

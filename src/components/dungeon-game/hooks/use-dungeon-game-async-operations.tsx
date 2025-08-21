@@ -20,11 +20,14 @@ const useSaveOperation = () => {
     async (
       gameData: Omit<DungeonGameSaveData, 'version' | 'timestamp'>
     ): Promise<SaveOperationResult> => {
+      console.log('🔍 [DEBUG] saveGameState called');
       setIsLoading(true);
       setLastError(null);
 
       try {
+        console.log('🔍 [DEBUG] calling saveDungeonGameState...');
         const result = await saveDungeonGameState(gameData);
+        console.log('🔍 [DEBUG] saveDungeonGameState result:', result);
 
         if (result.success) {
           setLastError(null);
@@ -34,6 +37,7 @@ const useSaveOperation = () => {
 
         return result;
       } catch (error) {
+        console.log('🔍 [DEBUG] saveGameState error:', error);
         const errorMessage =
           error instanceof Error ? error.message : 'Unknown error';
         setLastError(errorMessage);
