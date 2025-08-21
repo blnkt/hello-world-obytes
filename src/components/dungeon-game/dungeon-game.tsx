@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -121,6 +122,8 @@ const GameControls: React.FC<{
 
 // eslint-disable-next-line max-lines-per-function
 export default function DungeonGame() {
+  const router = useRouter();
+
   const {
     level,
     gameState,
@@ -157,10 +160,8 @@ export default function DungeonGame() {
   };
 
   const handleMainMenu = () => {
-    // Navigate back to the main app screen
-    // For now, we'll just reset the game to a clean state
-    startNewGame();
-    setLevel(1);
+    // Navigate back to the home screen
+    router.push('/(app)');
   };
 
   const handleNextLevel = () => {
