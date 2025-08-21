@@ -89,8 +89,6 @@ export default function GameGrid({ level, disabled = false }: GameGridProps) {
     gameOver,
     currency,
     setCurrency,
-    setRevealedTiles,
-    setTileTypes,
   } = useGameState();
 
   const grid = React.useMemo(
@@ -145,9 +143,9 @@ export default function GameGrid({ level, disabled = false }: GameGridProps) {
           const [adjRow, adjCol] = adjacentTile.split('-').map(Number);
           const adjTileIndex = adjRow * GRID_COLS + adjCol;
           const adjTileType = levelTiles[adjTileIndex];
-          // Reveal adjacent tile without costing a turn
-          setRevealedTiles((prev) => new Set([...prev, adjacentTile]));
-          setTileTypes((prev) => ({ ...prev, [adjacentTile]: adjTileType }));
+          // Reveal adjacent tile without costing a turn using the provider's method
+          // This avoids calling state setters directly which can cause navigation context issues
+          revealTile(adjRow, adjCol, adjTileType);
           // Give free turn for bonus tile (add 100 currency)
           setCurrency(currency + 100);
           console.log(`🎁 Adjacent tile revealed: ${adjTileType}`);
