@@ -259,11 +259,6 @@ export default function DungeonGame() {
           level={level}
           turnsUsed={turnsUsed}
           onMainMenu={handleMainMenu}
-          onRetry={() => {
-            if (canStartGame()) {
-              startNewGame();
-            }
-          }}
         />
       )}
     </View>

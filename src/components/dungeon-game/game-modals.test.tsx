@@ -79,7 +79,6 @@ describe('GameOverModal', () => {
     level: 2,
     turnsUsed: 15,
     onMainMenu: jest.fn(),
-    onRetry: jest.fn(),
   };
 
   beforeEach(() => {
@@ -120,15 +119,6 @@ describe('GameOverModal', () => {
     expect(screen.getByText('Level 2 Failed')).toBeTruthy();
   });
 
-  it('should call onRetry when Try Again button is pressed', () => {
-    render(<GameOverModal {...defaultProps} />);
-
-    const tryAgainButton = screen.getByText('Try Again');
-    fireEvent.press(tryAgainButton);
-
-    expect(defaultProps.onRetry).toHaveBeenCalledTimes(1);
-  });
-
   it('should call onMainMenu when Main Menu button is pressed', () => {
     render(<GameOverModal {...defaultProps} />);
 
@@ -138,10 +128,9 @@ describe('GameOverModal', () => {
     expect(defaultProps.onMainMenu).toHaveBeenCalledTimes(1);
   });
 
-  it('should render both action buttons', () => {
+  it('should render the main menu button', () => {
     render(<GameOverModal {...defaultProps} />);
 
-    expect(screen.getByText('Try Again')).toBeTruthy();
     expect(screen.getByText('Main Menu')).toBeTruthy();
   });
 

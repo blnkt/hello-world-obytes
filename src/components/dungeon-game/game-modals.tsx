@@ -15,7 +15,6 @@ interface GameOverModalProps {
   level: number;
   turnsUsed: number;
   onMainMenu: () => void;
-  onRetry: () => void;
 }
 
 export function WinModal({
@@ -85,7 +84,6 @@ export function GameOverModal({
   level,
   turnsUsed,
   onMainMenu,
-  onRetry,
 }: GameOverModalProps) {
   // Don't render if not visible
   if (!visible) {
@@ -124,12 +122,6 @@ export function GameOverModal({
 
           {/* Actions */}
           <View className="space-y-3">
-            <Button
-              label="Try Again"
-              onPress={onRetry}
-              size="lg"
-              className="bg-orange-600 hover:bg-orange-700"
-            />
             <Button
               label="Main Menu"
               onPress={onMainMenu}
