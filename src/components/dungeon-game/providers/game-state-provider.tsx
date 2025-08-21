@@ -184,6 +184,10 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
   const [lastError, setLastError] = useState<string | null>(null);
   const [lastSaveTime, setLastSaveTime] = useState<number | null>(null);
 
+  // State transition timing validation
+  const [lastStateChange, setLastStateChange] = useState<number>(Date.now());
+  const MIN_STATE_CHANGE_INTERVAL = 100; // 100ms minimum between state changes
+
   // Debounced save ref
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
 
@@ -205,6 +209,87 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
     },
     []
   );
+
+  // State consistency validation helper
+  const validateGameStateConsistency = useCallback((): boolean => {
+    // Validate that game state data is consistent
+    if (gameState === 'Active') {
+      // In active state, we should have valid game data
+      if (level < 1) {
+        console.error('Invalid level in Active state:', level);
+        return false;
+      }
+      if (currency < 0) {
+        console.error('Invalid currency in Active state:', currency);
+        return false;
+      }
+      if (turnsUsed < 0) {
+        console.error('Invalid turns used in Active state:', turnsUsed);
+        return false;
+      }
+    }
+
+    // Validate that revealed tiles and tile types are consistent
+    for (const tileKey of revealedTiles) {
+      if (!tileTypes[tileKey]) {
+        console.error('Revealed tile without type:', tileKey);
+        return false;
+      }
+    }
+
+    // Validate that tile types only exist for revealed tiles
+    for (const tileKey of Object.keys(tileTypes)) {
+      if (!revealedTiles.has(tileKey)) {
+        console.error('Tile type for unrevealed tile:', tileKey);
+        return false;
+      }
+    }
+
+    return true;
+  }, [gameState, level, currency, turnsUsed, revealedTiles, tileTypes]);
+
+  // Business logic validation helper
+  const validateGameAction = useCallback(
+    (action: string, context: any): boolean => {
+      // Validate that actions make sense in current game state
+      if (gameState === 'Win' || gameState === 'Game Over') {
+        // Most actions are not allowed in terminal states
+        if (action === 'revealTile') {
+          console.warn(`Cannot ${action} in ${gameState} state`);
+          return false;
+        }
+      }
+
+      if (gameState === 'Active') {
+        // Validate turn-based actions
+        if (action === 'revealTile') {
+          const availableTurns = Math.floor(currency / 100);
+          if (availableTurns <= 0) {
+            console.warn('Cannot reveal tile: no turns available');
+            return false;
+          }
+        }
+      }
+
+      return true;
+    },
+    [gameState, currency]
+  );
+
+  // Transition timing validation helper
+  const validateTransitionTiming = useCallback((): boolean => {
+    const now = Date.now();
+    const timeSinceLastChange = now - lastStateChange;
+
+    if (timeSinceLastChange < MIN_STATE_CHANGE_INTERVAL) {
+      console.warn(
+        `State change too rapid: ${timeSinceLastChange}ms since last change`
+      );
+      return false;
+    }
+
+    return true;
+  }, [lastStateChange]);
 
   // Convert current state to save data
   const createSaveData = useCallback((): Omit<
@@ -267,6 +352,11 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
 
   const revealTile = useCallback(
     (x: number, y: number, type: string) => {
+      // Business logic validation
+      if (!validateGameAction('revealTile', { x, y, type })) {
+        return false;
+      }
+
       // Calculate available turns based on currency (100 currency per turn)
       const availableTurns = Math.floor(currency / 100);
 
@@ -286,7 +376,7 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
 
       return true; // Tile reveal successful
     },
-    [incrementTurn, currency, setCurrency]
+    [incrementTurn, currency, setCurrency, validateGameAction]
   );
 
   const startNewGame = useCallback(() => {
@@ -295,6 +385,14 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       console.warn(`Cannot transition from ${gameState} to Active state`);
       return;
     }
+
+    if (!validateTransitionTiming()) {
+      console.warn('State transition timing validation failed');
+      return;
+    }
+
+    // Update timing and perform state transition
+    setLastStateChange(Date.now());
 
     // Reset all game state to initial values
     setLevel(1);
@@ -307,35 +405,76 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
 
     // Immediate save for new game
     debouncedSave();
-  }, [debouncedSave, gameState, validateStateTransition]);
+  }, [
+    debouncedSave,
+    gameState,
+    validateStateTransition,
+    validateTransitionTiming,
+  ]);
 
   const completeLevel = useCallback(() => {
-    // Validate state transition
+    // Comprehensive validation before state transition
     if (!validateStateTransition(gameState, 'Win')) {
       console.warn(`Cannot transition from ${gameState} to Win state`);
       return;
     }
 
+    if (!validateGameStateConsistency()) {
+      console.error('Game state consistency validation failed');
+      return;
+    }
+
+    if (!validateTransitionTiming()) {
+      console.warn('State transition timing validation failed');
+      return;
+    }
+
+    // Update timing and perform state transition
+    setLastStateChange(Date.now());
     setGameState('Win');
     setLastError(null);
 
     // Immediate save for level completion
     debouncedSave();
-  }, [debouncedSave, gameState, validateStateTransition]);
+  }, [
+    debouncedSave,
+    gameState,
+    validateStateTransition,
+    validateGameStateConsistency,
+    validateTransitionTiming,
+  ]);
 
   const gameOver = useCallback(() => {
-    // Validate state transition
+    // Comprehensive validation before state transition
     if (!validateStateTransition(gameState, 'Game Over')) {
       console.warn(`Cannot transition from ${gameState} to Game Over state`);
       return;
     }
 
+    if (!validateGameStateConsistency()) {
+      console.error('Game state consistency validation failed');
+      return;
+    }
+
+    if (!validateTransitionTiming()) {
+      console.warn('State transition timing validation failed');
+      return;
+    }
+
+    // Update timing and perform state transition
+    setLastStateChange(Date.now());
     setGameState('Game Over');
     setLastError(null);
 
     // Immediate save for game over
     debouncedSave();
-  }, [debouncedSave, gameState, validateStateTransition]);
+  }, [
+    debouncedSave,
+    gameState,
+    validateStateTransition,
+    validateGameStateConsistency,
+    validateTransitionTiming,
+  ]);
 
   // Resume functionality
   const resumeGame = useCallback(async () => {
@@ -403,6 +542,18 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       }
     }
   }, [currency, gameState, gameOver]);
+
+  // Periodic state consistency validation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!validateGameStateConsistency()) {
+        console.error('Periodic state consistency check failed');
+        // Don't auto-fix, just log the error for debugging
+      }
+    }, 5000); // Check every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [validateGameStateConsistency]);
 
   // Context value
   const contextValue = useMemo<GameStateContextValue>(

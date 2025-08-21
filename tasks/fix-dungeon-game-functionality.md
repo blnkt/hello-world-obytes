@@ -35,7 +35,7 @@ The migration to GameStateProvider has broken several core dungeon game features
 - [x] 2.1 Fix win condition logic (exit tile revealed)
 - [x] 2.2 Fix game over condition (no turns remaining)
 - [x] 2.3 Implement proper state transitions between Active/Win/Game Over
-- [ ] 2.4 Add state validation to prevent invalid transitions
+- [x] 2.4 Add state validation to prevent invalid transitions
 - [ ] 2.5 Fix game over modal display
 
 ### 3.0 Fix Tile Effects System
