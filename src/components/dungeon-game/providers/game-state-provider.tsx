@@ -69,6 +69,13 @@ interface GameStateContextValue {
     availableTurns: number;
     minimumTurns: number;
   };
+  getNextLevel: () => number;
+  getLevelProgress: () => {
+    currentLevel: number;
+    nextLevel: number;
+    isMaxLevel: boolean;
+    levelCompletion: 'in_progress' | 'completed' | 'locked';
+  };
 }
 
 const GameStateContext = createContext<GameStateContextValue | null>(null);
@@ -557,6 +564,25 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
     };
   }, [currency, level]);
 
+  // Level progression helper functions
+  const getNextLevel = useCallback(() => {
+    return level + 1;
+  }, [level]);
+
+  const getLevelProgress = useCallback((): {
+    currentLevel: number;
+    nextLevel: number;
+    isMaxLevel: boolean;
+    levelCompletion: 'in_progress' | 'completed' | 'locked';
+  } => {
+    return {
+      currentLevel: level,
+      nextLevel: level + 1,
+      isMaxLevel: false, // For future expansion
+      levelCompletion: 'in_progress' as const, // 'in_progress', 'completed', 'locked'
+    };
+  }, [level]);
+
   const revealTile = useCallback(
     (x: number, y: number, type: string) => {
       // Business logic validation
@@ -696,6 +722,15 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
     setLastStateChange(Date.now());
     setGameState('Win');
     setLastError(null);
+
+    // Increment level for next level progression
+    setLevel((prevLevel) => {
+      const newLevel = prevLevel + 1;
+      console.log(
+        `Level ${prevLevel} completed! Advancing to level ${newLevel}`
+      );
+      return newLevel;
+    });
 
     // Immediate save for level completion
     debouncedSave();
@@ -882,6 +917,8 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       canProgressToLevel,
       getLevelProgressionValidationMessage,
       getGameStartValidationSummary,
+      getNextLevel,
+      getLevelProgress,
     }),
     [
       level,
@@ -916,6 +953,8 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       canProgressToLevel,
       getLevelProgressionValidationMessage,
       getGameStartValidationSummary,
+      getNextLevel,
+      getLevelProgress,
     ]
   );
 
