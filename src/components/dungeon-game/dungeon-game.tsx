@@ -61,13 +61,16 @@ const GameControls: React.FC<{
 );
 
 // Helper component for game state display
-const GameStateDisplay: React.FC<{ gameState: GameState }> = ({
+export const GameStateDisplay: React.FC<{ gameState: GameState }> = ({
   gameState,
 }) => {
   if (gameState === 'Win') {
     return (
       <View style={styles.gameState}>
         <Text style={styles.winText}>🎉 Level Complete! 🎉</Text>
+        <Text style={styles.winSubtext}>
+          Congratulations! You've completed this level!
+        </Text>
       </View>
     );
   }
@@ -76,11 +79,28 @@ const GameStateDisplay: React.FC<{ gameState: GameState }> = ({
     return (
       <View style={styles.gameState}>
         <Text style={styles.gameOverText}>💀 Game Over 💀</Text>
+        <Text style={styles.gameOverSubtext}>Better luck next time!</Text>
       </View>
     );
   }
 
-  return null;
+  if (gameState === 'Active') {
+    return (
+      <View style={styles.gameState}>
+        <Text style={styles.activeText}>🎮 Game Active</Text>
+        <Text style={styles.activeSubtext}>
+          Explore the dungeon and find the exit!
+        </Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.gameState}>
+      <Text style={styles.defaultText}>🎲 Ready to Play</Text>
+      <Text style={styles.defaultSubtext}>Start your adventure!</Text>
+    </View>
+  );
 };
 
 // eslint-disable-next-line max-lines-per-function
@@ -165,6 +185,9 @@ export default function DungeonGame() {
           </Text>
         </View>
       )}
+
+      {/* Game State Display */}
+      <GameStateDisplay gameState={gameState} />
 
       {/* Game Grid */}
       <GameGrid level={level} disabled={gameState !== 'Active'} />
@@ -295,7 +318,16 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     marginBottom: 16,
+    marginHorizontal: 16,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   winText: {
     fontSize: 20,
@@ -306,6 +338,41 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#F44336',
+  },
+  winSubtext: {
+    fontSize: 14,
+    color: '#4CAF50',
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  gameOverSubtext: {
+    fontSize: 14,
+    color: '#F44336',
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  activeText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#2196F3',
+  },
+  activeSubtext: {
+    fontSize: 14,
+    color: '#2196F3',
+    marginTop: 4,
+    textAlign: 'center',
+  },
+
+  defaultText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#9C27B0',
+  },
+  defaultSubtext: {
+    fontSize: 14,
+    color: '#9C27B0',
+    marginTop: 4,
+    textAlign: 'center',
   },
   errorContainer: {
     backgroundColor: '#FFEBEE',
