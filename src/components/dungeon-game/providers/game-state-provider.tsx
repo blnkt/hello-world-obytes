@@ -343,6 +343,17 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
     checkExistingSave();
   }, [hasExistingSaveData, loadGameState]);
 
+  // Monitor available turns and trigger game over when out of turns
+  useEffect(() => {
+    if (gameState === 'Active') {
+      const availableTurns = Math.floor(currency / 100);
+      if (availableTurns <= 0) {
+        // No turns available, trigger game over
+        gameOver();
+      }
+    }
+  }, [currency, gameState, gameOver]);
+
   // Context value
   const contextValue = useMemo<GameStateContextValue>(
     () => ({
