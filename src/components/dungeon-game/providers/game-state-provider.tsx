@@ -283,20 +283,30 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
   }, [debouncedSave]);
 
   const completeLevel = useCallback(() => {
+    // Prevent multiple win calls
+    if (gameState === 'Win') {
+      return;
+    }
+
     setGameState('Win');
     setLastError(null);
 
     // Immediate save for level completion
     debouncedSave();
-  }, [debouncedSave]);
+  }, [debouncedSave, gameState]);
 
   const gameOver = useCallback(() => {
+    // Prevent multiple game over calls
+    if (gameState === 'Game Over') {
+      return;
+    }
+
     setGameState('Game Over');
     setLastError(null);
 
     // Immediate save for game over
     debouncedSave();
-  }, [debouncedSave]);
+  }, [debouncedSave, gameState]);
 
   // Resume functionality
   const resumeGame = useCallback(async () => {
