@@ -25,7 +25,8 @@ function GameGridLayout({
   grid,
   tileTypes,
   onTilePress,
-}: GameGridLayoutProps) {
+  insufficientCurrency,
+}: GameGridLayoutProps & { insufficientCurrency: boolean }) {
   return (
     <View className="px-4 pb-2">
       {/* Game Grid with light brown frame */}
@@ -42,6 +43,7 @@ function GameGridLayout({
                   isRevealed={revealedTiles.has(tile.id)}
                   tileType={tileTypes[tile.id]}
                   onPress={onTilePress}
+                  insufficientCurrency={insufficientCurrency}
                 />
               ))}
             </View>
@@ -87,10 +89,10 @@ export default function GameGrid({ level, disabled = false }: GameGridProps) {
     revealTile,
     revealAdjacentTile,
     completeLevel,
-    gameOver,
     currency,
     addCurrency,
     deductCurrency,
+    canRevealTile,
   } = useGameState();
 
   const grid = React.useMemo(
@@ -98,42 +100,20 @@ export default function GameGrid({ level, disabled = false }: GameGridProps) {
     []
   );
 
-  const handleTilePress = React.useCallback(
-    (id: string, row: number, col: number) => {
-      if (disabled || revealedTiles.has(id)) {
-        return;
-      }
-
-      // Calculate tile index in the level tiles array
-      const tileIndex = row * GRID_COLS + col;
-      const tileType = levelTiles[tileIndex];
-
-      // Check if player has enough turns (100 currency per turn)
-      const availableTurns = Math.floor(currency / 100);
-      if (availableTurns <= 0) {
-        return; // Not enough turns
-      }
-
-      // Use revealTile method for safe state updates
-      const tileKey = `${row}-${col}`;
-      const revealSuccess = revealTile(row, col, tileType);
-
-      if (!revealSuccess) {
-        return; // Tile reveal failed
-      }
-
-      // Handle tile-specific effects
+  // Helper function to handle tile effects
+  const handleTileEffects = React.useCallback(
+    (tileType: string, id: string) => {
       if (tileType === 'exit') {
-        // Exit tile - complete level
         completeLevel();
       } else if (tileType === 'trap') {
-        // Trap tile - lose 1 additional turn (deduct 100 more currency)
-        deductCurrency(100);
+        if (currency >= 100) {
+          deductCurrency(100);
+        } else {
+          console.warn('Cannot apply trap penalty: insufficient currency');
+        }
       } else if (tileType === 'treasure') {
-        // Treasure tile - gain 1 free turn (add 100 currency)
         addCurrency(100);
       } else if (tileType === 'bonus') {
-        // Bonus tile - reveal adjacent tile and give free turn
         const adjacentTile = findUnrevealedAdjacentTile({
           tileId: id,
           revealedTiles,
@@ -146,30 +126,59 @@ export default function GameGrid({ level, disabled = false }: GameGridProps) {
           const adjTileIndex = adjRow * GRID_COLS + adjCol;
           const adjTileType = levelTiles[adjTileIndex];
 
-          // Use revealAdjacentTile method for safe adjacent tile reveal
           const adjacentRevealSuccess = revealAdjacentTile(
             adjRow,
             adjCol,
             adjTileType
           );
           if (adjacentRevealSuccess) {
-            // Give free turn for bonus tile (add 100 currency)
             addCurrency(100);
           }
         }
       }
     },
     [
-      disabled,
-      revealedTiles,
-      tileTypes,
-      levelTiles,
       currency,
       addCurrency,
       deductCurrency,
-      revealTile,
       revealAdjacentTile,
       completeLevel,
+      revealedTiles,
+      levelTiles,
+    ]
+  );
+
+  const handleTilePress = React.useCallback(
+    (id: string, row: number, col: number) => {
+      if (disabled || revealedTiles.has(id)) {
+        return;
+      }
+
+      const tileIndex = row * GRID_COLS + col;
+      const tileType = levelTiles[tileIndex];
+
+      // Enhanced currency validation
+      const availableTurns = Math.floor(currency / 100);
+      if (availableTurns <= 0 || currency < 100) {
+        console.warn('Cannot reveal tile: insufficient currency');
+        return;
+      }
+
+      const revealSuccess = revealTile(row, col, tileType);
+      if (!revealSuccess) {
+        console.warn('Tile reveal failed - likely due to currency validation');
+        return;
+      }
+
+      handleTileEffects(tileType, id);
+    },
+    [
+      disabled,
+      revealedTiles,
+      levelTiles,
+      currency,
+      revealTile,
+      handleTileEffects,
     ]
   );
 
@@ -200,6 +209,7 @@ export default function GameGrid({ level, disabled = false }: GameGridProps) {
       grid={grid}
       tileTypes={typedTileTypes}
       onTilePress={handleTilePress}
+      insufficientCurrency={!canRevealTile()}
     />
   );
 }

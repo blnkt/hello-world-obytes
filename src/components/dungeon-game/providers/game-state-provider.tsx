@@ -57,6 +57,8 @@ interface GameStateContextValue {
   getAvailableTurns: () => number;
   getMinimumTurnsRequired: () => number;
   getTurnValidationMessage: () => string;
+  canRevealTile: () => boolean;
+  getTileInteractionValidationMessage: () => string;
 }
 
 const GameStateContext = createContext<GameStateContextValue | null>(null);
@@ -429,10 +431,10 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
 
     // Ensure player has enough turns for meaningful gameplay
     // For level 1, need at least 3 turns to have a chance of winning
-    const minimumTurnsForLevel = Math.max(3, Math.ceil(level * 0.5));
+    const minimumTurnsForLevel = 1;
 
     return availableTurns >= minimumTurnsForLevel;
-  }, [currency, level]);
+  }, [currency]);
 
   const getAvailableTurns = useCallback(() => {
     return Math.floor(currency / 100);
@@ -458,6 +460,24 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
     return `Ready to play! You have ${availableTurns} turns available.`;
   }, [currency, level, getMinimumTurnsRequired]);
 
+  // Enhanced currency validation for tile interactions
+  const canRevealTile = useCallback(() => {
+    return currency >= 100;
+  }, [currency]);
+
+  const getTileInteractionValidationMessage = useCallback(() => {
+    if (currency < 100) {
+      return `Cannot reveal tile: need at least 100 steps per turn.`;
+    }
+
+    const availableTurns = Math.floor(currency / 100);
+    if (availableTurns <= 0) {
+      return `Cannot reveal tile: no turns available.`;
+    }
+
+    return `Ready to reveal tiles. You have ${availableTurns} turns available.`;
+  }, [currency]);
+
   const revealTile = useCallback(
     (x: number, y: number, type: string) => {
       // Business logic validation
@@ -465,12 +485,22 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
         return false;
       }
 
-      // Calculate available turns based on currency (100 currency per turn)
+      // Enhanced currency validation for tile reveal
       const availableTurns = Math.floor(currency / 100);
 
-      // Validate that player has enough turns to reveal a tile
       if (availableTurns <= 0) {
-        // No turns available, don't allow tile reveal
+        // No turns available, set error message
+        setLastError(
+          'Insufficient currency to reveal tile. Need at least 100 steps.'
+        );
+        return false;
+      }
+
+      // Additional validation: ensure player has enough currency for the action
+      if (currency < 100) {
+        setLastError(
+          'Insufficient currency. Need at least 100 steps per turn.'
+        );
         return false;
       }
 
@@ -483,23 +513,39 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
 
         // Increment turn count and deduct currency cost (100 per turn)
         incrementTurn();
-        setCurrency((prev) => prev - 100);
+        setCurrency((prev) => Math.max(0, prev - 100));
+
+        // Clear any previous errors on successful reveal
+        setLastError(null);
       });
 
       return true; // Tile reveal successful
     },
-    [incrementTurn, currency, setCurrency, validateGameAction, queueAction]
+    [
+      incrementTurn,
+      currency,
+      setCurrency,
+      validateGameAction,
+      queueAction,
+      setLastError,
+    ]
   );
 
   // Safe method to reveal adjacent tile for bonus tiles (no turn cost)
   const revealAdjacentTile = useCallback(
     (x: number, y: number, type: string) => {
       const tileKey = `${x}-${y}`;
+
+      // Validate that the tile hasn't been revealed yet
+      if (revealedTiles.has(tileKey)) {
+        return false; // Tile already revealed
+      }
+
       setRevealedTiles((prev) => new Set([...prev, tileKey]));
       setTileTypes((prev) => ({ ...prev, [tileKey]: type }));
       return true;
     },
-    []
+    [revealedTiles]
   );
 
   const startNewGame = useCallback(() => {
@@ -743,6 +789,8 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       getAvailableTurns,
       getMinimumTurnsRequired,
       getTurnValidationMessage,
+      canRevealTile,
+      getTileInteractionValidationMessage,
     }),
     [
       level,
@@ -773,6 +821,8 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       getAvailableTurns,
       getMinimumTurnsRequired,
       getTurnValidationMessage,
+      canRevealTile,
+      getTileInteractionValidationMessage,
     ]
   );
 

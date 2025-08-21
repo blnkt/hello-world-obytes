@@ -77,10 +77,18 @@ const getTileDescription = (
 const getTileStyle = (
   tileType: 'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral',
   isRevealed: boolean,
-  disabled: boolean
+  options: { disabled: boolean; insufficientCurrency: boolean } = {
+    disabled: false,
+    insufficientCurrency: false,
+  }
 ) => {
+  const { disabled, insufficientCurrency } = options;
   if (disabled) {
     return 'bg-gray-300 border-gray-400 opacity-50'; // Disabled state
+  }
+
+  if (insufficientCurrency && !isRevealed) {
+    return 'bg-[#D96B5E] border-[#C55A4D] opacity-60'; // Reddish for insufficient currency
   }
 
   if (!isRevealed) {
@@ -112,6 +120,7 @@ interface GridTileProps {
   onPress?: (id: string, row: number, col: number) => void;
   disabled?: boolean;
   showEffect?: boolean;
+  insufficientCurrency?: boolean;
 }
 
 export default function GridTile({
@@ -123,6 +132,7 @@ export default function GridTile({
   onPress,
   disabled = false,
   showEffect = false,
+  insufficientCurrency = false,
 }: GridTileProps) {
   const handlePress = () => {
     if (onPress && !disabled) {
@@ -144,11 +154,15 @@ export default function GridTile({
       onPress={handlePress}
       disabled={disabled}
       accessible={true}
-      accessibilityLabel={`Tile at row ${row + 1}, column ${col + 1}`}
-      accessibilityHint={getTileDescription(tileType, isRevealed)}
+      accessibilityLabel={`Tile at row ${row + 1}, column ${col + 1}${insufficientCurrency ? ' - Insufficient currency to reveal' : ''}`}
+      accessibilityHint={
+        insufficientCurrency
+          ? 'Need at least 100 steps to reveal this tile'
+          : getTileDescription(tileType, isRevealed)
+      }
       accessibilityRole="button"
       accessibilityState={{ disabled }}
-      className={`m-0.5 aspect-square flex-1 rounded-md border ${getTileStyle(tileType, isRevealed, disabled)}`}
+      className={`m-0.5 aspect-square flex-1 rounded-md border ${getTileStyle(tileType, isRevealed, { disabled, insufficientCurrency })}`}
       style={{ minHeight: 35 }}
     >
       <View className="flex-1 items-center justify-center">
