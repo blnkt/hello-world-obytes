@@ -32,6 +32,7 @@ interface GameStateContextValue {
   revealTile: (x: number, y: number, type: string) => void;
   setTurnsUsed: (turns: number) => void;
   setCurrency: (amount: number) => void;
+  incrementTurn: () => void;
 
   // Game flow
   startNewGame: () => void;
@@ -233,11 +234,20 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
   }, []);
 
   // Game actions
-  const revealTile = useCallback((x: number, y: number, type: string) => {
-    const tileKey = `${x}-${y}`;
-    setRevealedTiles((prev) => new Set([...prev, tileKey]));
-    setTileTypes((prev) => ({ ...prev, [tileKey]: type }));
+  const incrementTurn = useCallback(() => {
+    setTurnsUsed((prev) => prev + 1);
   }, []);
+
+  const revealTile = useCallback(
+    (x: number, y: number, type: string) => {
+      const tileKey = `${x}-${y}`;
+      setRevealedTiles((prev) => new Set([...prev, tileKey]));
+      setTileTypes((prev) => ({ ...prev, [tileKey]: type }));
+      // Increment turn count when tile is revealed
+      incrementTurn();
+    },
+    [incrementTurn]
+  );
 
   const startNewGame = useCallback(() => {
     setLevel(1);
@@ -339,6 +349,7 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       revealTile,
       setTurnsUsed,
       setCurrency,
+      incrementTurn,
 
       // Game flow
       startNewGame,
@@ -367,6 +378,7 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       revealTile,
       setTurnsUsed,
       setCurrency,
+      incrementTurn,
       startNewGame,
       completeLevel,
       gameOver,
