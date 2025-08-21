@@ -40,12 +40,12 @@ The migration to GameStateProvider has broken several core dungeon game features
 
 ### 3.0 Fix Tile Effects System
 
-- [ ] 3.1 Implement trap tile effect (lose 1 additional turn)
-- [ ] 3.2 Implement treasure tile effect (gain 1 free turn)
-- [ ] 3.3 Fix bonus reveal tile effect (auto-reveal with turn management)
-- [ ] 3.4 Add proper turn cost for bonus reveals
-
-- [ ] 3.5 Ensure tile effects don't break turn counting
+- [x] 3.1 Implement trap tile effect (lose 1 additional turn)
+- [x] 3.2 Implement treasure tile effect (gain 1 free turn)
+- [x] 3.3 Fix bonus reveal tile effect (auto-reveal with turn management)
+- [x] 3.4 Add visual feedback for tile effects
+- [x] 3.5 Add sound effects for tile interactions
+- [x] 3.6 Add tile effect animations
 
 ### 4.0 Fix Currency Integration
 
