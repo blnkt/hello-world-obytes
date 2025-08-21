@@ -39,6 +39,7 @@ interface GameStateContextValue {
 
   // Game flow
   startNewGame: () => void;
+  startNextLevel: () => void;
   completeLevel: () => void;
   gameOver: () => void;
 
@@ -701,6 +702,51 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
     validateTransitionTiming,
   ]);
 
+  const startNextLevel = useCallback(() => {
+    // Comprehensive currency validation before starting next level
+    if (!canStartGame()) {
+      const validationMessage = getTurnValidationMessage();
+      console.warn(
+        `Cannot start next level: insufficient currency - ${validationMessage}`
+      );
+      setLastError(validationMessage);
+      return;
+    }
+
+    // Validate state transition (can start next level from Win state)
+    if (!validateStateTransition(gameState, 'Active')) {
+      console.warn(`Cannot transition from ${gameState} to Active state`);
+      return;
+    }
+
+    if (!validateTransitionTiming()) {
+      console.warn('State transition timing validation failed');
+      return;
+    }
+
+    // Update timing and perform state transition
+    setLastStateChange(Date.now());
+
+    // Keep the current level (already incremented by completeLevel)
+    // Reset game state for the new level
+    setGameState('Active');
+    setRevealedTiles(new Set());
+    setTileTypes({});
+    setTurnsUsed(0);
+    setCurrency(1000); // Reset to initial currency for new level
+    setLastError(null);
+
+    // Immediate save for next level
+    debouncedSave();
+  }, [
+    canStartGame,
+    getTurnValidationMessage,
+    debouncedSave,
+    gameState,
+    validateStateTransition,
+    validateTransitionTiming,
+  ]);
+
   const completeLevel = useCallback(() => {
     // Comprehensive validation before state transition
     if (!validateStateTransition(gameState, 'Win')) {
@@ -893,6 +939,7 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
 
       // Game flow
       startNewGame,
+      startNextLevel,
       completeLevel,
       gameOver,
 
@@ -935,6 +982,7 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       addCurrency,
       deductCurrency,
       startNewGame,
+      startNextLevel,
       completeLevel,
       gameOver,
       isLoading,

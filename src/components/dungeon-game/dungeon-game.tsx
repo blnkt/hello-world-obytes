@@ -130,6 +130,7 @@ export default function DungeonGame() {
     isLoading,
     lastError,
     startNewGame,
+    startNextLevel,
     setLevel,
     canStartGame,
     getAvailableTurns,
@@ -174,11 +175,8 @@ export default function DungeonGame() {
       return;
     }
 
-    // Progress to next level
-    setLevel(nextLevel);
-
-    // Reset game state for the new level
-    startNewGame();
+    // Progress to next level using the dedicated function
+    startNextLevel();
   };
 
   const availableTurns = getAvailableTurns();
