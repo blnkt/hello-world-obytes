@@ -257,6 +257,11 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
   // Business logic validation helper
   const validateGameAction = useCallback(
     (action: string, context: any): boolean => {
+      console.log('🔍 [DEBUG] validateGameAction called with:', {
+        action,
+        context,
+      });
+
       // Validate that actions make sense in current game state
       if (gameState === 'Win' || gameState === 'Game Over') {
         // Most actions are not allowed in terminal states
@@ -269,7 +274,9 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       if (gameState === 'Active') {
         // Validate turn-based actions
         if (action === 'revealTile') {
+          console.log('🔍 [DEBUG] validating revealTile in Active state...');
           const availableTurns = Math.floor(currency / 100);
+          console.log('🔍 [DEBUG] calculated availableTurns:', availableTurns);
           if (availableTurns <= 0) {
             console.warn('Cannot reveal tile: no turns available');
             return false;
@@ -277,6 +284,7 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
         }
       }
 
+      console.log('🔍 [DEBUG] validateGameAction returning true');
       return true;
     },
     [gameState, currency]
@@ -383,32 +391,45 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
 
   const revealTile = useCallback(
     (x: number, y: number, type: string) => {
+      console.log('🔍 [DEBUG] revealTile called with:', { x, y, type });
+
       // Business logic validation
+      console.log('🔍 [DEBUG] calling validateGameAction...');
       if (!validateGameAction('revealTile', { x, y, type })) {
+        console.log('🔍 [DEBUG] validateGameAction failed');
         return false;
       }
+      console.log('🔍 [DEBUG] validateGameAction passed');
 
       // Calculate available turns based on currency (100 currency per turn)
+      console.log('🔍 [DEBUG] calculating available turns...');
       const availableTurns = Math.floor(currency / 100);
+      console.log('🔍 [DEBUG] availableTurns:', availableTurns);
 
       // Validate that player has enough turns to reveal a tile
       if (availableTurns <= 0) {
+        console.log('🔍 [DEBUG] no turns available');
         // No turns available, don't allow tile reveal
         return false;
       }
 
       const tileKey = `${x}-${y}`;
+      console.log('🔍 [DEBUG] tileKey:', tileKey);
 
       // Defer state updates to avoid navigation context issues during tile press
+      console.log('🔍 [DEBUG] setting timeout for state updates...');
       setTimeout(() => {
+        console.log('🔍 [DEBUG] timeout executing - updating state...');
         setRevealedTiles((prev) => new Set([...prev, tileKey]));
         setTileTypes((prev) => ({ ...prev, [tileKey]: type }));
 
         // Increment turn count and deduct currency cost (100 per turn)
         incrementTurn();
         setCurrency((prev) => prev - 100);
+        console.log('🔍 [DEBUG] state updates completed');
       }, 0);
 
+      console.log('🔍 [DEBUG] revealTile returning true');
       return true; // Tile reveal successful
     },
     [incrementTurn, currency, setCurrency, validateGameAction]
