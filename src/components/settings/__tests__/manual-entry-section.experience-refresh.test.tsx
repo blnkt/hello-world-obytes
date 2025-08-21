@@ -178,6 +178,27 @@ describe('Manual Entry Section Component Behavior', () => {
   });
 
   describe('Form State Management', () => {
+    beforeAll(() => {
+      // Create a fixed date for testing
+      const fixedDate = new Date('2025-08-21T12:00:00Z');
+      
+      // Mock the Date constructor
+      const spy = jest.spyOn(global, 'Date');
+      spy.mockImplementation((value?: string | number | Date) => {
+        // If a value is provided, create a real Date
+        if (value !== undefined) {
+          return new Date(value);
+        }
+        // Otherwise return our fixed date
+        return fixedDate;
+      });
+    });
+
+    afterAll(() => {
+      // Restore the original Date object
+      jest.restoreAllMocks();
+    });
+
     it('should maintain form state consistency after triggering refresh', async () => {
       render(<ManualEntrySection />);
       
@@ -197,7 +218,7 @@ describe('Manual Entry Section Component Behavior', () => {
       
       // Verify form is reset and ready for next entry
       await waitFor(() => {
-        expect(dateInput.props.value).toBe(new Date().toISOString().split('T')[0]); // Today's date
+        expect(dateInput.props.value).toBe('2025-08-21'); // Fixed mock date
         expect(stepCountInput.props.value).toBe(''); // Empty
       });
     });

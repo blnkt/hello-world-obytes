@@ -20,7 +20,7 @@
 - [x] 3.2 Implement logic to detect existing save data on game entry
 - [x] 3.3 Add user choice handling between resume previous game or start fresh
 - [x] 3.4 Create smooth transitions and animations for the modal
-- [ ] 3.5 Add unit tests for resume choice logic and modal behavior
+- [x] 3.5 Add unit tests for resume choice logic and modal behavior
 - [ ] 3.6 Integrate with navigation system for proper modal display
 
 ## 4.0 Integrate with Existing Game Components
@@ -40,6 +40,6 @@
 
 ## Progress Summary
 
-- **Completed**: 9/23 subtasks (39.1%)
+- **Completed**: 10/23 subtasks (43.5%)
 - **Current Focus**: Task 3.0 - Build Resume Choice System
-- **Next Steps**: Add unit tests for resume choice logic and modal behavior (3.5)
+- **Next Steps**: Integrate with navigation system for proper modal display (3.6)
