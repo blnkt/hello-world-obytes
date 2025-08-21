@@ -166,4 +166,19 @@ describe('GameOverModal', () => {
     rerender(<GameOverModal {...defaultProps} turnsUsed={100} />);
     expect(screen.getByText('Turns used: 100')).toBeTruthy();
   });
+
+  it('should handle edge case with 0 turns used', () => {
+    render(<GameOverModal {...defaultProps} turnsUsed={0} />);
+    expect(screen.getByText('Turns used: 0')).toBeTruthy();
+  });
+
+  it('should handle edge case with very high turn counts', () => {
+    render(<GameOverModal {...defaultProps} turnsUsed={1000000} />);
+    expect(screen.getByText('Turns used: 1000000')).toBeTruthy();
+  });
+
+  it('should display correct game over reason', () => {
+    render(<GameOverModal {...defaultProps} />);
+    expect(screen.getByText('You ran out of turns on Level 2.')).toBeTruthy();
+  });
 });

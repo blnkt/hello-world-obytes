@@ -538,10 +538,14 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       const availableTurns = Math.floor(currency / 100);
       if (availableTurns <= 0) {
         // No turns available, trigger game over
-        gameOver();
+        // Use setGameState directly to avoid circular dependency
+        setGameState('Game Over');
+        setLastError(null);
+        // Immediate save for game over
+        debouncedSave();
       }
     }
-  }, [currency, gameState, gameOver]);
+  }, [currency, gameState, debouncedSave]);
 
   // Periodic state consistency validation
   useEffect(() => {

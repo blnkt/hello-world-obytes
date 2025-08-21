@@ -168,6 +168,29 @@ export default function DungeonGame() {
           startNewGame();
         }}
       />
+
+      {/* Debug modal visibility */}
+      {__DEV__ && (
+        <View style={styles.debugContainer}>
+          <Text style={styles.debugText}>
+            [DEBUG] Win Modal Visible: {gameState === 'Win' ? 'YES' : 'NO'}
+          </Text>
+          <Text style={styles.debugText}>
+            [DEBUG] Game Over Modal Visible:{' '}
+            {gameState === 'Game Over' ? 'YES' : 'NO'}
+          </Text>
+        </View>
+      )}
+
+      {/* Debug info - remove in production */}
+      {__DEV__ && (
+        <View style={styles.debugContainer}>
+          <Text style={styles.debugText}>[DEBUG] Game State: {gameState}</Text>
+          <Text style={styles.debugText}>[DEBUG] Level: {level}</Text>
+          <Text style={styles.debugText}>[DEBUG] Turns Used: {turnsUsed}</Text>
+          <Text style={styles.debugText}>[DEBUG] Currency: {currency}</Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -226,6 +249,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     marginTop: 16,
     marginBottom: 16,
+  },
+  debugContainer: {
+    backgroundColor: '#f0f0f0',
+    padding: 8,
+    marginTop: 8,
+    borderRadius: 4,
+  },
+  debugText: {
+    fontSize: 12,
+    color: '#666',
+    fontFamily: 'monospace',
   },
   button: {
     paddingVertical: 12,
