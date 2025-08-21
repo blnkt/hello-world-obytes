@@ -15,20 +15,32 @@ const useSaveOperation = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [lastError, setLastError] = useState<string | null>(null);
 
-  const saveGameState = useCallback(
-    async (saveData: DungeonGameSaveData) => {
-      try {
-        const result = await saveDungeonGameState(saveData);
-        return result;
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-        };
+  const saveGameState = useCallback(async (saveData: DungeonGameSaveData) => {
+    setIsLoading(true);
+    setLastError(null);
+
+    try {
+      const result = await saveDungeonGameState(saveData);
+
+      if (result.success) {
+        setLastError(null);
+      } else {
+        setLastError(result.error || 'Save failed');
       }
-    },
-    [saveDungeonGameState]
-  );
+
+      return result;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      setLastError(errorMessage);
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   return { isLoading, lastError, saveGameState };
 };

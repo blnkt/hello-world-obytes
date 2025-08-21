@@ -28,12 +28,25 @@ const GameHeader: React.FC<{
 // Helper component for game controls
 const GameControls: React.FC<{
   gameState: GameState;
+  canStartGame: boolean;
   onReset: () => void;
   onNextLevel: () => void;
-}> = ({ gameState, onReset, onNextLevel }) => (
+}> = ({ gameState, canStartGame, onReset, onNextLevel }) => (
   <View style={styles.controls}>
-    <Pressable style={[styles.button, styles.resetButton]} onPress={onReset}>
-      <Text style={styles.buttonText}>Reset Game</Text>
+    <Pressable
+      style={[
+        styles.button,
+        styles.resetButton,
+        !canStartGame && styles.disabledButton,
+      ]}
+      onPress={onReset}
+      disabled={!canStartGame}
+    >
+      <Text
+        style={[styles.buttonText, !canStartGame && styles.disabledButtonText]}
+      >
+        {canStartGame ? 'Reset Game' : 'Need 100+ Steps'}
+      </Text>
     </Pressable>
 
     {gameState === 'Win' && (
@@ -82,6 +95,8 @@ export default function DungeonGame() {
     lastError,
     startNewGame,
     setLevel,
+    canStartGame,
+    getAvailableTurns,
   } = useGameState();
 
   const [showResumeModal, setShowResumeModal] = useState(false);
@@ -94,6 +109,10 @@ export default function DungeonGame() {
   }, [hasExistingSave]);
 
   const handleReset = () => {
+    if (!canStartGame()) {
+      // Don't allow reset if insufficient currency
+      return;
+    }
     startNewGame();
   };
 
@@ -105,6 +124,12 @@ export default function DungeonGame() {
   };
 
   const handleNextLevel = () => {
+    // Check if player can start the next level
+    if (!canStartGame()) {
+      // Don't allow level progression if insufficient currency
+      return;
+    }
+
     // Progress to next level
     const nextLevel = level + 1;
     setLevel(nextLevel);
@@ -113,7 +138,7 @@ export default function DungeonGame() {
     startNewGame();
   };
 
-  const availableTurns = Math.floor(currency / 100);
+  const availableTurns = getAvailableTurns();
 
   if (isLoading) {
     return (
@@ -132,8 +157,25 @@ export default function DungeonGame() {
         availableTurns={availableTurns}
       />
 
+      {/* Currency Error Display */}
+      {!canStartGame() && (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>
+            ⚠️ Insufficient currency to play. Need at least 100 steps to start.
+          </Text>
+        </View>
+      )}
+
       {/* Game Grid */}
       <GameGrid level={level} disabled={gameState !== 'Active'} />
+
+      {/* Game Controls */}
+      <GameControls
+        gameState={gameState}
+        canStartGame={canStartGame()}
+        onReset={handleReset}
+        onNextLevel={handleNextLevel}
+      />
 
       {/* Win Modal */}
       {gameState === 'Win' && (
@@ -153,7 +195,9 @@ export default function DungeonGame() {
           turnsUsed={turnsUsed}
           onMainMenu={handleMainMenu}
           onRetry={() => {
-            startNewGame();
+            if (canStartGame()) {
+              startNewGame();
+            }
           }}
         />
       )}
@@ -239,6 +283,12 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
+  },
+  disabledButton: {
+    backgroundColor: '#CCCCCC',
+  },
+  disabledButtonText: {
+    color: '#666666',
   },
   gameState: {
     backgroundColor: 'white',

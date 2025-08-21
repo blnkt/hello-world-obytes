@@ -51,6 +51,10 @@ interface GameStateContextValue {
   hasExistingSave: boolean;
   resumeGame: () => Promise<void>;
   clearSave: () => Promise<void>;
+
+  // Currency validation
+  canStartGame: () => boolean;
+  getAvailableTurns: () => number;
 }
 
 const GameStateContext = createContext<GameStateContextValue | null>(null);
@@ -411,6 +415,15 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
     setCurrency((prev) => Math.max(0, prev - amount));
   }, []);
 
+  // Currency validation methods
+  const canStartGame = useCallback(() => {
+    return currency >= 100; // Minimum 100 steps required to start
+  }, [currency]);
+
+  const getAvailableTurns = useCallback(() => {
+    return Math.floor(currency / 100);
+  }, [currency]);
+
   const revealTile = useCallback(
     (x: number, y: number, type: string) => {
       // Business logic validation
@@ -456,6 +469,17 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
   );
 
   const startNewGame = useCallback(() => {
+    // Check minimum playability requirement (100 steps minimum)
+    if (!canStartGame()) {
+      console.warn(
+        'Cannot start game: insufficient currency (need at least 100 steps)'
+      );
+      setLastError(
+        'Insufficient currency to start game. Need at least 100 steps.'
+      );
+      return;
+    }
+
     // Validate state transition (can start new game from any state)
     if (!validateStateTransition(gameState, 'Active')) {
       console.warn(`Cannot transition from ${gameState} to Active state`);
@@ -482,6 +506,7 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
     // Immediate save for new game
     debouncedSave();
   }, [
+    canStartGame,
     debouncedSave,
     gameState,
     validateStateTransition,
@@ -570,13 +595,21 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
           setTileTypes,
           setLastSaveTime,
         });
+
+        // Check if resumed game state has sufficient currency to continue
+        if (!canStartGame()) {
+          setLastError(
+            'Insufficient currency to continue game. Need at least 100 steps.'
+          );
+          setGameState('Game Over');
+        }
       }
     } catch (error) {
       setLastError(error instanceof Error ? error.message : 'Unknown error');
     } finally {
       setIsLoading(false);
     }
-  }, [loadGameState]);
+  }, [loadGameState, canStartGame]);
 
   const clearSave = useCallback(async () => {
     try {
@@ -671,6 +704,10 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       hasExistingSave: hasExistingSaveData(),
       resumeGame,
       clearSave,
+
+      // Currency validation
+      canStartGame,
+      getAvailableTurns,
     }),
     [
       level,
@@ -697,6 +734,8 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       hasExistingSaveData,
       resumeGame,
       clearSave,
+      canStartGame,
+      getAvailableTurns,
     ]
   );
 
