@@ -3,10 +3,7 @@ import { View } from 'react-native';
 
 import GridTile from './grid-tile';
 import { useGameState } from './providers/game-state-provider';
-import {
-  findUnrevealedAdjacentTile,
-  generateLevelTiles,
-} from './utils/game-utils';
+import { generateLevelTiles } from './utils/game-utils';
 
 // Game grid constants
 const GRID_ROWS = 5;
@@ -101,6 +98,7 @@ export default function GameGrid({ level, disabled = false }: GameGridProps) {
 
   const handleTilePress = React.useCallback(
     (id: string, row: number, col: number) => {
+      return;
       if (disabled || revealedTiles.has(id)) {
         return;
       }
@@ -119,47 +117,46 @@ export default function GameGrid({ level, disabled = false }: GameGridProps) {
       const tileKey = `${row}-${col}`;
 
       // Update revealed tiles and tile types directly
-      updateRevealedTiles(new Set([...revealedTiles, tileKey]));
-      updateTileTypes({ ...tileTypes, [tileKey]: tileType });
+      // updateRevealedTiles(new Set([...revealedTiles, tileKey]));
+      // updateTileTypes({ ...tileTypes, [tileKey]: tileType });
 
       // Deduct currency cost (100 per turn)
-      deductCurrency(100);
+      // deductCurrency(100);
 
       // Handle tile-specific effects
       if (tileType === 'exit') {
         // Exit tile - complete level
-        completeLevel();
+        // completeLevel();
       } else if (tileType === 'trap') {
         // Trap tile - lose 1 additional turn (deduct 100 more currency)
-        deductCurrency(100);
+        // deductCurrency(100);
       } else if (tileType === 'treasure') {
         // Treasure tile - gain 1 free turn (add 100 currency)
-        addCurrency(100);
+        // addCurrency(100);
       } else if (tileType === 'bonus') {
         // Bonus tile - reveal adjacent tile and give free turn
-        const adjacentTile = findUnrevealedAdjacentTile({
-          tileId: id,
-          revealedTiles,
-          rows: GRID_ROWS,
-          cols: GRID_COLS,
-        });
-        if (adjacentTile) {
-          const [adjRow, adjCol] = adjacentTile.split('-').map(Number);
-          const adjTileIndex = adjRow * GRID_COLS + adjCol;
-          const adjTileType = levelTiles[adjTileIndex];
-
-          // Direct state update for adjacent tile
-          const adjTileKey = `${adjRow}-${adjCol}`;
-          updateRevealedTiles(new Set([...revealedTiles, tileKey, adjTileKey]));
-          updateTileTypes({
-            ...tileTypes,
-            [tileKey]: tileType,
-            [adjTileKey]: adjTileType,
-          });
-
-          // Give free turn for bonus tile (add 100 currency)
-          addCurrency(100);
-        }
+        // Temporarily commented out to test navigation context fix
+        // const adjacentTile = findUnrevealedAdjacentTile({
+        //   tileId: id,
+        //   revealedTiles,
+        //   rows: GRID_ROWS,
+        //   cols: GRID_COLS,
+        // });
+        // if (adjacentTile && adjacentTile.includes('-')) {
+        //   const [adjRow, adjCol] = adjacentTile!.split('-').map(Number);
+        //   const adjTileIndex = adjRow * GRID_COLS + adjCol;
+        //   const adjTileType = levelTiles[adjTileIndex];
+        //   // Direct state update for adjacent tile
+        //   const adjTileKey = `${adjRow}-${adjCol}`;
+        //   updateRevealedTiles(new Set([...revealedTiles, tileKey, adjTileKey]));
+        //   updateTileTypes({
+        //     ...tileTypes,
+        //     [tileKey]: tileType,
+        //     [adjTileKey]: adjTileType,
+        //   });
+        //   // Give free turn for bonus tile (add 100 currency)
+        //   // addCurrency(100);
+        // }
       }
     },
     [

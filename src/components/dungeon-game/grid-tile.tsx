@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 
 import { Text } from '@/components/ui';
@@ -144,7 +144,7 @@ export default function GridTile({
   };
 
   return (
-    <Pressable
+    <TouchableOpacity
       testID={getTestId()}
       onPress={handlePress}
       disabled={disabled}
@@ -172,6 +172,6 @@ export default function GridTile({
           </View>
         )}
       </View>
-    </Pressable>
+    </TouchableOpacity>
   );
 }
