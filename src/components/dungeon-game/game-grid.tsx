@@ -90,6 +90,8 @@ export default function GameGrid({ level, disabled = false }: GameGridProps) {
     currency,
     addCurrency,
     deductCurrency,
+    updateRevealedTiles,
+    updateTileTypes,
   } = useGameState();
 
   const grid = React.useMemo(
@@ -160,6 +162,8 @@ export default function GameGrid({ level, disabled = false }: GameGridProps) {
       revealTile,
       addCurrency,
       deductCurrency,
+      updateRevealedTiles,
+      updateTileTypes,
       currency,
       completeLevel,
       gameOver,
