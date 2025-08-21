@@ -55,10 +55,20 @@ interface GameStateContextValue {
   // Currency validation
   canStartGame: () => boolean;
   getAvailableTurns: () => number;
-  getMinimumTurnsRequired: () => number;
   getTurnValidationMessage: () => string;
   canRevealTile: () => boolean;
   getTileInteractionValidationMessage: () => string;
+  canProgressToLevel: (targetLevel: number) => boolean;
+  getLevelProgressionValidationMessage: (targetLevel: number) => string;
+  getGameStartValidationSummary: () => {
+    canStart: boolean;
+    reason: 'insufficient_currency' | 'insufficient_turns' | 'ready';
+    message: string;
+    required: number;
+    current: number;
+    availableTurns: number;
+    minimumTurns: number;
+  };
 }
 
 const GameStateContext = createContext<GameStateContextValue | null>(null);
@@ -419,7 +429,7 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
     setCurrency((prev) => Math.max(0, prev - amount));
   }, []);
 
-  // Currency validation methods
+  // Enhanced currency validation methods
   const canStartGame = useCallback(() => {
     // Minimum 100 currency required to start
     if (currency < 100) {
@@ -430,7 +440,7 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
     const availableTurns = Math.floor(currency / 100);
 
     // Ensure player has enough turns for meaningful gameplay
-    // For level 1, need at least 3 turns to have a chance of winning
+    // For level 1, need at least 1 turn to start
     const minimumTurnsForLevel = 1;
 
     return availableTurns >= minimumTurnsForLevel;
@@ -440,25 +450,20 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
     return Math.floor(currency / 100);
   }, [currency]);
 
-  const getMinimumTurnsRequired = useCallback(() => {
-    // Calculate minimum turns needed for the current level
-    return Math.max(3, Math.ceil(level * 0.5));
-  }, [level]);
-
   const getTurnValidationMessage = useCallback(() => {
     if (currency < 100) {
       return `Insufficient currency. Need at least 100 steps to start.`;
     }
 
     const availableTurns = Math.floor(currency / 100);
-    const minimumTurns = getMinimumTurnsRequired();
+    const minimumTurns = 1;
 
     if (availableTurns < minimumTurns) {
       return `Need at least ${minimumTurns} turns for level ${level}. Current: ${availableTurns} turns.`;
     }
 
     return `Ready to play! You have ${availableTurns} turns available.`;
-  }, [currency, level, getMinimumTurnsRequired]);
+  }, [currency, level]);
 
   // Enhanced currency validation for tile interactions
   const canRevealTile = useCallback(() => {
@@ -477,6 +482,80 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
 
     return `Ready to reveal tiles. You have ${availableTurns} turns available.`;
   }, [currency]);
+
+  // Enhanced validation for level progression
+  const canProgressToLevel = useCallback(
+    (targetLevel: number) => {
+      // Calculate minimum turns needed for the target level
+      const minimumTurnsForLevel = Math.max(1, Math.ceil(targetLevel * 0.3));
+      const availableTurns = Math.floor(currency / 100);
+
+      return availableTurns >= minimumTurnsForLevel;
+    },
+    [currency]
+  );
+
+  const getLevelProgressionValidationMessage = useCallback(
+    (targetLevel: number) => {
+      if (!canProgressToLevel(targetLevel)) {
+        const minimumTurns = 1;
+        const availableTurns = Math.floor(currency / 100);
+
+        return `Cannot progress to level ${targetLevel}: need at least ${minimumTurns} turns. Current: ${availableTurns} turns.`;
+      }
+
+      return `Ready to progress to level ${targetLevel}. You have ${Math.floor(currency / 100)} turns available.`;
+    },
+    [currency, canProgressToLevel]
+  );
+
+  // Comprehensive game start validation summary
+  const getGameStartValidationSummary = useCallback((): {
+    canStart: boolean;
+    reason: 'insufficient_currency' | 'insufficient_turns' | 'ready';
+    message: string;
+    required: number;
+    current: number;
+    availableTurns: number;
+    minimumTurns: number;
+  } => {
+    const availableTurns = Math.floor(currency / 100);
+    const minimumTurns = 1;
+
+    if (currency < 100) {
+      return {
+        canStart: false,
+        reason: 'insufficient_currency',
+        message: 'Need at least 100 steps to start the game',
+        required: 100,
+        current: currency,
+        availableTurns: 0,
+        minimumTurns,
+      };
+    }
+
+    if (availableTurns < minimumTurns) {
+      return {
+        canStart: false,
+        reason: 'insufficient_turns',
+        message: `Need at least ${minimumTurns} turns for level ${level}`,
+        required: minimumTurns * 100,
+        current: currency,
+        availableTurns,
+        minimumTurns,
+      };
+    }
+
+    return {
+      canStart: true,
+      reason: 'ready',
+      message: `Ready to start! You have ${availableTurns} turns available`,
+      required: minimumTurns * 100,
+      current: currency,
+      availableTurns,
+      minimumTurns,
+    };
+  }, [currency, level]);
 
   const revealTile = useCallback(
     (x: number, y: number, type: string) => {
@@ -549,11 +628,16 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
   );
 
   const startNewGame = useCallback(() => {
-    // Enhanced turn validation before game start
+    // Comprehensive currency validation before game start
     if (!canStartGame()) {
       const validationMessage = getTurnValidationMessage();
-      console.warn(`Cannot start game: ${validationMessage}`);
+      console.warn(
+        `Cannot start game: insufficient currency - ${validationMessage}`
+      );
       setLastError(validationMessage);
+
+      // Set game state to indicate insufficient currency
+      setGameState('Game Over');
       return;
     }
 
@@ -674,13 +758,18 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
           setLastSaveTime,
         });
 
-        // Check if resumed game state has sufficient currency to continue
+        // Comprehensive validation of resumed game state
         if (!canStartGame()) {
           const validationMessage = getTurnValidationMessage();
-          setLastError(
-            `Resumed game has insufficient currency: ${validationMessage}`
-          );
+          const errorMessage = `Cannot resume game: insufficient currency. ${validationMessage}`;
+
+          console.warn(errorMessage);
+          setLastError(errorMessage);
           setGameState('Game Over');
+
+          // Clear the save since it's not playable
+          await clearGameState();
+          setLastSaveTime(null);
         }
       }
     } catch (error) {
@@ -688,7 +777,7 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [loadGameState, canStartGame, getTurnValidationMessage]);
+  }, [loadGameState, canStartGame, getTurnValidationMessage, clearGameState]);
 
   const clearSave = useCallback(async () => {
     try {
@@ -787,10 +876,12 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       // Currency validation
       canStartGame,
       getAvailableTurns,
-      getMinimumTurnsRequired,
       getTurnValidationMessage,
       canRevealTile,
       getTileInteractionValidationMessage,
+      canProgressToLevel,
+      getLevelProgressionValidationMessage,
+      getGameStartValidationSummary,
     }),
     [
       level,
@@ -819,10 +910,12 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       clearSave,
       canStartGame,
       getAvailableTurns,
-      getMinimumTurnsRequired,
       getTurnValidationMessage,
       canRevealTile,
       getTileInteractionValidationMessage,
+      canProgressToLevel,
+      getLevelProgressionValidationMessage,
+      getGameStartValidationSummary,
     ]
   );
 

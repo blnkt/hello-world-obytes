@@ -66,8 +66,15 @@ export const ResumeChoiceModal: React.FC<ResumeChoiceModalProps> = ({
   isVisible,
   onClose,
 }) => {
-  const { hasExistingSave, resumeGame, startNewGame, isLoading, lastSaveTime } =
-    useGameState();
+  const {
+    hasExistingSave,
+    resumeGame,
+    startNewGame,
+    isLoading,
+    lastSaveTime,
+    canStartGame,
+    getTurnValidationMessage,
+  } = useGameState();
 
   const handleResume = async () => {
     await resumeGame();
@@ -75,6 +82,14 @@ export const ResumeChoiceModal: React.FC<ResumeChoiceModalProps> = ({
   };
 
   const handleNewGame = async () => {
+    // Validate currency before starting new game
+    if (!canStartGame()) {
+      const validationMessage = getTurnValidationMessage();
+      console.warn(`Cannot start new game: ${validationMessage}`);
+      // The startNewGame function will handle setting the error state
+      return;
+    }
+
     startNewGame();
     onClose();
   };

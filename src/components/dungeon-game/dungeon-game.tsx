@@ -133,8 +133,9 @@ export default function DungeonGame() {
     setLevel,
     canStartGame,
     getAvailableTurns,
-    getMinimumTurnsRequired,
     getTurnValidationMessage,
+    canProgressToLevel,
+    getLevelProgressionValidationMessage,
   } = useGameState();
 
   const [showResumeModal, setShowResumeModal] = useState(false);
@@ -162,14 +163,18 @@ export default function DungeonGame() {
   };
 
   const handleNextLevel = () => {
-    // Check if player can start the next level
-    if (!canStartGame()) {
-      // Don't allow level progression if insufficient currency
+    // Enhanced validation for level progression
+    const nextLevel = level + 1;
+
+    if (!canProgressToLevel(nextLevel)) {
+      const validationMessage = getLevelProgressionValidationMessage(nextLevel);
+      console.warn(
+        `Cannot progress to level ${nextLevel}: ${validationMessage}`
+      );
       return;
     }
 
     // Progress to next level
-    const nextLevel = level + 1;
     setLevel(nextLevel);
 
     // Reset game state for the new level
