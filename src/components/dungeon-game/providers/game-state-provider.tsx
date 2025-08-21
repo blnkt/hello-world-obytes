@@ -285,38 +285,44 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
 
   // Business logic validation helper
   const validateGameAction = useCallback(
-    (action: string, context: any): boolean => {
-      console.log('🔍 [DEBUG] validateGameAction called with:', {
-        action,
-        context,
-      });
+    (action: string, context: any) => {
+      // Validate game state
+      if (gameState !== 'Active') {
+        return false;
+      }
 
-      // Validate that actions make sense in current game state
-      if (gameState === 'Win' || gameState === 'Game Over') {
-        // Most actions are not allowed in terminal states
-        if (action === 'revealTile') {
-          console.warn(`Cannot ${action} in ${gameState} state`);
+      // Validate action-specific rules
+      if (action === 'revealTile') {
+        const { x, y, type } = context;
+
+        // Validate coordinates
+        if (x < 0 || x >= 5 || y < 0 || y >= 6) {
           return false;
         }
-      }
 
-      if (gameState === 'Active') {
-        // Validate turn-based actions
-        if (action === 'revealTile') {
-          console.log('🔍 [DEBUG] validating revealTile in Active state...');
-          const availableTurns = Math.floor(currency / 100);
-          console.log('🔍 [DEBUG] calculated availableTurns:', availableTurns);
-          if (availableTurns <= 0) {
-            console.warn('Cannot reveal tile: no turns available');
-            return false;
-          }
+        // Validate tile type
+        if (!['treasure', 'trap', 'exit', 'bonus', 'neutral'].includes(type)) {
+          return false;
         }
+
+        // Check if tile is already revealed
+        const tileKey = `${x}-${y}`;
+        if (revealedTiles.has(tileKey)) {
+          return false;
+        }
+
+        // Check if player has enough turns
+        const availableTurns = Math.floor(currency / 100);
+        if (availableTurns <= 0) {
+          return false;
+        }
+
+        return true;
       }
 
-      console.log('🔍 [DEBUG] validateGameAction returning true');
-      return true;
+      return false;
     },
-    [gameState, currency]
+    [gameState, revealedTiles, currency]
   );
 
   // Transition timing validation helper
@@ -335,11 +341,8 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
   }, [lastStateChange]);
 
   // Convert current state to save data
-  const createSaveData = useCallback((): Omit<
-    DungeonGameSaveData,
-    'version' | 'timestamp'
-  > => {
-    return createSaveDataHelper({
+  const createSaveData = useCallback((): DungeonGameSaveData => {
+    const baseData = createSaveDataHelper({
       gameState,
       level,
       revealedTiles,
@@ -347,34 +350,33 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       turnsUsed,
       currency,
     });
+
+    return {
+      ...baseData,
+      version: '1.0.0',
+      timestamp: Date.now(),
+    };
   }, [gameState, level, revealedTiles, tileTypes, turnsUsed, currency]);
 
   // Debounced save function
   const debouncedSave = useCallback(() => {
-    console.log('🔍 [DEBUG] debouncedSave called');
-
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
     }
 
     saveTimeoutRef.current = setTimeout(async () => {
-      console.log('🔍 [DEBUG] debouncedSave timeout executing...');
       try {
         const saveData = createSaveData();
-        console.log('🔍 [DEBUG] saveData created, calling saveGameState...');
         const result = await saveGameState(saveData);
 
         if (result.success) {
           setLastError(null);
           setLastSaveTime(Date.now());
-          console.log('🔍 [DEBUG] save successful');
         } else {
           setLastError(result.error || 'Save failed');
-          console.log('🔍 [DEBUG] save failed:', result.error);
         }
       } catch (error) {
         setLastError(error instanceof Error ? error.message : 'Unknown error');
-        console.log('🔍 [DEBUG] save error:', error);
       }
     }, 1000); // 1 second debounce
   }, [createSaveData, saveGameState]);
@@ -411,45 +413,32 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
 
   const revealTile = useCallback(
     (x: number, y: number, type: string) => {
-      console.log('🔍 [DEBUG] revealTile called with:', { x, y, type });
-
       // Business logic validation
-      console.log('🔍 [DEBUG] calling validateGameAction...');
       if (!validateGameAction('revealTile', { x, y, type })) {
-        console.log('🔍 [DEBUG] validateGameAction failed');
         return false;
       }
-      console.log('🔍 [DEBUG] validateGameAction passed');
 
       // Calculate available turns based on currency (100 currency per turn)
-      console.log('🔍 [DEBUG] calculating available turns...');
       const availableTurns = Math.floor(currency / 100);
-      console.log('🔍 [DEBUG] availableTurns:', availableTurns);
 
       // Validate that player has enough turns to reveal a tile
       if (availableTurns <= 0) {
-        console.log('🔍 [DEBUG] no turns available');
         // No turns available, don't allow tile reveal
         return false;
       }
 
       const tileKey = `${x}-${y}`;
-      console.log('🔍 [DEBUG] tileKey:', tileKey);
 
       // Queue state updates to avoid navigation context issues
-      console.log('🔍 [DEBUG] queuing state updates...');
       queueAction(() => {
-        console.log('🔍 [DEBUG] executing queued state updates...');
         setRevealedTiles((prev) => new Set([...prev, tileKey]));
         setTileTypes((prev) => ({ ...prev, [tileKey]: type }));
 
         // Increment turn count and deduct currency cost (100 per turn)
         incrementTurn();
         setCurrency((prev) => prev - 100);
-        console.log('🔍 [DEBUG] queued state updates completed');
       });
 
-      console.log('🔍 [DEBUG] revealTile returning true');
       return true; // Tile reveal successful
     },
     [incrementTurn, currency, setCurrency, validateGameAction, queueAction]
@@ -500,8 +489,6 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
   ]);
 
   const completeLevel = useCallback(() => {
-    console.log('🔍 [DEBUG] completeLevel called - starting validation...');
-
     // Comprehensive validation before state transition
     if (!validateStateTransition(gameState, 'Win')) {
       console.warn(`Cannot transition from ${gameState} to Win state`);
@@ -518,23 +505,13 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       return;
     }
 
-    console.log(
-      '🔍 [DEBUG] completeLevel validation passed - updating state...'
-    );
-
     // Update timing and perform state transition
     setLastStateChange(Date.now());
     setGameState('Win');
     setLastError(null);
 
-    console.log(
-      '🔍 [DEBUG] completeLevel state updated - calling debouncedSave...'
-    );
-
     // Immediate save for level completion
     debouncedSave();
-
-    console.log('🔍 [DEBUG] completeLevel completed successfully');
   }, [
     debouncedSave,
     gameState,

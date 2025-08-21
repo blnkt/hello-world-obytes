@@ -163,6 +163,8 @@ describe('useDungeonGamePersistence', () => {
         achievements: mockSaveData.achievements,
         statistics: mockSaveData.statistics,
         itemEffects: [],
+        version: '1.0.0',
+        timestamp: Date.now(),
       };
 
       let saveResult;
@@ -192,6 +194,8 @@ describe('useDungeonGamePersistence', () => {
         achievements: mockSaveData.achievements,
         statistics: mockSaveData.statistics,
         itemEffects: [],
+        version: '1.0.0',
+        timestamp: Date.now(),
       };
 
       let saveResult;
@@ -220,6 +224,8 @@ describe('useDungeonGamePersistence', () => {
         achievements: mockSaveData.achievements,
         statistics: mockSaveData.statistics,
         itemEffects: [],
+        version: '1.0.0',
+        timestamp: Date.now(),
       };
 
       let saveResult;
@@ -247,6 +253,8 @@ describe('useDungeonGamePersistence', () => {
         achievements: mockSaveData.achievements,
         statistics: mockSaveData.statistics,
         itemEffects: [],
+        version: '1.0.0',
+        timestamp: Date.now(),
       };
 
       let saveResult;
@@ -272,6 +280,8 @@ describe('useDungeonGamePersistence', () => {
         achievements: mockSaveData.achievements,
         statistics: mockSaveData.statistics,
         itemEffects: [],
+        version: '1.0.0',
+        timestamp: Date.now(),
       };
 
       let saveResult;
@@ -499,6 +509,8 @@ describe('useDungeonGamePersistence', () => {
         achievements: mockSaveData.achievements,
         statistics: mockSaveData.statistics,
         itemEffects: [],
+        version: '1.0.0',
+        timestamp: Date.now(),
       };
 
       // Start save operation

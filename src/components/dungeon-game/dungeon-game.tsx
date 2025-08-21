@@ -6,7 +6,6 @@ import type { GameState } from '@/types/dungeon-game';
 import GameGrid from './game-grid';
 import { GameOverModal, WinModal } from './game-modals';
 import { useGameState } from './providers/game-state-provider';
-import { ResumeChoiceModal } from './resume-choice-modal';
 
 // Helper component for the game header
 const GameHeader: React.FC<{
@@ -98,13 +97,12 @@ export default function DungeonGame() {
     startNewGame();
   };
 
-  const handleNextLevel = () => {
-    // Progress to next level
-    const nextLevel = level + 1;
-    setLevel(nextLevel);
+  const handleMainMenu = () => {
+    // TODO: Implement main menu navigation
+  };
 
-    // Reset game state for the new level
-    startNewGame();
+  const handleNextLevel = () => {
+    // TODO: Implement next level functionality
   };
 
   const availableTurns = Math.floor(currency / 100);
@@ -126,70 +124,30 @@ export default function DungeonGame() {
         availableTurns={availableTurns}
       />
 
-      <GameGrid level={level} />
+      {/* Game Grid */}
+      <GameGrid level={level} disabled={gameState !== 'Active'} />
 
-      <GameControls
-        gameState={gameState}
-        onReset={handleReset}
-        onNextLevel={handleNextLevel}
-      />
-
-      {lastError && (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Error: {lastError}</Text>
-        </View>
+      {/* Win Modal */}
+      {gameState === 'Win' && (
+        <WinModal
+          visible={true}
+          level={level}
+          onNextLevel={handleNextLevel}
+          onMainMenu={handleMainMenu}
+        />
       )}
 
-      <ResumeChoiceModal
-        isVisible={showResumeModal}
-        onClose={() => setShowResumeModal(false)}
-      />
-
-      {/* Game State Modals */}
-      <WinModal
-        visible={gameState === 'Win'}
-        level={level}
-        onNextLevel={handleNextLevel}
-        onMainMenu={() => {
-          // TODO: Navigate to main menu
-          console.log('Main menu navigation not implemented yet');
-        }}
-      />
-
-      <GameOverModal
-        visible={gameState === 'Game Over'}
-        level={level}
-        turnsUsed={turnsUsed}
-        onMainMenu={() => {
-          // TODO: Navigate to main menu
-          console.log('Main menu navigation not implemented yet');
-        }}
-        onRetry={() => {
-          startNewGame();
-        }}
-      />
-
-      {/* Debug modal visibility */}
-      {__DEV__ && (
-        <View style={styles.debugContainer}>
-          <Text style={styles.debugText}>
-            [DEBUG] Win Modal Visible: {gameState === 'Win' ? 'YES' : 'NO'}
-          </Text>
-          <Text style={styles.debugText}>
-            [DEBUG] Game Over Modal Visible:{' '}
-            {gameState === 'Game Over' ? 'YES' : 'NO'}
-          </Text>
-        </View>
-      )}
-
-      {/* Debug info - remove in production */}
-      {__DEV__ && (
-        <View style={styles.debugContainer}>
-          <Text style={styles.debugText}>[DEBUG] Game State: {gameState}</Text>
-          <Text style={styles.debugText}>[DEBUG] Level: {level}</Text>
-          <Text style={styles.debugText}>[DEBUG] Turns Used: {turnsUsed}</Text>
-          <Text style={styles.debugText}>[DEBUG] Currency: {currency}</Text>
-        </View>
+      {/* Game Over Modal */}
+      {gameState === 'Game Over' && (
+        <GameOverModal
+          visible={true}
+          level={level}
+          turnsUsed={turnsUsed}
+          onMainMenu={handleMainMenu}
+          onRetry={() => {
+            startNewGame();
+          }}
+        />
       )}
     </View>
   );
@@ -198,19 +156,37 @@ export default function DungeonGame() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
-    padding: 16,
+    backgroundColor: '#F5F5F5',
   },
   header: {
-    backgroundColor: 'white',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5E5',
+  },
+  headerText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333333',
+  },
+  turnsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5E5',
+  },
+  turnsText: {
+    fontSize: 14,
+    color: '#666666',
+  },
+  turnsRemainingText: {
+    fontSize: 14,
+    color: '#666666',
   },
   title: {
     fontSize: 24,
@@ -226,18 +202,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     color: '#666',
   },
-  turnsText: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 4,
-    color: '#888',
-  },
-  turnsRemainingText: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 4,
-    color: '#888',
-  },
   currencyText: {
     fontSize: 16,
     textAlign: 'center',
@@ -249,17 +213,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     marginTop: 16,
     marginBottom: 16,
-  },
-  debugContainer: {
-    backgroundColor: '#f0f0f0',
-    padding: 8,
-    marginTop: 8,
-    borderRadius: 4,
-  },
-  debugText: {
-    fontSize: 12,
-    color: '#666',
-    fontFamily: 'monospace',
   },
   button: {
     paddingVertical: 12,

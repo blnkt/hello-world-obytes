@@ -8,7 +8,6 @@ import {
 import type {
   DungeonGameSaveData,
   LoadOperationResult,
-  SaveOperationResult,
 } from '../../../types/dungeon-game';
 
 // Hook for save operations
@@ -17,39 +16,18 @@ const useSaveOperation = () => {
   const [lastError, setLastError] = useState<string | null>(null);
 
   const saveGameState = useCallback(
-    async (
-      gameData: Omit<DungeonGameSaveData, 'version' | 'timestamp'>
-    ): Promise<SaveOperationResult> => {
-      console.log('🔍 [DEBUG] saveGameState called');
-      setIsLoading(true);
-      setLastError(null);
-
+    async (saveData: DungeonGameSaveData) => {
       try {
-        console.log('🔍 [DEBUG] calling saveDungeonGameState...');
-        const result = await saveDungeonGameState(gameData);
-        console.log('🔍 [DEBUG] saveDungeonGameState result:', result);
-
-        if (result.success) {
-          setLastError(null);
-        } else {
-          setLastError(result.error || 'Save failed');
-        }
-
+        const result = await saveDungeonGameState(saveData);
         return result;
       } catch (error) {
-        console.log('🔍 [DEBUG] saveGameState error:', error);
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error';
-        setLastError(errorMessage);
         return {
           success: false,
-          error: errorMessage,
+          error: error instanceof Error ? error.message : 'Unknown error',
         };
-      } finally {
-        setIsLoading(false);
       }
     },
-    []
+    [saveDungeonGameState]
   );
 
   return { isLoading, lastError, saveGameState };
