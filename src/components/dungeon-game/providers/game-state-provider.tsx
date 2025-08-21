@@ -33,6 +33,8 @@ interface GameStateContextValue {
   setTurnsUsed: (turns: number) => void;
   setCurrency: (amount: number) => void;
   incrementTurn: () => void;
+  addCurrency: (amount: number) => void;
+  deductCurrency: (amount: number) => void;
 
   // Game flow
   startNewGame: () => void;
@@ -350,6 +352,15 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
     setTurnsUsed((prev) => prev + 1);
   }, []);
 
+  // Safe currency modification methods
+  const addCurrency = useCallback((amount: number) => {
+    setCurrency((prev) => prev + amount);
+  }, []);
+
+  const deductCurrency = useCallback((amount: number) => {
+    setCurrency((prev) => Math.max(0, prev - amount));
+  }, []);
+
   const revealTile = useCallback(
     (x: number, y: number, type: string) => {
       // Business logic validation
@@ -577,6 +588,8 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       setTurnsUsed,
       setCurrency,
       incrementTurn,
+      addCurrency,
+      deductCurrency,
 
       // Game flow
       startNewGame,
@@ -606,6 +619,8 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       setTurnsUsed,
       setCurrency,
       incrementTurn,
+      addCurrency,
+      deductCurrency,
       startNewGame,
       completeLevel,
       gameOver,

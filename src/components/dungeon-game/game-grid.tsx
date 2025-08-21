@@ -88,7 +88,8 @@ export default function GameGrid({ level, disabled = false }: GameGridProps) {
     completeLevel,
     gameOver,
     currency,
-    setCurrency,
+    addCurrency,
+    deductCurrency,
   } = useGameState();
 
   const grid = React.useMemo(
@@ -122,12 +123,12 @@ export default function GameGrid({ level, disabled = false }: GameGridProps) {
       } else if (tileType === 'trap') {
         // Trap tile - lose 1 additional turn (deduct 100 more currency)
         console.log('💀 Trap tile revealed! Lost 1 additional turn!');
-        setCurrency(Math.max(0, currency - 100));
+        deductCurrency(100);
         // Don't call gameOver() immediately - let the turn system handle it
       } else if (tileType === 'treasure') {
         // Treasure tile - gain 1 free turn (add 100 currency)
         console.log('💎 Treasure tile revealed! Gained 1 free turn!');
-        setCurrency(currency + 100);
+        addCurrency(100);
       } else if (tileType === 'bonus') {
         // Bonus tile - reveal adjacent tile and give free turn
         console.log(
@@ -147,7 +148,7 @@ export default function GameGrid({ level, disabled = false }: GameGridProps) {
           // This avoids calling state setters directly which can cause navigation context issues
           revealTile(adjRow, adjCol, adjTileType);
           // Give free turn for bonus tile (add 100 currency)
-          setCurrency(currency + 100);
+          addCurrency(100);
           console.log(`🎁 Adjacent tile revealed: ${adjTileType}`);
         }
       }
@@ -157,7 +158,8 @@ export default function GameGrid({ level, disabled = false }: GameGridProps) {
       revealedTiles,
       levelTiles,
       revealTile,
-      setCurrency,
+      addCurrency,
+      deductCurrency,
       currency,
       completeLevel,
       gameOver,
