@@ -33,6 +33,14 @@ interface GameStateContextValue {
   setTurnsUsed: (turns: number) => void;
   setCurrency: (amount: number) => void;
   incrementTurn: () => void;
+  setRevealedTiles: (
+    tiles: Set<string> | ((prev: Set<string>) => Set<string>)
+  ) => void;
+  setTileTypes: (
+    types:
+      | Record<string, string>
+      | ((prev: Record<string, string>) => Record<string, string>)
+  ) => void;
 
   // Game flow
   startNewGame: () => void;
@@ -577,6 +585,8 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       setTurnsUsed,
       setCurrency,
       incrementTurn,
+      setRevealedTiles,
+      setTileTypes,
 
       // Game flow
       startNewGame,
@@ -606,6 +616,8 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       setTurnsUsed,
       setCurrency,
       incrementTurn,
+      setRevealedTiles,
+      setTileTypes,
       startNewGame,
       completeLevel,
       gameOver,

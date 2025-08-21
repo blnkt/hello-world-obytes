@@ -2,6 +2,8 @@ import React from 'react';
 import { Pressable, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 
+import { Text } from '@/components/ui';
+
 // SVG Icon Components
 const SkullIcon = () => (
   <Svg width="24" height="24" viewBox="0 0 24 24" fill="white">
@@ -109,6 +111,7 @@ interface GridTileProps {
   tileType?: 'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral';
   onPress?: (id: string, row: number, col: number) => void;
   disabled?: boolean;
+  showEffect?: boolean;
 }
 
 export default function GridTile({
@@ -119,10 +122,16 @@ export default function GridTile({
   tileType = 'neutral',
   onPress,
   disabled = false,
+  showEffect = false,
 }: GridTileProps) {
+  const [isAnimating, setIsAnimating] = React.useState(false);
+
   const handlePress = () => {
     if (onPress && !disabled) {
+      setIsAnimating(true);
       onPress(id, row, col);
+      // Reset animation state after a short delay
+      setTimeout(() => setIsAnimating(false), 500);
     }
   };
 
@@ -144,11 +153,24 @@ export default function GridTile({
       accessibilityHint={getTileDescription(tileType, isRevealed)}
       accessibilityRole="button"
       accessibilityState={{ disabled }}
-      className={`m-0.5 aspect-square flex-1 rounded-md border ${getTileStyle(tileType, isRevealed, disabled)}`}
+      className={`m-0.5 aspect-square flex-1 rounded-md border ${getTileStyle(tileType, isRevealed, disabled)} ${
+        isAnimating ? 'scale-95 opacity-80' : ''
+      }`}
       style={{ minHeight: 35 }}
     >
       <View className="flex-1 items-center justify-center">
         {isRevealed && getTileContent(tileType, isRevealed)}
+        {showEffect && isRevealed && (
+          <View className="absolute inset-0 items-center justify-center">
+            <View className="rounded-full bg-yellow-400/80 p-2">
+              <Text className="text-xs font-bold text-white">
+                {tileType === 'treasure' && '+1 Turn'}
+                {tileType === 'trap' && '-1 Turn'}
+                {tileType === 'bonus' && 'Free Reveal'}
+              </Text>
+            </View>
+          </View>
+        )}
       </View>
     </Pressable>
   );

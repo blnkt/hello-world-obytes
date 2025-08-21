@@ -89,6 +89,8 @@ export default function GameGrid({ level, disabled = false }: GameGridProps) {
     gameOver,
     currency,
     setCurrency,
+    setRevealedTiles,
+    setTileTypes,
   } = useGameState();
 
   const grid = React.useMemo(
@@ -116,11 +118,23 @@ export default function GameGrid({ level, disabled = false }: GameGridProps) {
 
       // Handle tile-specific effects
       if (tileType === 'exit') {
+        // Exit tile - complete level
+        console.log('🎯 Exit tile revealed! Level complete!');
         completeLevel();
       } else if (tileType === 'trap') {
-        gameOver();
+        // Trap tile - lose 1 additional turn (deduct 100 more currency)
+        console.log('💀 Trap tile revealed! Lost 1 additional turn!');
+        setCurrency(Math.max(0, currency - 100));
+        // Don't call gameOver() immediately - let the turn system handle it
+      } else if (tileType === 'treasure') {
+        // Treasure tile - gain 1 free turn (add 100 currency)
+        console.log('💎 Treasure tile revealed! Gained 1 free turn!');
+        setCurrency(currency + 100);
       } else if (tileType === 'bonus') {
-        // Bonus tile - reveal adjacent tile
+        // Bonus tile - reveal adjacent tile and give free turn
+        console.log(
+          '⭐ Bonus tile revealed! Revealing adjacent tile and gaining free turn!'
+        );
         const adjacentTile = findUnrevealedAdjacentTile({
           tileId: id,
           revealedTiles,
@@ -131,12 +145,12 @@ export default function GameGrid({ level, disabled = false }: GameGridProps) {
           const [adjRow, adjCol] = adjacentTile.split('-').map(Number);
           const adjTileIndex = adjRow * GRID_COLS + adjCol;
           const adjTileType = levelTiles[adjTileIndex];
-          // Check if adjacent tile reveal succeeds
-          const adjacentRevealSuccess = revealTile(adjRow, adjCol, adjTileType);
-          if (!adjacentRevealSuccess) {
-            // If adjacent reveal fails, we might want to handle this case
-            // For now, just handle gracefully
-          }
+          // Reveal adjacent tile without costing a turn
+          setRevealedTiles((prev) => new Set([...prev, adjacentTile]));
+          setTileTypes((prev) => ({ ...prev, [adjacentTile]: adjTileType }));
+          // Give free turn for bonus tile (add 100 currency)
+          setCurrency(currency + 100);
+          console.log(`🎁 Adjacent tile revealed: ${adjTileType}`);
         }
       }
     },
