@@ -193,8 +193,8 @@ describe('DungeonGame', () => {
   it('should display currency and available turns based on currency system', () => {
     renderWithProvider(<DungeonGame />);
 
-    // Should display current currency in header
-    expect(screen.getByText('Currency: 1000')).toBeTruthy();
+    // Should display current currency and turns in header
+    expect(screen.getByText('💰 1000 steps = 10 turns')).toBeTruthy();
 
     // Should display turns information in header
     expect(screen.getAllByText(/Turns Used:/)[0]).toBeTruthy();
@@ -207,7 +207,7 @@ describe('DungeonGame', () => {
     renderWithProvider(<DungeonGame />);
 
     // Verify initial display
-    expect(screen.getByText('Currency: 1000')).toBeTruthy();
+    expect(screen.getByText('💰 1000 steps = 10 turns')).toBeTruthy();
     expect(screen.getByText('Level 1')).toBeTruthy();
 
     // Click a tile to reveal it
@@ -228,7 +228,7 @@ describe('DungeonGame', () => {
     expect(screen.getByTestId('game-grid')).toBeTruthy();
 
     // Should show currency information
-    expect(screen.getByText('Currency: 1000')).toBeTruthy();
+    expect(screen.getByText('💰 1000 steps = 10 turns')).toBeTruthy();
   });
 
   // This test verifies that the game over condition can be triggered

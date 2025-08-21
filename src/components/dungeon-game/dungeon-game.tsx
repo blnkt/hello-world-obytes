@@ -17,11 +17,19 @@ const GameHeader: React.FC<{
   <View style={styles.header}>
     <Text style={styles.title}>Dungeon Game</Text>
     <Text style={styles.levelText}>Level {level}</Text>
+
+    {/* Enhanced currency and turns display */}
+    <View style={styles.currencyTurnsContainer}>
+      <Text style={styles.currencyTurnsText}>
+        💰 {currency} steps = {availableTurns} turns
+      </Text>
+      <Text style={styles.turnCostText}>(100 steps per turn)</Text>
+    </View>
+
     <Text style={styles.turnsText}>Turns Used: {turnsUsed}</Text>
     <Text style={styles.turnsRemainingText}>
       Turns Remaining: {availableTurns}
     </Text>
-    <Text style={styles.currencyText}>Currency: {currency}</Text>
   </View>
 );
 
@@ -61,55 +69,55 @@ const GameControls: React.FC<{
 );
 
 // Helper component for game state display
-export const GameStateDisplay: React.FC<{ gameState: GameState }> = ({
-  gameState,
-}) => {
-  if (gameState === 'Win') {
-    return (
-      <View className="mx-4 mb-4 items-center rounded-xl bg-white p-4 shadow-lg">
-        <Text className="text-xl font-bold text-green-600">
-          🎉 Level Complete! 🎉
-        </Text>
-        <Text className="mt-1 text-center text-sm text-green-600">
-          Congratulations! You've completed this level!
-        </Text>
-      </View>
-    );
-  }
+// export const GameStateDisplay: React.FC<{ gameState: GameState }> = ({
+//   gameState,
+// }) => {
+//   if (gameState === 'Win') {
+//     return (
+//       <View className="mx-4 mb-4 items-center rounded-xl bg-white p-4 shadow-lg">
+//         <Text className="text-xl font-bold text-green-600">
+//           🎉 Level Complete! 🎉
+//         </Text>
+//         <Text className="mt-1 text-center text-sm text-green-600">
+//           Congratulations! You've completed this level!
+//         </Text>
+//       </View>
+//     );
+//   }
 
-  if (gameState === 'Game Over') {
-    return (
-      <View className="mx-4 mb-4 items-center rounded-xl bg-white p-4 shadow-lg">
-        <Text className="text-xl font-bold text-red-600">💀 Game Over 💀</Text>
-        <Text className="mt-1 text-center text-sm text-red-600">
-          Better luck next time!
-        </Text>
-      </View>
-    );
-  }
+//   if (gameState === 'Game Over') {
+//     return (
+//       <View className="mx-4 mb-4 items-center rounded-xl bg-white p-4 shadow-lg">
+//         <Text className="text-xl font-bold text-red-600">💀 Game Over 💀</Text>
+//         <Text className="mt-1 text-center text-sm text-red-600">
+//           Better luck next time!
+//         </Text>
+//       </View>
+//     );
+//   }
 
-  if (gameState === 'Active') {
-    return (
-      <View className="mx-4 mb-4 items-center rounded-xl bg-white p-4 shadow-lg">
-        <Text className="text-xl font-bold text-blue-600">🎮 Game Active</Text>
-        <Text className="mt-1 text-center text-sm text-blue-600">
-          Explore the dungeon and find the exit!
-        </Text>
-      </View>
-    );
-  }
+//   if (gameState === 'Active') {
+//     return (
+//       <View className="mx-4 mb-4 items-center rounded-xl bg-white p-4 shadow-lg">
+//         <Text className="text-xl font-bold text-blue-600">🎮 Game Active</Text>
+//         <Text className="mt-1 text-center text-sm text-blue-600">
+//           Explore the dungeon and find the exit!
+//         </Text>
+//       </View>
+//     );
+//   }
 
-  return (
-    <View className="mx-4 mb-4 items-center rounded-xl bg-white p-4 shadow-lg">
-      <Text className="text-xl font-bold text-purple-600">
-        🎲 Ready to Play
-      </Text>
-      <Text className="mt-1 text-center text-sm text-purple-600">
-        Start your adventure!
-      </Text>
-    </View>
-  );
-};
+//   return (
+//     <View className="mx-4 mb-4 items-center rounded-xl bg-white p-4 shadow-lg">
+//       <Text className="text-xl font-bold text-purple-600">
+//         🎲 Ready to Play
+//       </Text>
+//       <Text className="mt-1 text-center text-sm text-purple-600">
+//         Start your adventure!
+//       </Text>
+//     </View>
+//   );
+// };
 
 // eslint-disable-next-line max-lines-per-function
 export default function DungeonGame() {
@@ -187,25 +195,38 @@ export default function DungeonGame() {
         availableTurns={availableTurns}
       />
 
+      {/* Comprehensive Currency Display */}
+      {/* <View style={styles.currencyDisplayContainer}>
+        <CurrencyDisplay
+          currency={currency}
+          availableTurns={availableTurns}
+          turnCost={100}
+        />
+      </View> */}
+
       {/* Turn Requirements Display */}
-      <View style={styles.turnRequirementsContainer}>
+      {/* <View style={styles.turnRequirementsContainer}>
         <Text style={styles.turnRequirementsText}>
           📊 Level {level} requires minimum {getMinimumTurnsRequired()} turns
         </Text>
         <Text style={styles.turnRequirementsSubtext}>
-          You have {availableTurns} turns available ({currency} steps)
+          Current status:{' '}
+          {availableTurns >= getMinimumTurnsRequired()
+            ? '✅ Ready'
+            : '❌ Insufficient'}{' '}
+          turns
         </Text>
-      </View>
+      </View> */}
 
       {/* Enhanced Turn Validation Display */}
-      {!canStartGame() && (
+      {/* {!canStartGame() && (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>⚠️ {getTurnValidationMessage()}</Text>
         </View>
-      )}
+      )} */}
 
       {/* Game State Display */}
-      <GameStateDisplay gameState={gameState} />
+      {/* <GameStateDisplay gameState={gameState} /> */}
 
       {/* Game Grid */}
       <GameGrid level={level} disabled={gameState !== 'Active'} />
@@ -295,6 +316,23 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     color: '#666',
   },
+  currencyTurnsContainer: {
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  currencyTurnsText: {
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 2,
+    color: '#4CAF50',
+  },
+  turnCostText: {
+    fontSize: 12,
+    textAlign: 'center',
+    color: '#888',
+    fontStyle: 'italic',
+  },
   currencyText: {
     fontSize: 16,
     textAlign: 'center',
@@ -353,6 +391,10 @@ const styles = StyleSheet.create({
     color: '#42A5F5',
     textAlign: 'center',
     marginTop: 4,
+  },
+  currencyDisplayContainer: {
+    marginHorizontal: 16,
+    marginTop: 16,
   },
   errorContainer: {
     backgroundColor: '#FFEBEE',
