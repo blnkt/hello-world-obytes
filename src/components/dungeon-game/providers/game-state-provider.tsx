@@ -197,6 +197,38 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
   // Debounced save ref
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
 
+  // Action queue to avoid navigation context issues
+  const actionQueueRef = useRef<(() => void)[]>([]);
+  const isProcessingQueueRef = useRef(false);
+
+  // Process action queue
+  const processActionQueue = useCallback(() => {
+    if (isProcessingQueueRef.current || actionQueueRef.current.length === 0) {
+      return;
+    }
+
+    isProcessingQueueRef.current = true;
+
+    while (actionQueueRef.current.length > 0) {
+      const action = actionQueueRef.current.shift();
+      if (action) {
+        action();
+      }
+    }
+
+    isProcessingQueueRef.current = false;
+  }, []);
+
+  // Queue an action to avoid navigation context issues
+  const queueAction = useCallback(
+    (action: () => void) => {
+      actionQueueRef.current.push(action);
+      // Process queue in next tick to avoid navigation context issues
+      setTimeout(processActionQueue, 0);
+    },
+    [processActionQueue]
+  );
+
   // State transition validation helper
   const validateStateTransition = useCallback(
     (fromState: GameState, toState: GameState): boolean => {
@@ -416,23 +448,23 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       const tileKey = `${x}-${y}`;
       console.log('🔍 [DEBUG] tileKey:', tileKey);
 
-      // Defer state updates to avoid navigation context issues during tile press
-      console.log('🔍 [DEBUG] setting timeout for state updates...');
-      setTimeout(() => {
-        console.log('🔍 [DEBUG] timeout executing - updating state...');
+      // Queue state updates to avoid navigation context issues
+      console.log('🔍 [DEBUG] queuing state updates...');
+      queueAction(() => {
+        console.log('🔍 [DEBUG] executing queued state updates...');
         setRevealedTiles((prev) => new Set([...prev, tileKey]));
         setTileTypes((prev) => ({ ...prev, [tileKey]: type }));
 
         // Increment turn count and deduct currency cost (100 per turn)
         incrementTurn();
         setCurrency((prev) => prev - 100);
-        console.log('🔍 [DEBUG] state updates completed');
-      }, 0);
+        console.log('🔍 [DEBUG] queued state updates completed');
+      });
 
       console.log('🔍 [DEBUG] revealTile returning true');
       return true; // Tile reveal successful
     },
-    [incrementTurn, currency, setCurrency, validateGameAction]
+    [incrementTurn, currency, setCurrency, validateGameAction, queueAction]
   );
 
   const startNewGame = useCallback(() => {
