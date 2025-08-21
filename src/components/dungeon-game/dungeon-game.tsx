@@ -125,6 +125,8 @@ export default function DungeonGame() {
     setLevel,
     canStartGame,
     getAvailableTurns,
+    getMinimumTurnsRequired,
+    getTurnValidationMessage,
   } = useGameState();
 
   const [showResumeModal, setShowResumeModal] = useState(false);
@@ -185,12 +187,20 @@ export default function DungeonGame() {
         availableTurns={availableTurns}
       />
 
-      {/* Currency Error Display */}
+      {/* Turn Requirements Display */}
+      <View style={styles.turnRequirementsContainer}>
+        <Text style={styles.turnRequirementsText}>
+          📊 Level {level} requires minimum {getMinimumTurnsRequired()} turns
+        </Text>
+        <Text style={styles.turnRequirementsSubtext}>
+          You have {availableTurns} turns available ({currency} steps)
+        </Text>
+      </View>
+
+      {/* Enhanced Turn Validation Display */}
       {!canStartGame() && (
         <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>
-            ⚠️ Insufficient currency to play. Need at least 100 steps to start.
-          </Text>
+          <Text style={styles.errorText}>⚠️ {getTurnValidationMessage()}</Text>
         </View>
       )}
 
@@ -322,6 +332,28 @@ const styles = StyleSheet.create({
     color: '#666666',
   },
 
+  turnRequirementsContainer: {
+    backgroundColor: '#E3F2FD',
+    borderColor: '#2196F3',
+    borderWidth: 1,
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 16,
+    marginHorizontal: 16,
+    alignItems: 'center',
+  },
+  turnRequirementsText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1976D2',
+    textAlign: 'center',
+  },
+  turnRequirementsSubtext: {
+    fontSize: 12,
+    color: '#42A5F5',
+    textAlign: 'center',
+    marginTop: 4,
+  },
   errorContainer: {
     backgroundColor: '#FFEBEE',
     borderColor: '#F44336',

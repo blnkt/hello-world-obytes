@@ -50,7 +50,7 @@ The migration to GameStateProvider has broken several core dungeon game features
 ### 4.0 Fix Currency Integration
 
 - [x] 4.1 Add minimum playability check (100 steps minimum)
-- [ ] 4.2 Implement turn validation before game start
+- [x] 4.2 Implement turn validation before game start
 - [ ] 4.3 Fix currency display to show accurate available turns
 
 - [ ] 4.4 Add currency validation in tile interactions

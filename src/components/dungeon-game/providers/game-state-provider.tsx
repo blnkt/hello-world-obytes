@@ -55,6 +55,8 @@ interface GameStateContextValue {
   // Currency validation
   canStartGame: () => boolean;
   getAvailableTurns: () => number;
+  getMinimumTurnsRequired: () => number;
+  getTurnValidationMessage: () => string;
 }
 
 const GameStateContext = createContext<GameStateContextValue | null>(null);
@@ -417,12 +419,44 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
 
   // Currency validation methods
   const canStartGame = useCallback(() => {
-    return currency >= 100; // Minimum 100 steps required to start
-  }, [currency]);
+    // Minimum 100 currency required to start
+    if (currency < 100) {
+      return false;
+    }
+
+    // Calculate available turns
+    const availableTurns = Math.floor(currency / 100);
+
+    // Ensure player has enough turns for meaningful gameplay
+    // For level 1, need at least 3 turns to have a chance of winning
+    const minimumTurnsForLevel = Math.max(3, Math.ceil(level * 0.5));
+
+    return availableTurns >= minimumTurnsForLevel;
+  }, [currency, level]);
 
   const getAvailableTurns = useCallback(() => {
     return Math.floor(currency / 100);
   }, [currency]);
+
+  const getMinimumTurnsRequired = useCallback(() => {
+    // Calculate minimum turns needed for the current level
+    return Math.max(3, Math.ceil(level * 0.5));
+  }, [level]);
+
+  const getTurnValidationMessage = useCallback(() => {
+    if (currency < 100) {
+      return `Insufficient currency. Need at least 100 steps to start.`;
+    }
+
+    const availableTurns = Math.floor(currency / 100);
+    const minimumTurns = getMinimumTurnsRequired();
+
+    if (availableTurns < minimumTurns) {
+      return `Need at least ${minimumTurns} turns for level ${level}. Current: ${availableTurns} turns.`;
+    }
+
+    return `Ready to play! You have ${availableTurns} turns available.`;
+  }, [currency, level, getMinimumTurnsRequired]);
 
   const revealTile = useCallback(
     (x: number, y: number, type: string) => {
@@ -469,14 +503,11 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
   );
 
   const startNewGame = useCallback(() => {
-    // Check minimum playability requirement (100 steps minimum)
+    // Enhanced turn validation before game start
     if (!canStartGame()) {
-      console.warn(
-        'Cannot start game: insufficient currency (need at least 100 steps)'
-      );
-      setLastError(
-        'Insufficient currency to start game. Need at least 100 steps.'
-      );
+      const validationMessage = getTurnValidationMessage();
+      console.warn(`Cannot start game: ${validationMessage}`);
+      setLastError(validationMessage);
       return;
     }
 
@@ -507,6 +538,7 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
     debouncedSave();
   }, [
     canStartGame,
+    getTurnValidationMessage,
     debouncedSave,
     gameState,
     validateStateTransition,
@@ -598,8 +630,9 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
 
         // Check if resumed game state has sufficient currency to continue
         if (!canStartGame()) {
+          const validationMessage = getTurnValidationMessage();
           setLastError(
-            'Insufficient currency to continue game. Need at least 100 steps.'
+            `Resumed game has insufficient currency: ${validationMessage}`
           );
           setGameState('Game Over');
         }
@@ -609,7 +642,7 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [loadGameState, canStartGame]);
+  }, [loadGameState, canStartGame, getTurnValidationMessage]);
 
   const clearSave = useCallback(async () => {
     try {
@@ -708,6 +741,8 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       // Currency validation
       canStartGame,
       getAvailableTurns,
+      getMinimumTurnsRequired,
+      getTurnValidationMessage,
     }),
     [
       level,
@@ -736,6 +771,8 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       clearSave,
       canStartGame,
       getAvailableTurns,
+      getMinimumTurnsRequired,
+      getTurnValidationMessage,
     ]
   );
 
