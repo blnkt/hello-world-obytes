@@ -1,5 +1,6 @@
+import { MotiView } from 'moti';
 import React from 'react';
-import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { type PersistenceMetadata } from '@/types/dungeon-game';
 
@@ -41,7 +42,17 @@ const formatDataSize = (bytes: number): string => {
 const SaveInfoSection: React.FC<{ saveDataInfo: PersistenceMetadata }> = ({
   saveDataInfo,
 }) => (
-  <View style={styles.saveInfo}>
+  <MotiView
+    style={styles.saveInfo}
+    testID="animated-save-info"
+    from={{ opacity: 0, translateY: 20 }}
+    animate={{ opacity: 1, translateY: 0 }}
+    transition={{
+      type: 'timing',
+      duration: 300,
+      delay: 300,
+    }}
+  >
     <Text style={styles.saveInfoText}>
       Last saved: {formatSaveTime(saveDataInfo.lastSaveTime)}
     </Text>
@@ -51,13 +62,23 @@ const SaveInfoSection: React.FC<{ saveDataInfo: PersistenceMetadata }> = ({
     <Text style={styles.saveInfoText}>
       Size: {formatDataSize(saveDataInfo.dataSize)}
     </Text>
-  </View>
+  </MotiView>
 );
 
 const WarningSection: React.FC = () => (
-  <View style={styles.warningContainer}>
+  <MotiView
+    style={styles.warningContainer}
+    testID="animated-warning"
+    from={{ opacity: 0, translateY: 20 }}
+    animate={{ opacity: 1, translateY: 0 }}
+    transition={{
+      type: 'timing',
+      duration: 300,
+      delay: 300,
+    }}
+  >
     <Text style={styles.warningText}>Warning: Save data may be corrupted</Text>
-  </View>
+  </MotiView>
 );
 
 const ActionButtons: React.FC<{
@@ -65,27 +86,149 @@ const ActionButtons: React.FC<{
   onNewGame: () => void;
   showResume: boolean;
 }> = ({ onResume, onNewGame, showResume }) => (
-  <View style={styles.buttonContainer}>
+  <MotiView
+    style={styles.buttonContainer}
+    testID="animated-buttons"
+    from={{ opacity: 0, translateY: 20 }}
+    animate={{ opacity: 1, translateY: 0 }}
+    transition={{
+      type: 'timing',
+      duration: 300,
+      delay: 400,
+    }}
+  >
     {showResume && (
-      <TouchableOpacity
-        style={[styles.button, styles.resumeButton]}
+      <Pressable
         onPress={onResume}
         accessibilityLabel="Resume your previous game"
         accessibilityRole="button"
       >
-        <Text style={styles.buttonText}>Resume Game</Text>
-      </TouchableOpacity>
+        <MotiView
+          style={[styles.button, styles.resumeButton]}
+          testID="animated-resume-button"
+          from={{ scale: 1 }}
+          animate={{ scale: 1 }}
+          transition={{ type: 'timing', duration: 150 }}
+        >
+          <Text style={styles.buttonText}>Resume Game</Text>
+        </MotiView>
+      </Pressable>
     )}
 
-    <TouchableOpacity
-      style={[styles.button, styles.newGameButton]}
+    <Pressable
       onPress={onNewGame}
       accessibilityLabel="Start a new game"
       accessibilityRole="button"
     >
-      <Text style={styles.buttonText}>Start New Game</Text>
-    </TouchableOpacity>
-  </View>
+      <MotiView
+        style={[styles.button, styles.newGameButton]}
+        testID="animated-new-game-button"
+        from={{ scale: 1 }}
+        animate={{ scale: 1 }}
+        transition={{ type: 'timing', duration: 150 }}
+      >
+        <Text style={styles.buttonText}>Start New Game</Text>
+      </MotiView>
+    </Pressable>
+  </MotiView>
+);
+
+const AnimatedTitle: React.FC = () => (
+  <MotiView
+    testID="animated-title"
+    from={{ opacity: 0, translateY: -10 }}
+    animate={{ opacity: 1, translateY: 0 }}
+    transition={{
+      type: 'timing',
+      duration: 300,
+      delay: 100,
+    }}
+  >
+    <Text style={styles.title}>Resume Your Game?</Text>
+  </MotiView>
+);
+
+const AnimatedDescription: React.FC = () => (
+  <MotiView
+    testID="animated-description"
+    from={{ opacity: 0, translateY: 10 }}
+    animate={{ opacity: 1, translateY: 0 }}
+    transition={{
+      type: 'timing',
+      duration: 300,
+      delay: 200,
+    }}
+  >
+    <Text style={styles.description}>
+      You have an existing game in progress.
+    </Text>
+  </MotiView>
+);
+
+const CloseButton: React.FC<{ onClose: () => void }> = ({ onClose }) => (
+  <Pressable
+    style={styles.closeButton}
+    onPress={onClose}
+    accessibilityLabel="Close modal"
+    accessibilityRole="button"
+  >
+    <MotiView
+      from={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{
+        type: 'timing',
+        duration: 300,
+        delay: 500,
+      }}
+    >
+      <Text style={styles.closeButtonText}>Close</Text>
+    </MotiView>
+  </Pressable>
+);
+
+const AnimatedModalContent: React.FC<{
+  saveDataInfo: PersistenceMetadata;
+  onResume: () => void;
+  onNewGame: () => void;
+  onClose: () => void;
+}> = ({ saveDataInfo, onResume, onNewGame, onClose }) => (
+  <MotiView
+    style={styles.modalContent}
+    testID="animated-modal-container"
+    from={{ opacity: 0, scale: 0.8 }}
+    animate={{ opacity: 1, scale: 1 }}
+    transition={{
+      type: 'spring',
+      damping: 20,
+      mass: 1,
+      stiffness: 300,
+    }}
+  >
+    <AnimatedTitle />
+    <AnimatedDescription />
+
+    {saveDataInfo.isValid ? (
+      <>
+        <SaveInfoSection saveDataInfo={saveDataInfo} />
+        <ActionButtons
+          onResume={onResume}
+          onNewGame={onNewGame}
+          showResume={true}
+        />
+      </>
+    ) : (
+      <>
+        <WarningSection />
+        <ActionButtons
+          onResume={onResume}
+          onNewGame={onNewGame}
+          showResume={false}
+        />
+      </>
+    )}
+
+    <CloseButton onClose={onClose} />
+  </MotiView>
 );
 
 export const ResumeChoiceModal: React.FC<ResumeChoiceModalProps> = ({
@@ -103,54 +246,30 @@ export const ResumeChoiceModal: React.FC<ResumeChoiceModalProps> = ({
     <Modal
       visible={isVisible}
       transparent
-      animationType="fade"
+      animationType="none"
       onRequestClose={onClose}
     >
-      <TouchableOpacity
+      <Pressable
         testID="modal-backdrop"
         style={styles.backdrop}
-        activeOpacity={1}
         onPress={onClose}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.title}>Resume Your Game?</Text>
-
-            <Text style={styles.description}>
-              You have an existing game in progress.
-            </Text>
-
-            {saveDataInfo.isValid ? (
-              <>
-                <SaveInfoSection saveDataInfo={saveDataInfo} />
-                <ActionButtons
-                  onResume={onResume}
-                  onNewGame={onNewGame}
-                  showResume={true}
-                />
-              </>
-            ) : (
-              <>
-                <WarningSection />
-                <ActionButtons
-                  onResume={onResume}
-                  onNewGame={onNewGame}
-                  showResume={false}
-                />
-              </>
-            )}
-
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={onClose}
-              accessibilityLabel="Close modal"
-              accessibilityRole="button"
-            >
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
+        <MotiView
+          style={styles.backdrop}
+          from={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ type: 'timing', duration: 200 }}
+        >
+          <View style={styles.modalContainer}>
+            <AnimatedModalContent
+              saveDataInfo={saveDataInfo}
+              onResume={onResume}
+              onNewGame={onNewGame}
+              onClose={onClose}
+            />
           </View>
-        </View>
-      </TouchableOpacity>
+        </MotiView>
+      </Pressable>
     </Modal>
   );
 };
