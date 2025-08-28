@@ -8,6 +8,7 @@ import React, {
   useState,
 } from 'react';
 
+import { useCurrencySystem } from '@/lib/health';
 import type {
   DungeonGameSaveData,
   GameState,
@@ -194,15 +195,18 @@ const restoreGameStateHelper = (params: {
 // eslint-disable-next-line max-lines-per-function
 export const GameStateProvider: React.FC<GameStateProviderProps> = ({
   children,
-  initialCurrency = 1000,
+  initialCurrency,
 }) => {
+  // Get real currency from the currency system
+  const { currency: realCurrency } = useCurrencySystem();
+
   // Core game state
   const [level, setLevel] = useState(1);
   const [gameState, setGameState] = useState<GameState>('Active');
   const [revealedTiles, setRevealedTiles] = useState<Set<string>>(new Set());
   const [tileTypes, setTileTypes] = useState<Record<string, string>>({});
   const [turnsUsed, setTurnsUsed] = useState(0);
-  const [currency, setCurrency] = useState(initialCurrency);
+  const [currency, setCurrency] = useState(realCurrency);
 
   // Persistence
   const { saveGameState, loadGameState, clearGameState, hasExistingSaveData } =
@@ -413,6 +417,11 @@ export const GameStateProvider: React.FC<GameStateProviderProps> = ({
       debouncedSave();
     }
   }, [revealedTiles.size, turnsUsed, gameState, debouncedSave]);
+
+  // Sync currency with real currency system
+  useEffect(() => {
+    setCurrency(realCurrency);
+  }, [realCurrency]);
 
   // Cleanup save timeout
   useEffect(() => {

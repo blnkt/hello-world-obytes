@@ -5,7 +5,7 @@ import { GameStateProvider } from './providers/game-state-provider';
 
 const DungeonGameWrapper: React.FC = () => {
   return (
-    <GameStateProvider initialCurrency={1000}>
+    <GameStateProvider>
       <DungeonGame />
     </GameStateProvider>
   );

@@ -97,7 +97,8 @@ describe('Turn Management System', () => {
       const firstTile = tiles[0];
 
       // Verify tile is in hidden state initially
-      expect(firstTile).toHaveProp('accessibilityHint', 'Hidden tile');
+      // Note: With 0 currency, tiles show "Need at least 100 steps to reveal this tile"
+      expect(firstTile).toHaveProp('accessibilityHint', 'Need at least 100 steps to reveal this tile');
 
       fireEvent.press(firstTile);
 

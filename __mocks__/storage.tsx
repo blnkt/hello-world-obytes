@@ -274,10 +274,8 @@ export function getCurrencySync(): number {
   if (value) {
     return Number(value) || 0;
   }
-  // Set default currency for testing (1000 steps = 10 turns)
-  const defaultCurrency = 1000;
-  storage.set('currency', String(defaultCurrency));
-  return defaultCurrency;
+  // No default currency - let the real system handle it
+  return 0;
 }
 
 export function getCurrency(): number {

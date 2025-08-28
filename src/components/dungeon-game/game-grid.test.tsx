@@ -7,6 +7,11 @@ import { setCurrency } from '@/lib/storage';
 import DungeonGame from './dungeon-game';
 import { GameStateProvider } from './providers/game-state-provider';
 
+// Mock the currency system to control test values
+jest.mock('@/lib/health', () => ({
+  useCurrencySystem: jest.fn(),
+}));
+
 // Mock the persistence hook to prevent storage errors
 jest.mock('./hooks/use-dungeon-game-persistence', () => ({
   useDungeonGamePersistence: () => ({
@@ -23,13 +28,22 @@ describe('DungeonGame', () => {
   beforeEach(async () => {
     // Set up mock currency for each test
     await setCurrency(1000);
+
+    // Set up default mock for useCurrencySystem
+    const { useCurrencySystem } = require('@/lib/health');
+    useCurrencySystem.mockReturnValue({
+      currency: 1000,
+      availableCurrency: 0,
+      totalCurrencyEarned: 1000,
+      convertCurrentExperience: jest.fn(),
+      spend: jest.fn(),
+      conversionRate: 0.1,
+    });
   });
 
   // Helper function to render with provider
   const renderWithProvider = (component: React.ReactElement) => {
-    return render(
-      <GameStateProvider initialCurrency={1000}>{component}</GameStateProvider>
-    );
+    return render(<GameStateProvider>{component}</GameStateProvider>);
   };
   it('should render a 6x5 grid layout', () => {
     renderWithProvider(<DungeonGame />);
@@ -95,7 +109,7 @@ describe('DungeonGame', () => {
 
     // Re-render to ensure level tiles are generated consistently
     rerender(
-      <GameStateProvider initialCurrency={1000}>
+      <GameStateProvider>
         <DungeonGame />
       </GameStateProvider>
     );
@@ -191,6 +205,17 @@ describe('DungeonGame', () => {
   });
 
   it('should display currency and available turns based on currency system', () => {
+    // Mock the currency system to return a specific value for testing
+    const { useCurrencySystem } = require('@/lib/health');
+    useCurrencySystem.mockReturnValue({
+      currency: 1000,
+      availableCurrency: 0,
+      totalCurrencyEarned: 1000,
+      convertCurrentExperience: jest.fn(),
+      spend: jest.fn(),
+      conversionRate: 0.1,
+    });
+
     renderWithProvider(<DungeonGame />);
 
     // Should display current currency and turns in header
@@ -204,6 +229,17 @@ describe('DungeonGame', () => {
   });
 
   it('should handle tile interactions', () => {
+    // Mock the currency system to return a specific value for testing
+    const { useCurrencySystem } = require('@/lib/health');
+    useCurrencySystem.mockReturnValue({
+      currency: 1000,
+      availableCurrency: 0,
+      totalCurrencyEarned: 1000,
+      convertCurrentExperience: jest.fn(),
+      spend: jest.fn(),
+      conversionRate: 0.1,
+    });
+
     renderWithProvider(<DungeonGame />);
 
     // Verify initial display
@@ -219,6 +255,17 @@ describe('DungeonGame', () => {
   });
 
   it('should display available turns based on currency', async () => {
+    // Mock the currency system to return a specific value for testing
+    const { useCurrencySystem } = require('@/lib/health');
+    useCurrencySystem.mockReturnValue({
+      currency: 1000,
+      availableCurrency: 0,
+      totalCurrencyEarned: 1000,
+      convertCurrentExperience: jest.fn(),
+      spend: jest.fn(),
+      conversionRate: 0.1,
+    });
+
     renderWithProvider(<DungeonGame />);
 
     // Should display turns remaining (1000 currency / 100 = 10 turns)
