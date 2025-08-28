@@ -76,8 +76,8 @@ The migration to GameStateProvider has broken several core dungeon game features
 - [x] 6.3 Test tile effects with proper turn counting
 - [ ] 6.4 Verify currency integration and validation
 
-- [ ] 6.5 Test level progression
-- [ ] 6.6 Ensure all existing tests still pass
+- [x] 6.5 Test level progression
+- [x] 6.6 Ensure all existing tests still pass
 
 ## Implementation Notes
 
