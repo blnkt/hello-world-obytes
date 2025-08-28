@@ -60,8 +60,8 @@ The migration to GameStateProvider has broken several core dungeon game features
 - [x] 5.1 Add level increment logic in completeLevel function
 - [x] 5.2 Implement next level button functionality
 - [x] 5.3 Reset game state properly for new levels
-- [ ] 5.4 Update level display and progression tracking
-- [ ] 5.5 Review and fix game modal UI and progression flow
+- [x] 5.4 Update level display and progression tracking
+- [x] 5.5 Review and fix game modal UI and progression flow
   - Review all game modals (Win, Game Over, Resume Choice)
   - Ensure proper button functionality and state transitions
   - Fix level progression flow from Win modal to next level

@@ -7,6 +7,7 @@ import type { GameState } from '@/types/dungeon-game';
 import GameGrid from './game-grid';
 import { GameOverModal, WinModal } from './game-modals';
 import { useGameState } from './providers/game-state-provider';
+import { ResumeChoiceModal } from './resume-choice-modal';
 
 // Helper component for the game header
 const GameHeader: React.FC<{
@@ -131,14 +132,11 @@ export default function DungeonGame() {
     currency,
     hasExistingSave,
     isLoading,
-    lastError,
     startNewGame,
     startNextLevel,
-    setLevel,
     setGameState,
     canStartGame,
     getAvailableTurns,
-    getTurnValidationMessage,
     canProgressToLevel,
     getLevelProgressionValidationMessage,
   } = useGameState();
@@ -181,6 +179,10 @@ export default function DungeonGame() {
 
     // Progress to next level using the dedicated function
     startNextLevel();
+  };
+
+  const handleResumeModalClose = () => {
+    setShowResumeModal(false);
   };
 
   const availableTurns = getAvailableTurns();
@@ -246,6 +248,14 @@ export default function DungeonGame() {
         onNextLevel={handleNextLevel}
       />
 
+      {/* Resume Choice Modal - Show when there's existing save data */}
+      {showResumeModal && (
+        <ResumeChoiceModal
+          isVisible={showResumeModal}
+          onClose={handleResumeModalClose}
+        />
+      )}
+
       {/* Win Modal */}
       {gameState === 'Win' && (
         <WinModal
@@ -263,6 +273,7 @@ export default function DungeonGame() {
           level={level}
           turnsUsed={turnsUsed}
           onMainMenu={handleMainMenu}
+          onRestart={handleReset}
         />
       )}
     </View>

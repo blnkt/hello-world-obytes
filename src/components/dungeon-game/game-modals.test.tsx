@@ -134,6 +134,29 @@ describe('GameOverModal', () => {
     expect(screen.getByText('Main Menu')).toBeTruthy();
   });
 
+  it('should render restart button when onRestart is provided', () => {
+    const onRestart = jest.fn();
+    render(<GameOverModal {...defaultProps} onRestart={onRestart} />);
+
+    expect(screen.getByText('Restart Level')).toBeTruthy();
+  });
+
+  it('should not render restart button when onRestart is not provided', () => {
+    render(<GameOverModal {...defaultProps} />);
+
+    expect(screen.queryByText('Restart Level')).toBeNull();
+  });
+
+  it('should call onRestart when Restart Level button is pressed', () => {
+    const onRestart = jest.fn();
+    render(<GameOverModal {...defaultProps} onRestart={onRestart} />);
+
+    const restartButton = screen.getByText('Restart Level');
+    fireEvent.press(restartButton);
+
+    expect(onRestart).toHaveBeenCalledTimes(1);
+  });
+
   it('should handle different level values correctly', () => {
     const { rerender } = render(<GameOverModal {...defaultProps} level={1} />);
 
