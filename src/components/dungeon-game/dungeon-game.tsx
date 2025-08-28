@@ -6,6 +6,7 @@ import type { GameState } from '@/types/dungeon-game';
 
 import GameGrid from './game-grid';
 import { GameOverModal, WinModal } from './game-modals';
+import { PersistenceErrorDisplay } from './persistence-error-display';
 import { useGameState } from './providers/game-state-provider';
 import { ResumeChoiceModal } from './resume-choice-modal';
 
@@ -132,6 +133,7 @@ export default function DungeonGame() {
     currency,
     hasExistingSave,
     isLoading,
+    lastError,
     startNewGame,
     startNextLevel,
     setGameState,
@@ -276,6 +278,15 @@ export default function DungeonGame() {
           onRestart={handleReset}
         />
       )}
+
+      {/* Persistence Error Display */}
+      <PersistenceErrorDisplay
+        error={lastError}
+        onDismiss={() => setGameState('Active')}
+        onRetry={() => startNewGame()}
+        onStartNewGame={() => startNewGame()}
+        onTryRecover={() => startNewGame()}
+      />
     </View>
   );
 }
