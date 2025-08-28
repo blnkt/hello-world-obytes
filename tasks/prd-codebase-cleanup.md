@@ -17,6 +17,7 @@ This PRD outlines a comprehensive cleanup and refactoring initiative for the hel
 5. **Reduce Bundle Size**: Achieve measurable reduction in bundle size and build times
 6. **Establish Clean Architecture**: Create clear patterns and standards for future development
 7. **Improve Developer Experience**: Reduce confusion, improve IntelliSense, and establish better development practices
+8. **Consolidate Test Mocks**: Centralize frequently used test mocks to eliminate duplication and ensure consistency
 
 ## User Stories
 
@@ -121,6 +122,47 @@ This PRD outlines a comprehensive cleanup and refactoring initiative for the hel
     - Update testing guidelines
 
 11. **Performance Optimization**: Measure and document improvements
+
+### **Phase 6: Test Mock Consolidation (Week 7)**
+
+12. **Centralize Frequently Used Mocks**: Consolidate duplicate mock implementations into reusable modules
+
+    **Priority 1: Dungeon Game Persistence Mock** ⭐⭐⭐⭐⭐
+
+    - **Impact**: Used in 7+ test files
+    - **Current Duplication**: Identical mock implementation repeated across all dungeon game tests
+    - **Location**: Create `__mocks__/dungeon-game-persistence.ts`
+    - **Benefits**: Eliminate 7+ duplicate implementations, ensure consistent behavior
+
+    **Priority 2: Health Hooks Mock** ⭐⭐⭐⭐
+
+    - **Impact**: Used in 2+ test files
+    - **Current Duplication**: Multiple health-related hooks mocked together inconsistently
+    - **Location**: Create `__mocks__/health-hooks.ts`
+    - **Benefits**: Standardize health hook mocking, improve type safety
+
+    **Priority 3: Storage Functions Mock** ⭐⭐⭐
+
+    - **Impact**: Used in 2+ test files
+    - **Current Duplication**: Storage-related functions mocked together
+    - **Location**: Create `__mocks__/storage-functions.ts`
+    - **Benefits**: Centralize storage mocking, reduce duplication
+
+    **Implementation Details**:
+
+    - Create centralized mock files in `__mocks__/` directory
+    - Provide helper functions for common mock scenarios
+    - Include reset/cleanup functions for test isolation
+    - Add TypeScript types for all mock interfaces
+    - Update all test files to import from centralized mocks
+
+13. **Standardize Mock Patterns**: Establish consistent mocking patterns across the codebase
+
+    - Define standard mock structure and naming conventions
+    - Create mock factory functions for complex objects
+    - Implement mock validation to catch configuration errors
+    - Add documentation for mock usage patterns
+
     - Measure bundle size reduction
     - Measure build time improvements
     - Document performance gains
@@ -197,6 +239,7 @@ This PRD outlines a comprehensive cleanup and refactoring initiative for the hel
 3. **Dependencies**: Remove 6+ unused npm packages
 4. **Type Safety**: Replace 40+ `any` types with proper types
 5. **Build Time**: Improve build times by measurable percentage
+6. **Mock Consolidation**: Reduce duplicate mock code by 80%+ across test files
 
 ### **Qualitative Metrics**
 
@@ -238,11 +281,21 @@ This PRD outlines a comprehensive cleanup and refactoring initiative for the hel
 
 ### **Quality Gates**
 
-1. **All Tests Pass**: No test failures introduced
-2. **TypeScript Compilation**: No type errors
-3. **ESLint Compliance**: No linting errors
-4. **Performance Validation**: No performance regressions
-5. **Code Review**: All changes reviewed by team members
+### **Mock Consolidation Guidelines**
+
+1. **Mock File Structure**: All centralized mocks must be placed in `__mocks__/` directory
+2. **Naming Convention**: Use kebab-case for mock file names (e.g., `dungeon-game-persistence.ts`)
+3. **Export Pattern**: Export both individual functions and default object with all functions
+4. **Type Safety**: All mocks must have proper TypeScript interfaces
+5. **Helper Functions**: Include setup, teardown, and scenario helper functions
+6. **Documentation**: Each mock file must include usage examples and common scenarios
+7. **Test Updates**: All existing tests must be updated to use centralized mocks
+
+8. **All Tests Pass**: No test failures introduced
+9. **TypeScript Compilation**: No type errors
+10. **ESLint Compliance**: No linting errors
+11. **Performance Validation**: No performance regressions
+12. **Code Review**: All changes reviewed by team members
 
 ### **Rollback Strategy**
 
@@ -271,5 +324,5 @@ This PRD outlines a comprehensive cleanup and refactoring initiative for the hel
 **Created**: [Current Date]  
 **Status**: Ready for Implementation  
 **Priority**: High  
-**Estimated Effort**: 6 weeks (as-needed basis)  
+**Estimated Effort**: 7 weeks (as-needed basis)  
 **Risk Level**: Medium (breaking changes accepted for quality improvements)
