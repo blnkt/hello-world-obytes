@@ -4,13 +4,12 @@ import React from 'react';
 
 import { setCurrency } from '@/lib/storage';
 
+import {
+  mockUseCurrencySystem,
+  resetUseCurrencySystem,
+} from '../../../__mocks__/currency-system';
 import DungeonGame from './dungeon-game';
 import { GameStateProvider } from './providers/game-state-provider';
-
-// Mock the currency system to control test values
-jest.mock('@/lib/health', () => ({
-  useCurrencySystem: jest.fn(),
-}));
 
 // Mock the persistence hook to prevent storage errors
 jest.mock('./hooks/use-dungeon-game-persistence', () => ({
@@ -29,16 +28,12 @@ describe('DungeonGame', () => {
     // Set up mock currency for each test
     await setCurrency(1000);
 
-    // Set up default mock for useCurrencySystem
-    const { useCurrencySystem } = require('@/lib/health');
-    useCurrencySystem.mockReturnValue({
-      currency: 1000,
-      availableCurrency: 0,
-      totalCurrencyEarned: 1000,
-      convertCurrentExperience: jest.fn(),
-      spend: jest.fn(),
-      conversionRate: 0.1,
-    });
+    // Use centralized mock
+    mockUseCurrencySystem(1000);
+  });
+
+  afterEach(() => {
+    resetUseCurrencySystem();
   });
 
   // Helper function to render with provider
@@ -205,16 +200,7 @@ describe('DungeonGame', () => {
   });
 
   it('should display currency and available turns based on currency system', () => {
-    // Mock the currency system to return a specific value for testing
-    const { useCurrencySystem } = require('@/lib/health');
-    useCurrencySystem.mockReturnValue({
-      currency: 1000,
-      availableCurrency: 0,
-      totalCurrencyEarned: 1000,
-      convertCurrentExperience: jest.fn(),
-      spend: jest.fn(),
-      conversionRate: 0.1,
-    });
+    // Mock already set up in beforeEach
 
     renderWithProvider(<DungeonGame />);
 
@@ -229,16 +215,7 @@ describe('DungeonGame', () => {
   });
 
   it('should handle tile interactions', () => {
-    // Mock the currency system to return a specific value for testing
-    const { useCurrencySystem } = require('@/lib/health');
-    useCurrencySystem.mockReturnValue({
-      currency: 1000,
-      availableCurrency: 0,
-      totalCurrencyEarned: 1000,
-      convertCurrentExperience: jest.fn(),
-      spend: jest.fn(),
-      conversionRate: 0.1,
-    });
+    // Mock already set up in beforeEach
 
     renderWithProvider(<DungeonGame />);
 
@@ -255,16 +232,7 @@ describe('DungeonGame', () => {
   });
 
   it('should display available turns based on currency', async () => {
-    // Mock the currency system to return a specific value for testing
-    const { useCurrencySystem } = require('@/lib/health');
-    useCurrencySystem.mockReturnValue({
-      currency: 1000,
-      availableCurrency: 0,
-      totalCurrencyEarned: 1000,
-      convertCurrentExperience: jest.fn(),
-      spend: jest.fn(),
-      conversionRate: 0.1,
-    });
+    // Mock already set up in beforeEach
 
     renderWithProvider(<DungeonGame />);
 

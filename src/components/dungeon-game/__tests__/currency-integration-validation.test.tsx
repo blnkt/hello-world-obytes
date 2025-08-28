@@ -3,11 +3,11 @@ import { render, screen, fireEvent, act } from '@testing-library/react-native';
 
 import { GameStateProvider } from '../providers/game-state-provider';
 import GameGrid from '../game-grid';
-
-// Mock the currency system to control test values
-jest.mock('@/lib/health', () => ({
-  useCurrencySystem: jest.fn(),
-}));
+import { 
+  mockUseCurrencySystem, 
+  resetUseCurrencySystem,
+  currencyScenarios 
+} from '../../../../__mocks__/currency-system';
 
 // Mock the persistence hook to avoid storage dependencies
 jest.mock('../hooks/use-dungeon-game-persistence', () => ({
@@ -28,19 +28,18 @@ const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 describe('Currency Integration and Validation', () => {
+  beforeEach(() => {
+    resetUseCurrencySystem();
+  });
+
+  afterEach(() => {
+    resetUseCurrencySystem();
+  });
+
   describe('Real Currency System Integration', () => {
     it('should use real currency from useCurrencySystem instead of hardcoded values', () => {
-      // Mock the currency system to return a specific value
-      const mockCurrency = 2500; // 25 turns worth
-      const { useCurrencySystem } = require('@/lib/health');
-      useCurrencySystem.mockReturnValue({
-        currency: mockCurrency,
-        availableCurrency: 0,
-        totalCurrencyEarned: mockCurrency,
-        convertCurrentExperience: jest.fn(),
-        spend: jest.fn(),
-        conversionRate: 0.1,
-      });
+      // Use the centralized mock
+      mockUseCurrencySystem(2500); // 25 turns worth
 
       render(
         <TestWrapper>
@@ -56,15 +55,8 @@ describe('Currency Integration and Validation', () => {
     });
 
     it('should calculate available turns based on actual currency, not hardcoded value', () => {
-      const mockCurrency = 750; // 7.5 turns, should round down to 7
-      const { useCurrencySystem } = require('@/lib/health');
-      useCurrencySystem.mockReturnValue({
-        currency: mockCurrency,
-        totalCurrencyEarned: mockCurrency,
-        convertCurrentExperience: jest.fn(),
-        spend: jest.fn(),
-        conversionRate: 0.1,
-      });
+      // Use the centralized mock
+      mockUseCurrencySystem(750); // 7.5 turns, should round down to 7
 
       render(
         <TestWrapper>
@@ -112,15 +104,8 @@ describe('Currency Integration and Validation', () => {
     });
 
     it('should handle currency display for very high values', () => {
-      const { useCurrencySystem } = require('@/lib/health');
-      useCurrencySystem.mockReturnValue({
-        currency: 100000,
-        availableCurrency: 0,
-        totalCurrencyEarned: 100000,
-        convertCurrentExperience: jest.fn(),
-        spend: jest.fn(),
-        conversionRate: 0.1,
-      });
+      // Use predefined scenario
+      currencyScenarios.veryHigh();
 
       render(
         <TestWrapper>
@@ -136,15 +121,8 @@ describe('Currency Integration and Validation', () => {
 
   describe('Currency Validation Before Game Start', () => {
     it('should prevent game start with insufficient currency', () => {
-      const { useCurrencySystem } = require('@/lib/health');
-      useCurrencySystem.mockReturnValue({
-        currency: 50,
-        availableCurrency: 0,
-        totalCurrencyEarned: 50,
-        convertCurrentExperience: jest.fn(),
-        spend: jest.fn(),
-        conversionRate: 0.1,
-      });
+      // Use predefined scenario
+      currencyScenarios.insufficient();
 
       render(
         <TestWrapper>
@@ -158,15 +136,8 @@ describe('Currency Integration and Validation', () => {
     });
 
     it('should allow game start with sufficient currency', () => {
-      const { useCurrencySystem } = require('@/lib/health');
-      useCurrencySystem.mockReturnValue({
-        currency: 100,
-        availableCurrency: 0,
-        totalCurrencyEarned: 100,
-        convertCurrentExperience: jest.fn(),
-        spend: jest.fn(),
-        conversionRate: 0.1,
-      });
+      // Use predefined scenario
+      currencyScenarios.minimum();
 
       render(
         <TestWrapper>
@@ -180,15 +151,8 @@ describe('Currency Integration and Validation', () => {
     });
 
     it('should validate minimum playability requirements', () => {
-      const { useCurrencySystem } = require('@/lib/health');
-      useCurrencySystem.mockReturnValue({
-        currency: 99,
-        availableCurrency: 0,
-        totalCurrencyEarned: 99,
-        convertCurrentExperience: jest.fn(),
-        spend: jest.fn(),
-        conversionRate: 0.1,
-      });
+      // Use custom currency value
+      mockUseCurrencySystem(99);
 
       render(
         <TestWrapper>
