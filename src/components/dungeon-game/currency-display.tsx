@@ -18,7 +18,7 @@ function InfoRow({
 }: InfoRowProps) {
   return (
     <View className="flex-row items-center justify-between">
-      <Text className={`text-[ text-sm${colors.charcoal[500]}]`}>{label}</Text>
+      <Text className={`text-[${colors.charcoal[500]}] text-sm`}>{label}</Text>
       <Text className={valueClassName}>{value}</Text>
     </View>
   );
@@ -94,7 +94,7 @@ function SectionHeader({
   return (
     <View className="mb-3 flex-row items-center justify-between">
       <Text
-        className={`text-[ text-lg font-bold${colors.charcoal[600]}]`}
+        className={`text-[${colors.charcoal[600]}] text-lg font-bold`}
         accessibilityRole="header"
       >
         {title}
@@ -155,7 +155,7 @@ export default function CurrencyDisplay({
 
   return (
     <View
-      className={`border-[ rounded-lg border${colors.neutral[200]}] bg-[${colors.neutral[50]}] p-4`}
+      className={`border-[${colors.neutral[200]}] bg-[ rounded-lg${colors.neutral[50]}] p-4`}
       accessible={true}
       accessibilityLabel={`Currency and Turns - ${availableTurns} turns available`}
       accessibilityRole="summary"

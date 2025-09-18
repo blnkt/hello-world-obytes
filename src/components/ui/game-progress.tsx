@@ -27,7 +27,7 @@ const GameStateHeader = ({
   <View className="mb-3 flex-row items-center justify-between">
     <View>
       <Text
-        className={`text-[ text-lg font-bold${colors.charcoal[600]}]`}
+        className={`text-[${colors.charcoal[600]}] text-lg font-bold`}
         accessibilityRole="header"
       >
         Level {level}
@@ -64,22 +64,22 @@ const GameProgressInfo = ({
     accessibilityLabel={`Game Progress - ${turns} turns used, ${revealedTiles} out of ${totalTiles} tiles revealed`}
   >
     <View className="flex-row items-center justify-between">
-      <Text className={`text-[ text-sm${colors.charcoal[500]}]`}>
+      <Text className={`text-[${colors.charcoal[500]}] text-sm`}>
         Turns Used:
       </Text>
       <Text
-        className={`text-[ text-lg font-semibold${colors.charcoal[600]}]`}
+        className={`text-[${colors.charcoal[600]}] text-lg font-semibold`}
         accessibilityLabel={`${turns} turns used`}
       >
         {turns}
       </Text>
     </View>
     <View className="flex-row items-center justify-between">
-      <Text className={`text-[ text-sm${colors.charcoal[500]}]`}>
+      <Text className={`text-[${colors.charcoal[500]}] text-sm`}>
         Progress:
       </Text>
       <Text
-        className={`text-[ text-lg font-semibold${colors.charcoal[600]}]`}
+        className={`text-[${colors.charcoal[600]}] text-lg font-semibold`}
         accessibilityLabel={`${revealedTiles} out of ${totalTiles} tiles revealed`}
       >
         {revealedTiles}/{totalTiles}
@@ -99,7 +99,7 @@ const GameProgressBar = ({
 
   return (
     <View
-      className={`bg-[ h-3 rounded-full${colors.neutral[200]}]`}
+      className={`bg-[${colors.neutral[200]}] h-3 rounded-full`}
       accessible={true}
       accessibilityLabel={`Progress bar showing ${Math.round(progressPercentage)}% completion`}
       accessibilityRole="progressbar"
@@ -110,7 +110,7 @@ const GameProgressBar = ({
       }}
     >
       <View
-        className={`bg-[ h-3 rounded-full${colors.danger[500]}]`}
+        className={`bg-[${colors.danger[500]}] h-3 rounded-full`}
         style={{ width: `${progressPercentage}%` }}
         testID="progress-bar"
       />

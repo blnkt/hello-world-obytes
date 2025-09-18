@@ -56,7 +56,7 @@ function ActiveEffectsSection({
   return (
     <View className="mb-3">
       <Text
-        className={`text-[ mb-2 text-center text-xs font-medium${colors.charcoal[600]}]`}
+        className={`text-[${colors.charcoal[600]}] mb-2 text-center text-xs font-medium`}
       >
         ⚡ Active Effects
       </Text>
@@ -125,7 +125,7 @@ function PurchasedItemsSection({
               )}
             </View>
             <Text
-              className={`text-[ text-center text-xs font-medium${colors.charcoal[600]}]`}
+              className={`text-[${colors.charcoal[600]}] text-center text-xs font-medium`}
             >
               {item?.name}
             </Text>
@@ -185,7 +185,7 @@ export function PurchasedItemsGrid({
   return (
     <View className={className}>
       <Text
-        className={`text-[ mb-3 text-center text-sm font-semibold${colors.charcoal[600]}]`}
+        className={`text-[${colors.charcoal[600]}] mb-3 text-center text-sm font-semibold`}
       >
         {title}
       </Text>
