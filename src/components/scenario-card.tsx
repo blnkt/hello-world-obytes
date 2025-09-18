@@ -1,6 +1,8 @@
 import React from 'react';
 import { Animated, Text, TouchableOpacity, View } from 'react-native';
 
+import colors from '@/components/ui/colors';
+
 import type { Scenario } from '../types/scenario';
 import { MerchantIcon, MonsterIcon } from './ui/icons';
 
@@ -15,9 +17,13 @@ type ScenarioCardProps = {
 const getScenarioIcon = (type: string) => {
   switch (type) {
     case 'merchant':
-      return <MerchantIcon color="#8B5CF6" style={{ marginRight: 12 }} />;
+      return (
+        <MerchantIcon color={colors.primary[500]} style={{ marginRight: 12 }} />
+      );
     case 'monster':
-      return <MonsterIcon color="#DC2626" style={{ marginRight: 12 }} />;
+      return (
+        <MonsterIcon color={colors.danger[600]} style={{ marginRight: 12 }} />
+      );
     default:
       return null;
   }

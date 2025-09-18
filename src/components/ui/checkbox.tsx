@@ -8,8 +8,7 @@ import {
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
-import colors from '@/components/ui/colors';
-
+import colors from './colors';
 import { Text } from './text';
 
 const SIZE = 20;
@@ -81,7 +80,10 @@ export const CheckboxIcon = ({ checked = false }: IconProps) => {
         borderColor: color,
       }}
       className="items-center justify-center rounded-[5px] border-2"
-      from={{ backgroundColor: 'transparent', borderColor: '#CCCFD6' }}
+      from={{
+        backgroundColor: 'transparent',
+        borderColor: colors.charcoal[200],
+      }}
       animate={{
         backgroundColor: checked ? color : 'transparent',
         borderColor: color,
@@ -99,7 +101,7 @@ export const CheckboxIcon = ({ checked = false }: IconProps) => {
         <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
           <Path
             d="m16.726 7-.64.633c-2.207 2.212-3.878 4.047-5.955 6.158l-2.28-1.928-.69-.584L6 12.66l.683.577 2.928 2.477.633.535.591-.584c2.421-2.426 4.148-4.367 6.532-6.756l.633-.64L16.726 7Z"
-            fill="#fff"
+            fill={colors.white}
           />
         </Svg>
       </MotiView>
@@ -152,7 +154,7 @@ export const RadioIcon = ({ checked = false }: IconProps) => {
         borderColor: color,
       }}
       className="items-center justify-center rounded-[20px] border-2 bg-transparent"
-      from={{ borderColor: '#CCCFD6' }}
+      from={{ borderColor: colors.charcoal[200] }}
       animate={{
         borderColor: color,
       }}
@@ -221,7 +223,7 @@ export const SwitchIcon = ({ checked = false }: IconProps) => {
           height: THUMB_HEIGHT,
           width: THUMB_WIDTH,
           position: 'absolute',
-          backgroundColor: 'white',
+          backgroundColor: colors.white,
           borderRadius: 13,
           right: 0,
         }}

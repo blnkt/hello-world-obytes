@@ -1,6 +1,8 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import colors from '@/components/ui/colors';
+
 interface PersistenceErrorDisplayProps {
   error: string | null;
   onDismiss: () => void;
@@ -123,12 +125,12 @@ const styles = StyleSheet.create({
     zIndex: 1000,
   },
   errorCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     borderRadius: 12,
     padding: 20,
     margin: 20,
     maxWidth: 400,
-    shadowColor: '#000',
+    shadowColor: colors.black,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -140,13 +142,13 @@ const styles = StyleSheet.create({
   errorTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#DC2626',
+    color: colors.danger[600],
     textAlign: 'center',
     marginBottom: 12,
   },
   errorMessage: {
     fontSize: 14,
-    color: '#374151',
+    color: colors.charcoal[700],
     textAlign: 'center',
     marginBottom: 20,
     lineHeight: 20,
@@ -158,14 +160,14 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   actionButton: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: colors.primary[500],
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 6,
     minWidth: 80,
   },
   actionButtonText: {
-    color: '#FFFFFF',
+    color: colors.white,
     fontSize: 14,
     fontWeight: '500',
     textAlign: 'center',

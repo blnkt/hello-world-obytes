@@ -1,6 +1,8 @@
 import React from 'react';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 
+import colors from '@/components/ui/colors';
+
 import type { Character } from '../../types/character';
 import { calculateBalancedXP } from '../../types/character';
 import { getValidClass } from './utils';
@@ -31,7 +33,7 @@ export const ExperienceField: React.FC<{
           editable={false}
           className="flex-1 rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-center text-gray-500 dark:border-gray-600 dark:bg-gray-600 dark:text-gray-400"
           placeholder="Auto-updated from step count"
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={colors.charcoal[400]}
         />
         {onRefreshExperience && (
           <TouchableOpacity

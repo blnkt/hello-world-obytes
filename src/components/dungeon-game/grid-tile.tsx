@@ -3,6 +3,7 @@ import { Pressable, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 
 import { Text } from '@/components/ui';
+import colors from '@/components/ui/colors';
 
 // SVG Icon Components
 const SkullIcon = () => (
@@ -88,26 +89,26 @@ const getTileStyle = (
   }
 
   if (insufficientCurrency && !isRevealed) {
-    return 'bg-[#D96B5E] border-[#C55A4D] opacity-60'; // Reddish for insufficient currency
+    return `bg-[${colors.danger[500]}] border-[${colors.danger[600]}] opacity-60`; // Reddish for insufficient currency
   }
 
   if (!isRevealed) {
-    return 'bg-[#7A6F66] border-[#6B5F57]'; // Medium brown for unrevealed tiles (mockup color)
+    return `bg-[${colors.charcoal[600]}] border-[${colors.charcoal[700]}]`; // Medium brown for unrevealed tiles
   }
 
-  // Different styles for revealed tiles based on type (matching mockup colors)
+  // Different styles for revealed tiles based on type
   switch (tileType) {
     case 'treasure':
-      return 'bg-[#F7D17B] border-[#E6C269]'; // Yellow/gold for treasure (mockup color)
+      return `bg-[${colors.warning[400]}] border-[${colors.warning[500]}]`; // Yellow/gold for treasure
     case 'trap':
-      return 'bg-[#D96B5E] border-[#C55A4D]'; // Reddish-orange for trap (mockup color)
+      return `bg-[${colors.danger[500]}] border-[${colors.danger[600]}]`; // Reddish-orange for trap
     case 'exit':
-      return 'bg-[#8C7099] border-[#7D618A]'; // Muted purple for exit (mockup color)
+      return `bg-[${colors.primary[400]}] border-[${colors.primary[500]}]`; // Muted purple for exit
     case 'bonus':
-      return 'bg-[#5EC0C0] border-[#4DAFAF]'; // Teal/cyan for bonus (mockup color)
+      return `bg-[${colors.success[400]}] border-[${colors.success[500]}]`; // Teal/cyan for bonus
     case 'neutral':
     default:
-      return 'bg-[#E0D9CE] border-[#D1CABF]'; // Light beige for neutral (mockup color)
+      return `bg-[${colors.neutral[200]}] border-[${colors.neutral[300]}]`; // Light beige for neutral
   }
 };
 

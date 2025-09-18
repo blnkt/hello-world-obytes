@@ -2,6 +2,7 @@ import * as React from 'react';
 import type { TextInputProps } from 'react-native';
 import { TextInput, View } from 'react-native';
 
+import colors from './colors';
 import { ManualEntryErrorBoundary, Text } from './index';
 
 export interface ManualStepEntryProps
@@ -190,7 +191,7 @@ const ManualStepEntryComponent = React.forwardRef<
         testID={testID}
         ref={ref}
         placeholder="Enter your step count"
-        placeholderTextColor="#9CA3AF"
+        placeholderTextColor={colors.charcoal[400]}
         className="mt-0 rounded-xl border-[0.5px] border-neutral-300 bg-neutral-100 px-4 py-3 font-inter text-base font-medium leading-5 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
         keyboardType="numeric"
         editable={!disabled && !loading}

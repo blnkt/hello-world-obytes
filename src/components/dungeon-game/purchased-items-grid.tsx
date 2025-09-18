@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
+import colors from '@/components/ui/colors';
 import { useItemEffects } from '@/lib/item-effects';
 import { consumeItem } from '@/lib/storage';
 
@@ -54,7 +55,9 @@ function ActiveEffectsSection({
 
   return (
     <View className="mb-3">
-      <Text className="mb-2 text-center text-xs font-medium text-[#6B5F57]">
+      <Text
+        className={`text-[ mb-2 text-center text-xs font-medium${colors.charcoal[600]}]`}
+      >
         ⚡ Active Effects
       </Text>
       <View className="flex-row flex-wrap justify-start">
@@ -121,7 +124,9 @@ function PurchasedItemsSection({
                 </View>
               )}
             </View>
-            <Text className="text-center text-xs font-medium text-[#6B5F57]">
+            <Text
+              className={`text-[ text-center text-xs font-medium${colors.charcoal[600]}]`}
+            >
               {item?.name}
             </Text>
             <Text className="text-center text-xs text-blue-600">
@@ -137,7 +142,7 @@ function PurchasedItemsSection({
 export function PurchasedItemsGrid({
   purchasedItems,
   title = '🎒 Inventory',
-  className = 'mx-4 mt-3 rounded-lg bg-[#F5F0E8] p-4',
+  className = `mx-4 mt-3 rounded-lg bg-[${colors.neutral[50]}] p-4`,
   showActiveEffects = false,
   onItemActivated,
 }: PurchasedItemsGridProps) {
@@ -179,7 +184,9 @@ export function PurchasedItemsGrid({
 
   return (
     <View className={className}>
-      <Text className="mb-3 text-center text-sm font-semibold text-[#6B5F57]">
+      <Text
+        className={`text-[ mb-3 text-center text-sm font-semibold${colors.charcoal[600]}]`}
+      >
         {title}
       </Text>
 

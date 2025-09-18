@@ -1,6 +1,8 @@
 import React from 'react';
 import { Text, TextInput, View } from 'react-native';
 
+import colors from '@/components/ui/colors';
+
 import type { Character } from '../../types/character';
 
 type NameFieldProps = {
@@ -39,7 +41,7 @@ export const NameField: React.FC<NameFieldProps> = ({
         onChangeText={handleChangeText}
         className="rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
         placeholder={placeholder}
-        placeholderTextColor="#9CA3AF"
+        placeholderTextColor={colors.charcoal[400]}
       />
     </View>
   );

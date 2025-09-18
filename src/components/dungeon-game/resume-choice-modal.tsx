@@ -1,6 +1,8 @@
 import React from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import colors from '@/components/ui/colors';
+
 import { useGameState } from './providers/game-state-provider';
 
 interface ResumeChoiceModalProps {
@@ -126,7 +128,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: colors.white,
     borderRadius: 16,
     padding: 24,
     margin: 20,
@@ -143,13 +145,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 16,
     textAlign: 'center',
-    color: '#666',
+    color: colors.charcoal[600],
   },
   saveInfo: {
     fontSize: 14,
     marginBottom: 24,
     textAlign: 'center',
-    color: '#888',
+    color: colors.charcoal[500],
     fontStyle: 'italic',
   },
   buttonContainer: {
@@ -165,13 +167,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   resumeButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: colors.success[500],
   },
   newGameButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: colors.primary[500],
   },
   buttonText: {
-    color: 'white',
+    color: colors.white,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -180,7 +182,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   closeButtonText: {
-    color: '#666',
+    color: colors.charcoal[600],
     fontSize: 16,
   },
 });

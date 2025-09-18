@@ -1,6 +1,8 @@
 import React from 'react';
 import { View } from 'react-native';
 
+import colors from '@/components/ui/colors';
+
 import GridTile from './grid-tile';
 import { useGameState } from './providers/game-state-provider';
 import {
@@ -30,7 +32,7 @@ function GameGridLayout({
   return (
     <View className="px-4 pb-2">
       {/* Game Grid with light brown frame */}
-      <View className="rounded-lg bg-[#E0D9CE] p-4">
+      <View className={`bg-[ rounded-lg${colors.neutral[200]}] p-4`}>
         <View testID="game-grid" className="w-full">
           {grid.map((row, rowIndex) => (
             <View key={rowIndex} className="w-full flex-row">
