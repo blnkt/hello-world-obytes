@@ -32,7 +32,7 @@ function GameGridLayout({
   return (
     <View className="px-4 pb-2">
       {/* Game Grid with light brown frame */}
-      <View className={`bg-[ rounded-lg${colors.neutral[200]}] p-4`}>
+      <View className={`bg-[${colors.neutral[200]}] rounded-lg p-4`}>
         <View testID="game-grid" className="w-full">
           {grid.map((row, rowIndex) => (
             <View key={rowIndex} className="w-full flex-row">
