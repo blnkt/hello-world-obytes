@@ -23,6 +23,18 @@ jest.mock('./hooks/use-dungeon-game-persistence', () => ({
   }),
 }));
 
+// Mock the currency system hook
+jest.mock('@/lib/health', () => ({
+  useCurrencySystem: jest.fn(() => ({
+    currency: 1000,
+    availableCurrency: 0,
+    totalCurrencyEarned: 1000,
+    convertCurrentExperience: jest.fn().mockResolvedValue(0),
+    spend: jest.fn().mockResolvedValue(true),
+    conversionRate: 0.1,
+  })),
+}));
+
 describe('DungeonGame', () => {
   beforeEach(async () => {
     // Set up mock currency for each test
