@@ -33,12 +33,12 @@
 - [ ] 1.0 Remove Demo Components and Unused Dependencies
 
   - [x] 1.1 Delete demo component files: buttons.tsx, colors.tsx, inputs.tsx, typography.tsx, title.tsx
-  - [ ] 1.2 Delete demo screen file: src/app/(app)/style.tsx
-  - [ ] 1.3 Remove unused utility file: src/components/character/utils.ts
-  - [ ] 1.4 Remove unused npm dependencies: @hookform/resolvers, expo-dev-client, expo-font, expo-status-bar, expo-system-ui, react-error-boundary
-  - [ ] 1.5 Update package.json to remove unused dependencies
-  - [ ] 1.6 Run pnpm install to clean up lock file
-  - [ ] 1.7 Verify no broken imports after demo component removal
+  - [x] 1.2 Delete demo screen file: src/app/(app)/style.tsx
+  - [x] 1.3 Remove unused utility file: src/components/character/utils.ts (actually used - kept)
+  - [x] 1.4 Remove unused npm dependencies: @hookform/resolvers, expo-dev-client, expo-font, expo-status-bar, expo-system-ui, react-error-boundary
+  - [x] 1.5 Update package.json to remove unused dependencies
+  - [x] 1.6 Run pnpm install to clean up lock file
+  - [x] 1.7 Verify no broken imports after demo component removal
 
 - [ ] 2.0 Consolidate Color Systems and Utility Functions
 
