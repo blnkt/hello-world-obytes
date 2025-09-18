@@ -1,10 +1,8 @@
+// Import centralized validation utility
+const { validateI18nMessage } = require('../src/lib/utils.ts');
+
 const validate = (message = '') => {
-  if (!(message || '').trim()) {
-    throw new SyntaxError('Message is Empty.');
-  }
-  if (typeof message !== 'string') {
-    throw new TypeError('Message must be a String.');
-  }
+  validateI18nMessage(message);
   if (
     (message.includes('{') || message.includes('}')) &&
     !/{{ ?(?:- |\w+?)(, ?)?\w+? ?}}/g.test(message)

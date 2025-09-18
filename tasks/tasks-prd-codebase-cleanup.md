@@ -46,7 +46,7 @@
   - [x] 2.2 Audit all color definitions across the codebase for duplicates
   - [x] 2.3 Remove duplicate color definitions and consolidate into single system
   - [x] 2.4 Update all component imports to use consolidated color system
-  - [ ] 2.5 Identify and merge duplicate utility functions across codebase
+  - [x] 2.5 Identify and merge duplicate utility functions across codebase
   - [ ] 2.6 Create single source of truth for common utilities
   - [ ] 2.7 Update all imports to use consolidated utilities
   - [ ] 2.8 Verify color consistency and accessibility compliance

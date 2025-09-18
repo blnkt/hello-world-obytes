@@ -2,6 +2,7 @@ import React from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import colors from '@/components/ui/colors';
+import { formatDateTime } from '@/lib/utils';
 
 import { useGameState } from './providers/game-state-provider';
 
@@ -11,11 +12,7 @@ interface ResumeChoiceModalProps {
 }
 
 // Helper function to format last save time
-const formatLastSaveTime = (lastSaveTime: number | null): string => {
-  if (!lastSaveTime) return 'Unknown time';
-  const date = new Date(lastSaveTime);
-  return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-};
+// Using centralized formatDateTime utility
 
 // Helper function to render modal content
 const ModalContent: React.FC<{
@@ -34,7 +31,8 @@ const ModalContent: React.FC<{
 
     {lastSaveTime && (
       <Text style={styles.saveInfo}>
-        Last saved: {formatLastSaveTime(lastSaveTime)}
+        Last saved:{' '}
+        {lastSaveTime ? formatDateTime(lastSaveTime) : 'Unknown time'}
       </Text>
     )}
 
