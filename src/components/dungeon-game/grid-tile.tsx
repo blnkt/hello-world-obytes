@@ -89,26 +89,63 @@ const getTileStyle = (
   }
 
   if (insufficientCurrency && !isRevealed) {
-    return `bg-[${colors.danger[500]}] border-[${colors.danger[600]}] opacity-60`; // Reddish for insufficient currency
+    return 'border-red-500 opacity-60'; // Reddish for insufficient currency
   }
 
   if (!isRevealed) {
-    return `bg-[${colors.charcoal[600]}] border-[${colors.charcoal[700]}]`; // Medium brown for unrevealed tiles
+    return 'border-gray-600'; // Medium brown for unrevealed tiles
   }
 
   // Different styles for revealed tiles based on type
   switch (tileType) {
     case 'treasure':
-      return `bg-[${colors.warning[400]}] border-[${colors.warning[500]}]`; // Yellow/gold for treasure
+      return 'border-yellow-500'; // Yellow/gold for treasure
     case 'trap':
-      return `bg-[${colors.danger[500]}] border-[${colors.danger[600]}]`; // Reddish-orange for trap
+      return 'border-red-500'; // Reddish-orange for trap
     case 'exit':
-      return `bg-[${colors.primary[400]}] border-[${colors.primary[500]}]`; // Muted purple for exit
+      return 'border-blue-500'; // Muted purple for exit
     case 'bonus':
-      return `bg-[${colors.success[400]}] border-[${colors.success[500]}]`; // Teal/cyan for bonus
+      return 'border-green-500'; // Teal/cyan for bonus
     case 'neutral':
     default:
-      return `bg-[${colors.neutral[200]}] border-[${colors.neutral[300]}]`; // Light beige for neutral
+      return 'border-gray-300'; // Light beige for neutral
+  }
+};
+
+const getTileBackgroundStyle = (
+  tileType: 'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral',
+  isRevealed: boolean,
+  options: { disabled: boolean; insufficientCurrency: boolean } = {
+    disabled: false,
+    insufficientCurrency: false,
+  }
+) => {
+  const { disabled, insufficientCurrency } = options;
+  if (disabled) {
+    return { backgroundColor: '#d1d5db' }; // gray-300
+  }
+
+  if (insufficientCurrency && !isRevealed) {
+    return { backgroundColor: colors.danger[500] }; // Reddish for insufficient currency
+  }
+
+  if (!isRevealed) {
+    return { backgroundColor: colors.charcoal[600] }; // Medium brown for unrevealed tiles
+  }
+
+  // Different styles for revealed tiles based on type
+  switch (tileType) {
+    case 'treasure':
+      return { backgroundColor: colors.warning[400] }; // Yellow/gold for treasure
+    case 'trap':
+      return { backgroundColor: colors.danger[500] }; // Reddish-orange for trap
+    case 'exit':
+      return { backgroundColor: colors.primary[400] }; // Muted purple for exit
+    case 'bonus':
+      return { backgroundColor: colors.success[400] }; // Teal/cyan for bonus
+    case 'neutral':
+    default:
+      return { backgroundColor: colors.neutral[200] }; // Light beige for neutral
   }
 };
 
@@ -164,7 +201,13 @@ export default function GridTile({
       accessibilityRole="button"
       accessibilityState={{ disabled }}
       className={`m-0.5 aspect-square flex-1 rounded-md border ${getTileStyle(tileType, isRevealed, { disabled, insufficientCurrency })}`}
-      style={{ minHeight: 35 }}
+      style={{
+        minHeight: 35,
+        ...getTileBackgroundStyle(tileType, isRevealed, {
+          disabled,
+          insufficientCurrency,
+        }),
+      }}
     >
       <View className="flex-1 items-center justify-center">
         {isRevealed && getTileContent(tileType, isRevealed)}
