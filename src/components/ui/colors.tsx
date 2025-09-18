@@ -1,34 +1,4 @@
-// Color system interface definitions
-interface ColorScale {
-  50: string;
-  100: string;
-  200: string;
-  300: string;
-  400: string;
-  500: string;
-  600: string;
-  700: string;
-  800: string;
-  900: string;
-}
-
-interface ExtendedColorScale extends ColorScale {
-  850: string;
-  950: string;
-}
-
-interface Colors {
-  white: string;
-  black: string;
-  charcoal: ExtendedColorScale;
-  neutral: ColorScale;
-  primary: ColorScale;
-  success: ColorScale;
-  warning: ColorScale;
-  danger: ColorScale;
-}
-
-const colors: Colors = {
+const colors = {
   white: '#ffffff',
   black: '#000000',
   charcoal: {
@@ -108,4 +78,3 @@ const colors: Colors = {
 };
 
 export default colors;
-export type { Colors, ColorScale, ExtendedColorScale };

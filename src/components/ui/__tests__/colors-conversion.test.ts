@@ -34,14 +34,14 @@ describe('Colors Conversion to TypeScript', () => {
     expect(colors.danger[500]).toBe('#EF4444');
   });
 
-  it('should have proper TypeScript interfaces', () => {
-    // This test will verify that the file compiles with TypeScript
-    // and has proper type definitions
+  it('should have proper ES module exports', () => {
+    // This test will verify that the file uses ES module syntax
+    // and exports the colors object properly
     const colorsTsxContent = readFileSync(colorsTsxPath, 'utf8');
     
-    // Check for TypeScript-specific syntax
-    expect(colorsTsxContent).toContain('interface');
-    expect(colorsTsxContent).toContain('export');
+    // Check for ES module syntax
+    expect(colorsTsxContent).toContain('export default');
     expect(colorsTsxContent).not.toContain('module.exports');
+    expect(colorsTsxContent).toContain('const colors = {');
   });
 });
