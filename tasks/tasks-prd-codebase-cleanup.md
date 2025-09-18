@@ -2,13 +2,14 @@
 
 ## Relevant Files
 
-- `src/components/buttons.tsx` - Demo component to be removed
-- `src/components/colors.tsx` - Demo component to be removed
-- `src/components/inputs.tsx` - Demo component to be removed
-- `src/components/typography.tsx` - Demo component to be removed
-- `src/components/title.tsx` - Demo component to be removed
-- `src/app/(app)/style.tsx` - Demo screen to be removed
-- `src/components/character/utils.ts` - Contains unused utility functions to be removed
+- `src/components/buttons.tsx` - ✅ Demo component removed
+- `src/components/colors.tsx` - ✅ Demo component removed
+- `src/components/inputs.tsx` - ✅ Demo component removed
+- `src/components/typography.tsx` - ✅ Demo component removed
+- `src/components/title.tsx` - ✅ Demo component removed
+- `src/app/(app)/style.tsx` - ✅ Demo screen removed
+- `src/components/character/utils.ts` - Contains utility functions (actually used, kept)
+- `src/components/__tests__/demo-components-cleanup.test.tsx` - Test file to verify demo components removal
 - `src/components/ui/colors.js` - Color system to be converted to TypeScript and consolidated
 - `src/lib/storage.tsx` - Storage utilities requiring type safety improvements
 - `src/components/history/` - History components requiring type safety improvements
@@ -31,7 +32,7 @@
 
 - [ ] 1.0 Remove Demo Components and Unused Dependencies
 
-  - [ ] 1.1 Delete demo component files: buttons.tsx, colors.tsx, inputs.tsx, typography.tsx, title.tsx
+  - [x] 1.1 Delete demo component files: buttons.tsx, colors.tsx, inputs.tsx, typography.tsx, title.tsx
   - [ ] 1.2 Delete demo screen file: src/app/(app)/style.tsx
   - [ ] 1.3 Remove unused utility file: src/components/character/utils.ts
   - [ ] 1.4 Remove unused npm dependencies: @hookform/resolvers, expo-dev-client, expo-font, expo-status-bar, expo-system-ui, react-error-boundary
