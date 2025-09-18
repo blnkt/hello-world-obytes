@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import colors from '@/components/ui/colors';
 import type { GameState } from '@/types/dungeon-game';
 
 import GameGrid from './game-grid';
@@ -294,19 +295,19 @@ export default function DungeonGame() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: colors.neutral[50],
   },
   header: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
+    borderBottomColor: colors.charcoal[100],
   },
   headerText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333333',
+    color: colors.charcoal[800],
   },
   turnsContainer: {
     flexDirection: 'row',
@@ -314,31 +315,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 8,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
+    borderBottomColor: colors.charcoal[100],
   },
   turnsText: {
     fontSize: 14,
-    color: '#666666',
+    color: colors.charcoal[600],
   },
   turnsRemainingText: {
     fontSize: 14,
-    color: '#666666',
+    color: colors.charcoal[600],
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 12,
-    color: '#333',
+    color: colors.charcoal[800],
   },
   levelText: {
     fontSize: 18,
     fontWeight: '600',
     textAlign: 'center',
     marginBottom: 8,
-    color: '#666',
+    color: colors.charcoal[600],
   },
   currencyTurnsContainer: {
     alignItems: 'center',
@@ -349,19 +350,19 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
     marginBottom: 2,
-    color: '#4CAF50',
+    color: colors.success[500],
   },
   turnCostText: {
     fontSize: 12,
     textAlign: 'center',
-    color: '#888',
+    color: colors.charcoal[500],
     fontStyle: 'italic',
   },
   currencyText: {
     fontSize: 16,
     textAlign: 'center',
     marginBottom: 4,
-    color: '#888',
+    color: colors.charcoal[500],
   },
   controls: {
     flexDirection: 'row',
@@ -377,26 +378,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   resetButton: {
-    backgroundColor: '#FF9800',
+    backgroundColor: colors.primary[500],
   },
   nextLevelButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: colors.success[500],
   },
   buttonText: {
-    color: 'white',
+    color: colors.white,
     fontSize: 16,
     fontWeight: '600',
   },
   disabledButton: {
-    backgroundColor: '#CCCCCC',
+    backgroundColor: colors.charcoal[200],
   },
   disabledButtonText: {
-    color: '#666666',
+    color: colors.charcoal[600],
   },
 
   turnRequirementsContainer: {
-    backgroundColor: '#E3F2FD',
-    borderColor: '#2196F3',
+    backgroundColor: colors.primary[50],
+    borderColor: colors.primary[500],
     borderWidth: 1,
     padding: 12,
     borderRadius: 8,
@@ -407,12 +408,12 @@ const styles = StyleSheet.create({
   turnRequirementsText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1976D2',
+    color: colors.primary[700],
     textAlign: 'center',
   },
   turnRequirementsSubtext: {
     fontSize: 12,
-    color: '#42A5F5',
+    color: colors.primary[400],
     textAlign: 'center',
     marginTop: 4,
   },
@@ -421,22 +422,22 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   errorContainer: {
-    backgroundColor: '#FFEBEE',
-    borderColor: '#F44336',
+    backgroundColor: colors.danger[50],
+    borderColor: colors.danger[500],
     borderWidth: 1,
     padding: 12,
     borderRadius: 8,
     marginTop: 16,
   },
   errorText: {
-    color: '#D32F2F',
+    color: colors.danger[700],
     textAlign: 'center',
     fontSize: 14,
   },
   loadingText: {
     fontSize: 18,
     textAlign: 'center',
-    color: '#666',
+    color: colors.charcoal[600],
     marginTop: 100,
   },
 });
