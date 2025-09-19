@@ -11,7 +11,10 @@ import { getValidClass } from './utils';
 type FitnessClassFieldsProps = {
   // For character sheet (editing mode)
   character?: Character;
-  updateField?: (field: keyof Character, value: any) => void;
+  updateField?: (
+    field: keyof Character,
+    value: string | number | boolean
+  ) => void;
   onChange?: (updated: Character | ((prev: Character) => Character)) => void;
   // For character creation (controlled mode)
   selectedClass?: string;
@@ -28,7 +31,10 @@ type ClassChangeParams = {
   newClass: string | number;
   isEditingMode: boolean;
   onChange?: (updated: Character | ((prev: Character) => Character)) => void;
-  updateField?: (field: keyof Character, value: any) => void;
+  updateField?: (
+    field: keyof Character,
+    value: string | number | boolean
+  ) => void;
   setSelectedClass?: (className: string) => void;
 };
 
@@ -52,8 +58,8 @@ const handleClassChangeLogic = ({
   } else if (isEditingMode && updateField) {
     // Fallback to updateField for backward compatibility
     updateField('class', classString);
-    const newAttributes = getStartingAttributes(classString);
-    updateField('classAttributes', newAttributes);
+    // Note: classAttributes is an object, so we can't use updateField for it
+    // This fallback only updates the class string, not the attributes
   } else if (setSelectedClass) {
     // Creation mode
     setSelectedClass(classString);

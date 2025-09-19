@@ -20,7 +20,7 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
   // onRefreshExperience,
 }) => {
   const updateField = useCallback(
-    (field: keyof Character, value: any) => {
+    (field: keyof Character, value: string | number | boolean) => {
       onChange((prevCharacter) => ({
         ...prevCharacter,
         [field]: value,

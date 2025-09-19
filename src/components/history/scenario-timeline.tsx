@@ -2,6 +2,8 @@ import { FlashList } from '@shopify/flash-list';
 import React from 'react';
 import { Dimensions, Text, View } from 'react-native';
 
+import type { ScenarioHistory } from '@/types/scenario';
+
 import {
   MerchantIllustration,
   MonsterIllustration,
@@ -9,11 +11,11 @@ import {
 
 const ITEM_WIDTH = Dimensions.get('window').width;
 
-const TimelineItem: React.FC<{ entry: any; index: number; total: number }> = ({
-  entry,
-  index,
-  total,
-}) => (
+const TimelineItem: React.FC<{
+  entry: ScenarioHistory;
+  index: number;
+  total: number;
+}> = ({ entry, index, total }) => (
   <View style={{ width: ITEM_WIDTH }} className="mr-6 w-screen shrink-0 px-4">
     {/* Timeline line with illustration */}
     <View className="mb-4 items-center">
@@ -81,7 +83,7 @@ const TimelineItem: React.FC<{ entry: any; index: number; total: number }> = ({
 );
 
 const ScenarioTimeline: React.FC<{
-  history: any[];
+  history: ScenarioHistory[];
 }> = ({ history }) => (
   <FlashList
     data={history}

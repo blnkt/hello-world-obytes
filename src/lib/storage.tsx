@@ -2,6 +2,9 @@ import * as React from 'react';
 import { MMKV } from 'react-native-mmkv';
 import { useMMKVBoolean, useMMKVString } from 'react-native-mmkv';
 
+import type { Character } from '@/types/character';
+import type { ScenarioHistory } from '@/types/scenario';
+
 export const storage = new MMKV();
 
 export function getItem<T>(key: string): T | null {
@@ -20,12 +23,12 @@ export async function removeItem(key: string) {
 // Scenario History Storage
 const SCENARIO_HISTORY_KEY = 'SCENARIO_HISTORY';
 
-export function getScenarioHistory(): any[] {
+export function getScenarioHistory(): ScenarioHistory[] {
   const value = storage.getString(SCENARIO_HISTORY_KEY);
   return value ? JSON.parse(value) || [] : [];
 }
 
-export async function addScenarioToHistory(historyEntry: any) {
+export async function addScenarioToHistory(historyEntry: ScenarioHistory) {
   const currentHistory = getScenarioHistory();
   const updatedHistory = [historyEntry, ...currentHistory];
   await setItem(SCENARIO_HISTORY_KEY, updatedHistory);
@@ -38,13 +41,13 @@ export async function clearScenarioHistory() {
 // Character Storage
 const CHARACTER_STORAGE_KEY = 'CHARACTER_DATA';
 
-export function getCharacter(): any {
+export function getCharacter(): Character | null {
   const value = storage.getString(CHARACTER_STORAGE_KEY);
   const result = value ? JSON.parse(value) || null : null;
   return result;
 }
 
-export async function setCharacter(character: any) {
+export async function setCharacter(character: Character) {
   const jsonString = JSON.stringify(character);
   storage.set(CHARACTER_STORAGE_KEY, jsonString);
 }
@@ -54,7 +57,10 @@ export async function clearCharacter() {
 }
 
 // React Hook for Character
-export const useCharacter = () => {
+export const useCharacter = (): [
+  Character | null,
+  (character: Character) => void,
+] => {
   const [characterString, setCharacterString] = useMMKVString(
     CHARACTER_STORAGE_KEY,
     storage
@@ -63,7 +69,7 @@ export const useCharacter = () => {
   const character = characterString ? JSON.parse(characterString) : null;
 
   const setCharacter = React.useCallback(
-    (newCharacter: any) => {
+    (newCharacter: Character) => {
       setCharacterString(JSON.stringify(newCharacter));
     },
     [setCharacterString]
@@ -193,7 +199,10 @@ export function hasManualEntryForDate(date: string): boolean {
 }
 
 // React Hook for Manual Steps By Day
-export const useManualStepsByDay = () => {
+export const useManualStepsByDay = (): [
+  ManualStepEntry[],
+  (steps: ManualStepEntry[]) => void,
+] => {
   const [manualStepsString, setManualStepsString] = useMMKVString(
     MANUAL_STEPS_BY_DAY_KEY,
     storage
@@ -643,36 +652,40 @@ export function clearAllStorage() {
   storage.clearAll();
 }
 
-export function validateManualStepEntry(entry: any): entry is ManualStepEntry {
+export function validateManualStepEntry(
+  entry: unknown
+): entry is ManualStepEntry {
   // Check if entry is an object
   if (!entry || typeof entry !== 'object') {
     return false;
   }
 
+  const obj = entry as Record<string, unknown>;
+
   // Check required fields
-  if (!entry.date || typeof entry.date !== 'string') {
+  if (!obj.date || typeof obj.date !== 'string') {
     return false;
   }
 
-  if (typeof entry.steps !== 'number') {
+  if (typeof obj.steps !== 'number') {
     return false;
   }
 
-  if (entry.source !== 'manual') {
+  if (obj.source !== 'manual') {
     return false;
   }
 
   // Validate date format (YYYY-MM-DD)
   const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-  if (!dateRegex.test(entry.date)) {
+  if (!dateRegex.test(obj.date)) {
     return false;
   }
 
   // Validate steps (non-negative number, reasonable upper limit)
-  if (entry.steps < 0) {
+  if (obj.steps < 0) {
     return false;
   }
-  if (entry.steps > 100000) {
+  if (obj.steps > 100000) {
     return false;
   }
 

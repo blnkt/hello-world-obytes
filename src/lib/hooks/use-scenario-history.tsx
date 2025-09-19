@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import type { ScenarioHistory } from '../../types/scenario';
+import type { Scenario, ScenarioHistory } from '../../types/scenario';
 import { addScenarioToHistory, getScenarioHistory } from '../storage';
 
 const createHistoryEntry = (
-  scenario: any,
+  scenario: Scenario,
   milestone: number,
   outcome?: string
 ): ScenarioHistory => ({
@@ -42,7 +42,7 @@ export const useScenarioHistory = () => {
 
   // Add a scenario to history
   const addToHistory = useCallback(
-    async (scenario: any, milestone: number, outcome?: string) => {
+    async (scenario: Scenario, milestone: number, outcome?: string) => {
       const historyEntry = createHistoryEntry(scenario, milestone, outcome);
 
       try {

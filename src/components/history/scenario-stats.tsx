@@ -2,11 +2,12 @@ import React from 'react';
 import { Text, View } from 'react-native';
 
 import colors from '@/components/ui/colors';
+import type { ScenarioHistory } from '@/types/scenario';
 
 import { MerchantIcon, MonsterIcon } from '../ui/icons';
 
 const ScenarioStats: React.FC<{
-  history: any[];
+  history: ScenarioHistory[];
 }> = ({ history }) => {
   const merchantCount = history.filter((h) => h.type === 'merchant').length;
   const monsterCount = history.filter((h) => h.type === 'monster').length;

@@ -20,6 +20,7 @@ import {
   getLastCheckedDate,
   getManualStepsByDay,
   getStepsByDay,
+  type ManualStepEntry,
   setCumulativeExperience,
   setCurrency,
   setExperience,
@@ -706,9 +707,9 @@ const processHealthKitData = async (params: {
   dateStr: string;
   dayStart: Date;
   dayEnd: Date;
-  storedEntry: any;
+  storedEntry: { date: Date; steps: number } | undefined;
   dataIsFresh: boolean;
-  storedHealthKitData: any[];
+  storedHealthKitData: { date: Date; steps: number }[];
 }) => {
   const {
     dateStr,
@@ -955,7 +956,7 @@ const updateHealthData = async (params: {
 
 // Helper function to calculate earliest date from manual steps
 const calculateEarliestDate = (
-  manualSteps: any[],
+  manualSteps: ManualStepEntry[],
   lastCheckedDateTime: Date
 ): Date => {
   let earliestDate = lastCheckedDateTime;

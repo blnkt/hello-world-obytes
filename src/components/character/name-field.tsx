@@ -8,7 +8,10 @@ import type { Character } from '../../types/character';
 type NameFieldProps = {
   // For character sheet (editing mode)
   character?: Character;
-  updateField?: (field: keyof Character, value: any) => void;
+  updateField?: (
+    field: keyof Character,
+    value: string | number | boolean
+  ) => void;
   // For character creation (controlled mode)
   value?: string;
   onChangeText?: (text: string) => void;

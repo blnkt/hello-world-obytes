@@ -2,11 +2,12 @@ import React from 'react';
 import { Text, View } from 'react-native';
 
 import colors from '@/components/ui/colors';
+import type { ScenarioHistory } from '@/types/scenario';
 
 import { MerchantIcon, MonsterIcon } from '../ui/icons';
 
 const ScenarioGrid: React.FC<{
-  history: any[];
+  history: ScenarioHistory[];
 }> = ({ history }) => (
   <View className="flex-row flex-wrap justify-between">
     {history.map((entry) => (

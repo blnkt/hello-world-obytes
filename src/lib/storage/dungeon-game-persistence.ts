@@ -143,22 +143,28 @@ export class DungeonGamePersistenceService {
     }
   }
 
-  private validateSaveData(saveData: any): saveData is DungeonGameSaveData {
+  private validateSaveData(saveData: unknown): saveData is DungeonGameSaveData {
+    if (!saveData || typeof saveData !== 'object') {
+      return false;
+    }
+
+    const obj = saveData as Record<string, unknown>;
+
     return (
-      saveData &&
-      typeof saveData === 'object' &&
-      typeof saveData.version === 'string' &&
-      typeof saveData.timestamp === 'number' &&
-      typeof saveData.gameState === 'string' &&
-      ['Active', 'Win', 'Game Over'].includes(saveData.gameState) &&
-      typeof saveData.level === 'number' &&
-      Array.isArray(saveData.gridState) &&
-      typeof saveData.turnsUsed === 'number' &&
-      saveData.achievements &&
-      typeof saveData.achievements === 'object' &&
-      saveData.statistics &&
-      typeof saveData.statistics === 'object' &&
-      Array.isArray(saveData.itemEffects)
+      typeof obj.version === 'string' &&
+      typeof obj.timestamp === 'number' &&
+      typeof obj.gameState === 'string' &&
+      (['Active', 'Win', 'Game Over'] as string[]).includes(
+        obj.gameState as string
+      ) &&
+      typeof obj.level === 'number' &&
+      Array.isArray(obj.gridState) &&
+      typeof obj.turnsUsed === 'number' &&
+      Boolean(obj.achievements) &&
+      typeof obj.achievements === 'object' &&
+      Boolean(obj.statistics) &&
+      typeof obj.statistics === 'object' &&
+      Array.isArray(obj.itemEffects)
     );
   }
 }
