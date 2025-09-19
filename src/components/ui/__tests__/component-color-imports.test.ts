@@ -11,7 +11,7 @@ describe('Component Color Imports', () => {
     'src/components/character/name-field.tsx',
     'src/components/dungeon-game/currency-display.tsx',
     'src/components/dungeon-game/game-grid.tsx',
-    'src/components/dungeon-game/grid-tile.tsx',
+    // 'src/components/dungeon-game/grid-tile.tsx', // Now uses pure Tailwind classes
     'src/components/dungeon-game/persistence-error-display.tsx',
     'src/components/dungeon-game/purchased-items-grid.tsx',
     'src/components/dungeon-game/resume-choice-modal.tsx',
@@ -24,7 +24,7 @@ describe('Component Color Imports', () => {
     'src/components/ui/icons/language.tsx',
     'src/components/ui/list.tsx',
     'src/components/ui/manual-step-entry.tsx',
-    'src/components/ui/modal.tsx',
+    // 'src/components/ui/modal.tsx', // Now uses pure Tailwind classes
     'src/components/ui/progress-bar.tsx',
   ];
 

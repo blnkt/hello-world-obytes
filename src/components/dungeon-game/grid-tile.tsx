@@ -3,7 +3,6 @@ import { Pressable, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 
 import { Text } from '@/components/ui';
-import colors from '@/components/ui/colors';
 
 // SVG Icon Components
 const SkullIcon = () => (
@@ -75,7 +74,7 @@ const getTileDescription = (
   }
 };
 
-const getTileStyle = (
+const getTileClasses = (
   tileType: 'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral',
   isRevealed: boolean,
   options: { disabled: boolean; insufficientCurrency: boolean } = {
@@ -84,68 +83,32 @@ const getTileStyle = (
   }
 ) => {
   const { disabled, insufficientCurrency } = options;
+
   if (disabled) {
-    return 'bg-gray-300 border-gray-400 opacity-50'; // Disabled state
+    return 'bg-gray-300 border-gray-400 opacity-50';
   }
 
   if (insufficientCurrency && !isRevealed) {
-    return 'border-red-500 opacity-60'; // Reddish for insufficient currency
+    return 'bg-danger-500 border-danger-600 opacity-60';
   }
 
   if (!isRevealed) {
-    return 'border-gray-600'; // Medium brown for unrevealed tiles
+    return 'bg-charcoal-600 border-charcoal-700';
   }
 
   // Different styles for revealed tiles based on type
   switch (tileType) {
     case 'treasure':
-      return 'border-yellow-500'; // Yellow/gold for treasure
+      return 'bg-warning-400 border-warning-500';
     case 'trap':
-      return 'border-red-500'; // Reddish-orange for trap
+      return 'bg-danger-500 border-danger-600';
     case 'exit':
-      return 'border-blue-500'; // Muted purple for exit
+      return 'bg-primary-400 border-primary-500';
     case 'bonus':
-      return 'border-green-500'; // Teal/cyan for bonus
+      return 'bg-success-400 border-success-500';
     case 'neutral':
     default:
-      return 'border-gray-300'; // Light beige for neutral
-  }
-};
-
-const getTileBackgroundStyle = (
-  tileType: 'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral',
-  isRevealed: boolean,
-  options: { disabled: boolean; insufficientCurrency: boolean } = {
-    disabled: false,
-    insufficientCurrency: false,
-  }
-) => {
-  const { disabled, insufficientCurrency } = options;
-  if (disabled) {
-    return { backgroundColor: '#d1d5db' }; // gray-300
-  }
-
-  if (insufficientCurrency && !isRevealed) {
-    return { backgroundColor: colors.danger[500] }; // Reddish for insufficient currency
-  }
-
-  if (!isRevealed) {
-    return { backgroundColor: colors.charcoal[600] }; // Medium brown for unrevealed tiles
-  }
-
-  // Different styles for revealed tiles based on type
-  switch (tileType) {
-    case 'treasure':
-      return { backgroundColor: colors.warning[400] }; // Yellow/gold for treasure
-    case 'trap':
-      return { backgroundColor: colors.danger[500] }; // Reddish-orange for trap
-    case 'exit':
-      return { backgroundColor: colors.primary[400] }; // Muted purple for exit
-    case 'bonus':
-      return { backgroundColor: colors.success[400] }; // Teal/cyan for bonus
-    case 'neutral':
-    default:
-      return { backgroundColor: colors.neutral[200] }; // Light beige for neutral
+      return 'bg-neutral-200 border-neutral-300';
   }
 };
 
@@ -200,14 +163,8 @@ export default function GridTile({
       }
       accessibilityRole="button"
       accessibilityState={{ disabled }}
-      className={`m-0.5 aspect-square flex-1 rounded-md border ${getTileStyle(tileType, isRevealed, { disabled, insufficientCurrency })}`}
-      style={{
-        minHeight: 35,
-        ...getTileBackgroundStyle(tileType, isRevealed, {
-          disabled,
-          insufficientCurrency,
-        }),
-      }}
+      className={`m-0.5 aspect-square flex-1 rounded-md border ${getTileClasses(tileType, isRevealed, { disabled, insufficientCurrency })}`}
+      style={{ minHeight: 35 }}
     >
       <View className="flex-1 items-center justify-center">
         {isRevealed && getTileContent(tileType, isRevealed)}

@@ -155,7 +155,7 @@ export default function CurrencyDisplay({
 
   return (
     <View
-      className={`border-[${colors.neutral[200]}] bg-[ rounded-lg${colors.neutral[50]}] p-4`}
+      className={`rounded-lg border-neutral-200 bg-neutral-50 p-4`}
       accessible={true}
       accessibilityLabel={`Currency and Turns - ${availableTurns} turns available`}
       accessibilityRole="summary"
