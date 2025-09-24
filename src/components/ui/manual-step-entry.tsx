@@ -1,5 +1,10 @@
 import * as React from 'react';
-import type { TextInputProps } from 'react-native';
+import type {
+  NativeSyntheticEvent,
+  TextInputFocusEventData,
+  TextInputProps,
+  TextInputSubmitEditingEventData,
+} from 'react-native';
 import { TextInput, View } from 'react-native';
 
 import { validateStepCount } from '@/lib/utils';
@@ -155,7 +160,7 @@ const ManualStepEntryComponent = React.forwardRef<
   }, [errorProp]);
 
   const handleBlur = React.useCallback(
-    (e: any) => {
+    (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
       blurHandler(e, { value, validate, setError, onBlur });
     },
     [value, validate, setError, onBlur]
@@ -167,7 +172,7 @@ const ManualStepEntryComponent = React.forwardRef<
     [onChangeText, setError, error]
   );
   const handleSubmitEditing = React.useCallback(
-    (e: any) =>
+    (e: NativeSyntheticEvent<TextInputSubmitEditingEventData>) =>
       submitEditingHandler(e, {
         value,
         validate,
