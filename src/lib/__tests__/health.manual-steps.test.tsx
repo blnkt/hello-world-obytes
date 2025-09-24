@@ -1,6 +1,8 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react-native';
 
+import { createHealthHooksMock } from '../../../__mocks__/health-hooks';
+import { createStorageFunctionsMock } from '../../../__mocks__/storage-functions';
 import {
   useExperienceData,
   useStreakTracking,
@@ -15,16 +17,19 @@ import {
   getDailyStepsGoal,
 } from '../storage';
 
-// Mock storage
-jest.mock('../storage', () => ({
-  clearManualStepsByDay: jest.fn(),
-  getManualStepsByDay: jest.fn(),
-  setManualStepEntry: jest.fn(),
-  getCurrency: jest.fn(),
-  setCurrency: jest.fn(),
-  getDailyStepsGoal: jest.fn(() => 10000),
-  useDailyStepsGoal: jest.fn(() => [10000, jest.fn()]),
-}));
+// Mock storage using centralized mock
+jest.mock('../storage', () => {
+  const storageMock = require('../../../__mocks__/storage-functions').createStorageFunctionsMock();
+  return {
+    clearManualStepsByDay: storageMock.getManualStepsByDay, // Note: may need to be adjusted
+    getManualStepsByDay: storageMock.getManualStepsByDay,
+    setManualStepEntry: jest.fn(),
+    getCurrency: storageMock.getCurrency,
+    setCurrency: storageMock.setCurrency,
+    getDailyStepsGoal: jest.fn(() => 10000),
+    useDailyStepsGoal: jest.fn(() => [10000, jest.fn()]),
+  };
+});
 
 // Mock MMKV
 jest.mock('react-native-mmkv', () => ({

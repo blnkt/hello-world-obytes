@@ -1,5 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react-native';
 
+import { createDungeonGamePersistenceMock } from '../../../../__mocks__/dungeon-game-persistence';
 import { mmkvMockStorage } from '../../../../__mocks__/react-native-mmkv';
 import {
   clearDungeonGameSaveData,
@@ -10,14 +11,18 @@ import {
 } from '../../../lib/storage/dungeon-game-persistence';
 import { useDungeonGamePersistence } from './use-dungeon-game-persistence';
 
-// Mock the persistence functions
-jest.mock('../../../lib/storage/dungeon-game-persistence', () => ({
-  saveDungeonGameState: jest.fn(),
-  loadDungeonGameState: jest.fn(),
-  hasDungeonGameSaveData: jest.fn(),
-  clearDungeonGameSaveData: jest.fn(),
-  getDungeonGameSaveDataInfo: jest.fn(),
-}));
+// Mock the persistence functions - use factory inside jest.mock
+jest.mock('../../../lib/storage/dungeon-game-persistence', () => {
+  const mockPersistence =
+    require('../../../../__mocks__/dungeon-game-persistence').createDungeonGamePersistenceMock();
+  return {
+    saveDungeonGameState: mockPersistence.saveDungeonGameState,
+    loadDungeonGameState: mockPersistence.loadDungeonGameState,
+    hasDungeonGameSaveData: mockPersistence.hasDungeonGameSaveData,
+    clearDungeonGameSaveData: mockPersistence.clearDungeonGameSaveData,
+    getDungeonGameSaveDataInfo: mockPersistence.getDungeonGameSaveDataInfo,
+  };
+});
 
 // Mock the storage module
 jest.mock('../../../lib/storage', () =>
@@ -25,46 +30,24 @@ jest.mock('../../../lib/storage', () =>
 );
 
 describe('useDungeonGamePersistence', () => {
-  const mockSaveData = {
-    version: '1.0.0',
-    timestamp: Date.now(),
-    gameState: 'Active' as const,
+  // Create a new instance for testing
+  const mockDungeonGamePersistence = createDungeonGamePersistenceMock();
+
+  // Use centralized mock factory method
+  const mockSaveData = mockDungeonGamePersistence.createMockSaveData({
     level: 1,
-    gridState: [
-      {
-        id: 'tile-1',
-        x: 0,
-        y: 0,
-        isRevealed: false,
-        type: 'neutral' as const,
-        hasBeenVisited: false,
-      },
-    ],
     turnsUsed: 0,
     currency: 1000,
-    achievements: {
-      totalGamesPlayed: 0,
-      gamesWon: 0,
-      gamesLost: 0,
-      highestLevelReached: 0,
-      totalTurnsUsed: 0,
-      totalTreasureFound: 0,
-    },
-    statistics: {
-      winRate: 0,
-      averageTurnsPerGame: 0,
-      longestGameSession: 0,
-      totalPlayTime: 0,
-    },
-    itemEffects: [],
-  };
+  });
 
-  const mockSaveDataInfo = {
-    lastSaveTime: mockSaveData.timestamp,
-    saveCount: 1,
-    dataSize: 1024,
-    isValid: true,
-  };
+  // Use centralized mock factory method
+  const mockSaveDataInfo =
+    mockDungeonGamePersistence.createMockPersistenceMetadata({
+      lastSaveTime: mockSaveData.timestamp,
+      dataSize: 1024,
+      saveCount: 1,
+      isValid: true,
+    });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -72,7 +55,7 @@ describe('useDungeonGamePersistence', () => {
     // Clear the mock MMKV storage used by useMMKVString
     Object.keys(mmkvMockStorage).forEach((key) => delete mmkvMockStorage[key]);
 
-    // Default mock implementation
+    // Default mock implementation - manually set for now
     (hasDungeonGameSaveData as jest.Mock).mockReturnValue(false);
     (getDungeonGameSaveDataInfo as jest.Mock).mockReturnValue(null);
   });

@@ -1,27 +1,38 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import React from 'react';
 
+import { createHealthHooksMock } from '../../../__mocks__/health-hooks';
+import { createStorageFunctionsMock } from '../../../__mocks__/storage-functions';
 import ManualEntrySection from './manual-entry-section';
 
 global.alert = jest.fn();
 
 // Mock the storage module globally to fix i18n issues
 jest.mock('@/lib/storage', () => {
-  const originalModule = require('../../../__mocks__/storage.tsx');
+  const storageMock =
+    require('../../../__mocks__/storage-functions').createStorageFunctionsMock();
   return {
-    ...originalModule,
-    getManualStepsByDay: jest.fn(),
+    ...require('../../../__mocks__/storage.tsx'),
+    getManualStepsByDay: storageMock.getManualStepsByDay,
     clearManualStepsByDay: jest.fn(),
     useManualStepsByDay: jest.fn(),
   };
 });
 
 // Mock the health hooks
-jest.mock('@/lib/health', () => ({
-  useManualEntryMode: jest.fn(),
-  useDeveloperMode: jest.fn(),
-  useExperienceData: jest.fn(),
-}));
+jest.mock('@/lib/health', () => {
+  const healthMock =
+    require('../../../__mocks__/health-hooks').createHealthHooksMock();
+  return {
+    useManualEntryMode: healthMock.useManualEntryMode,
+    useDeveloperMode: healthMock.useDeveloperMode,
+    useExperienceData: healthMock.useExperienceData,
+  };
+});
+
+// Create centralized mock instances for the test
+const healthMock = createHealthHooksMock();
+const storageMock = createStorageFunctionsMock();
 
 const mockUseManualEntryMode = jest.mocked(
   require('@/lib/health').useManualEntryMode
@@ -47,28 +58,24 @@ afterEach(() => {
 });
 
 describe('ManualEntrySection', () => {
-  const defaultManualEntryMode = {
-    isManualMode: false,
-    setManualMode: jest.fn(),
-    isLoading: false,
-  };
+  // Use centralized mock factory methods
+  const defaultManualEntryMode = healthMock.createMockManualEntryModeData({
+    isManualEntryMode: false,
+  });
 
-  const defaultDeveloperMode = {
+  const defaultDeveloperMode = healthMock.createMockDeveloperModeData({
     isDeveloperMode: false,
-    setDevMode: jest.fn(),
-    isLoading: false,
-  };
+  });
+
+  const defaultExperienceData = healthMock.createMockExperienceData({
+    experience: 0,
+    cumulativeExperience: 0,
+  });
 
   beforeEach(() => {
     mockUseManualEntryMode.mockReturnValue(defaultManualEntryMode);
     mockUseDeveloperMode.mockReturnValue(defaultDeveloperMode);
-    mockUseExperienceData.mockReturnValue({
-      experience: 0,
-      cumulativeExperience: 0,
-      firstExperienceDate: null,
-      stepsByDay: [],
-      refreshExperience: jest.fn(),
-    });
+    mockUseExperienceData.mockReturnValue(defaultExperienceData);
     mockGetManualStepsByDay.mockReturnValue([]);
     mockClearManualStepsByDay.mockResolvedValue(undefined);
     mockUseManualStepsByDay.mockReturnValue([[], jest.fn()]);

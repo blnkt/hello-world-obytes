@@ -1,3 +1,4 @@
+import { createStorageFunctionsMock } from '../../../__mocks__/storage-functions';
 import { storage } from '../storage';
 import {
   clearDungeonGameSaveData,
@@ -9,19 +10,22 @@ import {
   saveDungeonGameState,
 } from './dungeon-game-persistence';
 
-// Mock the storage module
-jest.mock('../storage', () => ({
-  storage: {
-    set: jest.fn(),
-    getString: jest.fn(),
-    contains: jest.fn(),
-    delete: jest.fn(),
-  },
-}));
+// Mock the storage module using centralized mock
+jest.mock('../storage', () => {
+  const storageMock =
+    require('../../../__mocks__/storage-functions').createStorageFunctionsMock();
+  return {
+    storage: storageMock.storage,
+  };
+});
 
 const mockStorage = storage as jest.Mocked<typeof storage>;
 
+// Create centralized mock instances
+const storageMock = createStorageFunctionsMock();
+
 describe('DungeonGamePersistenceService', () => {
+  // Use centralized factory method (partial for compatibility)
   const mockSaveData = {
     gameState: 'Active' as const,
     level: 1,
