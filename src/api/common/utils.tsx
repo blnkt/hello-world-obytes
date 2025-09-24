@@ -10,7 +10,10 @@ type KeyParams = {
 };
 export const DEFAULT_LIMIT = 10;
 
-export function getQueryKey<T extends KeyParams>(key: string, params?: T) {
+export function getQueryKey<T extends KeyParams>(
+  key: string,
+  params?: T
+): (string | T)[] {
   return [key, ...(params ? [params] : [])];
 }
 

@@ -82,7 +82,7 @@ interface GameStateContextValue {
 
 const GameStateContext = createContext<GameStateContextValue | null>(null);
 
-export const useGameState = () => {
+export const useGameState = (): GameStateContextValue => {
   const context = useContext(GameStateContext);
   if (!context) {
     throw new Error('useGameState must be used within GameStateProvider');

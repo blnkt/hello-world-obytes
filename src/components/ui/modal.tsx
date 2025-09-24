@@ -51,7 +51,11 @@ type ModalHeaderProps = {
   dismiss: () => void;
 };
 
-export const useModal = () => {
+export const useModal = (): {
+  ref: React.RefObject<BottomSheetModal>;
+  present: (data?: any) => void;
+  dismiss: () => void;
+} => {
   const ref = React.useRef<BottomSheetModal>(null);
   const present = React.useCallback((data?: any) => {
     ref.current?.present(data);
@@ -127,9 +131,9 @@ const CustomBackdrop = ({ style }: BottomSheetBackdropProps) => {
   );
 };
 
-export const renderBackdrop = (props: BottomSheetBackdropProps) => (
-  <CustomBackdrop {...props} />
-);
+export const renderBackdrop = (
+  props: BottomSheetBackdropProps
+): React.JSX.Element => <CustomBackdrop {...props} />;
 
 /**
  *

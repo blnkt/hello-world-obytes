@@ -13,7 +13,10 @@ export type ColorSchemeType = 'light' | 'dark' | 'system';
  * don't use this hooks if you want to use it to style your component based on the theme use useColorScheme from nativewind instead
  *
  */
-export const useSelectedTheme = () => {
+export const useSelectedTheme = (): {
+  selectedTheme: ColorSchemeType;
+  setSelectedTheme: (theme: ColorSchemeType) => void;
+} => {
   const { setColorScheme } = useColorScheme();
   const [theme, _setTheme] = useMMKVString(SELECTED_THEME, storage);
 
@@ -29,7 +32,7 @@ export const useSelectedTheme = () => {
   return { selectedTheme, setSelectedTheme } as const;
 };
 // to be used in the root file to load the selected theme from MMKV
-export const loadSelectedTheme = () => {
+export const loadSelectedTheme = (): void => {
   const theme = storage.getString(SELECTED_THEME);
   if (theme !== undefined) {
     console.log('theme', theme);

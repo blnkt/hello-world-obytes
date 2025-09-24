@@ -57,42 +57,31 @@
   - [x] 3.2 Replace any[] types in history components with proper interfaces
   - [x] 3.3 Replace any types in character components with proper interfaces
   - [x] 3.4 Replace any types in API utilities with proper types
-  - [ ] 3.5 Add explicit return types to all functions missing them
+  - [x] 3.5 Add explicit return types to all functions missing them
   - [ ] 3.6 Add explicit parameter types to all functions missing them
   - [ ] 3.7 Add generic types where appropriate for reusable functions
   - [ ] 3.8 Run TypeScript compiler to verify no type errors
 
-- [ ] 4.0 Implement Structured Error Handling and Logging
+- [ ] 4.0 Consolidate Test Mocks and Standardize Patterns
 
-  - [ ] 4.1 Create centralized error logging system with structured error objects
-  - [ ] 4.2 Replace all console.log statements with proper logging
-  - [ ] 4.3 Replace all console.error statements with structured error handling
-  - [ ] 4.4 Define error types and interfaces for consistent error handling
-  - [ ] 4.5 Implement error recovery mechanisms where appropriate
-  - [ ] 4.6 Add user-friendly error messages for common error scenarios
-  - [ ] 4.7 Implement error boundaries for major features
-  - [ ] 4.8 Test error handling scenarios to ensure proper behavior
+  - [ ] 4.1 Create **mocks**/dungeon-game-persistence.ts with centralized mock implementation
+  - [ ] 4.2 Create **mocks**/health-hooks.ts with standardized health hook mocks
+  - [ ] 4.3 Create **mocks**/storage-functions.ts with centralized storage mocks
+  - [ ] 4.4 Add TypeScript interfaces for all mock implementations
+  - [ ] 4.5 Include helper functions for common mock scenarios (setup, teardown, reset)
+  - [ ] 4.6 Update all test files to import from centralized mocks
+  - [ ] 4.7 Define standard mock structure and naming conventions
+  - [ ] 4.8 Create mock factory functions for complex objects
+  - [ ] 4.9 Add documentation for mock usage patterns
+  - [ ] 4.10 Verify all tests pass with centralized mocks
 
-- [ ] 5.0 Consolidate Test Mocks and Standardize Patterns
-
-  - [ ] 5.1 Create **mocks**/dungeon-game-persistence.ts with centralized mock implementation
-  - [ ] 5.2 Create **mocks**/health-hooks.ts with standardized health hook mocks
-  - [ ] 5.3 Create **mocks**/storage-functions.ts with centralized storage mocks
-  - [ ] 5.4 Add TypeScript interfaces for all mock implementations
-  - [ ] 5.5 Include helper functions for common mock scenarios (setup, teardown, reset)
-  - [ ] 5.6 Update all test files to import from centralized mocks
-  - [ ] 5.7 Define standard mock structure and naming conventions
-  - [ ] 5.8 Create mock factory functions for complex objects
-  - [ ] 5.9 Add documentation for mock usage patterns
-  - [ ] 5.10 Verify all tests pass with centralized mocks
-
-- [ ] 6.0 Update Documentation and Measure Performance Improvements
-  - [ ] 6.1 Update README.md with new development guidelines
-  - [ ] 6.2 Document new error handling patterns and usage examples
-  - [ ] 6.3 Create component usage guidelines for future development
-  - [ ] 6.4 Update testing guidelines with new mock patterns
-  - [ ] 6.5 Measure bundle size reduction and document improvements
-  - [ ] 6.6 Measure build time improvements and document gains
-  - [ ] 6.7 Create performance monitoring guidelines
-  - [ ] 6.8 Document all breaking changes and migration guides
-  - [ ] 6.9 Verify all success metrics from PRD are achieved
+- [ ] 5.0 Update Documentation and Measure Performance Improvements
+  - [ ] 5.1 Update README.md with new development guidelines
+  - [ ] 5.2 Document new error handling patterns and usage examples
+  - [ ] 5.3 Create component usage guidelines for future development
+  - [ ] 5.4 Update testing guidelines with new mock patterns
+  - [ ] 5.5 Measure bundle size reduction and document improvements
+  - [ ] 5.6 Measure build time improvements and document gains
+  - [ ] 5.7 Create performance monitoring guidelines
+  - [ ] 5.8 Document all breaking changes and migration guides
+  - [ ] 5.9 Verify all success metrics from PRD are achieved

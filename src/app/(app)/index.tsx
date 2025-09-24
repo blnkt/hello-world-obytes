@@ -96,7 +96,7 @@ const DailyGoalSection = ({ stepCount }: { stepCount: number }) => {
   const handleGoalChange = () => {
     const parsed = parseInt(goalInput, 10);
     if (!isNaN(parsed) && parsed > 0) {
-      setDailyStepsGoal(String(parsed));
+      setDailyStepsGoal(parsed);
     } else {
       setGoalInput(dailyStepsGoal.toString());
     }

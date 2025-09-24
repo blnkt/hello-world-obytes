@@ -199,7 +199,11 @@ export const ManualModeProvider = ({
 };
 
 // Manual Entry Mode Hook
-export const useManualEntryMode = () => {
+export const useManualEntryMode = (): {
+  isManualMode: boolean;
+  setManualMode: (enabled: boolean) => Promise<void>;
+  isLoading: boolean;
+} => {
   const context = useContext(ManualModeContext);
   if (context === undefined) {
     throw new Error(
@@ -253,7 +257,11 @@ export const DeveloperModeProvider = ({
 };
 
 // Developer Mode Hook
-export const useDeveloperMode = () => {
+export const useDeveloperMode = (): {
+  isDeveloperMode: boolean;
+  setDevMode: (enabled: boolean) => Promise<void>;
+  isLoading: boolean;
+} => {
   const context = useContext(DeveloperModeContext);
   if (context === undefined) {
     throw new Error(
@@ -349,7 +357,13 @@ const useHealthKitAvailability = (): HealthKitAvailabilityResult => {
   };
 };
 
-export const useHealthKit = () => {
+export const useHealthKit = (): {
+  isAvailable: boolean;
+  hasRequestedAuthorization: boolean | null;
+  availabilityStatus: any;
+  availabilityError: string | null | undefined;
+  requestAuthorization: () => Promise<boolean>;
+} => {
   const availability = useHealthKitAvailability();
   const [hasRequestedAuthorization, setHasRequestedAuthorization] = useState<
     boolean | null
@@ -583,7 +597,7 @@ export const useHealthKitFallback = (): FallbackLogicResult => {
   };
 };
 
-export const getTodayStepCount = async () => {
+export const getTodayStepCount = async (): Promise<number | null> => {
   const todayStart = new Date(new Date().setHours(0, 0, 0, 0));
   const todayEnd = new Date(new Date().setHours(23, 59, 59, 999));
   // const yesterday = new Date(today.getTime() - 1 * 24 * 60 * 60 * 1000);
@@ -603,7 +617,7 @@ export const getTodayStepCount = async () => {
   }
 };
 
-export const getCumulativeStepCount = async () => {
+export const getCumulativeStepCount = async (): Promise<any> => {
   try {
     const MostRecentQuantitySample =
       await HealthKit.getMostRecentQuantitySample(
@@ -617,7 +631,7 @@ export const getCumulativeStepCount = async () => {
   }
 };
 
-export const useStepCount = () => {
+export const useStepCount = (): object | null => {
   const [stepCount, setStepCount] = useState<object | null>(null);
 
   useEffect(() => {
@@ -1139,7 +1153,11 @@ export const detectStreaks = (
  * @returns Object containing current streaks and streak detection function
  */
 // eslint-disable-next-line max-lines-per-function
-export const useStreakTracking = () => {
+export const useStreakTracking = (): {
+  streaks: Streak[];
+  currentStreak: Streak | null;
+  longestStreak: number;
+} => {
   const [streaks, setStreaks] = React.useState<Streak[]>([]);
   const [dailyGoal] = useDailyStepsGoal();
 
@@ -1174,7 +1192,10 @@ export const useStreakTracking = () => {
  *
  * @returns Object containing cumulative experience and first experience date
  */
-export const useCumulativeExperience = () => {
+export const useCumulativeExperience = (): {
+  cumulativeExperience: number;
+  firstExperienceDate: string | null;
+} => {
   const { cumulativeExperience, firstExperienceDate } = useExperienceData();
 
   return {
@@ -1192,7 +1213,10 @@ export const useCumulativeExperience = () => {
  *
  * @returns Object containing cumulative experience and first experience date
  */
-export const useCumulativeExperienceSimple = () => {
+export const useCumulativeExperienceSimple = (): {
+  cumulativeExperience: number;
+  firstExperienceDate: string | null;
+} => {
   const { cumulativeExperience, firstExperienceDate } = useExperienceData();
 
   return {
@@ -1229,7 +1253,14 @@ export const convertExperienceToCurrency = (experience: number): number => {
  *
  * @returns Object containing currency data and conversion functions
  */
-export const useCurrencySystem = () => {
+export const useCurrencySystem = (): {
+  currency: number;
+  availableCurrency: number;
+  totalCurrencyEarned: number;
+  convertCurrentExperience: () => Promise<number>;
+  spend: (amount: number) => Promise<boolean>;
+  conversionRate: number;
+} => {
   const { cumulativeExperience } = useExperienceData();
   const [currency] = useCurrency();
 

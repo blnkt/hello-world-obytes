@@ -19,7 +19,20 @@ const createHistoryEntry = (
   outcome,
 });
 
-export const useScenarioHistory = () => {
+type UseScenarioHistoryReturn = {
+  history: ScenarioHistory[];
+  isLoading: boolean;
+  addToHistory: (
+    scenario: Scenario,
+    milestone: number,
+    outcome?: string
+  ) => Promise<void>;
+  getScenariosByType: (type: 'merchant' | 'monster') => ScenarioHistory[];
+  getScenariosByMilestone: (milestone: number) => ScenarioHistory[];
+  getRecentScenarios: (count?: number) => ScenarioHistory[];
+};
+
+export const useScenarioHistory = (): UseScenarioHistoryReturn => {
   const [history, setHistory] = useState<ScenarioHistory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
