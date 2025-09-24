@@ -15,7 +15,7 @@
 - `src/components/history/` - History components requiring type safety improvements
 - `src/components/character/` - Character components requiring type safety improvements
 - `src/api/` - API utilities requiring type safety improvements
-- `__mocks__/dungeon-game-persistence.ts` - New centralized mock for dungeon game persistence
+- `__mocks__/dungeon-game-persistence.ts` - ✅ Centralized mock for dungeon game persistence with TypeScript interfaces and helper functions
 - `__mocks__/health-hooks.ts` - New centralized mock for health-related hooks
 - `__mocks__/storage-functions.ts` - New centralized mock for storage functions
 - `package.json` - Dependencies to be removed and updated
@@ -59,12 +59,12 @@
   - [x] 3.4 Replace any types in API utilities with proper types
   - [x] 3.5 Add explicit return types to all functions missing them
   - [x] 3.6 Add explicit parameter types to all functions missing them
-  - [ ] 3.7 Add generic types where appropriate for reusable functions
-  - [ ] 3.8 Run TypeScript compiler to verify no type errors
+  - [x] 3.7 Add generic types where appropriate for reusable functions
+  - [x] 3.8 Run TypeScript compiler to verify no type errors
 
 - [ ] 4.0 Consolidate Test Mocks and Standardize Patterns
 
-  - [ ] 4.1 Create **mocks**/dungeon-game-persistence.ts with centralized mock implementation
+  - [x] 4.1 Create **mocks**/dungeon-game-persistence.ts with centralized mock implementation
   - [ ] 4.2 Create **mocks**/health-hooks.ts with standardized health hook mocks
   - [ ] 4.3 Create **mocks**/storage-functions.ts with centralized storage mocks
   - [ ] 4.4 Add TypeScript interfaces for all mock implementations
