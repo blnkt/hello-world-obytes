@@ -515,3 +515,54 @@ export type MockResetFunction = () => void;
  * Mock setup function type
  */
 export type MockSetupFunction = () => void;
+
+// ============================================================================
+// HELPER FUNCTION TYPES
+// ============================================================================
+
+/**
+ * Mock registry entry type
+ */
+export type MockRegistryEntry = {
+  name: string;
+  mock: AnyMock;
+  registeredAt: number;
+};
+
+/**
+ * Test scenario configuration type
+ */
+export type TestScenarioConfig = {
+  mocks: Record<string, AnyMock>;
+  scenario: MockScenario;
+  setup?: (mocks: Record<string, AnyMock>) => void;
+  teardown?: (mocks: Record<string, AnyMock>) => void;
+};
+
+/**
+ * Mock validation result type
+ */
+export type MockValidationResult = {
+  isValid: boolean;
+  errors: string[];
+};
+
+/**
+ * Mock state type
+ */
+export type MockState = {
+  registered: boolean;
+  hasReset: boolean;
+  hasClear: boolean;
+  hasRestore: boolean;
+  lastUsed?: number;
+};
+
+/**
+ * Mock debugger type
+ */
+export type MockDebugger = {
+  logCalls: () => void;
+  logState: () => void;
+  validate: () => boolean;
+};
