@@ -58,7 +58,7 @@
   - [x] 3.3 Replace any types in character components with proper interfaces
   - [x] 3.4 Replace any types in API utilities with proper types
   - [x] 3.5 Add explicit return types to all functions missing them
-  - [ ] 3.6 Add explicit parameter types to all functions missing them
+  - [x] 3.6 Add explicit parameter types to all functions missing them
   - [ ] 3.7 Add generic types where appropriate for reusable functions
   - [ ] 3.8 Run TypeScript compiler to verify no type errors
 

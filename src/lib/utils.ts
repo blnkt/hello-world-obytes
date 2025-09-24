@@ -182,3 +182,74 @@ export const throttle = <T extends (...args: any[]) => any>(
     }
   };
 };
+
+/**
+ * Additional generic utility functions
+ */
+
+// Deep clone utility with generic type support
+export const deepClone = <T>(obj: T): T => {
+  if (obj === null || typeof obj !== 'object') {
+    return obj;
+  }
+
+  if (obj instanceof Date) {
+    return new Date(obj.getTime()) as T;
+  }
+
+  if (obj instanceof Array) {
+    return obj.map((item) => deepClone(item)) as T;
+  }
+
+  if (typeof obj === 'object') {
+    const clonedObj = {} as T;
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        clonedObj[key] = deepClone(obj[key]);
+      }
+    }
+    return clonedObj;
+  }
+
+  return obj;
+};
+
+// Safe property access with generic return type
+export const safeGet = <T, K extends keyof T>(
+  obj: T,
+  key: K
+): T[K] | undefined => {
+  try {
+    return obj[key];
+  } catch {
+    return undefined;
+  }
+};
+
+// Generic array chunking utility
+export const chunk = <T>(array: T[], size: number): T[][] => {
+  const chunks: T[][] = [];
+  for (let i = 0; i < array.length; i += size) {
+    chunks.push(array.slice(i, i + size));
+  }
+  return chunks;
+};
+
+// Generic array flattening utility
+export const flatten = <T>(array: (T | T[])[]): T[] => {
+  return array.reduce<T[]>((flat, item) => {
+    return flat.concat(Array.isArray(item) ? flatten(item) : item);
+  }, []);
+};
+
+// Generic array sorting utility
+export const sortBy = <T>(
+  array: T[],
+  keyFn: (item: T) => string | number
+): T[] => {
+  return [...array].sort((a, b) => {
+    const aVal = keyFn(a);
+    const bVal = keyFn(b);
+    return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+  });
+};

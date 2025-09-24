@@ -30,12 +30,12 @@ export const showErrorMessage = (message: string = 'Something went wrong ') => {
   });
 };
 
-export const extractError = (data: unknown): string => {
+export const extractError = <T = unknown,>(data: T): string => {
   if (typeof data === 'string') {
     return data;
   }
   if (Array.isArray(data)) {
-    const messages = data.map((item: any) => {
+    const messages = data.map((item: unknown) => {
       return `  ${extractError(item)}`;
     });
 
@@ -43,12 +43,14 @@ export const extractError = (data: unknown): string => {
   }
 
   if (typeof data === 'object' && data !== null) {
-    const messages = Object.entries(data).map((item: [string, any]) => {
-      const [key, value] = item;
-      const separator = Array.isArray(value) ? ':\n ' : ': ';
+    const messages = Object.entries(data as Record<string, unknown>).map(
+      (item: [string, unknown]) => {
+        const [key, value] = item;
+        const separator = Array.isArray(value) ? ':\n ' : ': ';
 
-      return `- ${key}${separator}${extractError(value)} \n `;
-    });
+        return `- ${key}${separator}${extractError(value)} \n `;
+      }
+    );
     return `${messages.join('')} `;
   }
   return 'Something went wrong ';

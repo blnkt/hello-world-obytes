@@ -25,14 +25,14 @@ export function normalizePages<T>(pages?: PaginateQuery<T>[]): T[] {
 }
 
 // a function that accept a url and return params as an object
-export function getUrlParameters(
-  url: string | null
-): { [k: string]: string } | null {
+export function getUrlParameters<
+  T extends Record<string, string> = Record<string, string>,
+>(url: string | null): T | null {
   if (url === null) {
     return null;
   }
   let regex = /[?&]([^=#]+)=([^&#]*)/g,
-    params = {},
+    params = {} as T,
     match;
   while ((match = regex.exec(url))) {
     if (match[1] !== null) {
