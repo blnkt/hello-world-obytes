@@ -1,133 +1,16 @@
-import type { Streak } from '../src/lib/storage';
-
-// Health Hooks Return Types
-export interface ExperienceDataReturn {
-  experience: number;
-  cumulativeExperience: number;
-  refreshExperience: () => Promise<void>;
-  isLoading: boolean;
-  error: string | null;
-}
-
-export interface ManualEntryModeReturn {
-  isManualEntryMode: boolean;
-  setManualEntryMode: (enabled: boolean) => Promise<void>;
-  toggleManualEntryMode: () => Promise<void>;
-}
-
-export interface DeveloperModeReturn {
-  isDeveloperMode: boolean;
-  setDevMode: (enabled: boolean) => Promise<void>;
-  toggleDevMode: () => Promise<void>;
-}
-
-export interface HealthKitReturn {
-  isAvailable: boolean;
-  hasRequestedAuthorization: boolean | null;
-  availabilityStatus: string;
-  availabilityError: string | null | undefined;
-  requestAuthorization: () => Promise<boolean>;
-}
-
-export interface HealthKitFallbackReturn {
-  shouldUseManualEntry: boolean;
-  suggestion: 'none' | 'suggest_manual' | 'force_manual' | 'retry_healthkit';
-  reason: string;
-  canRetryHealthKit: boolean;
-  isLoading: boolean;
-  error: string | null | undefined;
-}
-
-export interface StepCountReturn {
-  stepCount: number | null;
-  isLoading: boolean;
-  error: string | null;
-}
-
-export interface StreakTrackingReturn {
-  streaks: Streak[];
-  currentStreak: Streak | null;
-  longestStreak: number;
-}
-
-export interface CumulativeExperienceReturn {
-  cumulativeExperience: number;
-  firstExperienceDate: string | null;
-}
-
-export interface CurrencySystemReturn {
-  currency: number;
-  availableCurrency: number;
-  totalCurrencyEarned: number;
-  convertCurrentExperience: () => Promise<number>;
-  spend: (amount: number) => Promise<boolean>;
-  conversionRate: number;
-}
-
-export interface HealthHooksMock {
-  useExperienceData: jest.MockedFunction<() => ExperienceDataReturn>;
-  useManualEntryMode: jest.MockedFunction<() => ManualEntryModeReturn>;
-  useDeveloperMode: jest.MockedFunction<() => DeveloperModeReturn>;
-  useHealthKit: jest.MockedFunction<() => HealthKitReturn>;
-  useHealthKitFallback: jest.MockedFunction<() => HealthKitFallbackReturn>;
-  useStepCount: jest.MockedFunction<() => StepCountReturn>;
-  useStreakTracking: jest.MockedFunction<() => StreakTrackingReturn>;
-  useCumulativeExperience: jest.MockedFunction<
-    () => CumulativeExperienceReturn
-  >;
-  useCumulativeExperienceSimple: jest.MockedFunction<
-    () => CumulativeExperienceReturn
-  >;
-  useCurrencySystem: jest.MockedFunction<() => CurrencySystemReturn>;
-  createMockExperienceData: (
-    overrides?: Partial<ExperienceDataReturn>
-  ) => ExperienceDataReturn;
-  createMockManualEntryModeData: (
-    overrides?: Partial<ManualEntryModeReturn>
-  ) => ManualEntryModeReturn;
-  createMockDeveloperModeData: (
-    overrides?: Partial<DeveloperModeReturn>
-  ) => DeveloperModeReturn;
-  createMockHealthKitData: (
-    overrides?: Partial<HealthKitReturn>
-  ) => HealthKitReturn;
-  createMockHealthKitFallbackData: (
-    overrides?: Partial<HealthKitFallbackReturn>
-  ) => HealthKitFallbackReturn;
-  createMockStepCountData: (
-    overrides?: Partial<StepCountReturn>
-  ) => StepCountReturn;
-  createMockStreakTrackingData: (
-    overrides?: Partial<StreakTrackingReturn>
-  ) => StreakTrackingReturn;
-  createMockCumulativeExperienceData: (
-    overrides?: Partial<CumulativeExperienceReturn>
-  ) => CumulativeExperienceReturn;
-  createMockCurrencySystemData: (
-    overrides?: Partial<CurrencySystemReturn>
-  ) => CurrencySystemReturn;
-  setupSuccessScenario: () => void;
-  setupErrorScenario: (errorMessage?: string) => void;
-  setupManualModeScenario: () => void;
-  setupDeveloperModeScenario: () => void;
-}
-
-export interface HealthHooksMockOptions {
-  useExperienceData?: jest.MockedFunction<() => ExperienceDataReturn>;
-  useManualEntryMode?: jest.MockedFunction<() => ManualEntryModeReturn>;
-  useDeveloperMode?: jest.MockedFunction<() => DeveloperModeReturn>;
-  useHealthKit?: jest.MockedFunction<() => HealthKitReturn>;
-  useHealthKitFallback?: jest.MockedFunction<() => HealthKitFallbackReturn>;
-  useStepCount?: jest.MockedFunction<() => StepCountReturn>;
-  useStreakTracking?: jest.MockedFunction<() => StreakTrackingReturn>;
-  useCumulativeExperience?: jest.MockedFunction<
-    () => CumulativeExperienceReturn
-  >;
-  useCumulativeExperienceSimple?: jest.MockedFunction<
-    () => CumulativeExperienceReturn
-  >;
-  useCurrencySystem?: jest.MockedFunction<() => CurrencySystemReturn>;
-}
+import type {
+  CumulativeExperienceReturn,
+  CurrencySystemReturn,
+  DeveloperModeReturn,
+  ExperienceDataReturn,
+  HealthHooksMock,
+  HealthHooksMockOptions,
+  HealthKitFallbackReturn,
+  HealthKitReturn,
+  ManualEntryModeReturn,
+  StepCountReturn,
+  StreakTrackingReturn,
+} from './types';
 
 let currentMock: HealthHooksMock | null = null;
 
@@ -296,6 +179,28 @@ export function createHealthHooksMock(
     ...baseMethods,
     ...factoryMethods,
     ...createScenarioMethods({} as HealthHooksMock), // Temporary empty object for initial creation
+    // Base mock methods
+    reset: () => {
+      Object.values(mock).forEach((mockFn) => {
+        if (jest.isMockFunction(mockFn)) {
+          mockFn.mockReset();
+        }
+      });
+    },
+    clear: () => {
+      Object.values(mock).forEach((mockFn) => {
+        if (jest.isMockFunction(mockFn)) {
+          mockFn.mockClear();
+        }
+      });
+    },
+    restore: () => {
+      Object.values(mock).forEach((mockFn) => {
+        if (jest.isMockFunction(mockFn)) {
+          mockFn.mockRestore();
+        }
+      });
+    },
   };
 
   // Update scenario methods with actual mock reference

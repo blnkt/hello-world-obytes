@@ -1,105 +1,10 @@
-// Storage Instance Interface
-export interface StorageInstance {
-  getString: jest.MockedFunction<(key: string) => string | null>;
-  set: jest.MockedFunction<(key: string, value: string) => void>;
-  delete: jest.MockedFunction<(key: string) => void>;
-  clear: jest.MockedFunction<() => void>;
-  contains: jest.MockedFunction<(key: string) => boolean>;
-}
-
-// Character Data Interface
-export interface CharacterData {
-  name: string;
-  level: number;
-  experience: number;
-  class: string;
-  stats?: {
-    strength: number;
-    agility: number;
-    intelligence: number;
-  };
-}
-
-// Manual Step Entry Interface
-export interface ManualStepEntry {
-  date: string;
-  steps: number;
-  source: 'manual';
-}
-
-// Storage Functions Mock Interface
-export interface StorageFunctionsMock {
-  storage: jest.Mocked<StorageInstance>;
-  useMMKVString: jest.MockedFunction<
-    (
-      key: string,
-      storageInstance?: any
-    ) => [string | null, (value: string | null) => void]
-  >;
-  useMMKVBoolean: jest.MockedFunction<
-    (
-      key: string,
-      storageInstance?: any
-    ) => [boolean | undefined, (value: boolean) => void]
-  >;
-  getItem: jest.MockedFunction<(key: string) => any>;
-  setItem: jest.MockedFunction<(key: string, value: any) => Promise<void>>;
-  removeItem: jest.MockedFunction<(key: string) => Promise<void>>;
-  getExperience: jest.MockedFunction<() => number>;
-  setExperience: jest.MockedFunction<(experience: number) => Promise<void>>;
-  getCurrency: jest.MockedFunction<() => number>;
-  setCurrency: jest.MockedFunction<(currency: number) => Promise<void>>;
-  getManualStepsByDay: jest.MockedFunction<() => ManualStepEntry[]>;
-  setManualStepsByDay: jest.MockedFunction<
-    (steps: ManualStepEntry[]) => Promise<void>
-  >;
-  getCharacter: jest.MockedFunction<() => CharacterData | null>;
-  setCharacter: jest.MockedFunction<
-    (character: CharacterData) => Promise<void>
-  >;
-  createMockStorage: (
-    overrides?: Partial<StorageInstance>
-  ) => jest.Mocked<StorageInstance>;
-  createMockCharacter: (overrides?: Partial<CharacterData>) => CharacterData;
-  createMockManualStepEntry: (
-    overrides?: Partial<ManualStepEntry>
-  ) => ManualStepEntry;
-  setupSuccessScenario: () => void;
-  setupErrorScenario: (errorMessage?: string) => void;
-  setupEmptyDataScenario: () => void;
-  setupPopulatedDataScenario: () => void;
-}
-
-export interface StorageFunctionsMockOptions {
-  storage?: jest.Mocked<StorageInstance>;
-  useMMKVString?: jest.MockedFunction<
-    (
-      key: string,
-      storageInstance?: any
-    ) => [string | null, (value: string | null) => void]
-  >;
-  useMMKVBoolean?: jest.MockedFunction<
-    (
-      key: string,
-      storageInstance?: any
-    ) => [boolean | undefined, (value: boolean) => void]
-  >;
-  getItem?: jest.MockedFunction<(key: string) => any>;
-  setItem?: jest.MockedFunction<(key: string, value: any) => Promise<void>>;
-  removeItem?: jest.MockedFunction<(key: string) => Promise<void>>;
-  getExperience?: jest.MockedFunction<() => number>;
-  setExperience?: jest.MockedFunction<(experience: number) => Promise<void>>;
-  getCurrency?: jest.MockedFunction<() => number>;
-  setCurrency?: jest.MockedFunction<(currency: number) => Promise<void>>;
-  getManualStepsByDay?: jest.MockedFunction<() => ManualStepEntry[]>;
-  setManualStepsByDay?: jest.MockedFunction<
-    (steps: ManualStepEntry[]) => Promise<void>
-  >;
-  getCharacter?: jest.MockedFunction<() => CharacterData | null>;
-  setCharacter?: jest.MockedFunction<
-    (character: CharacterData) => Promise<void>
-  >;
-}
+import type {
+  CharacterData,
+  ManualStepEntry,
+  StorageFunctionsMock,
+  StorageFunctionsMockOptions,
+  StorageInstance,
+} from './types';
 
 let currentMock: StorageFunctionsMock | null = null;
 
@@ -230,6 +135,28 @@ export function createStorageFunctionsMock(
     ...baseMethods,
     ...factoryMethods,
     ...createScenarioMethods({} as StorageFunctionsMock), // Temporary empty object for initial creation
+    // Base mock methods
+    reset: () => {
+      Object.values(mock).forEach((mockFn) => {
+        if (jest.isMockFunction(mockFn)) {
+          mockFn.mockReset();
+        }
+      });
+    },
+    clear: () => {
+      Object.values(mock).forEach((mockFn) => {
+        if (jest.isMockFunction(mockFn)) {
+          mockFn.mockClear();
+        }
+      });
+    },
+    restore: () => {
+      Object.values(mock).forEach((mockFn) => {
+        if (jest.isMockFunction(mockFn)) {
+          mockFn.mockRestore();
+        }
+      });
+    },
   };
 
   // Update scenario methods with actual mock reference

@@ -1,48 +1,9 @@
 import type {
+  DungeonGamePersistenceMock,
+  DungeonGamePersistenceMockOptions,
   DungeonGameSaveData,
-  LoadOperationResult,
   PersistenceMetadata,
-  SaveOperationResult,
-} from '../src/types/dungeon-game';
-
-export interface DungeonGamePersistenceMock {
-  saveDungeonGameState: jest.MockedFunction<
-    (
-      saveData: Omit<DungeonGameSaveData, 'version' | 'timestamp'>
-    ) => Promise<SaveOperationResult>
-  >;
-  loadDungeonGameState: jest.MockedFunction<() => Promise<LoadOperationResult>>;
-  hasDungeonGameSaveData: jest.MockedFunction<() => boolean>;
-  clearDungeonGameSaveData: jest.MockedFunction<() => Promise<boolean>>;
-  getDungeonGameSaveDataInfo: jest.MockedFunction<
-    () => PersistenceMetadata | null
-  >;
-  createMockSaveData: (
-    overrides?: Partial<DungeonGameSaveData>
-  ) => DungeonGameSaveData;
-  createMockPersistenceMetadata: (
-    overrides?: Partial<PersistenceMetadata>
-  ) => PersistenceMetadata;
-  setupSuccessScenario: () => void;
-  setupErrorScenario: (errorMessage?: string) => void;
-  setupNoDataScenario: () => void;
-}
-
-export interface DungeonGamePersistenceMockOptions {
-  saveDungeonGameState?: jest.MockedFunction<
-    (
-      saveData: Omit<DungeonGameSaveData, 'version' | 'timestamp'>
-    ) => Promise<SaveOperationResult>
-  >;
-  loadDungeonGameState?: jest.MockedFunction<
-    () => Promise<LoadOperationResult>
-  >;
-  hasDungeonGameSaveData?: jest.MockedFunction<() => boolean>;
-  clearDungeonGameSaveData?: jest.MockedFunction<() => Promise<boolean>>;
-  getDungeonGameSaveDataInfo?: jest.MockedFunction<
-    () => PersistenceMetadata | null
-  >;
-}
+} from './types';
 
 let currentMock: DungeonGamePersistenceMock | null = null;
 
@@ -71,28 +32,34 @@ function createDefaultMockFunctions() {
   };
 }
 
-export function createDungeonGamePersistenceMock(
-  options: DungeonGamePersistenceMockOptions = {}
-): DungeonGamePersistenceMock {
-  const {
-    mockSaveData,
-    mockLoadData,
-    mockHasData,
-    mockClearData,
-    mockGetInfo,
-  } = createDefaultMockFunctions();
+function createBaseMockMethods() {
+  return {
+    reset: (mock: DungeonGamePersistenceMock) => {
+      Object.values(mock).forEach((mockFn) => {
+        if (jest.isMockFunction(mockFn)) {
+          mockFn.mockReset();
+        }
+      });
+    },
+    clear: (mock: DungeonGamePersistenceMock) => {
+      Object.values(mock).forEach((mockFn) => {
+        if (jest.isMockFunction(mockFn)) {
+          mockFn.mockClear();
+        }
+      });
+    },
+    restore: (mock: DungeonGamePersistenceMock) => {
+      Object.values(mock).forEach((mockFn) => {
+        if (jest.isMockFunction(mockFn)) {
+          mockFn.mockRestore();
+        }
+      });
+    },
+  };
+}
 
-  const mock: DungeonGamePersistenceMock = {
-    saveDungeonGameState: options.saveDungeonGameState || mockSaveData,
-    loadDungeonGameState: options.loadDungeonGameState || mockLoadData,
-    hasDungeonGameSaveData: options.hasDungeonGameSaveData || mockHasData,
-    clearDungeonGameSaveData: options.clearDungeonGameSaveData || mockClearData,
-    getDungeonGameSaveDataInfo:
-      options.getDungeonGameSaveDataInfo || mockGetInfo,
-    createMockSaveData: (overrides = {}) =>
-      createDefaultMockSaveData(overrides),
-    createMockPersistenceMetadata: (overrides = {}) =>
-      createDefaultMockMetadata(overrides),
+function createScenarioMethods(mock: DungeonGamePersistenceMock) {
+  return {
     setupSuccessScenario: () => {
       mock.saveDungeonGameState.mockResolvedValue({
         success: true,
@@ -136,6 +103,43 @@ export function createDungeonGamePersistenceMock(
       mock.getDungeonGameSaveDataInfo.mockReturnValue(null);
     },
   };
+}
+
+export function createDungeonGamePersistenceMock(
+  options: DungeonGamePersistenceMockOptions = {}
+): DungeonGamePersistenceMock {
+  const {
+    mockSaveData,
+    mockLoadData,
+    mockHasData,
+    mockClearData,
+    mockGetInfo,
+  } = createDefaultMockFunctions();
+
+  const baseMockMethods = createBaseMockMethods();
+
+  const mock: DungeonGamePersistenceMock = {
+    saveDungeonGameState: options.saveDungeonGameState || mockSaveData,
+    loadDungeonGameState: options.loadDungeonGameState || mockLoadData,
+    hasDungeonGameSaveData: options.hasDungeonGameSaveData || mockHasData,
+    clearDungeonGameSaveData: options.clearDungeonGameSaveData || mockClearData,
+    getDungeonGameSaveDataInfo:
+      options.getDungeonGameSaveDataInfo || mockGetInfo,
+    createMockSaveData: (overrides = {}) =>
+      createDefaultMockSaveData(overrides),
+    createMockPersistenceMetadata: (overrides = {}) =>
+      createDefaultMockMetadata(overrides),
+    reset: () => baseMockMethods.reset(mock),
+    clear: () => baseMockMethods.clear(mock),
+    restore: () => baseMockMethods.restore(mock),
+    // Placeholder scenario methods - will be replaced by Object.assign
+    setupSuccessScenario: () => {},
+    setupErrorScenario: () => {},
+    setupNoDataScenario: () => {},
+  };
+
+  // Add scenario methods
+  Object.assign(mock, createScenarioMethods(mock));
 
   currentMock = mock;
   return mock;
