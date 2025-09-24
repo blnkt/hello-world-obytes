@@ -492,7 +492,7 @@ describe('useDungeonGamePersistence', () => {
     it('should set loading state during save operation', async () => {
       // Create a promise that we can control
       let resolveSave: (value: any) => void;
-      const savePromise = new Promise((resolve) => {
+      const savePromise = new Promise((resolve: (value: any) => void) => {
         resolveSave = resolve;
       });
 

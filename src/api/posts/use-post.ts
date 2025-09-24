@@ -12,6 +12,6 @@ export const usePost = createQuery<Response, Variables, AxiosError>({
   fetcher: (variables) => {
     return client
       .get(`posts/${variables.id}`)
-      .then((response) => response.data);
+      .then((response: any) => response.data);
   },
 });

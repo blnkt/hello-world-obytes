@@ -6,7 +6,11 @@ import type {
   RegisterOptions,
 } from 'react-hook-form';
 import { useController } from 'react-hook-form';
-import type { TextInputProps } from 'react-native';
+import type {
+  NativeSyntheticEvent,
+  TextInputFocusEventData,
+  TextInputProps,
+} from 'react-native';
 import { View } from 'react-native';
 import { TextInput as NTextInput } from 'react-native';
 import { tv } from 'tailwind-variants';
@@ -83,8 +87,14 @@ interface ControlledInputProps<T extends FieldValues>
 export const Input = React.forwardRef<NTextInput, NInputProps>((props, ref) => {
   const { label, error, testID, simple = false, ...inputProps } = props;
   const [isFocussed, setIsFocussed] = React.useState(false);
-  const onBlur = React.useCallback(() => setIsFocussed(false), []);
-  const onFocus = React.useCallback(() => setIsFocussed(true), []);
+  const onBlur = React.useCallback(
+    (e: NativeSyntheticEvent<TextInputFocusEventData>) => setIsFocussed(false),
+    []
+  );
+  const onFocus = React.useCallback(
+    (e: NativeSyntheticEvent<TextInputFocusEventData>) => setIsFocussed(true),
+    []
+  );
 
   const styles = React.useMemo(
     () =>

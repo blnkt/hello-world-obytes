@@ -100,7 +100,7 @@ export const FitnessClassFields: React.FC<FitnessClassFieldsProps> = ({
     });
   };
 
-  const options = Object.keys(FITNESS_CLASSES).map((key) => ({
+  const options = Object.keys(FITNESS_CLASSES).map((key: string) => ({
     label: key,
     value: key,
   }));

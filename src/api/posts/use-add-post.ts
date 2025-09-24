@@ -13,5 +13,5 @@ export const useAddPost = createMutation<Response, Variables, AxiosError>({
       url: 'posts/add',
       method: 'POST',
       data: variables,
-    }).then((response) => response.data),
+    }).then((response: any) => response.data),
 });
