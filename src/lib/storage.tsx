@@ -181,7 +181,7 @@ export async function setManualStepEntry(
 
   // Get current manual steps from storage
   const existing = getManualStepsByDay();
-  const idx = existing.findIndex((e) => e.date === entry.date);
+  const idx = existing.findIndex((e: ManualStepEntry) => e.date === entry.date);
 
   if (idx !== -1) {
     // Combine steps for the same date
@@ -196,7 +196,7 @@ export async function setManualStepEntry(
 
 export function getManualStepEntry(date: string): ManualStepEntry | null {
   const entries = getManualStepsByDay();
-  return entries.find((entry) => entry.date === date) || null;
+  return entries.find((entry: ManualStepEntry) => entry.date === date) || null;
 }
 
 export function hasManualEntryForDate(date: string): boolean {
@@ -524,7 +524,9 @@ export async function setPurchasedItems(items: PurchasedItem[]): Promise<void> {
 
 export async function addPurchasedItem(itemId: string): Promise<void> {
   const currentItems = getPurchasedItems();
-  const existingItem = currentItems.find((item) => item.id === itemId);
+  const existingItem = currentItems.find(
+    (item: PurchasedItem) => item.id === itemId
+  );
 
   if (existingItem) {
     // Increment quantity if item already exists
@@ -539,7 +541,9 @@ export async function addPurchasedItem(itemId: string): Promise<void> {
 
 export async function consumeItem(itemId: string): Promise<boolean> {
   const currentItems = getPurchasedItems();
-  const itemIndex = currentItems.findIndex((item) => item.id === itemId);
+  const itemIndex = currentItems.findIndex(
+    (item: PurchasedItem) => item.id === itemId
+  );
 
   if (itemIndex === -1 || currentItems[itemIndex].quantity <= 0) {
     return false; // Item not found or no quantity left
@@ -665,21 +669,26 @@ export async function migrateManualStepEntries(): Promise<void> {
   };
 
   // Convert old step data to manual entry format
-  const migratedEntries: ManualStepEntry[] = existingSteps.map((step) => ({
-    date: getDateString(step.date),
-    steps: step.steps,
-    source: 'manual' as const,
-  }));
+  const migratedEntries: ManualStepEntry[] = existingSteps.map(
+    (step: { date: Date; steps: number }) => ({
+      date: getDateString(step.date),
+      steps: step.steps,
+      source: 'manual' as const,
+    })
+  );
 
   // Merge with existing manual entries, avoiding duplicates
   const allEntries = [...existingManualSteps, ...migratedEntries];
-  const uniqueEntries = allEntries.reduce((acc, entry) => {
-    const existing = acc.find((e) => e.date === entry.date);
-    if (!existing) {
-      acc.push(entry);
-    }
-    return acc;
-  }, [] as ManualStepEntry[]);
+  const uniqueEntries = allEntries.reduce(
+    (acc: ManualStepEntry[], entry: ManualStepEntry) => {
+      const existing = acc.find((e: ManualStepEntry) => e.date === entry.date);
+      if (!existing) {
+        acc.push(entry);
+      }
+      return acc;
+    },
+    [] as ManualStepEntry[]
+  );
 
   // Sort by date
   uniqueEntries.sort((a, b) => a.date.localeCompare(b.date));

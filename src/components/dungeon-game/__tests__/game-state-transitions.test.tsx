@@ -18,7 +18,7 @@ jest.mock('../hooks/use-dungeon-game-persistence', () => ({
 
 // Test wrapper component
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <GameStateProvider initialCurrency={1000}>
+  <GameStateProvider _initialCurrency={1000}>
     {children}
   </GameStateProvider>
 );
@@ -70,7 +70,7 @@ describe('Game State Transitions', () => {
 
     it('should prevent game start with insufficient currency', () => {
       render(
-        <GameStateProvider initialCurrency={50}>
+        <GameStateProvider _initialCurrency={50}>
           <GameGrid level={1} disabled={false} />
         </GameStateProvider>
       );
@@ -169,7 +169,7 @@ describe('Game State Transitions', () => {
   describe('Game Over Transitions', () => {
     it('should transition from "Active" to "Game Over" when turns run out', () => {
       render(
-        <GameStateProvider initialCurrency={100}>
+        <GameStateProvider _initialCurrency={100}>
           <GameGrid level={1} disabled={false} />
         </GameStateProvider>
       );
@@ -186,7 +186,7 @@ describe('Game State Transitions', () => {
 
     it('should prevent further tile reveals after game over', () => {
       render(
-        <GameStateProvider initialCurrency={100}>
+        <GameStateProvider _initialCurrency={100}>
           <GameGrid level={1} disabled={false} />
         </GameStateProvider>
       );

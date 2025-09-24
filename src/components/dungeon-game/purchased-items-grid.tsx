@@ -139,6 +139,7 @@ function PurchasedItemsSection({
   );
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function PurchasedItemsGrid({
   purchasedItems,
   title = '🎒 Inventory',
@@ -154,7 +155,15 @@ export function PurchasedItemsGrid({
   const purchasedItemsData = React.useMemo(() => {
     return purchasedItems
       .map((item) => {
-        const shopItem = SHOP_ITEMS.find((item) => item.id === item.id);
+        const shopItem = SHOP_ITEMS.find(
+          (item: {
+            id: string;
+            name: string;
+            icon: string;
+            price: number;
+            description: string;
+          }) => item.id === item.id
+        );
         return shopItem ? { ...shopItem, quantity: item.quantity } : null;
       })
       .filter(Boolean);
@@ -171,7 +180,7 @@ export function PurchasedItemsGrid({
         }
       }
     },
-    [consumeItem, activateItemEffect, onItemActivated]
+    [activateItemEffect, onItemActivated]
   );
 
   // Early return after all hooks have been called

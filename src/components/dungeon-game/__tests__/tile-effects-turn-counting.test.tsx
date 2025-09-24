@@ -17,7 +17,7 @@ jest.mock('../hooks/use-dungeon-game-persistence', () => ({
 
 // Test wrapper component
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <GameStateProvider initialCurrency={1000}>
+  <GameStateProvider _initialCurrency={1000}>
     {children}
   </GameStateProvider>
 );
@@ -152,7 +152,7 @@ describe('Tile Effects with Turn Counting', () => {
 
     it('should prevent tile reveal when insufficient currency for effects', () => {
       render(
-        <GameStateProvider initialCurrency={50}>
+        <GameStateProvider _initialCurrency={50}>
           <GameGrid level={1} disabled={false} />
         </GameStateProvider>
       );
@@ -172,7 +172,7 @@ describe('Tile Effects with Turn Counting', () => {
   describe('Edge Cases and Error Handling', () => {
     it('should handle tile effects when at minimum currency', () => {
       render(
-        <GameStateProvider initialCurrency={100}>
+        <GameStateProvider _initialCurrency={100}>
           <GameGrid level={1} disabled={false} />
         </GameStateProvider>
       );
@@ -189,7 +189,7 @@ describe('Tile Effects with Turn Counting', () => {
 
     it('should handle tile effects that would result in negative currency', () => {
       render(
-        <GameStateProvider initialCurrency={50}>
+        <GameStateProvider _initialCurrency={50}>
           <GameGrid level={1} disabled={false} />
         </GameStateProvider>
       );

@@ -17,7 +17,7 @@ jest.mock('../hooks/use-dungeon-game-persistence', () => ({
 
 // Test wrapper component
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <GameStateProvider initialCurrency={1000}>
+  <GameStateProvider _initialCurrency={1000}>
     {children}
   </GameStateProvider>
 );
@@ -69,7 +69,7 @@ describe('Turn Management System', () => {
   describe('Turn Validation', () => {
     it('should prevent tile reveal when no turns available', () => {
       render(
-        <GameStateProvider initialCurrency={50}>
+        <GameStateProvider _initialCurrency={50}>
           <GameGrid level={1} disabled={false} />
         </GameStateProvider>
       );
@@ -124,7 +124,7 @@ describe('Turn Management System', () => {
 
     it('should prevent actions when currency drops below 100', () => {
       render(
-        <GameStateProvider initialCurrency={150}>
+        <GameStateProvider _initialCurrency={150}>
           <GameGrid level={1} disabled={false} />
         </GameStateProvider>
       );
@@ -140,7 +140,7 @@ describe('Turn Management System', () => {
   describe('Game Over on Turn Depletion', () => {
     it('should trigger game over when turns run out', () => {
       render(
-        <GameStateProvider initialCurrency={100}>
+        <GameStateProvider _initialCurrency={100}>
           <GameGrid level={1} disabled={false} />
         </GameStateProvider>
       );
@@ -153,7 +153,7 @@ describe('Turn Management System', () => {
 
     it('should prevent further tile reveals after game over', () => {
       render(
-        <GameStateProvider initialCurrency={100}>
+        <GameStateProvider _initialCurrency={100}>
           <GameGrid level={1} disabled={false} />
         </GameStateProvider>
       );
@@ -169,7 +169,7 @@ describe('Turn Management System', () => {
   describe('Turn Management Edge Cases', () => {
     it('should handle very high turn counts correctly', () => {
       render(
-        <GameStateProvider initialCurrency={100000}>
+        <GameStateProvider _initialCurrency={100000}>
           <GameGrid level={1} disabled={false} />
         </GameStateProvider>
       );
@@ -182,7 +182,7 @@ describe('Turn Management System', () => {
 
     it('should handle zero currency gracefully', () => {
       render(
-        <GameStateProvider initialCurrency={0}>
+        <GameStateProvider _initialCurrency={0}>
           <GameGrid level={1} disabled={false} />
         </GameStateProvider>
       );
@@ -195,7 +195,7 @@ describe('Turn Management System', () => {
 
     it('should handle negative currency prevention', () => {
       render(
-        <GameStateProvider initialCurrency={50}>
+        <GameStateProvider _initialCurrency={50}>
           <GameGrid level={1} disabled={false} />
         </GameStateProvider>
       );

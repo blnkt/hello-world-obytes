@@ -9,8 +9,12 @@ import { MerchantIcon, MonsterIcon } from '../ui/icons';
 const ScenarioStats: React.FC<{
   history: ScenarioHistory[];
 }> = ({ history }) => {
-  const merchantCount = history.filter((h) => h.type === 'merchant').length;
-  const monsterCount = history.filter((h) => h.type === 'monster').length;
+  const merchantCount = history.filter(
+    (h: ScenarioHistory) => h.type === 'merchant'
+  ).length;
+  const monsterCount = history.filter(
+    (h: ScenarioHistory) => h.type === 'monster'
+  ).length;
   const totalCount = history.length;
 
   return (

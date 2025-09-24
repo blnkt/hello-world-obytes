@@ -169,7 +169,7 @@ describe('Currency Integration and Validation', () => {
   describe('Currency Validation During Gameplay', () => {
     it('should validate currency before each tile reveal', async () => {
       render(
-        <GameStateProvider initialCurrency={150}>
+        <GameStateProvider _initialCurrency={150}>
           <GameGrid level={1} disabled={false} />
         </GameStateProvider>
       );
@@ -192,7 +192,7 @@ describe('Currency Integration and Validation', () => {
 
     it('should prevent actions when currency drops below threshold', () => {
       render(
-        <GameStateProvider initialCurrency={100}>
+        <GameStateProvider _initialCurrency={100}>
           <GameGrid level={1} disabled={false} />
         </GameStateProvider>
       );
@@ -209,7 +209,7 @@ describe('Currency Integration and Validation', () => {
 
     it('should handle edge case of exactly 100 currency', () => {
       render(
-        <GameStateProvider initialCurrency={100}>
+        <GameStateProvider _initialCurrency={100}>
           <GameGrid level={1} disabled={false} />
         </GameStateProvider>
       );
@@ -228,7 +228,7 @@ describe('Currency Integration and Validation', () => {
   describe('Currency Calculation and Precision', () => {
     it('should calculate available turns correctly', () => {
       render(
-        <GameStateProvider initialCurrency={250}>
+        <GameStateProvider _initialCurrency={250}>
           <GameGrid level={1} disabled={false} />
         </GameStateProvider>
       );
@@ -239,7 +239,7 @@ describe('Currency Integration and Validation', () => {
 
     it('should handle currency values that don\'t divide evenly by 100', () => {
       render(
-        <GameStateProvider initialCurrency={350}>
+        <GameStateProvider _initialCurrency={350}>
           <GameGrid level={1} disabled={false} />
         </GameStateProvider>
       );
@@ -250,7 +250,7 @@ describe('Currency Integration and Validation', () => {
 
     it('should prevent negative currency values', () => {
       render(
-        <GameStateProvider initialCurrency={50}>
+        <GameStateProvider _initialCurrency={50}>
           <GameGrid level={1} disabled={false} />
         </GameStateProvider>
       );
@@ -304,7 +304,7 @@ describe('Currency Integration and Validation', () => {
   describe('Currency Error Handling and User Feedback', () => {
     it('should provide clear error messages for insufficient currency', () => {
       render(
-        <GameStateProvider initialCurrency={50}>
+        <GameStateProvider _initialCurrency={50}>
           <GameGrid level={1} disabled={false} />
         </GameStateProvider>
       );
@@ -315,7 +315,7 @@ describe('Currency Integration and Validation', () => {
 
     it('should show validation messages before game actions', () => {
       render(
-        <GameStateProvider initialCurrency={75}>
+        <GameStateProvider _initialCurrency={75}>
           <GameGrid level={1} disabled={false} />
         </GameStateProvider>
       );
@@ -326,7 +326,7 @@ describe('Currency Integration and Validation', () => {
 
     it('should handle currency validation edge cases gracefully', () => {
       render(
-        <GameStateProvider initialCurrency={0}>
+        <GameStateProvider _initialCurrency={0}>
           <GameGrid level={1} disabled={false} />
         </GameStateProvider>
       );
@@ -362,7 +362,7 @@ describe('Currency Integration and Validation', () => {
 
     it('should optimize currency calculations for large values', () => {
       render(
-        <GameStateProvider initialCurrency={1000000}>
+        <GameStateProvider _initialCurrency={1000000}>
           <GameGrid level={1} disabled={false} />
         </GameStateProvider>
       );

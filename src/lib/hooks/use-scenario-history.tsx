@@ -32,6 +32,7 @@ type UseScenarioHistoryReturn = {
   getRecentScenarios: (count?: number) => ScenarioHistory[];
 };
 
+// eslint-disable-next-line max-lines-per-function
 export const useScenarioHistory = (): UseScenarioHistoryReturn => {
   const [history, setHistory] = useState<ScenarioHistory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -71,7 +72,7 @@ export const useScenarioHistory = (): UseScenarioHistoryReturn => {
   // Get scenarios by type
   const getScenariosByType = useCallback(
     (type: 'merchant' | 'monster') => {
-      return history.filter((entry) => entry.type === type);
+      return history.filter((entry: ScenarioHistory) => entry.type === type);
     },
     [history]
   );
@@ -79,7 +80,9 @@ export const useScenarioHistory = (): UseScenarioHistoryReturn => {
   // Get scenarios by milestone
   const getScenariosByMilestone = useCallback(
     (milestone: number) => {
-      return history.filter((entry) => entry.milestone === milestone);
+      return history.filter(
+        (entry: ScenarioHistory) => entry.milestone === milestone
+      );
     },
     [history]
   );

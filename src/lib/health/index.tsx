@@ -751,12 +751,14 @@ const processHealthKitData = async (params: {
       const preservedSteps = Math.max(storedEntry.steps, healthKitSteps);
       storedEntry.steps = preservedSteps;
 
-      const updatedArray = storedHealthKitData.map((entry) => {
-        if (isSameDay(entry.date, dateStr)) {
-          return { ...entry, steps: preservedSteps };
+      const updatedArray = storedHealthKitData.map(
+        (entry: { date: Date; steps: number }) => {
+          if (isSameDay(entry.date, dateStr)) {
+            return { ...entry, steps: preservedSteps };
+          }
+          return entry;
         }
-        return entry;
-      });
+      );
       if (typeof setStepsByDay === 'function') {
         await setStepsByDay(updatedArray);
       }
@@ -791,9 +793,11 @@ const getStepsGroupedByDay = async (
 
     // Only get HealthKit data, not combined data
     const dateStr = getDateString(dayStart);
-    const storedEntry = storedHealthKitData.find((entry) => {
-      return isSameDay(entry.date, dateStr);
-    });
+    const storedEntry = storedHealthKitData.find(
+      (entry: { date: Date; steps: number }) => {
+        return isSameDay(entry.date, dateStr);
+      }
+    );
 
     const healthKitSteps = await processHealthKitData({
       dateStr,
@@ -882,20 +886,20 @@ const mergeStepData = (
   const stepMap = new Map<string, number>();
 
   // Add HealthKit steps
-  healthKitResults.forEach((entry) => {
+  healthKitResults.forEach((entry: { date: Date; steps: number }) => {
     const dateStr = getDateString(entry.date);
     stepMap.set(dateStr, (stepMap.get(dateStr) || 0) + entry.steps);
   });
 
   // Add manual steps (sum with HealthKit if exists)
-  manualSteps.forEach((entry) => {
+  manualSteps.forEach((entry: ManualStepEntry) => {
     const dateStr = entry.date;
     stepMap.set(dateStr, (stepMap.get(dateStr) || 0) + entry.steps);
   });
 
   // Convert back to array of { date, steps }
   const mergedResults = Array.from(stepMap.entries()).map(
-    ([dateStr, steps]) => {
+    ([dateStr, steps]: [string, number]) => {
       // Create date in local timezone to avoid UTC conversion issues
       const [year, month, day] = dateStr.split('-').map(Number);
       const localDate = new Date(year, month - 1, day); // month is 0-indexed
@@ -976,9 +980,11 @@ const calculateEarliestDate = (
   let earliestDate = lastCheckedDateTime;
   if (manualSteps.length > 0) {
     // Find the earliest manual step date
-    const manualDates = manualSteps.map((entry) => new Date(entry.date));
+    const manualDates = manualSteps.map(
+      (entry: ManualStepEntry) => new Date(entry.date)
+    );
     const earliestManualDate = new Date(
-      Math.min(...manualDates.map((d) => d.getTime()))
+      Math.min(...manualDates.map((d: Date) => d.getTime()))
     );
 
     // Use the earlier of lastCheckedDateTime or earliest manual step date

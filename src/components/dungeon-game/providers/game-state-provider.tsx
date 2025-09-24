@@ -92,7 +92,7 @@ export const useGameState = (): GameStateContextValue => {
 
 interface GameStateProviderProps {
   children: React.ReactNode;
-  initialCurrency?: number;
+  _initialCurrency?: number;
 }
 
 // Helper function to create save data
@@ -109,7 +109,7 @@ const createSaveDataHelper = (params: {
   return {
     gameState,
     level,
-    gridState: Array.from(revealedTiles).map((tileKey) => {
+    gridState: Array.from(revealedTiles).map((tileKey: string) => {
       const [x, y] = tileKey.split('-').map(Number);
       return {
         id: tileKey,
@@ -195,7 +195,7 @@ const restoreGameStateHelper = (params: {
 // eslint-disable-next-line max-lines-per-function
 export const GameStateProvider: React.FC<GameStateProviderProps> = ({
   children,
-  initialCurrency,
+  _initialCurrency,
 }) => {
   // Get real currency from the currency system
   const { currency: realCurrency } = useCurrencySystem();
