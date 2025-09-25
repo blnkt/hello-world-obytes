@@ -76,7 +76,7 @@ const getDungeonGameTabScreen = () => ({
   name: 'dungeon-game',
   options: {
     title: 'Dungeon',
-    headerShown: false,
+    headerShown: true,
     tabBarIcon: ({ color }: { color: string }) => (
       <MerchantIcon color={color} />
     ),
