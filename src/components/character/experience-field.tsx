@@ -5,17 +5,13 @@ import colors from '@/components/ui/colors';
 
 import type { Character } from '../../types/character';
 import { calculateBalancedXP } from '../../types/character';
-import { getValidClass } from './utils';
 
 export const ExperienceField: React.FC<{
   character: Character;
   onRefreshExperience?: () => void;
 }> = ({ character, onRefreshExperience }) => {
-  const validClass = getValidClass(character.class);
   const baseSteps = character.experience;
-  const balancedXP = calculateBalancedXP(baseSteps, validClass);
-  const xpMultiplier =
-    baseSteps > 0 ? (balancedXP / baseSteps).toFixed(2) : '1.00';
+  const _balancedXP = calculateBalancedXP(baseSteps);
 
   return (
     <View className="space-y-2">
@@ -24,7 +20,7 @@ export const ExperienceField: React.FC<{
           Experience (Steps)
         </Text>
         <Text className="text-xs text-gray-500 dark:text-gray-400">
-          XP Multiplier: {xpMultiplier}x
+          Flat XP Rate
         </Text>
       </View>
       <View className="flex-row items-center">

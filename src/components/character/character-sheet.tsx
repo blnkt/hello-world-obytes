@@ -2,9 +2,7 @@ import React, { useCallback } from 'react';
 import { ScrollView, View } from 'react-native';
 
 import type { Character } from '../../types/character';
-import { AttributesSection } from './attributes-section';
 import { CharacterAvatar } from './character-avatar';
-import { FitnessClassFields } from './fitness-background-class-fields';
 import { LevelExpFields } from './level-exp-fields';
 import { NameField } from './name-field';
 
@@ -38,13 +36,7 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
         </View>
 
         <NameField character={character} updateField={updateField} />
-        <FitnessClassFields
-          character={character}
-          updateField={updateField}
-          onChange={onChange}
-        />
         <LevelExpFields character={character} />
-        <AttributesSection character={character} />
       </View>
     </ScrollView>
   );

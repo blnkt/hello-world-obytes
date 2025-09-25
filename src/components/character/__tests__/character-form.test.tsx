@@ -22,108 +22,57 @@ jest.mock('../name-field', () => {
   };
 });
 
-jest.mock('../fitness-background-class-fields', () => {
-  const React = require('react');
-  const { View, Text } = require('react-native');
-  return {
-    FitnessClassFields: ({ selectedClass, setSelectedClass, label }: { selectedClass: string; setSelectedClass: (v: string) => void; label: string }) => (
-      <View testID="fitness-class-fields">
-        <Text testID="class-label">{label}</Text>
-        <Text testID="selected-class">Selected: {selectedClass}</Text>
-        <Text
-          testID="change-class"
-          onPress={() => setSelectedClass('Cardio Crusher')}
-        >
-          Change Class
-        </Text>
-      </View>
-    ),
-  };
-});
-
 describe('CharacterForm', () => {
   const mockSetName = jest.fn();
-  const mockSetSelectedClass = jest.fn();
 
   beforeEach(() => {
     mockSetName.mockClear();
-    mockSetSelectedClass.mockClear();
   });
 
-  it('renders character creation form with header', () => {
-    render(
-      <CharacterForm
-        name=""
-        setName={mockSetName}
-        selectedClass="General Fitness"
-        setSelectedClass={mockSetSelectedClass}
-      />
-    );
-
-    expect(screen.getByText('Create Your Character')).toBeTruthy();
-    expect(screen.getByText('Choose your name and fitness class to begin your adventure')).toBeTruthy();
-    expect(screen.getByText('Character Name')).toBeTruthy();
-    expect(screen.getByTestId('name-input')).toBeTruthy();
-    expect(screen.getByText('Choose Your Class')).toBeTruthy();
-  });
-
-  it('displays current name and class', () => {
+  it('renders the form with header and name field', () => {
     render(
       <CharacterForm
         name="Test Character"
         setName={mockSetName}
-        selectedClass="Strength Seeker"
-        setSelectedClass={mockSetSelectedClass}
       />
     );
 
-    expect(screen.getByTestId('name-input')).toHaveTextContent('Test Character');
-    expect(screen.getByText('Selected: Strength Seeker')).toBeTruthy();
+    expect(screen.getByText('Create Your Character')).toBeTruthy();
+    expect(screen.getByText('Choose your name to begin your adventure')).toBeTruthy();
+    expect(screen.getByTestId('name-field')).toBeTruthy();
   });
 
-  it('calls setName when name input changes', () => {
+  it('displays the character name in the name field', () => {
+    render(
+      <CharacterForm
+        name="Test Character"
+        setName={mockSetName}
+      />
+    );
+
+    expect(screen.getByTestId('name-label')).toHaveTextContent('Character Name');
+  });
+
+  it('calls setName when name field is interacted with', () => {
     render(
       <CharacterForm
         name=""
         setName={mockSetName}
-        selectedClass="General Fitness"
-        setSelectedClass={mockSetSelectedClass}
       />
     );
 
-    const nameInput = screen.getByTestId('name-input');
-    fireEvent.press(nameInput);
-
+    fireEvent.press(screen.getByTestId('name-input'));
     expect(mockSetName).toHaveBeenCalledWith('New Character Name');
   });
 
-  it('calls setSelectedClass when class is changed', () => {
+  it('renders with empty name initially', () => {
     render(
       <CharacterForm
         name=""
         setName={mockSetName}
-        selectedClass="General Fitness"
-        setSelectedClass={mockSetSelectedClass}
       />
     );
 
-    const changeClassButton = screen.getByTestId('change-class');
-    fireEvent.press(changeClassButton);
-
-    expect(mockSetSelectedClass).toHaveBeenCalledWith('Cardio Crusher');
+    expect(screen.getByTestId('name-input')).toHaveTextContent('Enter your character\'s name');
   });
-
-  it('renders fitness class fields component', () => {
-    render(
-      <CharacterForm
-        name=""
-        setName={mockSetName}
-        selectedClass="General Fitness"
-        setSelectedClass={mockSetSelectedClass}
-      />
-    );
-
-    expect(screen.getByTestId('fitness-class-fields')).toBeTruthy();
-    expect(screen.getByText('Selected: General Fitness')).toBeTruthy();
-  });
-}); 
+});
