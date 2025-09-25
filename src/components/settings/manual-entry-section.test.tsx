@@ -32,7 +32,7 @@ jest.mock('@/lib/health', () => {
 
 // Create centralized mock instances for the test
 const healthMock = createHealthHooksMock();
-const storageMock = createStorageFunctionsMock();
+const _storageMock = createStorageFunctionsMock();
 
 const mockUseManualEntryMode = jest.mocked(
   require('@/lib/health').useManualEntryMode

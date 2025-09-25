@@ -48,11 +48,13 @@ export class DungeonGamePersistenceService {
         success: true,
         metadata,
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         success: false,
         error:
-          error instanceof Error ? error.message : 'Unknown error during save',
+          _error instanceof Error
+            ? _error.message
+            : 'Unknown error during save',
       };
     }
   }
@@ -99,11 +101,13 @@ export class DungeonGamePersistenceService {
         data: saveData,
         metadata,
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         success: false,
         error:
-          error instanceof Error ? error.message : 'Unknown error during load',
+          _error instanceof Error
+            ? _error.message
+            : 'Unknown error during load',
       };
     }
   }
@@ -117,7 +121,7 @@ export class DungeonGamePersistenceService {
       storage.delete(DUNGEON_GAME_SAVE_KEY);
       this.saveCount = 0;
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

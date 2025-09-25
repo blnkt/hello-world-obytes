@@ -92,7 +92,7 @@ const CharacterSvg: React.FC<{
 export const CharacterAvatar: React.FC<CharacterAvatarProps> = ({
   character,
   size = 120,
-  isWalking = true,
+  _isWalking = true,
 }) => {
   const primaryColor = getClassColor(character.class);
   const secondaryColor = colors.neutral[100];

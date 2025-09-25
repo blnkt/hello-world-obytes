@@ -2,7 +2,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
 
 /**
  * Migration Helper Script
@@ -70,11 +69,13 @@ class MigrationHelper {
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      
+
       // Detect function start
-      if (line.match(/^\s*(export\s+)?(async\s+)?function\s+\w+/) || 
-          line.match(/^\s*(export\s+)?const\s+\w+\s*=\s*(async\s+)?\(/) ||
-          line.match(/^\s*(export\s+)?\w+\s*:\s*(async\s+)?\(/)) {
+      if (
+        line.match(/^\s*(export\s+)?(async\s+)?function\s+\w+/) ||
+        line.match(/^\s*(export\s+)?const\s+\w+\s*=\s*(async\s+)?\(/) ||
+        line.match(/^\s*(export\s+)?\w+\s*:\s*(async\s+)?\(/)
+      ) {
         currentFunction = line.trim();
         functionStartLine = i;
         inFunction = true;
@@ -94,7 +95,7 @@ class MigrationHelper {
               function: currentFunction,
               startLine: functionStartLine + 1,
               endLine: i + 1,
-              length: functionLength
+              length: functionLength,
             });
           }
           inFunction = false;
@@ -112,21 +113,23 @@ class MigrationHelper {
     if (!content) return [];
 
     const violations = [];
-    const functionRegex = /^\s*(export\s+)?(async\s+)?function\s+(\w+)\s*\(([^)]*)\)/gm;
-    const arrowFunctionRegex = /^\s*(export\s+)?const\s+(\w+)\s*=\s*(async\s+)?\(([^)]*)\)/gm;
+    const functionRegex =
+      /^\s*(export\s+)?(async\s+)?function\s+(\w+)\s*\(([^)]*)\)/gm;
+    const arrowFunctionRegex =
+      /^\s*(export\s+)?const\s+(\w+)\s*=\s*(async\s+)?\(([^)]*)\)/gm;
     const methodRegex = /^\s*(\w+)\s*:\s*(async\s+)?\(([^)]*)\)/gm;
 
     let match;
-    
+
     // Check regular functions
     while ((match = functionRegex.exec(content)) !== null) {
       const functionName = match[3];
-      const parameters = match[4].split(',').filter(p => p.trim()).length;
+      const parameters = match[4].split(',').filter((p) => p.trim()).length;
       if (parameters > 3) {
         violations.push({
           function: functionName,
           parameters: parameters,
-          type: 'function'
+          type: 'function',
         });
       }
     }
@@ -134,12 +137,12 @@ class MigrationHelper {
     // Check arrow functions
     while ((match = arrowFunctionRegex.exec(content)) !== null) {
       const functionName = match[2];
-      const parameters = match[4].split(',').filter(p => p.trim()).length;
+      const parameters = match[4].split(',').filter((p) => p.trim()).length;
       if (parameters > 3) {
         violations.push({
           function: functionName,
           parameters: parameters,
-          type: 'arrow function'
+          type: 'arrow function',
         });
       }
     }
@@ -147,12 +150,12 @@ class MigrationHelper {
     // Check methods
     while ((match = methodRegex.exec(content)) !== null) {
       const functionName = match[1];
-      const parameters = match[3].split(',').filter(p => p.trim()).length;
+      const parameters = match[3].split(',').filter((p) => p.trim()).length;
       if (parameters > 3) {
         violations.push({
           function: functionName,
           parameters: parameters,
-          type: 'method'
+          type: 'method',
         });
       }
     }
@@ -166,7 +169,7 @@ class MigrationHelper {
     if (!content) return [];
 
     const violations = [];
-    
+
     // Check for implicit any types
     const implicitAnyRegex = /:\s*any\b/g;
     let match;
@@ -174,18 +177,19 @@ class MigrationHelper {
       violations.push({
         type: 'implicit any',
         position: match.index,
-        message: 'Found implicit any type'
+        message: 'Found implicit any type',
       });
     }
 
     // Check for missing return types
-    const functionRegex = /^\s*(export\s+)?(async\s+)?function\s+\w+\s*\([^)]*\)\s*(?::\s*\w+)?\s*{/gm;
+    const functionRegex =
+      /^\s*(export\s+)?(async\s+)?function\s+\w+\s*\([^)]*\)\s*(?::\s*\w+)?\s*{/gm;
     while ((match = functionRegex.exec(content)) !== null) {
       if (!match[0].includes(':')) {
         violations.push({
           type: 'missing return type',
           position: match.index,
-          message: 'Function missing explicit return type'
+          message: 'Function missing explicit return type',
         });
       }
     }
@@ -205,8 +209,8 @@ class MigrationHelper {
         functionLengthViolations: 0,
         parameterCountViolations: 0,
         typeScriptViolations: 0,
-        migrationRequired: 0
-      }
+        migrationRequired: 0,
+      },
     };
 
     // Find all TypeScript files
@@ -215,7 +219,7 @@ class MigrationHelper {
 
     this.log(`Found ${files.length} TypeScript files to analyze\n`);
 
-    files.forEach(filePath => {
+    files.forEach((filePath) => {
       const relativePath = path.relative(this.projectRoot, filePath);
       this.log(`Analyzing: ${relativePath}`);
 
@@ -223,18 +227,23 @@ class MigrationHelper {
         path: relativePath,
         functionLengthViolations: this.checkFunctionLength(relativePath),
         parameterCountViolations: this.checkParameterCount(relativePath),
-        typeScriptViolations: this.checkTypeScriptTypes(relativePath)
+        typeScriptViolations: this.checkTypeScriptTypes(relativePath),
       };
 
       report.files.push(fileReport);
       report.summary.totalFiles++;
-      report.summary.functionLengthViolations += fileReport.functionLengthViolations.length;
-      report.summary.parameterCountViolations += fileReport.parameterCountViolations.length;
-      report.summary.typeScriptViolations += fileReport.typeScriptViolations.length;
+      report.summary.functionLengthViolations +=
+        fileReport.functionLengthViolations.length;
+      report.summary.parameterCountViolations +=
+        fileReport.parameterCountViolations.length;
+      report.summary.typeScriptViolations +=
+        fileReport.typeScriptViolations.length;
 
-      if (fileReport.functionLengthViolations.length > 0 || 
-          fileReport.parameterCountViolations.length > 0 || 
-          fileReport.typeScriptViolations.length > 0) {
+      if (
+        fileReport.functionLengthViolations.length > 0 ||
+        fileReport.parameterCountViolations.length > 0 ||
+        fileReport.typeScriptViolations.length > 0
+      ) {
         report.summary.migrationRequired++;
       }
     });
@@ -244,8 +253,12 @@ class MigrationHelper {
     this.log('============================');
     this.log(`Total files analyzed: ${report.summary.totalFiles}`);
     this.log(`Files requiring migration: ${report.summary.migrationRequired}`);
-    this.log(`Function length violations: ${report.summary.functionLengthViolations}`);
-    this.log(`Parameter count violations: ${report.summary.parameterCountViolations}`);
+    this.log(
+      `Function length violations: ${report.summary.functionLengthViolations}`
+    );
+    this.log(
+      `Parameter count violations: ${report.summary.parameterCountViolations}`
+    );
     this.log(`TypeScript violations: ${report.summary.typeScriptViolations}`);
 
     // Save detailed report
@@ -259,24 +272,27 @@ class MigrationHelper {
   // Find TypeScript files recursively
   findTypeScriptFiles(dir) {
     const files = [];
-    
+
     try {
       const items = fs.readdirSync(dir);
-      
+
       for (const item of items) {
         const fullPath = path.join(dir, item);
         const stat = fs.statSync(fullPath);
-        
+
         if (stat.isDirectory()) {
           files.push(...this.findTypeScriptFiles(fullPath));
-        } else if (stat.isFile() && (item.endsWith('.ts') || item.endsWith('.tsx'))) {
+        } else if (
+          stat.isFile() &&
+          (item.endsWith('.ts') || item.endsWith('.tsx'))
+        ) {
           files.push(fullPath);
         }
       }
     } catch (error) {
       this.error(`Failed to read directory ${dir}: ${error.message}`);
     }
-    
+
     return files;
   }
 
@@ -307,7 +323,9 @@ class MigrationHelper {
     }
 
     this.log('\n📚 Additional Resources:');
-    this.log('- See docs/BREAKING_CHANGES_AND_MIGRATION.md for detailed guides');
+    this.log(
+      '- See docs/BREAKING_CHANGES_AND_MIGRATION.md for detailed guides'
+    );
     this.log('- Check docs/TESTING_GUIDELINES.md for mock migration');
     this.log('- Review docs/COMPONENT_GUIDELINES.md for component standards');
   }
@@ -317,7 +335,7 @@ class MigrationHelper {
     try {
       const report = this.generateMigrationReport();
       this.generateRecommendations(report);
-      
+
       // Save migration log
       const logPath = path.join(this.projectRoot, 'migration-log.txt');
       fs.writeFileSync(logPath, this.migrationLog.join('\n'));

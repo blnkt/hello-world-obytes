@@ -54,7 +54,7 @@ export const mmkvMockStorage: Record<string, string> = {};
 
 export const useMMKVString = (
   key: string,
-  storageInstance?: any
+  _storageInstance?: any
 ): [string | null, (newValue: string | null) => void] => {
   const [value, setValue] = require('react').useState(() => {
     return mmkvMockStorage[key] || null;

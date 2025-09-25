@@ -399,7 +399,8 @@ export default function Home() {
   useScenarioTrigger(todaySteps);
 
   // Get streak tracking data
-  const { currentStreak, longestStreak } = useStreakTracking();
+  const { currentStreak: _currentStreak, longestStreak: _longestStreak } =
+    useStreakTracking();
 
   // Get currency data
   const { currency } = useCurrencySystem();

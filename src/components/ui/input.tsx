@@ -88,11 +88,11 @@ export const Input = React.forwardRef<NTextInput, NInputProps>((props, ref) => {
   const { label, error, testID, simple = false, ...inputProps } = props;
   const [isFocussed, setIsFocussed] = React.useState(false);
   const onBlur = React.useCallback(
-    (e: NativeSyntheticEvent<TextInputFocusEventData>) => setIsFocussed(false),
+    (_e: NativeSyntheticEvent<TextInputFocusEventData>) => setIsFocussed(false),
     []
   );
   const onFocus = React.useCallback(
-    (e: NativeSyntheticEvent<TextInputFocusEventData>) => setIsFocussed(true),
+    (_e: NativeSyntheticEvent<TextInputFocusEventData>) => setIsFocussed(true),
     []
   );
 

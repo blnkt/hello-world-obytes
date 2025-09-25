@@ -22,7 +22,7 @@ jest.mock('../storage', () => {
 const mockStorage = storage as jest.Mocked<typeof storage>;
 
 // Create centralized mock instances
-const storageMock = createStorageFunctionsMock();
+const _storageMock = createStorageFunctionsMock();
 
 describe('DungeonGamePersistenceService', () => {
   // Use centralized factory method (partial for compatibility)

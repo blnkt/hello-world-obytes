@@ -124,7 +124,7 @@ export const ManualEntryErrorBoundary = ({
   children: React.ReactNode;
 }) => {
   const ManualEntryErrorFallback = ({
-    error,
+    error: _error,
     resetError,
   }: {
     error?: Error;
@@ -167,7 +167,7 @@ export const StorageErrorBoundary = ({
   children: React.ReactNode;
 }) => {
   const StorageErrorFallback = ({
-    error,
+    error: _error,
     resetError,
   }: {
     error?: Error;
@@ -201,7 +201,7 @@ export const HealthKitErrorBoundary = ({
   children: React.ReactNode;
 }) => {
   const HealthKitErrorFallback = ({
-    error,
+    error: _error,
     resetError,
   }: {
     error?: Error;

@@ -99,7 +99,7 @@ const handlePurchase = async (
 
 const ShopScreen = () => {
   const [lastCheckedDate] = useLastCheckedDate();
-  const lastCheckedDateTime = lastCheckedDate
+  const _lastCheckedDateTime = lastCheckedDate
     ? new Date(lastCheckedDate)
     : (() => {
         const d = new Date();

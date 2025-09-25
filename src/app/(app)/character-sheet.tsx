@@ -33,7 +33,7 @@ export default function CharacterSheetScreen() {
   const [lastCheckedDate] = useLastCheckedDate();
 
   // Default to start of today if not set
-  const lastCheckedDateTime = lastCheckedDate
+  const _lastCheckedDateTime = lastCheckedDate
     ? new Date(lastCheckedDate)
     : (() => {
         const d = new Date();

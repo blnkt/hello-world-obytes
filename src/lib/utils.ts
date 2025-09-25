@@ -15,7 +15,7 @@ export const formatDate = (dateString: string | Date): string => {
       month: 'short',
       day: 'numeric',
     });
-  } catch (error) {
+  } catch (_error) {
     return 'Invalid date';
   }
 };
@@ -29,7 +29,7 @@ export const formatDateTime = (dateInput: string | Date | number): string => {
           ? new Date(dateInput)
           : dateInput;
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-  } catch (error) {
+  } catch (_error) {
     return 'Invalid date';
   }
 };
@@ -45,7 +45,7 @@ export const formatDateDetailed = (dateString: string): string => {
       month: 'short',
       day: 'numeric',
     });
-  } catch (error) {
+  } catch (_error) {
     return 'Invalid date';
   }
 };
