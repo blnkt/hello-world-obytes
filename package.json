@@ -47,7 +47,8 @@
     "e2e-test": "maestro test .maestro/ -e APP_ID=com.hello-world-expo-owner.development",
     "create-issues": "tasks/directions/create-issues-from-tasks.sh",
     "analyze-bundle": "node scripts/analyze-bundle-size.js",
-    "analyze-build-times": "node scripts/analyze-build-times.js"
+    "analyze-build-times": "node scripts/analyze-build-times.js",
+    "check-performance-budget": "node scripts/performance-budget.js"
   },
   "dependencies": {
     "@expo/metro-runtime": "^4.0.1",
