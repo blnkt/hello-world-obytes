@@ -10,10 +10,10 @@
     "totalDependencies": 81
   },
   "buildTimes": {
-    "TypeScript Type Check": 2461,
-    "ESLint Linting": 7032,
-    "Jest Testing": 4022,
-    "Full Check (lint + type-check + test)": 8775
+    "TypeScript Type Check": 1985,
+    "ESLint Linting": 6991,
+    "Jest Testing": 3790,
+    "Full Check (lint + type-check + test)": 9004
   },
-  "totalTime": 22290
+  "totalTime": 21770
 }

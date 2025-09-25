@@ -48,7 +48,8 @@
     "create-issues": "tasks/directions/create-issues-from-tasks.sh",
     "analyze-bundle": "node scripts/analyze-bundle-size.js",
     "analyze-build-times": "node scripts/analyze-build-times.js",
-    "check-performance-budget": "node scripts/performance-budget.js"
+    "check-performance-budget": "node scripts/performance-budget.js",
+    "migration-analysis": "node scripts/migration-helper.js"
   },
   "dependencies": {
     "@expo/metro-runtime": "^4.0.1",

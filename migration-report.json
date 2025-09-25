@@ -1,0 +1,1435 @@
+{
+  "timestamp": "2025-09-25T04:16:01.927Z",
+  "files": [
+    {
+      "path": "src/api/common/api-provider.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/api/common/client.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/api/common/index.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/api/common/utils.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": [
+        {
+          "type": "implicit any",
+          "position": 189,
+          "message": "Found implicit any type"
+        }
+      ]
+    },
+    {
+      "path": "src/api/index.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/api/posts/index.ts",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/api/posts/types.ts",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/api/posts/use-add-post.ts",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": [
+        {
+          "type": "implicit any",
+          "position": 469,
+          "message": "Found implicit any type"
+        }
+      ]
+    },
+    {
+      "path": "src/api/posts/use-post.ts",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": [
+        {
+          "type": "implicit any",
+          "position": 415,
+          "message": "Found implicit any type"
+        }
+      ]
+    },
+    {
+      "path": "src/api/posts/use-posts.ts",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": [
+        {
+          "type": "implicit any",
+          "position": 490,
+          "message": "Found implicit any type"
+        }
+      ]
+    },
+    {
+      "path": "src/api/types.ts",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/app/(app)/_layout.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/app/(app)/character-sheet.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/app/(app)/dungeon-game.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/app/(app)/index.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [
+        {
+          "function": "ProgressDashboard",
+          "parameters": 5,
+          "type": "arrow function"
+        }
+      ],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/app/(app)/scenario.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/app/(app)/settings.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/app/(app)/shop.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [
+        {
+          "function": "ShopItem",
+          "parameters": 4,
+          "type": "arrow function"
+        }
+      ],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/app/(app)/steps-history.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": [
+        {
+          "type": "implicit any",
+          "position": 1126,
+          "message": "Found implicit any type"
+        }
+      ]
+    },
+    {
+      "path": "src/app/+html.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/app/[...messing].tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/app/_layout.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [
+        {
+          "function": "getAppContent",
+          "parameters": 4,
+          "type": "function"
+        }
+      ],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/app/character-creation.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/app/onboarding.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": [
+        {
+          "type": "implicit any",
+          "position": 425,
+          "message": "Found implicit any type"
+        }
+      ]
+    },
+    {
+      "path": "src/components/character/__tests__/character-form.test.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [
+        {
+          "function": "NameField",
+          "parameters": 4,
+          "type": "method"
+        }
+      ],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/character/attributes-section.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/character/character-avatar.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/character/character-customization.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/character/character-form.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/character/character-sheet.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/character/class-info.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/character/experience-field.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/character/fitness-background-class-fields.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [
+        {
+          "function": "handleClassChangeLogic",
+          "parameters": 6,
+          "type": "arrow function"
+        }
+      ],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/character/level-display.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/character/level-exp-fields.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/character/name-field.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/character/utils.ts",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/cover.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/dungeon-game/__tests__/currency-integration-validation.test.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/dungeon-game/__tests__/game-state-transitions.test.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/dungeon-game/__tests__/level-progression-difficulty.test.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/dungeon-game/__tests__/persistence-error-handling.test.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/dungeon-game/__tests__/tile-effects-turn-counting.test.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/dungeon-game/__tests__/turn-management.test.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/dungeon-game/currency-display.test.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/dungeon-game/currency-display.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [
+        {
+          "function": "InfoRow",
+          "parameters": 4,
+          "type": "function"
+        },
+        {
+          "function": "StatusCard",
+          "parameters": 5,
+          "type": "function"
+        },
+        {
+          "function": "SectionHeader",
+          "parameters": 4,
+          "type": "function"
+        }
+      ],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/dungeon-game/dungeon-game-wrapper.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/dungeon-game/dungeon-game.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/dungeon-game/game-grid.test.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/dungeon-game/game-grid.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [
+        {
+          "function": "GameGridLayout",
+          "parameters": 6,
+          "type": "function"
+        }
+      ],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/dungeon-game/game-modals.test.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/dungeon-game/game-modals.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [
+        {
+          "function": "WinModal",
+          "parameters": 5,
+          "type": "function"
+        },
+        {
+          "function": "GameOverModal",
+          "parameters": 6,
+          "type": "function"
+        }
+      ],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/dungeon-game/grid-tile.test.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/dungeon-game/grid-tile.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [
+        {
+          "function": "getTileClasses",
+          "parameters": 5,
+          "type": "arrow function"
+        }
+      ],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/dungeon-game/hooks/use-dungeon-game-async-operations.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/dungeon-game/hooks/use-dungeon-game-persistence.test.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": [
+        {
+          "type": "implicit any",
+          "position": 15512,
+          "message": "Found implicit any type"
+        },
+        {
+          "type": "implicit any",
+          "position": 15582,
+          "message": "Found implicit any type"
+        }
+      ]
+    },
+    {
+      "path": "src/components/dungeon-game/hooks/use-dungeon-game-persistence.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/dungeon-game/hooks/use-resume-choice-logic.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/dungeon-game/persistence-error-display.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/dungeon-game/providers/game-state-provider.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": [
+        {
+          "type": "implicit any",
+          "position": 3743,
+          "message": "Found implicit any type"
+        },
+        {
+          "type": "implicit any",
+          "position": 9153,
+          "message": "Found implicit any type"
+        }
+      ]
+    },
+    {
+      "path": "src/components/dungeon-game/purchased-items-grid.tsx",
+      "functionLengthViolations": [
+        {
+          "function": "export function PurchasedItemsGrid({",
+          "startLine": 143,
+          "endLine": 217,
+          "length": 75
+        }
+      ],
+      "parameterCountViolations": [
+        {
+          "function": "PurchasedItemsSection",
+          "parameters": 5,
+          "type": "function"
+        },
+        {
+          "function": "PurchasedItemsGrid",
+          "parameters": 6,
+          "type": "function"
+        }
+      ],
+      "typeScriptViolations": [
+        {
+          "type": "implicit any",
+          "position": 1136,
+          "message": "Found implicit any type"
+        },
+        {
+          "type": "implicit any",
+          "position": 1175,
+          "message": "Found implicit any type"
+        },
+        {
+          "type": "implicit any",
+          "position": 2529,
+          "message": "Found implicit any type"
+        }
+      ]
+    },
+    {
+      "path": "src/components/dungeon-game/resume-choice-modal.test.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/dungeon-game/resume-choice-modal.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/dungeon-game/save-status-indicator.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/dungeon-game/status-bar.test.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/dungeon-game/status-bar.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/dungeon-game/utils/game-utils.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/history/index.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/history/scenario-grid.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/history/scenario-history-item.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/history/scenario-illustrations.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/history/scenario-stats.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/history/scenario-timeline.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/history/step-history-item.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/history/ui-components.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/scenario-card.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/scenario-header.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/scenario-outcome.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/settings/__tests__/manual-entry-section.experience-refresh.test.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/settings/entry-mode-item.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/settings/healthkit-sync-section.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [
+        {
+          "function": "SyncButton",
+          "parameters": 4,
+          "type": "arrow function"
+        }
+      ],
+      "typeScriptViolations": [
+        {
+          "type": "implicit any",
+          "position": 268,
+          "message": "Found implicit any type"
+        },
+        {
+          "type": "implicit any",
+          "position": 284,
+          "message": "Found implicit any type"
+        },
+        {
+          "type": "implicit any",
+          "position": 2059,
+          "message": "Found implicit any type"
+        },
+        {
+          "type": "implicit any",
+          "position": 2077,
+          "message": "Found implicit any type"
+        },
+        {
+          "type": "implicit any",
+          "position": 3398,
+          "message": "Found implicit any type"
+        }
+      ]
+    },
+    {
+      "path": "src/components/settings/item.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [
+        {
+          "function": "Item",
+          "parameters": 4,
+          "type": "arrow function"
+        }
+      ],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/settings/items-container.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/settings/language-item.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/settings/manual-entry-section.test.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/settings/manual-entry-section.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": [
+        {
+          "type": "implicit any",
+          "position": 3693,
+          "message": "Found implicit any type"
+        },
+        {
+          "type": "implicit any",
+          "position": 5415,
+          "message": "Found implicit any type"
+        }
+      ]
+    },
+    {
+      "path": "src/components/settings/theme-item.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/settings/use-manual-step-form.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/__tests__/color-accessibility-compliance.test.ts",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/__tests__/color-consolidation.test.ts",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/__tests__/color-duplicates-audit.test.ts",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/__tests__/colors-conversion.test.ts",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/__tests__/component-color-imports.test.ts",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/__tests__/utility-duplicates-audit.test.ts",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/attribute-list.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [
+        {
+          "function": "AttributeList",
+          "parameters": 4,
+          "type": "function"
+        }
+      ],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/button.test.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/button.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/card.test.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/card.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/checkbox.test.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/checkbox.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [
+        {
+          "function": "Root",
+          "parameters": 6,
+          "type": "arrow function"
+        },
+        {
+          "function": "CheckboxBase",
+          "parameters": 4,
+          "type": "arrow function"
+        },
+        {
+          "function": "RadioBase",
+          "parameters": 4,
+          "type": "arrow function"
+        },
+        {
+          "function": "SwitchBase",
+          "parameters": 4,
+          "type": "arrow function"
+        }
+      ],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/colors.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/confirmation-dialog.test.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/confirmation-dialog.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/error-boundary.test.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/error-boundary.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [
+        {
+          "function": "DefaultErrorFallback",
+          "parameters": 4,
+          "type": "arrow function"
+        }
+      ],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/feature-list.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [
+        {
+          "function": "FeatureList",
+          "parameters": 6,
+          "type": "function"
+        }
+      ],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/focus-aware-status-bar.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/game-progress.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [
+        {
+          "function": "GameProgress",
+          "parameters": 7,
+          "type": "function"
+        },
+        {
+          "function": "GameStateHeader",
+          "parameters": 5,
+          "type": "arrow function"
+        },
+        {
+          "function": "GameProgressInfo",
+          "parameters": 4,
+          "type": "arrow function"
+        }
+      ],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/history-item.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [
+        {
+          "function": "HistoryItem",
+          "parameters": 5,
+          "type": "function"
+        }
+      ],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/icons/arrow-right.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/icons/caret-down.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/icons/character.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/icons/github.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/icons/home.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/icons/index.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/icons/language.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/icons/merchant.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/icons/monster.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/icons/rate.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/icons/settings.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/icons/share.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/icons/style.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/icons/support.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/icons/website.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/image.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [
+        {
+          "function": "Image",
+          "parameters": 4,
+          "type": "arrow function"
+        }
+      ],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/index.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/input.test.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/input.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/list.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/loading-overlay.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [
+        {
+          "function": "LoadingOverlay",
+          "parameters": 5,
+          "type": "function"
+        }
+      ],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/manual-step-entry.test.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": [
+        {
+          "type": "missing return type",
+          "position": 2003,
+          "message": "Function missing explicit return type"
+        },
+        {
+          "type": "missing return type",
+          "position": 2508,
+          "message": "Function missing explicit return type"
+        },
+        {
+          "type": "missing return type",
+          "position": 10060,
+          "message": "Function missing explicit return type"
+        }
+      ]
+    },
+    {
+      "path": "src/components/ui/manual-step-entry.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": [
+        {
+          "type": "implicit any",
+          "position": 799,
+          "message": "Found implicit any type"
+        },
+        {
+          "type": "implicit any",
+          "position": 954,
+          "message": "Found implicit any type"
+        },
+        {
+          "type": "implicit any",
+          "position": 1876,
+          "message": "Found implicit any type"
+        },
+        {
+          "type": "implicit any",
+          "position": 2040,
+          "message": "Found implicit any type"
+        }
+      ]
+    },
+    {
+      "path": "src/components/ui/modal-keyboard-aware-scroll-view.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": [
+        {
+          "type": "missing return type",
+          "position": 360,
+          "message": "Function missing explicit return type"
+        }
+      ]
+    },
+    {
+      "path": "src/components/ui/modal.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": [
+        {
+          "type": "implicit any",
+          "position": 1258,
+          "message": "Found implicit any type"
+        },
+        {
+          "type": "implicit any",
+          "position": 1398,
+          "message": "Found implicit any type"
+        }
+      ]
+    },
+    {
+      "path": "src/components/ui/progress-bar.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/select.test.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/select.tsx",
+      "functionLengthViolations": [
+        {
+          "function": "export const Select = (props: SelectProps) => {",
+          "startLine": 153,
+          "endLine": 235,
+          "length": 83
+        }
+      ],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/status-indicator.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [
+        {
+          "function": "StatusIndicator",
+          "parameters": 7,
+          "type": "function"
+        }
+      ],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/text.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [
+        {
+          "function": "Text",
+          "parameters": 5,
+          "type": "arrow function"
+        }
+      ],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/components/ui/utils.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/lib/__tests__/experience-refresh-system.test.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/lib/__tests__/health.manual-steps.test.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/lib/__tests__/healthCore.test.ts",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/lib/__tests__/storage.manual-steps.test.ts",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/lib/health/index.test.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/lib/health/index.tsx",
+      "functionLengthViolations": [
+        {
+          "function": "export const useHealthKitFallback = (): FallbackLogicResult => {",
+          "startLine": 525,
+          "endLine": 598,
+          "length": 74
+        }
+      ],
+      "parameterCountViolations": [],
+      "typeScriptViolations": [
+        {
+          "type": "implicit any",
+          "position": 10470,
+          "message": "Found implicit any type"
+        },
+        {
+          "type": "missing return type",
+          "position": 4822,
+          "message": "Function missing explicit return type"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/hooks/index.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/lib/hooks/use-is-first-time.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/lib/hooks/use-scenario-history.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/lib/hooks/use-selected-theme.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/lib/i18n/index.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/lib/i18n/react-i18next.d.ts",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/lib/i18n/resources.ts",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/lib/i18n/types.ts",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/lib/i18n/utils.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/lib/index.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/lib/item-effects.ts",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": [
+        {
+          "type": "missing return type",
+          "position": 2179,
+          "message": "Function missing explicit return type"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/scenario.ts",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/lib/storage/dungeon-game-persistence.test.ts",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/lib/storage/dungeon-game-persistence.ts",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/lib/storage.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/lib/test-utils.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/lib/use-scenario-trigger.ts",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/lib/use-theme-config.tsx",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": [
+        {
+          "type": "missing return type",
+          "position": 654,
+          "message": "Function missing explicit return type"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": [
+        {
+          "type": "implicit any",
+          "position": 3822,
+          "message": "Found implicit any type"
+        },
+        {
+          "type": "implicit any",
+          "position": 4111,
+          "message": "Found implicit any type"
+        }
+      ]
+    },
+    {
+      "path": "src/types/character.ts",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/types/dungeon-game.test.ts",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/types/dungeon-game.ts",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/types/index.ts",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    },
+    {
+      "path": "src/types/scenario.ts",
+      "functionLengthViolations": [],
+      "parameterCountViolations": [],
+      "typeScriptViolations": []
+    }
+  ],
+  "summary": {
+    "totalFiles": 171,
+    "functionLengthViolations": 3,
+    "parameterCountViolations": 31,
+    "typeScriptViolations": 36,
+    "migrationRequired": 40
+  }
+}
