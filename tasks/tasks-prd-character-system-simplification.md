@@ -40,32 +40,32 @@
   - [x] 1.5 Update Character type exports and imports across the codebase
   - [x] 1.6 Update unit tests for Character type changes
 
-- [ ] 2.0 Remove Class-Related Components and Utilities
-  - [ ] 2.1 Delete `src/components/character/fitness-background-class-fields.tsx` component
-  - [ ] 2.2 Delete `src/components/character/fitness-background-class-fields.test.tsx` tests
-  - [ ] 2.3 Delete `src/components/character/class-info.tsx` component
-  - [ ] 2.4 Delete `src/components/character/class-info.test.tsx` tests
-  - [ ] 2.5 Remove class-related utility functions from `src/components/character/utils.ts`
-  - [ ] 2.6 Update `src/components/character/utils.test.ts` to remove class-related tests
-  - [ ] 2.7 Remove all imports and references to deleted components
+- [x] 2.0 Remove Class-Related Components and Utilities
+  - [x] 2.1 Delete `src/components/character/fitness-background-class-fields.tsx` component
+  - [x] 2.2 Delete `src/components/character/fitness-background-class-fields.test.tsx` tests
+  - [x] 2.3 Delete `src/components/character/class-info.tsx` component
+  - [x] 2.4 Delete `src/components/character/class-info.test.tsx` tests
+  - [x] 2.5 Remove class-related utility functions from `src/components/character/utils.ts`
+  - [x] 2.6 Update `src/components/character/utils.test.ts` to remove class-related tests
+  - [x] 2.7 Remove all imports and references to deleted components
 
-- [ ] 3.0 Update Character Creation Flow
-  - [ ] 3.1 Remove FitnessClassFields import and usage from `src/components/character/character-form.tsx`
-  - [ ] 3.2 Remove `selectedClass` and `setSelectedClass` props from CharacterForm component
-  - [ ] 3.3 Simplify CharacterForm to only include name input field
-  - [ ] 3.4 Update character creation form UI text and descriptions
-  - [ ] 3.5 Update `src/app/character-creation.tsx` to remove class selection state
-  - [ ] 3.6 Update character creation tests to reflect simplified form
-  - [ ] 3.7 Test character creation flow end-to-end
+- [x] 3.0 Update Character Creation Flow
+  - [x] 3.1 Remove FitnessClassFields import and usage from `src/components/character/character-form.tsx`
+  - [x] 3.2 Remove `selectedClass` and `setSelectedClass` props from CharacterForm component
+  - [x] 3.3 Simplify CharacterForm to only include name input field
+  - [x] 3.4 Update character creation form UI text and descriptions
+  - [x] 3.5 Update `src/app/character-creation.tsx` to remove class selection state
+  - [x] 3.6 Update character creation tests to reflect simplified form
+  - [x] 3.7 Test character creation flow end-to-end
 
-- [ ] 4.0 Update Character Sheet Display
-  - [ ] 4.1 Remove FitnessClassFields import and usage from `src/components/character/character-sheet.tsx`
-  - [ ] 4.2 Remove class-related props from CharacterSheet component
-  - [ ] 4.3 Update character sheet layout to remove class information sections
-  - [ ] 4.4 Update `src/components/character/attributes-section.tsx` to remove class attribute references
-  - [ ] 4.5 Update character sheet screen wrapper in `src/app/(app)/character-sheet.tsx`
-  - [ ] 4.6 Update character sheet tests to remove class-related functionality
-  - [ ] 4.7 Test character sheet display and editing functionality
+- [x] 4.0 Update Character Sheet Display
+  - [x] 4.1 Remove FitnessClassFields import and usage from `src/components/character/character-sheet.tsx`
+  - [x] 4.2 Remove class-related props from CharacterSheet component
+  - [x] 4.3 Update character sheet layout to remove class information sections
+  - [x] 4.4 Update `src/components/character/attributes-section.tsx` to remove class attribute references
+  - [x] 4.5 Update character sheet screen wrapper in `src/app/(app)/character-sheet.tsx`
+  - [x] 4.6 Update character sheet tests to remove class-related functionality
+  - [x] 4.7 Test character sheet display and editing functionality
 
 - [ ] 5.0 Implement Data Migration and Cleanup
   - [ ] 5.1 Create `src/lib/character-migration.ts` utility for data migration
