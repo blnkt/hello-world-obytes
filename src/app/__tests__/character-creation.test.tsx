@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react-native';
 import React from 'react';
 
-import CharacterCreation from './character-creation';
+import CharacterCreation from '../character-creation';
 
 // Mock expo-router
 jest.mock('expo-router', () => ({
