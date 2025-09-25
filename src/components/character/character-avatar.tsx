@@ -13,20 +13,8 @@ type CharacterAvatarProps = {
   isWalking?: boolean;
 };
 
-const getClassColor = (characterClass: string) => {
-  switch (characterClass) {
-    case 'Cardio Crusher':
-      return colors.primary[500]; // Blue
-    case 'Strength Seeker':
-      return colors.danger[500]; // Red
-    case 'Flexibility Fanatic':
-      return colors.primary[500]; // Purple (using primary for now)
-    case 'Weight Loss Warrior':
-      return colors.success[500]; // Green
-    case 'General Fitness':
-    default:
-      return colors.charcoal[500]; // Gray
-  }
+const getDefaultColor = () => {
+  return colors.charcoal[500]; // Default gray color
 };
 
 const CharacterSvg: React.FC<{
@@ -92,9 +80,9 @@ const CharacterSvg: React.FC<{
 export const CharacterAvatar: React.FC<CharacterAvatarProps> = ({
   character,
   size = 120,
-  isWalking = true,
+  isWalking: _isWalking = true,
 }) => {
-  const primaryColor = getClassColor(character.class);
+  const primaryColor = getDefaultColor();
   const secondaryColor = colors.neutral[100];
 
   return (

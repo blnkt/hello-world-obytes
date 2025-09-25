@@ -326,7 +326,7 @@ const CharacterPreview = () => {
             {character.name}
           </Text>
           <Text className="text-gray-600 dark:text-gray-400">
-            Level {character.level} {character.class}
+            Level {character.level}
           </Text>
         </View>
         <Text className="text-gray-500 dark:text-gray-400">

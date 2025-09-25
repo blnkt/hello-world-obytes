@@ -5,6 +5,8 @@ import { useMMKVBoolean, useMMKVString } from 'react-native-mmkv';
 import type { Character } from '@/types/character';
 import type { ScenarioHistory } from '@/types/scenario';
 
+import { migrateIfNeeded } from './character-migration';
+
 export const storage = new MMKV();
 
 export function getItem<T>(key: string): T | null {
@@ -46,7 +48,20 @@ const CHARACTER_STORAGE_KEY = 'CHARACTER_DATA';
 export function getCharacter(): Character | null {
   const value = storage.getString(CHARACTER_STORAGE_KEY);
   const result = value ? JSON.parse(value) || null : null;
-  return result;
+
+  if (result) {
+    // Migrate character data if needed
+    const migratedCharacter = migrateIfNeeded(result);
+
+    // If migration occurred, save the migrated data back to storage
+    if (migratedCharacter !== result) {
+      setCharacter(migratedCharacter);
+    }
+
+    return migratedCharacter;
+  }
+
+  return null;
 }
 
 export async function setCharacter(character: Character): Promise<void> {
@@ -68,7 +83,27 @@ export const useCharacter = (): [
     storage
   );
 
-  const character = characterString ? JSON.parse(characterString) : null;
+  const character = React.useMemo(() => {
+    if (!characterString) return null;
+
+    try {
+      const parsed = JSON.parse(characterString);
+      if (!parsed) return null;
+
+      // Migrate character data if needed
+      const migratedCharacter = migrateIfNeeded(parsed);
+
+      // If migration occurred, save the migrated data back to storage
+      if (migratedCharacter !== parsed) {
+        setCharacterString(JSON.stringify(migratedCharacter));
+      }
+
+      return migratedCharacter;
+    } catch (error) {
+      console.error('Error parsing character data:', error);
+      return null;
+    }
+  }, [characterString, setCharacterString]);
 
   const setCharacter = React.useCallback(
     (newCharacter: Character) => {
