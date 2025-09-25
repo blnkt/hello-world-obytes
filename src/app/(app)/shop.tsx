@@ -3,11 +3,7 @@ import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 import { PurchasedItemsGrid } from '../../components/dungeon-game/purchased-items-grid';
 import { useCurrencySystem } from '../../lib/health';
-import {
-  addPurchasedItem,
-  useLastCheckedDate,
-  usePurchasedItems,
-} from '../../lib/storage';
+import { addPurchasedItem, usePurchasedItems } from '../../lib/storage';
 
 // Define shop items
 const SHOP_ITEMS = [
@@ -97,15 +93,7 @@ const handlePurchase = async (
   }
 };
 
-const ShopScreen = () => {
-  const [lastCheckedDate] = useLastCheckedDate();
-  const _lastCheckedDateTime = lastCheckedDate
-    ? new Date(lastCheckedDate)
-    : (() => {
-        const d = new Date();
-        d.setHours(0, 0, 0, 0);
-        return d;
-      })();
+export default function ShopScreen() {
   const { currency, spend } = useCurrencySystem();
   const [purchasedItems] = usePurchasedItems();
 
@@ -152,6 +140,4 @@ const ShopScreen = () => {
       </View>
     </ScrollView>
   );
-};
-
-export default ShopScreen;
+}

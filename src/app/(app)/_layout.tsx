@@ -13,61 +13,97 @@ import { HealthModeProvider } from '@/lib/health';
 // TODO: PHASE 4 - Add character portraits - Visual representation of characters
 // TODO: PHASE 4 - Implement particle effects - Visual effects for level-ups and achievements
 
+const getCharacterTabScreen = () => ({
+  name: 'character-sheet',
+  options: {
+    title: 'Character',
+    headerShown: true,
+    tabBarIcon: ({ color }: { color: string }) => (
+      <CharacterIcon color={color} />
+    ),
+    tabBarButtonTestID: 'character-tab',
+  },
+});
+
+const getStepsHistoryTabScreen = () => ({
+  name: 'steps-history',
+  options: {
+    title: 'Scenarios',
+    headerShown: true,
+    tabBarIcon: ({ color }: { color: string }) => (
+      <MerchantIcon color={color} />
+    ),
+    tabBarButtonTestID: 'scenarios-tab',
+  },
+});
+
+const getSettingsTabScreen = () => ({
+  name: 'settings',
+  options: {
+    title: 'Settings',
+    headerShown: true,
+    tabBarIcon: ({ color }: { color: string }) => (
+      <SettingsIcon color={color} />
+    ),
+    tabBarButtonTestID: 'settings-tab',
+  },
+});
+
+const getHomeTabScreen = () => ({
+  name: 'index',
+  options: {
+    title: 'Home',
+    headerShown: true,
+    tabBarIcon: ({ color }: { color: string }) => <HomeIcon color={color} />,
+    tabBarButtonTestID: 'home-tab',
+  },
+});
+
+const getScenarioTabScreen = () => ({
+  name: 'scenario',
+  options: {
+    href: null,
+    title: 'Scenario',
+    headerShown: true,
+    tabBarIcon: ({ color }: { color: string }) => (
+      <MerchantIcon color={color} />
+    ),
+    tabBarButtonTestID: 'scenario-tab',
+  },
+});
+
+const getDungeonGameTabScreen = () => ({
+  name: 'dungeon-game',
+  options: {
+    title: 'Dungeon',
+    headerShown: false,
+    tabBarIcon: ({ color }: { color: string }) => (
+      <MerchantIcon color={color} />
+    ),
+    tabBarButtonTestID: 'dungeon-tab',
+  },
+});
+
+const getShopTabScreen = () => ({
+  name: 'shop',
+  options: {
+    title: 'Shop',
+    headerShown: true,
+    tabBarIcon: ({ color }: { color: string }) => (
+      <MerchantIcon color={color} />
+    ),
+    tabBarButtonTestID: 'shop-tab',
+  },
+});
+
 const getTabScreens = () => [
-  {
-    name: 'character-sheet',
-    options: {
-      title: 'Character',
-      headerShown: true,
-      tabBarIcon: ({ color }: { color: string }) => (
-        <CharacterIcon color={color} />
-      ),
-      tabBarButtonTestID: 'character-tab',
-    },
-  },
-  {
-    name: 'steps-history',
-    options: {
-      title: 'Scenarios',
-      headerShown: true,
-      tabBarIcon: ({ color }: { color: string }) => (
-        <MerchantIcon color={color} />
-      ),
-      tabBarButtonTestID: 'scenarios-tab',
-    },
-  },
-  {
-    name: 'settings',
-    options: {
-      title: 'Settings',
-      headerShown: true,
-      tabBarIcon: ({ color }: { color: string }) => (
-        <SettingsIcon color={color} />
-      ),
-      tabBarButtonTestID: 'settings-tab',
-    },
-  },
-  {
-    name: 'index',
-    options: {
-      title: 'Home',
-      headerShown: true,
-      tabBarIcon: ({ color }: { color: string }) => <HomeIcon color={color} />,
-      tabBarButtonTestID: 'home-tab',
-    },
-  },
-  {
-    name: 'scenario',
-    options: {
-      href: null,
-      title: 'Scenario',
-      headerShown: true,
-      tabBarIcon: ({ color }: { color: string }) => (
-        <MerchantIcon color={color} />
-      ),
-      tabBarButtonTestID: 'scenario-tab',
-    },
-  },
+  getCharacterTabScreen(),
+  getStepsHistoryTabScreen(),
+  getSettingsTabScreen(),
+  getHomeTabScreen(),
+  getScenarioTabScreen(),
+  getDungeonGameTabScreen(),
+  getShopTabScreen(),
 ];
 
 export default function TabLayout() {
