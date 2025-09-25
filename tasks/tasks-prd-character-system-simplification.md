@@ -67,12 +67,12 @@
   - [x] 4.6 Update character sheet tests to remove class-related functionality
   - [x] 4.7 Test character sheet display and editing functionality
 
-- [ ] 5.0 Implement Data Migration and Cleanup
-  - [ ] 5.1 Create `src/lib/character-migration.ts` utility for data migration
-  - [ ] 5.2 Implement migration function to remove class and classAttributes from existing data
-  - [ ] 5.3 Preserve character name, level, and experience during migration
-  - [ ] 5.4 Add migration utility tests in `src/lib/character-migration.test.ts`
-  - [ ] 5.5 Integrate migration into app startup or character loading
-  - [ ] 5.6 Test migration with existing character data
-  - [ ] 5.7 Remove any remaining references to class functionality in the codebase
-  - [ ] 5.8 Run full test suite to ensure no broken references
+- [x] 5.0 Implement Data Migration and Cleanup
+  - [x] 5.1 Create `src/lib/character-migration.ts` utility for data migration
+  - [x] 5.2 Implement migration function to remove class and classAttributes from existing data
+  - [x] 5.3 Preserve character name, level, and experience during migration
+  - [x] 5.4 Add migration utility tests in `src/lib/character-migration.test.ts`
+  - [x] 5.5 Integrate migration into app startup or character loading
+  - [x] 5.6 Test migration with existing character data
+  - [x] 5.7 Remove any remaining references to class functionality in the codebase
+  - [x] 5.8 Run full test suite to ensure no broken references
