@@ -1,493 +1,443 @@
-import { router } from 'expo-router';
-import React, { useState } from 'react';
-import { Pressable, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { LoadingOverlay, Text } from '@/components/ui';
-import { useCurrencySystem } from '@/lib/health';
-import { applyItemEffects, useItemEffects } from '@/lib/item-effects';
-import { usePurchasedItems } from '@/lib/storage';
+import colors from '@/components/ui/colors';
+import type { GameState } from '@/types/dungeon-game';
 
 import GameGrid from './game-grid';
 import { GameOverModal, WinModal } from './game-modals';
-import { PurchasedItemsGrid } from './purchased-items-grid';
+import { PersistenceErrorDisplay } from './persistence-error-display';
+import { useGameState } from './providers/game-state-provider';
+import { ResumeChoiceModal } from './resume-choice-modal';
 
-interface DungeonGameLayoutProps {
+// Helper component for the game header
+const GameHeader: React.FC<{
   level: number;
-  turns: number;
-  gameState: 'Active' | 'Win' | 'Game Over';
-  revealedTiles: number;
-  totalTiles: number;
+  turnsUsed: number;
   currency: number;
   availableTurns: number;
-  turnCost: number;
-  isLoading: boolean;
-  onTurnsUpdate: (turns: number) => void;
-  onRevealedTilesUpdate: (count: number) => void;
-  onWinGame: () => void;
-  onGameOver: () => void;
-  onResetGame: () => void;
-  onHomePress: () => void;
-  onExitFound: () => void;
-  onGameOverFromTurns: () => void;
+}> = ({ level, turnsUsed, currency, availableTurns }) => (
+  <View style={styles.header}>
+    <Text style={styles.title}>Dungeon Game</Text>
+    <Text style={styles.levelText}>Level {level}</Text>
+
+    {/* Enhanced currency and turns display */}
+    <View style={styles.currencyTurnsContainer}>
+      <Text style={styles.currencyTurnsText}>
+        💰 {currency} steps = {availableTurns} turns
+      </Text>
+      <Text style={styles.turnCostText}>(100 steps per turn)</Text>
+    </View>
+
+    <Text style={styles.turnsText}>Turns Used: {turnsUsed}</Text>
+    <Text style={styles.turnsRemainingText}>
+      Turns Remaining: {availableTurns}
+    </Text>
+  </View>
+);
+
+// Helper component for game controls
+const GameControls: React.FC<{
+  gameState: GameState;
+  canStartGame: boolean;
+  onReset: () => void;
   onNextLevel: () => void;
-  onSpendCurrency: (amount: number) => Promise<boolean>;
-  activeEffects: any[];
-}
-
-interface HeaderSectionProps {
-  level: number;
-  turns: number;
-  gameState: 'Active' | 'Win' | 'Game Over';
-  revealedTiles: number;
-  totalTiles: number;
-  currency: number;
-  availableTurns: number;
-  turnCost: number;
-  activeEffects?: any[];
-}
-
-function HeaderSection({
-  level,
-  turns,
-  gameState,
-  revealedTiles,
-  totalTiles,
-  currency,
-  availableTurns,
-  turnCost,
-  activeEffects = [],
-}: HeaderSectionProps) {
-  let topInset = 0;
-  try {
-    const insets = useSafeAreaInsets();
-    topInset = insets.top || 0;
-  } catch {
-    // Fallback for test environment
-    topInset = 0;
-  }
-
-  return (
-    <View className="px-4 py-2" style={{ paddingTop: topInset }}>
-      {/* Condensed Header - All essential info in one compact bar */}
-      <View className="rounded-lg bg-[#B06F5E] px-4 py-3">
-        {/* Top row: Turns Left */}
-        <View className="mb-2">
-          <Text className="text-center text-lg font-bold uppercase text-white">
-            TURNS LEFT: {availableTurns}
-          </Text>
-        </View>
-
-        {/* Bottom row: Level, Currency, Turn Cost */}
-        <View className="flex-row items-center justify-between">
-          <View className="items-center">
-            <Text className="text-xs font-medium uppercase text-white/80">
-              Level
-            </Text>
-            <Text className="text-sm font-bold text-white">{level}</Text>
-          </View>
-
-          <View className="items-center">
-            <Text className="text-xs font-medium uppercase text-white/80">
-              Balance
-            </Text>
-            <Text className="text-sm font-bold text-white">{currency} 💰</Text>
-          </View>
-
-          <View className="items-center">
-            <Text className="text-xs font-medium uppercase text-white/80">
-              Turn Cost
-            </Text>
-            <Text className="text-sm font-bold text-white">
-              {turnCost} 💰
-              {activeEffects && activeEffects.length > 0 && (
-                <Text className="text-xs text-green-300">*</Text>
-              )}
-            </Text>
-          </View>
-        </View>
-      </View>
-    </View>
-  );
-}
-
-interface GameGridSectionProps {
-  availableTurns: number;
-  level: number;
-  onTurnsUpdate: (turns: number) => void;
-  onRevealedTilesUpdate: (count: number) => void;
-  onExitFound: () => void;
-  onGameOverFromTurns: () => void;
-  onSpendCurrency: (amount: number) => Promise<boolean>;
-}
-
-function GameGridSection({
-  availableTurns,
-  level,
-  onTurnsUpdate,
-  onRevealedTilesUpdate,
-  onExitFound,
-  onGameOverFromTurns,
-  onSpendCurrency,
-}: GameGridSectionProps) {
-  const [purchasedItems] = usePurchasedItems();
-  const { activeEffects } = useItemEffects();
-
-  // Calculate effective turn cost with item effects
-  const baseTurnCost = 100;
-  const effectiveTurnCost = applyItemEffects.getTurnCost(
-    baseTurnCost,
-    activeEffects
-  );
-  const bonusTurns = applyItemEffects.getBonusTurns(activeEffects);
-  const effectiveAvailableTurns = availableTurns + bonusTurns;
-
-  return (
-    <View className="mb-3">
-      {effectiveAvailableTurns < 1 ? (
-        <View className="rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
-          <Text className="text-center text-base text-gray-600 dark:text-gray-300">
-            Cannot play with insufficient currency
-          </Text>
-        </View>
-      ) : (
-        <>
-          <GameGrid
-            level={level}
-            disabled={false}
-            onTurnsUpdate={onTurnsUpdate}
-            onRevealedTilesUpdate={onRevealedTilesUpdate}
-            onExitFound={onExitFound}
-            onGameOver={onGameOverFromTurns}
-            onSpendCurrency={onSpendCurrency}
-          />
-
-          {/* Message Bar */}
-          <MessageBar
-            message="Ready to play! Click tiles to reveal them."
-            type="info"
-          />
-
-          {/* Purchased Items Grid with Active Effects */}
-          <PurchasedItemsGrid
-            purchasedItems={purchasedItems}
-            showActiveEffects={true}
-            onItemActivated={(itemId) => {
-              console.log(`Item activated: ${itemId}`);
-            }}
-          />
-        </>
-      )}
-    </View>
-  );
-}
-
-interface FooterSectionProps {
-  onResetGame: () => void;
-  onHomePress: () => void;
-  onWinGame: () => void;
-  onGameOver: () => void;
-}
-
-interface NavigationButtonProps {
-  icon: string;
-  label: string;
-  onPress: () => void;
-  accessibilityLabel: string;
-}
-
-function NavigationButton({
-  icon,
-  label,
-  onPress,
-  accessibilityLabel,
-}: NavigationButtonProps) {
-  return (
+}> = ({ gameState, canStartGame, onReset, onNextLevel }) => (
+  <View style={styles.controls}>
     <Pressable
-      onPress={onPress}
-      className="flex-1 items-center"
-      accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel}
+      style={[
+        styles.button,
+        styles.resetButton,
+        !canStartGame && styles.disabledButton,
+      ]}
+      onPress={onReset}
+      disabled={!canStartGame}
     >
-      <View className="rounded-full bg-white/20 p-3">
-        <Text className="text-lg text-white">{icon}</Text>
-      </View>
-      <Text className="mt-1 text-xs text-white">{label}</Text>
+      <Text
+        style={[styles.buttonText, !canStartGame && styles.disabledButtonText]}
+      >
+        {canStartGame ? 'Reset Game' : 'Need 100+ Steps'}
+      </Text>
     </Pressable>
-  );
-}
 
-function FooterSection({
-  onResetGame,
-  onHomePress,
-  onWinGame,
-  onGameOver,
-}: FooterSectionProps) {
-  let bottomInset = 0;
-  try {
-    const insets = useSafeAreaInsets();
-    bottomInset = insets.bottom || 0;
-  } catch {
-    // Fallback for test environment
-    bottomInset = 0;
+    {gameState === 'Win' && (
+      <Pressable
+        style={[styles.button, styles.nextLevelButton]}
+        onPress={onNextLevel}
+      >
+        <Text style={styles.buttonText}>Next Level</Text>
+      </Pressable>
+    )}
+  </View>
+);
+
+// Helper component for game state display
+// export const GameStateDisplay: React.FC<{ gameState: GameState }> = ({
+//   gameState,
+// }) => {
+//   if (gameState === 'Win') {
+//     return (
+//       <View className="mx-4 mb-4 items-center rounded-xl bg-white p-4 shadow-lg">
+//         <Text className="text-xl font-bold text-green-600">
+//           🎉 Level Complete! 🎉
+//         </Text>
+//         <Text className="mt-1 text-center text-sm text-green-600">
+//           Congratulations! You've completed this level!
+//         </Text>
+//       </View>
+//     );
+//   }
+
+//   if (gameState === 'Game Over') {
+//     return (
+//       <View className="mx-4 mb-4 items-center rounded-xl bg-white p-4 shadow-lg">
+//         <Text className="text-xl font-bold text-red-600">💀 Game Over 💀</Text>
+//         <Text className="mt-1 text-center text-sm text-red-600">
+//           Better luck next time!
+//         </Text>
+//       </View>
+//     );
+//   }
+
+//   if (gameState === 'Active') {
+//     return (
+//       <View className="mx-4 mb-4 items-center rounded-xl bg-white p-4 shadow-lg">
+//         <Text className="text-xl font-bold text-blue-600">🎮 Game Active</Text>
+//         <Text className="mt-1 text-center text-sm text-blue-600">
+//           Explore the dungeon and find the exit!
+//         </Text>
+//       </View>
+//     );
+//   }
+
+//   return (
+//     <View className="mx-4 mb-4 items-center rounded-xl bg-white p-4 shadow-lg">
+//       <Text className="text-xl font-bold text-purple-600">
+//         🎲 Ready to Play
+//       </Text>
+//       <Text className="mt-1 text-center text-sm text-purple-600">
+//         Start your adventure!
+//       </Text>
+//     </View>
+//   );
+// };
+
+// eslint-disable-next-line max-lines-per-function
+export default function DungeonGame() {
+  const router = useRouter();
+
+  const {
+    level,
+    gameState,
+    turnsUsed,
+    currency,
+    hasExistingSave,
+    isLoading,
+    lastError,
+    startNewGame,
+    startNextLevel,
+    setGameState,
+    canStartGame,
+    getAvailableTurns,
+    canProgressToLevel,
+    getLevelProgressionValidationMessage,
+  } = useGameState();
+
+  const [showResumeModal, setShowResumeModal] = useState(false);
+
+  // Show resume modal when component mounts if there's existing save data
+  useEffect(() => {
+    if (hasExistingSave) {
+      setShowResumeModal(true);
+    }
+  }, [hasExistingSave]);
+
+  const handleReset = () => {
+    if (!canStartGame()) {
+      // Don't allow reset if insufficient currency
+      return;
+    }
+    startNewGame();
+  };
+
+  const handleMainMenu = () => {
+    // Close the modal by resetting game state
+    setGameState('Active');
+    // Navigate back to the home screen
+    router.push('/(app)');
+  };
+
+  const handleNextLevel = () => {
+    // Enhanced validation for level progression
+    const nextLevel = level + 1;
+
+    if (!canProgressToLevel(nextLevel)) {
+      const validationMessage = getLevelProgressionValidationMessage(nextLevel);
+      console.warn(
+        `Cannot progress to level ${nextLevel}: ${validationMessage}`
+      );
+      return;
+    }
+
+    // Progress to next level using the dedicated function
+    startNextLevel();
+  };
+
+  const handleResumeModalClose = () => {
+    setShowResumeModal(false);
+  };
+
+  const availableTurns = getAvailableTurns();
+
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.loadingText}>Loading game...</Text>
+      </View>
+    );
   }
 
   return (
-    <View className="px-4 pb-2" style={{ paddingBottom: bottomInset }}>
-      {/* Main Navigation Bar - Terracotta background like mockup */}
-      <View className="rounded-lg bg-[#7A6F66] px-6 py-3">
-        <View className="flex-row items-center justify-between">
-          <NavigationButton
-            icon="🏠"
-            label="Home"
-            onPress={onHomePress}
-            accessibilityLabel="Go to home"
-          />
-          <NavigationButton
-            icon="🔄"
-            label="Reset"
-            onPress={onResetGame}
-            accessibilityLabel="Reset game"
-          />
-          <NavigationButton
-            icon="⚙️"
-            label="Settings"
-            onPress={() => {}} // Placeholder for settings
-            accessibilityLabel="Settings"
-          />
-        </View>
-      </View>
-    </View>
-  );
-}
-
-interface MessageBarProps {
-  message: string;
-  type: 'info' | 'warning' | 'success' | 'error';
-}
-
-function MessageBar({ message, type }: MessageBarProps) {
-  const getMessageStyles = () => {
-    switch (type) {
-      case 'warning':
-        return {
-          container: 'bg-[#F5F0E8]',
-          icon: 'bg-red-500',
-          text: 'text-[#6B5F57]',
-        };
-      case 'error':
-        return {
-          container: 'bg-red-100',
-          icon: 'bg-red-600',
-          text: 'text-red-800',
-        };
-      case 'success':
-        return {
-          container: 'bg-green-100',
-          icon: 'bg-green-600',
-          text: 'text-green-800',
-        };
-      case 'info':
-      default:
-        return {
-          container: 'bg-[#F5F0E8]',
-          icon: 'bg-blue-500',
-          text: 'text-[#6B5F57]',
-        };
-    }
-  };
-
-  const styles = getMessageStyles();
-
-  return (
-    <View className={`mx-4 mt-1 rounded-lg ${styles.container} px-4 py-2`}>
-      <View className="flex-row items-center">
-        <View className={`mr-3 rounded-full ${styles.icon} p-1`}>
-          <Text className="text-xs font-bold text-white">!</Text>
-        </View>
-        <Text className={`flex-1 text-sm ${styles.text}`}>{message}</Text>
-      </View>
-    </View>
-  );
-}
-
-// eslint-disable-next-line max-lines-per-function
-function DungeonGameLayout({
-  level,
-  turns,
-  gameState,
-  revealedTiles,
-  totalTiles,
-  currency,
-  availableTurns,
-  turnCost,
-  isLoading,
-  onTurnsUpdate,
-  onRevealedTilesUpdate,
-  onWinGame,
-  onGameOver,
-  onResetGame,
-  onHomePress,
-  onExitFound,
-  onGameOverFromTurns,
-  onNextLevel,
-  onSpendCurrency,
-  activeEffects,
-}: DungeonGameLayoutProps) {
-  return (
-    <View className="flex-1">
-      <LoadingOverlay visible={isLoading} />
-      <HeaderSection
-        {...{
-          level,
-          turns,
-          gameState,
-          revealedTiles,
-          totalTiles,
-          currency,
-          availableTurns,
-          turnCost,
-          activeEffects,
-        }}
-      />
-      <GameGridSection
-        {...{
-          availableTurns,
-          level,
-          onTurnsUpdate,
-          onRevealedTilesUpdate,
-          onExitFound,
-          onGameOverFromTurns,
-          onSpendCurrency,
-        }}
-      />
-      {/* Footer removed to keep only MessageBar below game grid */}
-      {/* Game Modals */}
-      <WinModal
-        visible={gameState === 'Win'}
+    <View style={styles.container}>
+      <GameHeader
         level={level}
-        onNextLevel={onNextLevel}
-        onMainMenu={onHomePress}
+        turnsUsed={turnsUsed}
+        currency={currency}
+        availableTurns={availableTurns}
       />
-      <GameOverModal
-        visible={gameState === 'Game Over'}
-        level={level}
-        turnsUsed={turns}
-        onMainMenu={onHomePress}
-        onRetry={onResetGame}
+
+      {/* Comprehensive Currency Display */}
+      {/* <View style={styles.currencyDisplayContainer}>
+        <CurrencyDisplay
+          currency={currency}
+          availableTurns={availableTurns}
+          turnCost={100}
+        />
+      </View> */}
+
+      {/* Turn Requirements Display */}
+      {/* <View style={styles.turnRequirementsContainer}>
+        <Text style={styles.turnRequirementsText}>
+          📊 Level {level} requires minimum {getMinimumTurnsRequired()} turns
+        </Text>
+        <Text style={styles.turnRequirementsSubtext}>
+          Current status:{' '}
+          {availableTurns >= getMinimumTurnsRequired()
+            ? '✅ Ready'
+            : '❌ Insufficient'}{' '}
+          turns
+        </Text>
+      </View> */}
+
+      {/* Enhanced Turn Validation Display */}
+      {/* {!canStartGame() && (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>⚠️ {getTurnValidationMessage()}</Text>
+        </View>
+      )} */}
+
+      {/* Game State Display */}
+      {/* <GameStateDisplay gameState={gameState} /> */}
+
+      {/* Game Grid */}
+      <GameGrid level={level} disabled={gameState !== 'Active'} />
+
+      {/* Game Controls */}
+      <GameControls
+        gameState={gameState}
+        canStartGame={canStartGame()}
+        onReset={handleReset}
+        onNextLevel={handleNextLevel}
+      />
+
+      {/* Resume Choice Modal - Show when there's existing save data */}
+      {showResumeModal && (
+        <ResumeChoiceModal
+          isVisible={showResumeModal}
+          onClose={handleResumeModalClose}
+        />
+      )}
+
+      {/* Win Modal */}
+      {gameState === 'Win' && (
+        <WinModal
+          visible={true}
+          level={level}
+          onNextLevel={handleNextLevel}
+          onMainMenu={handleMainMenu}
+        />
+      )}
+
+      {/* Game Over Modal */}
+      {gameState === 'Game Over' && (
+        <GameOverModal
+          visible={true}
+          level={level}
+          turnsUsed={turnsUsed}
+          onMainMenu={handleMainMenu}
+          onRestart={handleReset}
+        />
+      )}
+
+      {/* Persistence Error Display */}
+      <PersistenceErrorDisplay
+        error={lastError}
+        onDismiss={() => setGameState('Active')}
+        onRetry={() => startNewGame()}
+        onStartNewGame={() => startNewGame()}
+        onTryRecover={() => startNewGame()}
       />
     </View>
   );
 }
 
-interface DungeonGameProps {
-  navigation?: {
-    navigate: (screen: string) => void;
-    goBack: () => void;
-  };
-}
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.neutral[50],
+  },
+  header: {
+    backgroundColor: colors.white,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.charcoal[100],
+  },
+  headerText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.charcoal[800],
+  },
+  turnsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: colors.white,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.charcoal[100],
+  },
+  turnsText: {
+    fontSize: 14,
+    color: colors.charcoal[600],
+  },
+  turnsRemainingText: {
+    fontSize: 14,
+    color: colors.charcoal[600],
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 12,
+    color: colors.charcoal[800],
+  },
+  levelText: {
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 8,
+    color: colors.charcoal[600],
+  },
+  currencyTurnsContainer: {
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  currencyTurnsText: {
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 2,
+    color: colors.success[500],
+  },
+  turnCostText: {
+    fontSize: 12,
+    textAlign: 'center',
+    color: colors.charcoal[500],
+    fontStyle: 'italic',
+  },
+  currencyText: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 4,
+    color: colors.charcoal[500],
+  },
+  controls: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 16,
+    marginBottom: 16,
+  },
+  button: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    minWidth: 120,
+    alignItems: 'center',
+  },
+  resetButton: {
+    backgroundColor: colors.primary[500],
+  },
+  nextLevelButton: {
+    backgroundColor: colors.success[500],
+  },
+  buttonText: {
+    color: colors.white,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  disabledButton: {
+    backgroundColor: colors.charcoal[200],
+  },
+  disabledButtonText: {
+    color: colors.charcoal[600],
+  },
 
-// eslint-disable-next-line max-lines-per-function
-export default function DungeonGame({ navigation }: DungeonGameProps) {
-  // Currency system integration
-  const { currency, spend } = useCurrencySystem();
-  const { activeEffects } = useItemEffects();
-
-  // Calculate available turns based on currency
-  const availableTurns = Math.floor(currency / 100);
-  const turnCost = 100;
-
-  // Game state management
-  const [level, setLevel] = useState(1);
-  const [turns, setTurns] = useState(0);
-  const [gameState, setGameState] = useState<'Active' | 'Win' | 'Game Over'>(
-    'Active'
-  );
-  const [revealedTiles, setRevealedTiles] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
-  const totalTiles = 30; // 6x5 grid
-
-  // Callbacks to update parent state from GameGrid
-  const handleTurnsUpdate = React.useCallback((newTurns: number) => {
-    setTurns(newTurns);
-  }, []);
-
-  const handleRevealedTilesUpdate = React.useCallback(
-    (newRevealedTiles: number) => {
-      setRevealedTiles(newRevealedTiles);
-    },
-    []
-  );
-
-  const handleHomePress = React.useCallback(() => {
-    if (navigation) {
-      navigation.navigate('index');
-    } else {
-      router.replace('/');
-    }
-  }, [navigation]);
-
-  const handleWinGame = React.useCallback(() => {
-    setGameState('Win');
-  }, []);
-
-  const handleGameOver = React.useCallback(() => {
-    setGameState('Game Over');
-  }, []);
-
-  const handleResetGame = React.useCallback(() => {
-    setGameState('Active');
-    setTurns(0);
-    setRevealedTiles(0);
-  }, []);
-
-  const handleExitFound = React.useCallback(() => {
-    setGameState('Win');
-  }, []);
-
-  const handleGameOverFromTurns = React.useCallback(() => {
-    setGameState('Game Over');
-  }, []);
-
-  const handleNextLevel = React.useCallback(() => {
-    setIsLoading(true);
-    // Immediate state change for testing, can add delay later for production
-    setLevel((prevLevel) => prevLevel + 1);
-    setGameState('Active');
-    setTurns(0);
-    setRevealedTiles(0);
-    setIsLoading(false);
-  }, []);
-
-  const handleSpendCurrency = React.useCallback(
-    async (amount: number) => {
-      return await spend(amount);
-    },
-    [spend]
-  );
-
-  return (
-    <DungeonGameLayout
-      level={level}
-      turns={turns}
-      gameState={gameState}
-      revealedTiles={revealedTiles}
-      totalTiles={totalTiles}
-      currency={currency}
-      availableTurns={availableTurns}
-      turnCost={turnCost}
-      isLoading={isLoading}
-      onTurnsUpdate={handleTurnsUpdate}
-      onRevealedTilesUpdate={handleRevealedTilesUpdate}
-      onWinGame={handleWinGame}
-      onGameOver={handleGameOver}
-      onResetGame={handleResetGame}
-      onHomePress={handleHomePress}
-      onExitFound={handleExitFound}
-      onGameOverFromTurns={handleGameOverFromTurns}
-      onNextLevel={handleNextLevel}
-      onSpendCurrency={handleSpendCurrency}
-      activeEffects={activeEffects}
-    />
-  );
-}
+  turnRequirementsContainer: {
+    backgroundColor: colors.primary[50],
+    borderColor: colors.primary[500],
+    borderWidth: 1,
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 16,
+    marginHorizontal: 16,
+    alignItems: 'center',
+  },
+  turnRequirementsText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.primary[700],
+    textAlign: 'center',
+  },
+  turnRequirementsSubtext: {
+    fontSize: 12,
+    color: colors.primary[400],
+    textAlign: 'center',
+    marginTop: 4,
+  },
+  currencyDisplayContainer: {
+    marginHorizontal: 16,
+    marginTop: 16,
+  },
+  errorContainer: {
+    backgroundColor: colors.danger[50],
+    borderColor: colors.danger[500],
+    borderWidth: 1,
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 16,
+  },
+  errorText: {
+    color: colors.danger[700],
+    textAlign: 'center',
+    fontSize: 14,
+  },
+  loadingText: {
+    fontSize: 18,
+    textAlign: 'center',
+    color: colors.charcoal[600],
+    marginTop: 100,
+  },
+});

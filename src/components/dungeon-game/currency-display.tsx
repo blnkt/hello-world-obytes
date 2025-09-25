@@ -2,6 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 
 import { Text } from '@/components/ui';
+import colors from '@/components/ui/colors';
 
 // Reusable InfoRow component for label-value pairs
 interface InfoRowProps {
@@ -13,11 +14,11 @@ interface InfoRowProps {
 function InfoRow({
   label,
   value,
-  valueClassName = 'text-lg font-semibold text-[#6B5F57]',
+  valueClassName = `text-lg font-semibold text-[${colors.charcoal[600]}]`,
 }: InfoRowProps) {
   return (
     <View className="flex-row items-center justify-between">
-      <Text className="text-sm text-[#7A6F66]">{label}</Text>
+      <Text className={`text-[${colors.charcoal[500]}] text-sm`}>{label}</Text>
       <Text className={valueClassName}>{value}</Text>
     </View>
   );
@@ -93,7 +94,7 @@ function SectionHeader({
   return (
     <View className="mb-3 flex-row items-center justify-between">
       <Text
-        className="text-lg font-bold text-[#6B5F57]"
+        className={`text-[${colors.charcoal[600]}] text-lg font-bold`}
         accessibilityRole="header"
       >
         {title}
@@ -120,12 +121,12 @@ function InfoSection({
 
 const getTurnStatusColor = (availableTurns: number) => {
   if (availableTurns < 1) {
-    return 'text-[#D96B5E]';
+    return `text-[${colors.danger[500]}]`;
   }
   if (availableTurns < 3) {
-    return 'text-[#F7D17B]';
+    return `text-[${colors.warning[400]}]`;
   }
-  return 'text-[#5EC0C0]';
+  return `text-[${colors.success[400]}]`;
 };
 
 const getStatusIcon = (availableTurns: number) => {
@@ -154,7 +155,7 @@ export default function CurrencyDisplay({
 
   return (
     <View
-      className="rounded-lg border border-[#E0D9CE] bg-[#F5F0E8] p-4"
+      className={`rounded-lg border-neutral-200 bg-neutral-50 p-4`}
       accessible={true}
       accessibilityLabel={`Currency and Turns - ${availableTurns} turns available`}
       accessibilityRole="summary"

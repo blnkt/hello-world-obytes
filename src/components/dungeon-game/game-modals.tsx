@@ -15,7 +15,7 @@ interface GameOverModalProps {
   level: number;
   turnsUsed: number;
   onMainMenu: () => void;
-  onRetry: () => void;
+  onRestart?: () => void;
 }
 
 export function WinModal({
@@ -24,8 +24,18 @@ export function WinModal({
   onNextLevel,
   onMainMenu,
 }: WinModalProps) {
+  // Don't render if not visible
+  if (!visible) {
+    return null;
+  }
+
   return (
-    <Modal visible={visible} animationType="fade">
+    <Modal
+      visible={visible}
+      animationType="fade"
+      transparent={true}
+      statusBarTranslucent={true}
+    >
       <View className="flex-1 items-center justify-center bg-black/50 p-4">
         <View className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-800">
           {/* Header */}
@@ -75,10 +85,20 @@ export function GameOverModal({
   level,
   turnsUsed,
   onMainMenu,
-  onRetry,
+  onRestart,
 }: GameOverModalProps) {
+  // Don't render if not visible
+  if (!visible) {
+    return null;
+  }
+
   return (
-    <Modal visible={visible} animationType="fade">
+    <Modal
+      visible={visible}
+      animationType="fade"
+      transparent={true}
+      statusBarTranslucent={true}
+    >
       <View className="flex-1 items-center justify-center bg-black/50 p-4">
         <View className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-800">
           {/* Header */}
@@ -104,12 +124,14 @@ export function GameOverModal({
 
           {/* Actions */}
           <View className="space-y-3">
-            <Button
-              label="Try Again"
-              onPress={onRetry}
-              size="lg"
-              className="bg-orange-600 hover:bg-orange-700"
-            />
+            {onRestart && (
+              <Button
+                label="Restart Level"
+                onPress={onRestart}
+                size="lg"
+                className="bg-orange-600 hover:bg-orange-700"
+              />
+            )}
             <Button
               label="Main Menu"
               onPress={onMainMenu}

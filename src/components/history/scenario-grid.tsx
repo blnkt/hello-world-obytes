@@ -1,10 +1,13 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 
+import colors from '@/components/ui/colors';
+import type { ScenarioHistory } from '@/types/scenario';
+
 import { MerchantIcon, MonsterIcon } from '../ui/icons';
 
 const ScenarioGrid: React.FC<{
-  history: any[];
+  history: ScenarioHistory[];
 }> = ({ history }) => (
   <View className="flex-row flex-wrap justify-between">
     {history.map((entry) => (
@@ -14,9 +17,9 @@ const ScenarioGrid: React.FC<{
       >
         <View className="mb-2 items-center">
           {entry.type === 'merchant' ? (
-            <MerchantIcon color="#10B981" width={32} height={32} />
+            <MerchantIcon color={colors.success[500]} width={32} height={32} />
           ) : (
-            <MonsterIcon color="#EF4444" width={32} height={32} />
+            <MonsterIcon color={colors.danger[500]} width={32} height={32} />
           )}
         </View>
         <Text className="text-center text-xs font-medium text-gray-900 dark:text-white">

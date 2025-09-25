@@ -68,12 +68,6 @@ const getTabScreens = () => [
       tabBarButtonTestID: 'scenario-tab',
     },
   },
-  {
-    name: 'style',
-    options: {
-      href: null,
-    },
-  },
 ];
 
 export default function TabLayout() {

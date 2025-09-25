@@ -20,6 +20,7 @@ import {
   getLastCheckedDate,
   getManualStepsByDay,
   getStepsByDay,
+  type ManualStepEntry,
   setCumulativeExperience,
   setCurrency,
   setExperience,
@@ -198,7 +199,11 @@ export const ManualModeProvider = ({
 };
 
 // Manual Entry Mode Hook
-export const useManualEntryMode = () => {
+export const useManualEntryMode = (): {
+  isManualMode: boolean;
+  setManualMode: (enabled: boolean) => Promise<void>;
+  isLoading: boolean;
+} => {
   const context = useContext(ManualModeContext);
   if (context === undefined) {
     throw new Error(
@@ -252,7 +257,11 @@ export const DeveloperModeProvider = ({
 };
 
 // Developer Mode Hook
-export const useDeveloperMode = () => {
+export const useDeveloperMode = (): {
+  isDeveloperMode: boolean;
+  setDevMode: (enabled: boolean) => Promise<void>;
+  isLoading: boolean;
+} => {
   const context = useContext(DeveloperModeContext);
   if (context === undefined) {
     throw new Error(
@@ -348,7 +357,13 @@ const useHealthKitAvailability = (): HealthKitAvailabilityResult => {
   };
 };
 
-export const useHealthKit = () => {
+export const useHealthKit = (): {
+  isAvailable: boolean;
+  hasRequestedAuthorization: boolean | null;
+  availabilityStatus: any;
+  availabilityError: string | null | undefined;
+  requestAuthorization: () => Promise<boolean>;
+} => {
   const availability = useHealthKitAvailability();
   const [hasRequestedAuthorization, setHasRequestedAuthorization] = useState<
     boolean | null
@@ -582,7 +597,7 @@ export const useHealthKitFallback = (): FallbackLogicResult => {
   };
 };
 
-export const getTodayStepCount = async () => {
+export const getTodayStepCount = async (): Promise<number | null> => {
   const todayStart = new Date(new Date().setHours(0, 0, 0, 0));
   const todayEnd = new Date(new Date().setHours(23, 59, 59, 999));
   // const yesterday = new Date(today.getTime() - 1 * 24 * 60 * 60 * 1000);
@@ -602,7 +617,7 @@ export const getTodayStepCount = async () => {
   }
 };
 
-export const getCumulativeStepCount = async () => {
+export const getCumulativeStepCount = async (): Promise<any> => {
   try {
     const MostRecentQuantitySample =
       await HealthKit.getMostRecentQuantitySample(
@@ -616,7 +631,7 @@ export const getCumulativeStepCount = async () => {
   }
 };
 
-export const useStepCount = () => {
+export const useStepCount = (): object | null => {
   const [stepCount, setStepCount] = useState<object | null>(null);
 
   useEffect(() => {
@@ -706,9 +721,9 @@ const processHealthKitData = async (params: {
   dateStr: string;
   dayStart: Date;
   dayEnd: Date;
-  storedEntry: any;
+  storedEntry: { date: Date; steps: number } | undefined;
   dataIsFresh: boolean;
-  storedHealthKitData: any[];
+  storedHealthKitData: { date: Date; steps: number }[];
 }) => {
   const {
     dateStr,
@@ -736,12 +751,14 @@ const processHealthKitData = async (params: {
       const preservedSteps = Math.max(storedEntry.steps, healthKitSteps);
       storedEntry.steps = preservedSteps;
 
-      const updatedArray = storedHealthKitData.map((entry) => {
-        if (isSameDay(entry.date, dateStr)) {
-          return { ...entry, steps: preservedSteps };
+      const updatedArray = storedHealthKitData.map(
+        (entry: { date: Date; steps: number }) => {
+          if (isSameDay(entry.date, dateStr)) {
+            return { ...entry, steps: preservedSteps };
+          }
+          return entry;
         }
-        return entry;
-      });
+      );
       if (typeof setStepsByDay === 'function') {
         await setStepsByDay(updatedArray);
       }
@@ -776,9 +793,11 @@ const getStepsGroupedByDay = async (
 
     // Only get HealthKit data, not combined data
     const dateStr = getDateString(dayStart);
-    const storedEntry = storedHealthKitData.find((entry) => {
-      return isSameDay(entry.date, dateStr);
-    });
+    const storedEntry = storedHealthKitData.find(
+      (entry: { date: Date; steps: number }) => {
+        return isSameDay(entry.date, dateStr);
+      }
+    );
 
     const healthKitSteps = await processHealthKitData({
       dateStr,
@@ -867,20 +886,20 @@ const mergeStepData = (
   const stepMap = new Map<string, number>();
 
   // Add HealthKit steps
-  healthKitResults.forEach((entry) => {
+  healthKitResults.forEach((entry: { date: Date; steps: number }) => {
     const dateStr = getDateString(entry.date);
     stepMap.set(dateStr, (stepMap.get(dateStr) || 0) + entry.steps);
   });
 
   // Add manual steps (sum with HealthKit if exists)
-  manualSteps.forEach((entry) => {
+  manualSteps.forEach((entry: ManualStepEntry) => {
     const dateStr = entry.date;
     stepMap.set(dateStr, (stepMap.get(dateStr) || 0) + entry.steps);
   });
 
   // Convert back to array of { date, steps }
   const mergedResults = Array.from(stepMap.entries()).map(
-    ([dateStr, steps]) => {
+    ([dateStr, steps]: [string, number]) => {
       // Create date in local timezone to avoid UTC conversion issues
       const [year, month, day] = dateStr.split('-').map(Number);
       const localDate = new Date(year, month - 1, day); // month is 0-indexed
@@ -955,15 +974,17 @@ const updateHealthData = async (params: {
 
 // Helper function to calculate earliest date from manual steps
 const calculateEarliestDate = (
-  manualSteps: any[],
+  manualSteps: ManualStepEntry[],
   lastCheckedDateTime: Date
 ): Date => {
   let earliestDate = lastCheckedDateTime;
   if (manualSteps.length > 0) {
     // Find the earliest manual step date
-    const manualDates = manualSteps.map((entry) => new Date(entry.date));
+    const manualDates = manualSteps.map(
+      (entry: ManualStepEntry) => new Date(entry.date)
+    );
     const earliestManualDate = new Date(
-      Math.min(...manualDates.map((d) => d.getTime()))
+      Math.min(...manualDates.map((d: Date) => d.getTime()))
     );
 
     // Use the earlier of lastCheckedDateTime or earliest manual step date
@@ -1138,7 +1159,11 @@ export const detectStreaks = (
  * @returns Object containing current streaks and streak detection function
  */
 // eslint-disable-next-line max-lines-per-function
-export const useStreakTracking = () => {
+export const useStreakTracking = (): {
+  streaks: Streak[];
+  currentStreak: Streak | null;
+  longestStreak: number;
+} => {
   const [streaks, setStreaks] = React.useState<Streak[]>([]);
   const [dailyGoal] = useDailyStepsGoal();
 
@@ -1173,7 +1198,10 @@ export const useStreakTracking = () => {
  *
  * @returns Object containing cumulative experience and first experience date
  */
-export const useCumulativeExperience = () => {
+export const useCumulativeExperience = (): {
+  cumulativeExperience: number;
+  firstExperienceDate: string | null;
+} => {
   const { cumulativeExperience, firstExperienceDate } = useExperienceData();
 
   return {
@@ -1191,7 +1219,10 @@ export const useCumulativeExperience = () => {
  *
  * @returns Object containing cumulative experience and first experience date
  */
-export const useCumulativeExperienceSimple = () => {
+export const useCumulativeExperienceSimple = (): {
+  cumulativeExperience: number;
+  firstExperienceDate: string | null;
+} => {
   const { cumulativeExperience, firstExperienceDate } = useExperienceData();
 
   return {
@@ -1228,7 +1259,14 @@ export const convertExperienceToCurrency = (experience: number): number => {
  *
  * @returns Object containing currency data and conversion functions
  */
-export const useCurrencySystem = () => {
+export const useCurrencySystem = (): {
+  currency: number;
+  availableCurrency: number;
+  totalCurrencyEarned: number;
+  convertCurrentExperience: () => Promise<number>;
+  spend: (amount: number) => Promise<boolean>;
+  conversionRate: number;
+} => {
   const { cumulativeExperience } = useExperienceData();
   const [currency] = useCurrency();
 

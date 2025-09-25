@@ -1,6 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 
+import colors from './colors';
 import { Text } from './text';
 
 interface GameProgressProps {
@@ -26,7 +27,7 @@ const GameStateHeader = ({
   <View className="mb-3 flex-row items-center justify-between">
     <View>
       <Text
-        className="text-lg font-bold text-[#6B5F57]"
+        className={`text-[${colors.charcoal[600]}] text-lg font-bold`}
         accessibilityRole="header"
       >
         Level {level}
@@ -63,18 +64,22 @@ const GameProgressInfo = ({
     accessibilityLabel={`Game Progress - ${turns} turns used, ${revealedTiles} out of ${totalTiles} tiles revealed`}
   >
     <View className="flex-row items-center justify-between">
-      <Text className="text-sm text-[#7A6F66]">Turns Used:</Text>
+      <Text className={`text-[${colors.charcoal[500]}] text-sm`}>
+        Turns Used:
+      </Text>
       <Text
-        className="text-lg font-semibold text-[#6B5F57]"
+        className={`text-[${colors.charcoal[600]}] text-lg font-semibold`}
         accessibilityLabel={`${turns} turns used`}
       >
         {turns}
       </Text>
     </View>
     <View className="flex-row items-center justify-between">
-      <Text className="text-sm text-[#7A6F66]">Progress:</Text>
+      <Text className={`text-[${colors.charcoal[500]}] text-sm`}>
+        Progress:
+      </Text>
       <Text
-        className="text-lg font-semibold text-[#6B5F57]"
+        className={`text-[${colors.charcoal[600]}] text-lg font-semibold`}
         accessibilityLabel={`${revealedTiles} out of ${totalTiles} tiles revealed`}
       >
         {revealedTiles}/{totalTiles}
@@ -94,7 +99,7 @@ const GameProgressBar = ({
 
   return (
     <View
-      className="h-3 rounded-full bg-[#E0D9CE]"
+      className={`bg-[${colors.neutral[200]}] h-3 rounded-full`}
       accessible={true}
       accessibilityLabel={`Progress bar showing ${Math.round(progressPercentage)}% completion`}
       accessibilityRole="progressbar"
@@ -105,7 +110,7 @@ const GameProgressBar = ({
       }}
     >
       <View
-        className="h-3 rounded-full bg-[#B06F5E]"
+        className={`bg-[${colors.danger[500]}] h-3 rounded-full`}
         style={{ width: `${progressPercentage}%` }}
         testID="progress-bar"
       />
@@ -135,11 +140,11 @@ export function GameProgress({
   const getGameStateColor = () => {
     switch (gameState) {
       case 'Win':
-        return 'bg-[#F7D17B] border-[#E6C269] text-[#8B7355]';
+        return `bg-[${colors.warning[400]}] border-[${colors.warning[500]}] text-[${colors.charcoal[600]}]`;
       case 'Game Over':
-        return 'bg-[#D96B5E] border-[#C55A4D] text-[#8B4A3F]';
+        return `bg-[${colors.danger[500]}] border-[${colors.danger[600]}] text-[${colors.charcoal[600]}]`;
       default:
-        return 'bg-[#E0D9CE] border-[#D1CABF] text-[#7A6F66]';
+        return `bg-[${colors.neutral[200]}] border-[${colors.neutral[300]}] text-[${colors.charcoal[500]}]`;
     }
   };
 

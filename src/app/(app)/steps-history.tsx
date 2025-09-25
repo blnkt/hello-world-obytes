@@ -91,7 +91,7 @@ export default function HistoryScreen() {
   const [lastCheckedDate] = useLastCheckedDate();
 
   // Step history data
-  const lastCheckedDateTime = lastCheckedDate
+  const _lastCheckedDateTime = lastCheckedDate
     ? new Date(lastCheckedDate)
     : (() => {
         const d = new Date();

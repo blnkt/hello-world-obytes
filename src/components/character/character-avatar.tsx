@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 
 import { Text } from '@/components/ui';
+import colors from '@/components/ui/colors';
 
 import type { Character } from '../../types/character';
 
@@ -15,16 +16,16 @@ type CharacterAvatarProps = {
 const getClassColor = (characterClass: string) => {
   switch (characterClass) {
     case 'Cardio Crusher':
-      return '#3B82F6'; // Blue
+      return colors.primary[500]; // Blue
     case 'Strength Seeker':
-      return '#EF4444'; // Red
+      return colors.danger[500]; // Red
     case 'Flexibility Fanatic':
-      return '#8B5CF6'; // Purple
+      return colors.primary[500]; // Purple (using primary for now)
     case 'Weight Loss Warrior':
-      return '#10B981'; // Green
+      return colors.success[500]; // Green
     case 'General Fitness':
     default:
-      return '#6B7280'; // Gray
+      return colors.charcoal[500]; // Gray
   }
 };
 
@@ -82,7 +83,7 @@ const CharacterSvg: React.FC<{
 
       {/* Level indicator */}
       <Circle cx="75" cy="25" r="12" fill={primaryColor} />
-      <Circle cx="75" cy="25" r="10" fill="white" />
+      <Circle cx="75" cy="25" r="10" fill={colors.white} />
       <Path d="M 75 20 L 78 25 L 75 30 L 72 25 Z" fill={primaryColor} />
     </Svg>
   );
@@ -94,7 +95,7 @@ export const CharacterAvatar: React.FC<CharacterAvatarProps> = ({
   isWalking = true,
 }) => {
   const primaryColor = getClassColor(character.class);
-  const secondaryColor = '#F3F4F6';
+  const secondaryColor = colors.neutral[100];
 
   return (
     <View className="items-center justify-center">

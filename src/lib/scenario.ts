@@ -54,23 +54,30 @@ const SCENARIO_TEMPLATES: Record<EncounterType, Omit<Scenario, 'id'>[]> = {
   ],
 };
 
-export function generateRandomScenarios(milestone: number): Scenario[] {
+export function generateRandomScenarios<T extends Scenario>(
+  milestone: number,
+  encounterTypes: EncounterType[] = ENCOUNTER_TYPES,
+  scenarioTemplates: Record<
+    EncounterType,
+    Omit<T, 'id'>[]
+  > = SCENARIO_TEMPLATES as Record<EncounterType, Omit<T, 'id'>[]>
+): T[] {
   // Shuffle and pick two different encounter types
-  const shuffled = ENCOUNTER_TYPES.sort(() => 0.5 - Math.random());
+  const shuffled = encounterTypes.sort(() => 0.5 - Math.random());
   const [type1, type2] = shuffled;
 
   // Pick random scenarios for each type
   const scenario1 =
-    SCENARIO_TEMPLATES[type1][
-      Math.floor(Math.random() * SCENARIO_TEMPLATES[type1].length)
+    scenarioTemplates[type1][
+      Math.floor(Math.random() * scenarioTemplates[type1].length)
     ];
   const scenario2 =
-    SCENARIO_TEMPLATES[type2][
-      Math.floor(Math.random() * SCENARIO_TEMPLATES[type2].length)
+    scenarioTemplates[type2][
+      Math.floor(Math.random() * scenarioTemplates[type2].length)
     ];
 
   return [
-    { ...scenario1, id: `${scenario1.type}_${milestone}_1` },
-    { ...scenario2, id: `${scenario2.type}_${milestone}_2` },
+    { ...scenario1, id: `${scenario1.type}_${milestone}_1` } as T,
+    { ...scenario2, id: `${scenario2.type}_${milestone}_2` } as T,
   ];
 }

@@ -1,8 +1,10 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 
+import type { ScenarioHistory } from '@/types/scenario';
+
 const ScenarioHistoryItem: React.FC<{
-  entry: any;
+  entry: ScenarioHistory;
 }> = ({ entry }) => (
   <View className="mb-4 rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
     <View className="mb-2 flex-row items-center justify-between">

@@ -108,7 +108,7 @@ const handleSyncLogic = async (params: {
       'Sync Complete',
       'HealthKit data has been synchronized with your local storage.'
     );
-  } catch (error) {
+  } catch (_error) {
     Alert.alert(
       'Sync Failed',
       'There was an error syncing HealthKit data. Please try again.'

@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import type { ScenarioHistory } from '../../types/scenario';
+import type { Scenario, ScenarioHistory } from '../../types/scenario';
 import { addScenarioToHistory, getScenarioHistory } from '../storage';
 
 const createHistoryEntry = (
-  scenario: any,
+  scenario: Scenario,
   milestone: number,
   outcome?: string
 ): ScenarioHistory => ({
@@ -19,7 +19,21 @@ const createHistoryEntry = (
   outcome,
 });
 
-export const useScenarioHistory = () => {
+type UseScenarioHistoryReturn = {
+  history: ScenarioHistory[];
+  isLoading: boolean;
+  addToHistory: (
+    scenario: Scenario,
+    milestone: number,
+    outcome?: string
+  ) => Promise<void>;
+  getScenariosByType: (type: 'merchant' | 'monster') => ScenarioHistory[];
+  getScenariosByMilestone: (milestone: number) => ScenarioHistory[];
+  getRecentScenarios: (count?: number) => ScenarioHistory[];
+};
+
+// eslint-disable-next-line max-lines-per-function
+export const useScenarioHistory = (): UseScenarioHistoryReturn => {
   const [history, setHistory] = useState<ScenarioHistory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -42,7 +56,7 @@ export const useScenarioHistory = () => {
 
   // Add a scenario to history
   const addToHistory = useCallback(
-    async (scenario: any, milestone: number, outcome?: string) => {
+    async (scenario: Scenario, milestone: number, outcome?: string) => {
       const historyEntry = createHistoryEntry(scenario, milestone, outcome);
 
       try {
@@ -58,7 +72,7 @@ export const useScenarioHistory = () => {
   // Get scenarios by type
   const getScenariosByType = useCallback(
     (type: 'merchant' | 'monster') => {
-      return history.filter((entry) => entry.type === type);
+      return history.filter((entry: ScenarioHistory) => entry.type === type);
     },
     [history]
   );
@@ -66,7 +80,9 @@ export const useScenarioHistory = () => {
   // Get scenarios by milestone
   const getScenariosByMilestone = useCallback(
     (milestone: number) => {
-      return history.filter((entry) => entry.milestone === milestone);
+      return history.filter(
+        (entry: ScenarioHistory) => entry.milestone === milestone
+      );
     },
     [history]
   );

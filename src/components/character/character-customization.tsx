@@ -11,7 +11,7 @@ type CharacterCustomizationProps = {
 };
 
 export const CharacterCustomization: React.FC<CharacterCustomizationProps> = ({
-  character,
+  character: _character,
   onCustomize,
 }) => {
   return (

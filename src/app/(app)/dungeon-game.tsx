@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 import React from 'react';
 
-import DungeonGame from '@/components/dungeon-game/dungeon-game';
+import DungeonGameWrapper from '@/components/dungeon-game/dungeon-game-wrapper';
 
 export default function DungeonGameRoute() {
   return (
@@ -11,7 +11,7 @@ export default function DungeonGameRoute() {
           headerShown: false,
         }}
       />
-      <DungeonGame />
+      <DungeonGameWrapper />
     </>
   );
 }

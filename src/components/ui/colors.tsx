@@ -1,4 +1,4 @@
-module.exports = {
+const colors = {
   white: '#ffffff',
   black: '#000000',
   charcoal: {
@@ -76,3 +76,5 @@ module.exports = {
     900: '#7F1D1D',
   },
 };
+
+export default colors;

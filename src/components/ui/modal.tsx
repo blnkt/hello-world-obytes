@@ -51,7 +51,11 @@ type ModalHeaderProps = {
   dismiss: () => void;
 };
 
-export const useModal = () => {
+export const useModal = (): {
+  ref: React.RefObject<BottomSheetModal>;
+  present: (data?: any) => void;
+  dismiss: () => void;
+} => {
   const ref = React.useRef<BottomSheetModal>(null);
   const present = React.useCallback((data?: any) => {
     ref.current?.present(data);
@@ -127,9 +131,9 @@ const CustomBackdrop = ({ style }: BottomSheetBackdropProps) => {
   );
 };
 
-export const renderBackdrop = (props: BottomSheetBackdropProps) => (
-  <CustomBackdrop {...props} />
-);
+export const renderBackdrop = (
+  props: BottomSheetBackdropProps
+): React.JSX.Element => <CustomBackdrop {...props} />;
 
 /**
  *
@@ -162,7 +166,9 @@ const ModalHeader = React.memo(({ title, dismiss }: ModalHeaderProps) => {
         <View className="flex-row px-2 py-4">
           <View className="size-[24px]" />
           <View className="flex-1">
-            <Text className="text-center text-[16px] font-bold text-[#26313D] dark:text-white">
+            <Text
+              className={`text-center text-[16px] font-bold text-charcoal-800 dark:text-white`}
+            >
               {title}
             </Text>
           </View>

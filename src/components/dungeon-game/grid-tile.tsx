@@ -2,6 +2,8 @@ import React from 'react';
 import { Pressable, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 
+import { Text } from '@/components/ui';
+
 // SVG Icon Components
 const SkullIcon = () => (
   <Svg width="24" height="24" viewBox="0 0 24 24" fill="white">
@@ -72,32 +74,41 @@ const getTileDescription = (
   }
 };
 
-const getTileStyle = (
+const getTileClasses = (
   tileType: 'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral',
   isRevealed: boolean,
-  disabled: boolean
+  options: { disabled: boolean; insufficientCurrency: boolean } = {
+    disabled: false,
+    insufficientCurrency: false,
+  }
 ) => {
+  const { disabled, insufficientCurrency } = options;
+
   if (disabled) {
-    return 'bg-gray-300 border-gray-400 opacity-50'; // Disabled state
+    return 'bg-gray-300 border-gray-400 opacity-50';
+  }
+
+  if (insufficientCurrency && !isRevealed) {
+    return 'bg-danger-500 border-danger-600 opacity-60';
   }
 
   if (!isRevealed) {
-    return 'bg-[#7A6F66] border-[#6B5F57]'; // Medium brown for unrevealed tiles (mockup color)
+    return 'bg-charcoal-600 border-charcoal-700';
   }
 
-  // Different styles for revealed tiles based on type (matching mockup colors)
+  // Different styles for revealed tiles based on type
   switch (tileType) {
     case 'treasure':
-      return 'bg-[#F7D17B] border-[#E6C269]'; // Yellow/gold for treasure (mockup color)
+      return 'bg-warning-400 border-warning-500';
     case 'trap':
-      return 'bg-[#D96B5E] border-[#C55A4D]'; // Reddish-orange for trap (mockup color)
+      return 'bg-danger-500 border-danger-600';
     case 'exit':
-      return 'bg-[#8C7099] border-[#7D618A]'; // Muted purple for exit (mockup color)
+      return 'bg-primary-400 border-primary-500';
     case 'bonus':
-      return 'bg-[#5EC0C0] border-[#4DAFAF]'; // Teal/cyan for bonus (mockup color)
+      return 'bg-success-400 border-success-500';
     case 'neutral':
     default:
-      return 'bg-[#E0D9CE] border-[#D1CABF]'; // Light beige for neutral (mockup color)
+      return 'bg-neutral-200 border-neutral-300';
   }
 };
 
@@ -109,6 +120,8 @@ interface GridTileProps {
   tileType?: 'treasure' | 'trap' | 'exit' | 'bonus' | 'neutral';
   onPress?: (id: string, row: number, col: number) => void;
   disabled?: boolean;
+  showEffect?: boolean;
+  insufficientCurrency?: boolean;
 }
 
 export default function GridTile({
@@ -119,6 +132,8 @@ export default function GridTile({
   tileType = 'neutral',
   onPress,
   disabled = false,
+  showEffect = false,
+  insufficientCurrency = false,
 }: GridTileProps) {
   const handlePress = () => {
     if (onPress && !disabled) {
@@ -140,15 +155,30 @@ export default function GridTile({
       onPress={handlePress}
       disabled={disabled}
       accessible={true}
-      accessibilityLabel={`Tile at row ${row + 1}, column ${col + 1}`}
-      accessibilityHint={getTileDescription(tileType, isRevealed)}
+      accessibilityLabel={`Tile at row ${row + 1}, column ${col + 1}${insufficientCurrency ? ' - Insufficient currency to reveal' : ''}`}
+      accessibilityHint={
+        insufficientCurrency
+          ? 'Need at least 100 steps to reveal this tile'
+          : getTileDescription(tileType, isRevealed)
+      }
       accessibilityRole="button"
       accessibilityState={{ disabled }}
-      className={`m-0.5 aspect-square flex-1 rounded-md border ${getTileStyle(tileType, isRevealed, disabled)}`}
+      className={`m-0.5 aspect-square flex-1 rounded-md border ${getTileClasses(tileType, isRevealed, { disabled, insufficientCurrency })}`}
       style={{ minHeight: 35 }}
     >
       <View className="flex-1 items-center justify-center">
         {isRevealed && getTileContent(tileType, isRevealed)}
+        {showEffect && isRevealed && (
+          <View className="absolute inset-0 items-center justify-center">
+            <View className="rounded-full bg-yellow-400/80 p-2">
+              <Text className="text-xs font-bold text-white">
+                {tileType === 'treasure' && '+1 Turn'}
+                {tileType === 'trap' && '-1 Turn'}
+                {tileType === 'bonus' && 'Free Reveal'}
+              </Text>
+            </View>
+          </View>
+        )}
       </View>
     </Pressable>
   );

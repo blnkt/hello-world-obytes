@@ -149,36 +149,38 @@ export function useItemEffects() {
 // Utility functions for applying effects to game mechanics
 export const applyItemEffects = {
   // Calculate turn cost with active reductions
-  getTurnCost: (
+  getTurnCost: <T extends ActiveItemEffect>(
     baseCost: number,
-    activeEffects: ActiveItemEffect[]
+    activeEffects: T[]
   ): number => {
     const costReduction = activeEffects
-      .filter((effect) => effect.type === 'turn-cost-reduction')
+      .filter(
+        (effect): effect is Extract<T, { type: 'turn-cost-reduction' }> =>
+          effect.type === 'turn-cost-reduction'
+      )
       .reduce((total, effect) => {
-        if (effect.type === 'turn-cost-reduction') {
-          return total + effect.reductionPercent / 100;
-        }
-        return total;
+        return total + effect.reductionPercent / 100;
       }, 0);
 
     return Math.max(1, Math.floor(baseCost * (1 - costReduction)));
   },
 
   // Check if trap immunity is active
-  hasTrapImmunity: (activeEffects: ActiveItemEffect[]): boolean => {
+  hasTrapImmunity: <T extends ActiveItemEffect>(
+    activeEffects: T[]
+  ): boolean => {
     return activeEffects.some((effect) => effect.type === 'trap-immunity');
   },
 
   // Get bonus turns from active effects
-  getBonusTurns: (activeEffects: ActiveItemEffect[]): number => {
+  getBonusTurns: <T extends ActiveItemEffect>(activeEffects: T[]): number => {
     return activeEffects
-      .filter((effect) => effect.type === 'bonus-turns')
+      .filter(
+        (effect): effect is Extract<T, { type: 'bonus-turns' }> =>
+          effect.type === 'bonus-turns'
+      )
       .reduce((total, effect) => {
-        if (effect.type === 'bonus-turns') {
-          return total + effect.turnCount;
-        }
-        return total;
+        return total + effect.turnCount;
       }, 0);
   },
 };

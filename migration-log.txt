@@ -1,0 +1,208 @@
+[2025-09-25T04:16:01.925Z] 🔍 Starting Migration Analysis...
+
+[2025-09-25T04:16:01.929Z] Found 171 TypeScript files to analyze
+
+[2025-09-25T04:16:01.929Z] Analyzing: src/api/common/api-provider.tsx
+[2025-09-25T04:16:01.930Z] Analyzing: src/api/common/client.tsx
+[2025-09-25T04:16:01.930Z] Analyzing: src/api/common/index.tsx
+[2025-09-25T04:16:01.931Z] Analyzing: src/api/common/utils.tsx
+[2025-09-25T04:16:01.931Z] Analyzing: src/api/index.tsx
+[2025-09-25T04:16:01.931Z] Analyzing: src/api/posts/index.ts
+[2025-09-25T04:16:01.932Z] Analyzing: src/api/posts/types.ts
+[2025-09-25T04:16:01.932Z] Analyzing: src/api/posts/use-add-post.ts
+[2025-09-25T04:16:01.932Z] Analyzing: src/api/posts/use-post.ts
+[2025-09-25T04:16:01.933Z] Analyzing: src/api/posts/use-posts.ts
+[2025-09-25T04:16:01.933Z] Analyzing: src/api/types.ts
+[2025-09-25T04:16:01.934Z] Analyzing: src/app/(app)/_layout.tsx
+[2025-09-25T04:16:01.934Z] Analyzing: src/app/(app)/character-sheet.tsx
+[2025-09-25T04:16:01.934Z] Analyzing: src/app/(app)/dungeon-game.tsx
+[2025-09-25T04:16:01.934Z] Analyzing: src/app/(app)/index.tsx
+[2025-09-25T04:16:01.935Z] Analyzing: src/app/(app)/scenario.tsx
+[2025-09-25T04:16:01.936Z] Analyzing: src/app/(app)/settings.tsx
+[2025-09-25T04:16:01.936Z] Analyzing: src/app/(app)/shop.tsx
+[2025-09-25T04:16:01.936Z] Analyzing: src/app/(app)/steps-history.tsx
+[2025-09-25T04:16:01.936Z] Analyzing: src/app/+html.tsx
+[2025-09-25T04:16:01.936Z] Analyzing: src/app/[...messing].tsx
+[2025-09-25T04:16:01.936Z] Analyzing: src/app/_layout.tsx
+[2025-09-25T04:16:01.937Z] Analyzing: src/app/character-creation.tsx
+[2025-09-25T04:16:01.937Z] Analyzing: src/app/onboarding.tsx
+[2025-09-25T04:16:01.937Z] Analyzing: src/components/character/__tests__/character-form.test.tsx
+[2025-09-25T04:16:01.938Z] Analyzing: src/components/character/attributes-section.tsx
+[2025-09-25T04:16:01.938Z] Analyzing: src/components/character/character-avatar.tsx
+[2025-09-25T04:16:01.938Z] Analyzing: src/components/character/character-customization.tsx
+[2025-09-25T04:16:01.939Z] Analyzing: src/components/character/character-form.tsx
+[2025-09-25T04:16:01.939Z] Analyzing: src/components/character/character-sheet.tsx
+[2025-09-25T04:16:01.939Z] Analyzing: src/components/character/class-info.tsx
+[2025-09-25T04:16:01.939Z] Analyzing: src/components/character/experience-field.tsx
+[2025-09-25T04:16:01.939Z] Analyzing: src/components/character/fitness-background-class-fields.tsx
+[2025-09-25T04:16:01.940Z] Analyzing: src/components/character/level-display.tsx
+[2025-09-25T04:16:01.940Z] Analyzing: src/components/character/level-exp-fields.tsx
+[2025-09-25T04:16:01.940Z] Analyzing: src/components/character/name-field.tsx
+[2025-09-25T04:16:01.941Z] Analyzing: src/components/character/utils.ts
+[2025-09-25T04:16:01.941Z] Analyzing: src/components/cover.tsx
+[2025-09-25T04:16:01.941Z] Analyzing: src/components/dungeon-game/__tests__/currency-integration-validation.test.tsx
+[2025-09-25T04:16:01.942Z] Analyzing: src/components/dungeon-game/__tests__/game-state-transitions.test.tsx
+[2025-09-25T04:16:01.942Z] Analyzing: src/components/dungeon-game/__tests__/level-progression-difficulty.test.tsx
+[2025-09-25T04:16:01.942Z] Analyzing: src/components/dungeon-game/__tests__/persistence-error-handling.test.tsx
+[2025-09-25T04:16:01.943Z] Analyzing: src/components/dungeon-game/__tests__/tile-effects-turn-counting.test.tsx
+[2025-09-25T04:16:01.943Z] Analyzing: src/components/dungeon-game/__tests__/turn-management.test.tsx
+[2025-09-25T04:16:01.943Z] Analyzing: src/components/dungeon-game/currency-display.test.tsx
+[2025-09-25T04:16:01.943Z] Analyzing: src/components/dungeon-game/currency-display.tsx
+[2025-09-25T04:16:01.944Z] Analyzing: src/components/dungeon-game/dungeon-game-wrapper.tsx
+[2025-09-25T04:16:01.944Z] Analyzing: src/components/dungeon-game/dungeon-game.tsx
+[2025-09-25T04:16:01.944Z] Analyzing: src/components/dungeon-game/game-grid.test.tsx
+[2025-09-25T04:16:01.944Z] Analyzing: src/components/dungeon-game/game-grid.tsx
+[2025-09-25T04:16:01.945Z] Analyzing: src/components/dungeon-game/game-modals.test.tsx
+[2025-09-25T04:16:01.945Z] Analyzing: src/components/dungeon-game/game-modals.tsx
+[2025-09-25T04:16:01.945Z] Analyzing: src/components/dungeon-game/grid-tile.test.tsx
+[2025-09-25T04:16:01.946Z] Analyzing: src/components/dungeon-game/grid-tile.tsx
+[2025-09-25T04:16:01.946Z] Analyzing: src/components/dungeon-game/hooks/use-dungeon-game-async-operations.tsx
+[2025-09-25T04:16:01.946Z] Analyzing: src/components/dungeon-game/hooks/use-dungeon-game-persistence.test.tsx
+[2025-09-25T04:16:01.947Z] Analyzing: src/components/dungeon-game/hooks/use-dungeon-game-persistence.tsx
+[2025-09-25T04:16:01.947Z] Analyzing: src/components/dungeon-game/hooks/use-resume-choice-logic.tsx
+[2025-09-25T04:16:01.947Z] Analyzing: src/components/dungeon-game/persistence-error-display.tsx
+[2025-09-25T04:16:01.947Z] Analyzing: src/components/dungeon-game/providers/game-state-provider.tsx
+[2025-09-25T04:16:01.948Z] Analyzing: src/components/dungeon-game/purchased-items-grid.tsx
+[2025-09-25T04:16:01.949Z] Analyzing: src/components/dungeon-game/resume-choice-modal.test.tsx
+[2025-09-25T04:16:01.949Z] Analyzing: src/components/dungeon-game/resume-choice-modal.tsx
+[2025-09-25T04:16:01.949Z] Analyzing: src/components/dungeon-game/save-status-indicator.tsx
+[2025-09-25T04:16:01.950Z] Analyzing: src/components/dungeon-game/status-bar.test.tsx
+[2025-09-25T04:16:01.950Z] Analyzing: src/components/dungeon-game/status-bar.tsx
+[2025-09-25T04:16:01.950Z] Analyzing: src/components/dungeon-game/utils/game-utils.tsx
+[2025-09-25T04:16:01.951Z] Analyzing: src/components/history/index.tsx
+[2025-09-25T04:16:01.951Z] Analyzing: src/components/history/scenario-grid.tsx
+[2025-09-25T04:16:01.951Z] Analyzing: src/components/history/scenario-history-item.tsx
+[2025-09-25T04:16:01.951Z] Analyzing: src/components/history/scenario-illustrations.tsx
+[2025-09-25T04:16:01.952Z] Analyzing: src/components/history/scenario-stats.tsx
+[2025-09-25T04:16:01.952Z] Analyzing: src/components/history/scenario-timeline.tsx
+[2025-09-25T04:16:01.952Z] Analyzing: src/components/history/step-history-item.tsx
+[2025-09-25T04:16:01.952Z] Analyzing: src/components/history/ui-components.tsx
+[2025-09-25T04:16:01.952Z] Analyzing: src/components/scenario-card.tsx
+[2025-09-25T04:16:01.953Z] Analyzing: src/components/scenario-header.tsx
+[2025-09-25T04:16:01.953Z] Analyzing: src/components/scenario-outcome.tsx
+[2025-09-25T04:16:01.953Z] Analyzing: src/components/settings/__tests__/manual-entry-section.experience-refresh.test.tsx
+[2025-09-25T04:16:01.953Z] Analyzing: src/components/settings/entry-mode-item.tsx
+[2025-09-25T04:16:01.953Z] Analyzing: src/components/settings/healthkit-sync-section.tsx
+[2025-09-25T04:16:01.954Z] Analyzing: src/components/settings/item.tsx
+[2025-09-25T04:16:01.954Z] Analyzing: src/components/settings/items-container.tsx
+[2025-09-25T04:16:01.954Z] Analyzing: src/components/settings/language-item.tsx
+[2025-09-25T04:16:01.954Z] Analyzing: src/components/settings/manual-entry-section.test.tsx
+[2025-09-25T04:16:01.955Z] Analyzing: src/components/settings/manual-entry-section.tsx
+[2025-09-25T04:16:01.955Z] Analyzing: src/components/settings/theme-item.tsx
+[2025-09-25T04:16:01.955Z] Analyzing: src/components/settings/use-manual-step-form.tsx
+[2025-09-25T04:16:01.955Z] Analyzing: src/components/ui/__tests__/color-accessibility-compliance.test.ts
+[2025-09-25T04:16:01.956Z] Analyzing: src/components/ui/__tests__/color-consolidation.test.ts
+[2025-09-25T04:16:01.956Z] Analyzing: src/components/ui/__tests__/color-duplicates-audit.test.ts
+[2025-09-25T04:16:01.956Z] Analyzing: src/components/ui/__tests__/colors-conversion.test.ts
+[2025-09-25T04:16:01.956Z] Analyzing: src/components/ui/__tests__/component-color-imports.test.ts
+[2025-09-25T04:16:01.957Z] Analyzing: src/components/ui/__tests__/utility-duplicates-audit.test.ts
+[2025-09-25T04:16:01.957Z] Analyzing: src/components/ui/attribute-list.tsx
+[2025-09-25T04:16:01.957Z] Analyzing: src/components/ui/button.test.tsx
+[2025-09-25T04:16:01.957Z] Analyzing: src/components/ui/button.tsx
+[2025-09-25T04:16:01.957Z] Analyzing: src/components/ui/card.test.tsx
+[2025-09-25T04:16:01.958Z] Analyzing: src/components/ui/card.tsx
+[2025-09-25T04:16:01.958Z] Analyzing: src/components/ui/checkbox.test.tsx
+[2025-09-25T04:16:01.958Z] Analyzing: src/components/ui/checkbox.tsx
+[2025-09-25T04:16:01.959Z] Analyzing: src/components/ui/colors.tsx
+[2025-09-25T04:16:01.959Z] Analyzing: src/components/ui/confirmation-dialog.test.tsx
+[2025-09-25T04:16:01.959Z] Analyzing: src/components/ui/confirmation-dialog.tsx
+[2025-09-25T04:16:01.959Z] Analyzing: src/components/ui/error-boundary.test.tsx
+[2025-09-25T04:16:01.959Z] Analyzing: src/components/ui/error-boundary.tsx
+[2025-09-25T04:16:01.960Z] Analyzing: src/components/ui/feature-list.tsx
+[2025-09-25T04:16:01.960Z] Analyzing: src/components/ui/focus-aware-status-bar.tsx
+[2025-09-25T04:16:01.960Z] Analyzing: src/components/ui/game-progress.tsx
+[2025-09-25T04:16:01.960Z] Analyzing: src/components/ui/history-item.tsx
+[2025-09-25T04:16:01.960Z] Analyzing: src/components/ui/icons/arrow-right.tsx
+[2025-09-25T04:16:01.960Z] Analyzing: src/components/ui/icons/caret-down.tsx
+[2025-09-25T04:16:01.961Z] Analyzing: src/components/ui/icons/character.tsx
+[2025-09-25T04:16:01.961Z] Analyzing: src/components/ui/icons/github.tsx
+[2025-09-25T04:16:01.961Z] Analyzing: src/components/ui/icons/home.tsx
+[2025-09-25T04:16:01.961Z] Analyzing: src/components/ui/icons/index.tsx
+[2025-09-25T04:16:01.961Z] Analyzing: src/components/ui/icons/language.tsx
+[2025-09-25T04:16:01.961Z] Analyzing: src/components/ui/icons/merchant.tsx
+[2025-09-25T04:16:01.962Z] Analyzing: src/components/ui/icons/monster.tsx
+[2025-09-25T04:16:01.962Z] Analyzing: src/components/ui/icons/rate.tsx
+[2025-09-25T04:16:01.962Z] Analyzing: src/components/ui/icons/settings.tsx
+[2025-09-25T04:16:01.962Z] Analyzing: src/components/ui/icons/share.tsx
+[2025-09-25T04:16:01.963Z] Analyzing: src/components/ui/icons/style.tsx
+[2025-09-25T04:16:01.963Z] Analyzing: src/components/ui/icons/support.tsx
+[2025-09-25T04:16:01.963Z] Analyzing: src/components/ui/icons/website.tsx
+[2025-09-25T04:16:01.963Z] Analyzing: src/components/ui/image.tsx
+[2025-09-25T04:16:01.963Z] Analyzing: src/components/ui/index.tsx
+[2025-09-25T04:16:01.963Z] Analyzing: src/components/ui/input.test.tsx
+[2025-09-25T04:16:01.963Z] Analyzing: src/components/ui/input.tsx
+[2025-09-25T04:16:01.964Z] Analyzing: src/components/ui/list.tsx
+[2025-09-25T04:16:01.964Z] Analyzing: src/components/ui/loading-overlay.tsx
+[2025-09-25T04:16:01.964Z] Analyzing: src/components/ui/manual-step-entry.test.tsx
+[2025-09-25T04:16:01.964Z] Analyzing: src/components/ui/manual-step-entry.tsx
+[2025-09-25T04:16:01.965Z] Analyzing: src/components/ui/modal-keyboard-aware-scroll-view.tsx
+[2025-09-25T04:16:01.965Z] Analyzing: src/components/ui/modal.tsx
+[2025-09-25T04:16:01.965Z] Analyzing: src/components/ui/progress-bar.tsx
+[2025-09-25T04:16:01.965Z] Analyzing: src/components/ui/select.test.tsx
+[2025-09-25T04:16:01.965Z] Analyzing: src/components/ui/select.tsx
+[2025-09-25T04:16:01.966Z] Analyzing: src/components/ui/status-indicator.tsx
+[2025-09-25T04:16:01.966Z] Analyzing: src/components/ui/text.tsx
+[2025-09-25T04:16:01.966Z] Analyzing: src/components/ui/utils.tsx
+[2025-09-25T04:16:01.966Z] Analyzing: src/lib/__tests__/experience-refresh-system.test.tsx
+[2025-09-25T04:16:01.967Z] Analyzing: src/lib/__tests__/health.manual-steps.test.tsx
+[2025-09-25T04:16:01.967Z] Analyzing: src/lib/__tests__/healthCore.test.ts
+[2025-09-25T04:16:01.967Z] Analyzing: src/lib/__tests__/storage.manual-steps.test.ts
+[2025-09-25T04:16:01.968Z] Analyzing: src/lib/health/index.test.tsx
+[2025-09-25T04:16:01.968Z] Analyzing: src/lib/health/index.tsx
+[2025-09-25T04:16:01.969Z] Analyzing: src/lib/hooks/index.tsx
+[2025-09-25T04:16:01.969Z] Analyzing: src/lib/hooks/use-is-first-time.tsx
+[2025-09-25T04:16:01.970Z] Analyzing: src/lib/hooks/use-scenario-history.tsx
+[2025-09-25T04:16:01.970Z] Analyzing: src/lib/hooks/use-selected-theme.tsx
+[2025-09-25T04:16:01.970Z] Analyzing: src/lib/i18n/index.tsx
+[2025-09-25T04:16:01.970Z] Analyzing: src/lib/i18n/react-i18next.d.ts
+[2025-09-25T04:16:01.970Z] Analyzing: src/lib/i18n/resources.ts
+[2025-09-25T04:16:01.970Z] Analyzing: src/lib/i18n/types.ts
+[2025-09-25T04:16:01.971Z] Analyzing: src/lib/i18n/utils.tsx
+[2025-09-25T04:16:01.971Z] Analyzing: src/lib/index.tsx
+[2025-09-25T04:16:01.971Z] Analyzing: src/lib/item-effects.ts
+[2025-09-25T04:16:01.971Z] Analyzing: src/lib/scenario.ts
+[2025-09-25T04:16:01.972Z] Analyzing: src/lib/storage/dungeon-game-persistence.test.ts
+[2025-09-25T04:16:01.972Z] Analyzing: src/lib/storage/dungeon-game-persistence.ts
+[2025-09-25T04:16:01.972Z] Analyzing: src/lib/storage.tsx
+[2025-09-25T04:16:01.973Z] Analyzing: src/lib/test-utils.tsx
+[2025-09-25T04:16:01.973Z] Analyzing: src/lib/use-scenario-trigger.ts
+[2025-09-25T04:16:01.973Z] Analyzing: src/lib/use-theme-config.tsx
+[2025-09-25T04:16:01.973Z] Analyzing: src/lib/utils.ts
+[2025-09-25T04:16:01.973Z] Analyzing: src/types/character.ts
+[2025-09-25T04:16:01.974Z] Analyzing: src/types/dungeon-game.test.ts
+[2025-09-25T04:16:01.974Z] Analyzing: src/types/dungeon-game.ts
+[2025-09-25T04:16:01.974Z] Analyzing: src/types/index.ts
+[2025-09-25T04:16:01.974Z] Analyzing: src/types/scenario.ts
+[2025-09-25T04:16:01.974Z] 
+📊 Migration Analysis Summary
+[2025-09-25T04:16:01.974Z] ============================
+[2025-09-25T04:16:01.974Z] Total files analyzed: 171
+[2025-09-25T04:16:01.974Z] Files requiring migration: 40
+[2025-09-25T04:16:01.974Z] Function length violations: 3
+[2025-09-25T04:16:01.974Z] Parameter count violations: 31
+[2025-09-25T04:16:01.974Z] TypeScript violations: 36
+[2025-09-25T04:16:01.975Z] 
+📄 Detailed report saved to: /Users/blnkt/code/hello-world-obytes/migration-report.json
+[2025-09-25T04:16:01.975Z] 
+💡 Migration Recommendations
+[2025-09-25T04:16:01.975Z] ============================
+[2025-09-25T04:16:01.975Z] 
+🔧 Function Length Violations:
+[2025-09-25T04:16:01.975Z] - Break down functions exceeding 70 lines
+[2025-09-25T04:16:01.975Z] - Extract helper functions for complex logic
+[2025-09-25T04:16:01.975Z] - Use object parameters for related data
+[2025-09-25T04:16:01.975Z] 
+🔧 Parameter Count Violations:
+[2025-09-25T04:16:01.975Z] - Use object parameters for functions with > 3 parameters
+[2025-09-25T04:16:01.975Z] - Group related parameters into interfaces
+[2025-09-25T04:16:01.975Z] - Consider builder pattern for complex objects
+[2025-09-25T04:16:01.975Z] 
+🔧 TypeScript Violations:
+[2025-09-25T04:16:01.975Z] - Add explicit return types to all functions
+[2025-09-25T04:16:01.975Z] - Replace any types with proper interfaces
+[2025-09-25T04:16:01.975Z] - Use generic types for reusable functions
+[2025-09-25T04:16:01.975Z] 
+📚 Additional Resources:
+[2025-09-25T04:16:01.975Z] - See docs/BREAKING_CHANGES_AND_MIGRATION.md for detailed guides
+[2025-09-25T04:16:01.975Z] - Check docs/TESTING_GUIDELINES.md for mock migration
+[2025-09-25T04:16:01.975Z] - Review docs/COMPONENT_GUIDELINES.md for component standards

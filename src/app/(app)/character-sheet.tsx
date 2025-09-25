@@ -33,7 +33,7 @@ export default function CharacterSheetScreen() {
   const [lastCheckedDate] = useLastCheckedDate();
 
   // Default to start of today if not set
-  const lastCheckedDateTime = lastCheckedDate
+  const _lastCheckedDateTime = lastCheckedDate
     ? new Date(lastCheckedDate)
     : (() => {
         const d = new Date();
@@ -49,7 +49,22 @@ export default function CharacterSheetScreen() {
     experience,
   } as Character;
 
+  const handleCharacterChange = React.useCallback(
+    (updated: Character | ((prev: Character) => Character)) => {
+      if (typeof updated === 'function') {
+        const newCharacter = updated(displayCharacter);
+        setCharacter(newCharacter);
+      } else {
+        setCharacter(updated);
+      }
+    },
+    [displayCharacter, setCharacter]
+  );
+
   return (
-    <CharacterSheet character={displayCharacter} onChange={setCharacter} />
+    <CharacterSheet
+      character={displayCharacter}
+      onChange={handleCharacterChange}
+    />
   );
 }

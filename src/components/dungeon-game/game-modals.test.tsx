@@ -79,7 +79,6 @@ describe('GameOverModal', () => {
     level: 2,
     turnsUsed: 15,
     onMainMenu: jest.fn(),
-    onRetry: jest.fn(),
   };
 
   beforeEach(() => {
@@ -120,15 +119,6 @@ describe('GameOverModal', () => {
     expect(screen.getByText('Level 2 Failed')).toBeTruthy();
   });
 
-  it('should call onRetry when Try Again button is pressed', () => {
-    render(<GameOverModal {...defaultProps} />);
-
-    const tryAgainButton = screen.getByText('Try Again');
-    fireEvent.press(tryAgainButton);
-
-    expect(defaultProps.onRetry).toHaveBeenCalledTimes(1);
-  });
-
   it('should call onMainMenu when Main Menu button is pressed', () => {
     render(<GameOverModal {...defaultProps} />);
 
@@ -138,11 +128,33 @@ describe('GameOverModal', () => {
     expect(defaultProps.onMainMenu).toHaveBeenCalledTimes(1);
   });
 
-  it('should render both action buttons', () => {
+  it('should render the main menu button', () => {
     render(<GameOverModal {...defaultProps} />);
 
-    expect(screen.getByText('Try Again')).toBeTruthy();
     expect(screen.getByText('Main Menu')).toBeTruthy();
+  });
+
+  it('should render restart button when onRestart is provided', () => {
+    const onRestart = jest.fn();
+    render(<GameOverModal {...defaultProps} onRestart={onRestart} />);
+
+    expect(screen.getByText('Restart Level')).toBeTruthy();
+  });
+
+  it('should not render restart button when onRestart is not provided', () => {
+    render(<GameOverModal {...defaultProps} />);
+
+    expect(screen.queryByText('Restart Level')).toBeNull();
+  });
+
+  it('should call onRestart when Restart Level button is pressed', () => {
+    const onRestart = jest.fn();
+    render(<GameOverModal {...defaultProps} onRestart={onRestart} />);
+
+    const restartButton = screen.getByText('Restart Level');
+    fireEvent.press(restartButton);
+
+    expect(onRestart).toHaveBeenCalledTimes(1);
   });
 
   it('should handle different level values correctly', () => {
@@ -165,5 +177,20 @@ describe('GameOverModal', () => {
 
     rerender(<GameOverModal {...defaultProps} turnsUsed={100} />);
     expect(screen.getByText('Turns used: 100')).toBeTruthy();
+  });
+
+  it('should handle edge case with 0 turns used', () => {
+    render(<GameOverModal {...defaultProps} turnsUsed={0} />);
+    expect(screen.getByText('Turns used: 0')).toBeTruthy();
+  });
+
+  it('should handle edge case with very high turn counts', () => {
+    render(<GameOverModal {...defaultProps} turnsUsed={1000000} />);
+    expect(screen.getByText('Turns used: 1000000')).toBeTruthy();
+  });
+
+  it('should display correct game over reason', () => {
+    render(<GameOverModal {...defaultProps} />);
+    expect(screen.getByText('You ran out of turns on Level 2.')).toBeTruthy();
   });
 });

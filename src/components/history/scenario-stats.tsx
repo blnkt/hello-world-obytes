@@ -1,13 +1,20 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 
+import colors from '@/components/ui/colors';
+import type { ScenarioHistory } from '@/types/scenario';
+
 import { MerchantIcon, MonsterIcon } from '../ui/icons';
 
 const ScenarioStats: React.FC<{
-  history: any[];
+  history: ScenarioHistory[];
 }> = ({ history }) => {
-  const merchantCount = history.filter((h) => h.type === 'merchant').length;
-  const monsterCount = history.filter((h) => h.type === 'monster').length;
+  const merchantCount = history.filter(
+    (h: ScenarioHistory) => h.type === 'merchant'
+  ).length;
+  const monsterCount = history.filter(
+    (h: ScenarioHistory) => h.type === 'monster'
+  ).length;
   const totalCount = history.length;
 
   return (
@@ -48,9 +55,13 @@ const ScenarioStats: React.FC<{
         {history.slice(0, 3).map((entry) => (
           <View key={entry.id} className="mb-2 flex-row items-center">
             {entry.type === 'merchant' ? (
-              <MerchantIcon color="#10B981" width={16} height={16} />
+              <MerchantIcon
+                color={colors.success[500]}
+                width={16}
+                height={16}
+              />
             ) : (
-              <MonsterIcon color="#EF4444" width={16} height={16} />
+              <MonsterIcon color={colors.danger[500]} width={16} height={16} />
             )}
             <Text className="ml-2 flex-1 text-xs text-gray-600 dark:text-gray-300">
               {entry.title}

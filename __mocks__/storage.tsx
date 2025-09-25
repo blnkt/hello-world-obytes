@@ -6,7 +6,7 @@ import { mmkvMockStorage } from './react-native-mmkv';
 const mockStorage: Record<string, string> = {};
 
 // Mock useMMKVString hook
-export const useMMKVString = (key: string, storageInstance?: any) => {
+export const useMMKVString = (key: string, _storageInstance?: any) => {
   const [value, setValue] = React.useState<string | null>(() => {
     return mockStorage[key] || null;
   });
@@ -27,7 +27,7 @@ export const useMMKVString = (key: string, storageInstance?: any) => {
 };
 
 // Mock useMMKVBoolean hook
-export const useMMKVBoolean = (key: string, storageInstance?: any) => {
+export const useMMKVBoolean = (key: string, _storageInstance?: any) => {
   const [value, setValue] = React.useState<boolean | undefined>(() => {
     const stored = mockStorage[key];
     return stored ? JSON.parse(stored) : undefined;
@@ -274,10 +274,8 @@ export function getCurrencySync(): number {
   if (value) {
     return Number(value) || 0;
   }
-  // Set default currency for testing (1000 steps = 10 turns)
-  const defaultCurrency = 1000;
-  storage.set('currency', String(defaultCurrency));
-  return defaultCurrency;
+  // No default currency - let the real system handle it
+  return 0;
 }
 
 export function getCurrency(): number {

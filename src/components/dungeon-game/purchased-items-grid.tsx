@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
+import colors from '@/components/ui/colors';
 import { useItemEffects } from '@/lib/item-effects';
 import { consumeItem } from '@/lib/storage';
 
@@ -54,7 +55,9 @@ function ActiveEffectsSection({
 
   return (
     <View className="mb-3">
-      <Text className="mb-2 text-center text-xs font-medium text-[#6B5F57]">
+      <Text
+        className={`text-[${colors.charcoal[600]}] mb-2 text-center text-xs font-medium`}
+      >
         ⚡ Active Effects
       </Text>
       <View className="flex-row flex-wrap justify-start">
@@ -121,7 +124,9 @@ function PurchasedItemsSection({
                 </View>
               )}
             </View>
-            <Text className="text-center text-xs font-medium text-[#6B5F57]">
+            <Text
+              className={`text-[${colors.charcoal[600]}] text-center text-xs font-medium`}
+            >
               {item?.name}
             </Text>
             <Text className="text-center text-xs text-blue-600">
@@ -134,10 +139,11 @@ function PurchasedItemsSection({
   );
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function PurchasedItemsGrid({
   purchasedItems,
   title = '🎒 Inventory',
-  className = 'mx-4 mt-3 rounded-lg bg-[#F5F0E8] p-4',
+  className = `mx-4 mt-3 rounded-lg bg-[${colors.neutral[50]}] p-4`,
   showActiveEffects = false,
   onItemActivated,
 }: PurchasedItemsGridProps) {
@@ -149,7 +155,15 @@ export function PurchasedItemsGrid({
   const purchasedItemsData = React.useMemo(() => {
     return purchasedItems
       .map((item) => {
-        const shopItem = SHOP_ITEMS.find((item) => item.id === item.id);
+        const shopItem = SHOP_ITEMS.find(
+          (item: {
+            id: string;
+            name: string;
+            icon: string;
+            price: number;
+            description: string;
+          }) => item.id === item.id
+        );
         return shopItem ? { ...shopItem, quantity: item.quantity } : null;
       })
       .filter(Boolean);
@@ -166,7 +180,7 @@ export function PurchasedItemsGrid({
         }
       }
     },
-    [consumeItem, activateItemEffect, onItemActivated]
+    [activateItemEffect, onItemActivated]
   );
 
   // Early return after all hooks have been called
@@ -179,7 +193,9 @@ export function PurchasedItemsGrid({
 
   return (
     <View className={className}>
-      <Text className="mb-3 text-center text-sm font-semibold text-[#6B5F57]">
+      <Text
+        className={`text-[${colors.charcoal[600]}] mb-3 text-center text-sm font-semibold`}
+      >
         {title}
       </Text>
 

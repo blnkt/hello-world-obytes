@@ -3,8 +3,10 @@ import { StyleSheet } from 'react-native';
 import type { SvgProps } from 'react-native-svg';
 import Svg, { Circle, Path } from 'react-native-svg';
 
+import colors from '../colors';
+
 export const MerchantIcon = ({
-  color = '#8B5CF6',
+  color = colors.primary[500],
   style,
   ...props
 }: SvgProps) => (

@@ -10,7 +10,10 @@ type KeyParams = {
 };
 export const DEFAULT_LIMIT = 10;
 
-export function getQueryKey<T extends KeyParams>(key: string, params?: T) {
+export function getQueryKey<T extends KeyParams>(
+  key: string,
+  params?: T
+): (string | T)[] {
   return [key, ...(params ? [params] : [])];
 }
 
@@ -22,14 +25,14 @@ export function normalizePages<T>(pages?: PaginateQuery<T>[]): T[] {
 }
 
 // a function that accept a url and return params as an object
-export function getUrlParameters(
-  url: string | null
-): { [k: string]: string } | null {
+export function getUrlParameters<
+  T extends Record<string, string> = Record<string, string>,
+>(url: string | null): T | null {
   if (url === null) {
     return null;
   }
   let regex = /[?&]([^=#]+)=([^&#]*)/g,
-    params = {},
+    params = {} as T,
     match;
   while ((match = regex.exec(url))) {
     if (match[1] !== null) {
@@ -43,9 +46,11 @@ export function getUrlParameters(
 export const getPreviousPageParam: GetNextPageParamFunction<
   unknown,
   PaginateQuery<unknown>
-> = (page) => getUrlParameters(page.previous)?.offset ?? null;
+> = (page: PaginateQuery<unknown>) =>
+  getUrlParameters(page.previous)?.offset ?? null;
 
 export const getNextPageParam: GetPreviousPageParamFunction<
   unknown,
   PaginateQuery<unknown>
-> = (page) => getUrlParameters(page.next)?.offset ?? null;
+> = (page: PaginateQuery<unknown>) =>
+  getUrlParameters(page.next)?.offset ?? null;

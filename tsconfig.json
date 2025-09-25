@@ -3,12 +3,10 @@
   "compilerOptions": {
     "strict": true,
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"],
-      "@env": ["./src/lib/env.js"]
-    },
+    "paths": { "@/*": ["./src/*"], "@env": ["./src/lib/env.js"] },
     "esModuleInterop": true,
-    "checkJs": true
+    "checkJs": true,
+    "skipLibCheck": true
   },
   "exclude": [
     "node_modules",
@@ -18,7 +16,8 @@
     "cli",
     "android",
     "ios",
-    "lint-staged.config.js"
+    "lint-staged.config.js",
+    "**/@types/minimatch/**"
   ],
   "include": [
     "**/*.ts",

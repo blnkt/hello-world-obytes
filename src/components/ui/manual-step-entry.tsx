@@ -1,7 +1,15 @@
 import * as React from 'react';
-import type { TextInputProps } from 'react-native';
+import type {
+  NativeSyntheticEvent,
+  TextInputFocusEventData,
+  TextInputProps,
+  TextInputSubmitEditingEventData,
+} from 'react-native';
 import { TextInput, View } from 'react-native';
 
+import { validateStepCount } from '@/lib/utils';
+
+import colors from './colors';
 import { ManualEntryErrorBoundary, Text } from './index';
 
 export interface ManualStepEntryProps
@@ -14,20 +22,11 @@ export interface ManualStepEntryProps
 }
 
 const useValidation = () => {
-  const validate = React.useCallback((val: string) => {
-    if (!val || val.trim() === '') {
-      return 'Step count is required';
-    }
-    if (!/^[0-9]+$/.test(val)) {
-      if (/\./.test(val)) return 'Step count must be a whole number';
-      return 'Step count must be a positive number';
-    }
-    const num = Number(val);
-    if (num < 1) return 'Step count must be at least 1 step';
-    if (num > 100000)
-      return 'Step count exceeds maximum daily limit of 100,000 steps';
-    return undefined;
-  }, []);
+  // Using centralized validateStepCount utility
+  const validate = React.useCallback(
+    (val: string) => validateStepCount(val),
+    []
+  );
 
   return { validate };
 };
@@ -161,7 +160,7 @@ const ManualStepEntryComponent = React.forwardRef<
   }, [errorProp]);
 
   const handleBlur = React.useCallback(
-    (e: any) => {
+    (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
       blurHandler(e, { value, validate, setError, onBlur });
     },
     [value, validate, setError, onBlur]
@@ -173,7 +172,7 @@ const ManualStepEntryComponent = React.forwardRef<
     [onChangeText, setError, error]
   );
   const handleSubmitEditing = React.useCallback(
-    (e: any) =>
+    (e: NativeSyntheticEvent<TextInputSubmitEditingEventData>) =>
       submitEditingHandler(e, {
         value,
         validate,
@@ -190,7 +189,7 @@ const ManualStepEntryComponent = React.forwardRef<
         testID={testID}
         ref={ref}
         placeholder="Enter your step count"
-        placeholderTextColor="#9CA3AF"
+        placeholderTextColor={colors.charcoal[400]}
         className="mt-0 rounded-xl border-[0.5px] border-neutral-300 bg-neutral-100 px-4 py-3 font-inter text-base font-medium leading-5 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
         keyboardType="numeric"
         editable={!disabled && !loading}

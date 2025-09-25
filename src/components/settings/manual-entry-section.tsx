@@ -8,6 +8,7 @@ import {
   useManualEntryMode,
 } from '@/lib/health';
 import { clearManualStepsByDay, useManualStepsByDay } from '@/lib/storage';
+import { formatDateDetailed, formatNumber } from '@/lib/utils';
 
 import { useManualStepForm } from './use-manual-step-form';
 
@@ -137,32 +138,15 @@ const ManualEntriesInfo = ({ onRefresh }: { onRefresh: () => void }) => {
 };
 
 const ManualEntryHistoryItem = ({ entry }: { entry: any }) => {
-  const formatDate = (dateString: string) => {
-    try {
-      // Create date in local timezone to avoid UTC conversion issues
-      const [year, month, day] = dateString.split('-').map(Number);
-      const localDate = new Date(year, month - 1, day); // month is 0-indexed
+  // Using centralized formatDateDetailed utility
 
-      return localDate.toLocaleDateString('en-US', {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      });
-    } catch {
-      return dateString;
-    }
-  };
-
-  const formatSteps = (steps: number) => {
-    return steps.toLocaleString();
-  };
+  // Using centralized formatNumber utility
 
   return (
     <Card
       variant="info"
-      title={formatDate(entry.date)}
-      description={`${formatSteps(entry.steps)} steps`}
+      title={formatDateDetailed(entry.date)}
+      description={`${formatNumber(entry.steps)} steps`}
     />
   );
 };

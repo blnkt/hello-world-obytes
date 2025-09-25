@@ -2,6 +2,9 @@ import * as React from 'react';
 import { MMKV } from 'react-native-mmkv';
 import { useMMKVBoolean, useMMKVString } from 'react-native-mmkv';
 
+import type { Character } from '@/types/character';
+import type { ScenarioHistory } from '@/types/scenario';
+
 export const storage = new MMKV();
 
 export function getItem<T>(key: string): T | null {
@@ -9,52 +12,57 @@ export function getItem<T>(key: string): T | null {
   return value ? JSON.parse(value) || null : null;
 }
 
-export async function setItem<T>(key: string, value: T) {
+export async function setItem<T>(key: string, value: T): Promise<void> {
   storage.set(key, JSON.stringify(value));
 }
 
-export async function removeItem(key: string) {
+export async function removeItem(key: string): Promise<void> {
   storage.delete(key);
 }
 
 // Scenario History Storage
 const SCENARIO_HISTORY_KEY = 'SCENARIO_HISTORY';
 
-export function getScenarioHistory(): any[] {
+export function getScenarioHistory(): ScenarioHistory[] {
   const value = storage.getString(SCENARIO_HISTORY_KEY);
   return value ? JSON.parse(value) || [] : [];
 }
 
-export async function addScenarioToHistory(historyEntry: any) {
+export async function addScenarioToHistory(
+  historyEntry: ScenarioHistory
+): Promise<void> {
   const currentHistory = getScenarioHistory();
   const updatedHistory = [historyEntry, ...currentHistory];
   await setItem(SCENARIO_HISTORY_KEY, updatedHistory);
 }
 
-export async function clearScenarioHistory() {
+export async function clearScenarioHistory(): Promise<void> {
   await removeItem(SCENARIO_HISTORY_KEY);
 }
 
 // Character Storage
 const CHARACTER_STORAGE_KEY = 'CHARACTER_DATA';
 
-export function getCharacter(): any {
+export function getCharacter(): Character | null {
   const value = storage.getString(CHARACTER_STORAGE_KEY);
   const result = value ? JSON.parse(value) || null : null;
   return result;
 }
 
-export async function setCharacter(character: any) {
+export async function setCharacter(character: Character): Promise<void> {
   const jsonString = JSON.stringify(character);
   storage.set(CHARACTER_STORAGE_KEY, jsonString);
 }
 
-export async function clearCharacter() {
+export async function clearCharacter(): Promise<void> {
   await removeItem(CHARACTER_STORAGE_KEY);
 }
 
 // React Hook for Character
-export const useCharacter = () => {
+export const useCharacter = (): [
+  Character | null,
+  (character: Character) => void,
+] => {
   const [characterString, setCharacterString] = useMMKVString(
     CHARACTER_STORAGE_KEY,
     storage
@@ -63,7 +71,7 @@ export const useCharacter = () => {
   const character = characterString ? JSON.parse(characterString) : null;
 
   const setCharacter = React.useCallback(
-    (newCharacter: any) => {
+    (newCharacter: Character) => {
       setCharacterString(JSON.stringify(newCharacter));
     },
     [setCharacterString]
@@ -80,16 +88,16 @@ export function getManualEntryMode(): boolean {
   return value ? JSON.parse(value) : false;
 }
 
-export async function setManualEntryMode(enabled: boolean) {
+export async function setManualEntryMode(enabled: boolean): Promise<void> {
   storage.set(MANUAL_ENTRY_MODE_KEY, JSON.stringify(enabled));
 }
 
-export async function clearManualEntryMode() {
+export async function clearManualEntryMode(): Promise<void> {
   storage.delete(MANUAL_ENTRY_MODE_KEY);
 }
 
 // React Hook for Manual Entry Mode
-export const useManualEntryMode = () => {
+export const useManualEntryMode = (): [boolean, (value: boolean) => void] => {
   const [isManualMode, setIsManualMode] = useMMKVBoolean(
     MANUAL_ENTRY_MODE_KEY,
     storage
@@ -110,16 +118,16 @@ export function getDeveloperMode(): boolean {
   return value ? JSON.parse(value) : false;
 }
 
-export async function setDeveloperMode(enabled: boolean) {
+export async function setDeveloperMode(enabled: boolean): Promise<void> {
   storage.set(DEVELOPER_MODE_KEY, JSON.stringify(enabled));
 }
 
-export async function clearDeveloperMode() {
+export async function clearDeveloperMode(): Promise<void> {
   storage.delete(DEVELOPER_MODE_KEY);
 }
 
 // React Hook for Developer Mode
-export const useDeveloperMode = () => {
+export const useDeveloperMode = (): [boolean, (value: boolean) => void] => {
   const [isDeveloperMode, setIsDeveloperMode] = useMMKVBoolean(
     DEVELOPER_MODE_KEY,
     storage
@@ -146,7 +154,9 @@ export function getManualStepsByDay(): ManualStepEntry[] {
   }
 }
 
-export async function setManualStepsByDay(stepsByDay: ManualStepEntry[]) {
+export async function setManualStepsByDay(
+  stepsByDay: ManualStepEntry[]
+): Promise<void> {
   // Validate all entries before storing
   for (const entry of stepsByDay) {
     if (!validateManualStepEntry(entry)) {
@@ -158,18 +168,20 @@ export async function setManualStepsByDay(stepsByDay: ManualStepEntry[]) {
   await setItem(MANUAL_STEPS_BY_DAY_KEY, stepsByDay);
 }
 
-export async function clearManualStepsByDay() {
+export async function clearManualStepsByDay(): Promise<void> {
   await removeItem(MANUAL_STEPS_BY_DAY_KEY);
 }
 
-export async function setManualStepEntry(entry: ManualStepEntry) {
+export async function setManualStepEntry(
+  entry: ManualStepEntry
+): Promise<void> {
   if (!validateManualStepEntry(entry)) {
     throw new Error('Invalid manual step entry');
   }
 
   // Get current manual steps from storage
   const existing = getManualStepsByDay();
-  const idx = existing.findIndex((e) => e.date === entry.date);
+  const idx = existing.findIndex((e: ManualStepEntry) => e.date === entry.date);
 
   if (idx !== -1) {
     // Combine steps for the same date
@@ -184,7 +196,7 @@ export async function setManualStepEntry(entry: ManualStepEntry) {
 
 export function getManualStepEntry(date: string): ManualStepEntry | null {
   const entries = getManualStepsByDay();
-  return entries.find((entry) => entry.date === date) || null;
+  return entries.find((entry: ManualStepEntry) => entry.date === date) || null;
 }
 
 export function hasManualEntryForDate(date: string): boolean {
@@ -193,7 +205,10 @@ export function hasManualEntryForDate(date: string): boolean {
 }
 
 // React Hook for Manual Steps By Day
-export const useManualStepsByDay = () => {
+export const useManualStepsByDay = (): [
+  ManualStepEntry[],
+  (steps: ManualStepEntry[]) => void,
+] => {
   const [manualStepsString, setManualStepsString] = useMMKVString(
     MANUAL_STEPS_BY_DAY_KEY,
     storage
@@ -226,11 +241,11 @@ export const useManualStepsByDay = () => {
 // First Time Storage
 const IS_FIRST_TIME_KEY = 'IS_FIRST_TIME';
 
-export function resetFirstTime() {
+export function resetFirstTime(): void {
   storage.delete(IS_FIRST_TIME_KEY);
 }
 
-export function setFirstTime(value: boolean) {
+export function setFirstTime(value: boolean): void {
   storage.set(IS_FIRST_TIME_KEY, value);
 }
 
@@ -241,21 +256,28 @@ export function getLastCheckedDate(): string | null {
   return storage.getString(LAST_CHECKED_DATE_KEY) || null;
 }
 
-export async function setLastCheckedDate(date: string) {
+export async function setLastCheckedDate(date: string): Promise<void> {
   storage.set(LAST_CHECKED_DATE_KEY, date);
 }
 
-export async function clearLastCheckedDate() {
+export async function clearLastCheckedDate(): Promise<void> {
   await removeItem(LAST_CHECKED_DATE_KEY);
 }
 
 // React Hook for Last Checked Date
-export const useLastCheckedDate = () => {
+export const useLastCheckedDate = (): [
+  string | null,
+  (value: string | null) => void,
+] => {
   const [lastCheckedDate, setLastCheckedDate] = useMMKVString(
     LAST_CHECKED_DATE_KEY,
     storage
   );
-  return [lastCheckedDate, setLastCheckedDate] as const;
+  const value = lastCheckedDate === undefined ? null : lastCheckedDate;
+  const setter = (newValue: string | null) => {
+    setLastCheckedDate(newValue === null ? undefined : newValue);
+  };
+  return [value, setter] as const;
 };
 
 // Last Milestone Storage
@@ -265,21 +287,28 @@ export function getLastMilestone(): string | null {
   return storage.getString(LAST_MILESTONE_KEY) || null;
 }
 
-export async function setLastMilestone(milestone: string) {
+export async function setLastMilestone(milestone: string): Promise<void> {
   storage.set(LAST_MILESTONE_KEY, milestone);
 }
 
-export async function clearLastMilestone() {
+export async function clearLastMilestone(): Promise<void> {
   await removeItem(LAST_MILESTONE_KEY);
 }
 
 // React Hook for Last Milestone
-export const useLastMilestone = () => {
+export const useLastMilestone = (): [
+  string | null,
+  (value: string | null) => void,
+] => {
   const [lastMilestone, setLastMilestone] = useMMKVString(
     LAST_MILESTONE_KEY,
     storage
   );
-  return [lastMilestone, setLastMilestone] as const;
+  const value = lastMilestone === undefined ? null : lastMilestone;
+  const setter = (newValue: string | null) => {
+    setLastMilestone(newValue === null ? undefined : newValue);
+  };
+  return [value, setter] as const;
 };
 
 // Steps By Day Storage
@@ -296,11 +325,11 @@ export function getStepsByDay(): { date: Date; steps: number }[] {
 
 export async function setStepsByDay(
   stepsByDay: { date: Date; steps: number }[]
-) {
+): Promise<void> {
   await setItem(STEPS_BY_DAY_KEY, stepsByDay);
 }
 
-export async function clearStepsByDay() {
+export async function clearStepsByDay(): Promise<void> {
   await removeItem(STEPS_BY_DAY_KEY);
 }
 
@@ -312,11 +341,11 @@ export function getExperience(): number {
   return value ? Number(value) || 0 : 0;
 }
 
-export async function setExperience(experience: number) {
+export async function setExperience(experience: number): Promise<void> {
   storage.set(EXPERIENCE_KEY, String(experience));
 }
 
-export async function clearExperience() {
+export async function clearExperience(): Promise<void> {
   await removeItem(EXPERIENCE_KEY);
 }
 
@@ -328,11 +357,13 @@ export function getCumulativeExperience(): number {
   return value ? Number(value) || 0 : 0;
 }
 
-export async function setCumulativeExperience(experience: number) {
+export async function setCumulativeExperience(
+  experience: number
+): Promise<void> {
   storage.set(CUMULATIVE_EXPERIENCE_KEY, String(experience));
 }
 
-export async function clearCumulativeExperience() {
+export async function clearCumulativeExperience(): Promise<void> {
   await removeItem(CUMULATIVE_EXPERIENCE_KEY);
 }
 
@@ -343,11 +374,11 @@ export function getFirstExperienceDate(): string | null {
   return storage.getString(FIRST_EXPERIENCE_DATE_KEY) || null;
 }
 
-export async function setFirstExperienceDate(date: string) {
+export async function setFirstExperienceDate(date: string): Promise<void> {
   storage.set(FIRST_EXPERIENCE_DATE_KEY, date);
 }
 
-export async function clearFirstExperienceDate() {
+export async function clearFirstExperienceDate(): Promise<void> {
   await removeItem(FIRST_EXPERIENCE_DATE_KEY);
 }
 
@@ -362,24 +393,27 @@ export function getDailyStepsGoal(): number {
     : DEFAULT_DAILY_STEPS_GOAL;
 }
 
-export async function setDailyStepsGoal(goal: number) {
+export async function setDailyStepsGoal(goal: number): Promise<void> {
   storage.set(DAILY_STEPS_GOAL_KEY, String(goal));
 }
 
-export async function clearDailyStepsGoal() {
+export async function clearDailyStepsGoal(): Promise<void> {
   await removeItem(DAILY_STEPS_GOAL_KEY);
 }
 
 // React Hook for Daily Step Goal
-export const useDailyStepsGoal = () => {
+export const useDailyStepsGoal = (): [number, (value: number) => void] => {
   const [dailyStepsGoal, setDailyStepsGoal] = useMMKVString(
     DAILY_STEPS_GOAL_KEY,
     storage
   );
-  return [
-    dailyStepsGoal ? Number(dailyStepsGoal) : DEFAULT_DAILY_STEPS_GOAL,
-    setDailyStepsGoal,
-  ] as const;
+  const value = dailyStepsGoal
+    ? Number(dailyStepsGoal)
+    : DEFAULT_DAILY_STEPS_GOAL;
+  const setter = (newValue: number) => {
+    setDailyStepsGoal(newValue.toString());
+  };
+  return [value, setter] as const;
 };
 
 // Streaks Storage
@@ -402,24 +436,28 @@ export function getStreaks(): Streak[] {
   }
 }
 
-export async function setStreaks(streaks: Streak[]) {
+export async function setStreaks(streaks: Streak[]): Promise<void> {
   await setItem(STREAKS_KEY, streaks);
 }
 
-export async function addStreak(streak: Streak) {
+export async function addStreak(streak: Streak): Promise<void> {
   const currentStreaks = getStreaks();
   const updatedStreaks = [...currentStreaks, streak];
   await setStreaks(updatedStreaks);
 }
 
-export async function clearStreaks() {
+export async function clearStreaks(): Promise<void> {
   await removeItem(STREAKS_KEY);
 }
 
 // React Hook for Streaks
-export const useStreaks = () => {
+export const useStreaks = (): [Streak[], (value: Streak[]) => void] => {
   const [streaks, setStreaks] = useMMKVString(STREAKS_KEY, storage);
-  return [streaks ? JSON.parse(streaks) || [] : [], setStreaks] as const;
+  const value = streaks ? JSON.parse(streaks) || [] : [];
+  const setter = (newValue: Streak[]) => {
+    setStreaks(JSON.stringify(newValue));
+  };
+  return [value, setter] as const;
 };
 
 // Currency Storage
@@ -431,11 +469,11 @@ export function getCurrency(): number {
   return value ? Number(value) || DEFAULT_CURRENCY : DEFAULT_CURRENCY;
 }
 
-export async function setCurrency(currency: number) {
+export async function setCurrency(currency: number): Promise<void> {
   storage.set(CURRENCY_KEY, String(currency));
 }
 
-export async function addCurrency(amount: number) {
+export async function addCurrency(amount: number): Promise<void> {
   const currentCurrency = getCurrency();
   await setCurrency(currentCurrency + amount);
 }
@@ -449,14 +487,18 @@ export async function spendCurrency(amount: number): Promise<boolean> {
   return false;
 }
 
-export async function clearCurrency() {
+export async function clearCurrency(): Promise<void> {
   await removeItem(CURRENCY_KEY);
 }
 
 // React Hook for Currency
-export const useCurrency = () => {
+export const useCurrency = (): [number, (value: number) => void] => {
   const [currency, setCurrency] = useMMKVString(CURRENCY_KEY, storage);
-  return [currency ? Number(currency) : DEFAULT_CURRENCY, setCurrency] as const;
+  const value = currency ? Number(currency) : DEFAULT_CURRENCY;
+  const setter = (newValue: number) => {
+    setCurrency(newValue.toString());
+  };
+  return [value, setter] as const;
 };
 
 // Purchased Items Storage
@@ -476,13 +518,15 @@ export function getPurchasedItems(): PurchasedItem[] {
   }
 }
 
-export async function setPurchasedItems(items: PurchasedItem[]) {
+export async function setPurchasedItems(items: PurchasedItem[]): Promise<void> {
   await setItem(PURCHASED_ITEMS_KEY, items);
 }
 
-export async function addPurchasedItem(itemId: string) {
+export async function addPurchasedItem(itemId: string): Promise<void> {
   const currentItems = getPurchasedItems();
-  const existingItem = currentItems.find((item) => item.id === itemId);
+  const existingItem = currentItems.find(
+    (item: PurchasedItem) => item.id === itemId
+  );
 
   if (existingItem) {
     // Increment quantity if item already exists
@@ -497,7 +541,9 @@ export async function addPurchasedItem(itemId: string) {
 
 export async function consumeItem(itemId: string): Promise<boolean> {
   const currentItems = getPurchasedItems();
-  const itemIndex = currentItems.findIndex((item) => item.id === itemId);
+  const itemIndex = currentItems.findIndex(
+    (item: PurchasedItem) => item.id === itemId
+  );
 
   if (itemIndex === -1 || currentItems[itemIndex].quantity <= 0) {
     return false; // Item not found or no quantity left
@@ -515,20 +561,24 @@ export async function consumeItem(itemId: string): Promise<boolean> {
   return true; // Item used successfully
 }
 
-export async function clearPurchasedItems() {
+export async function clearPurchasedItems(): Promise<void> {
   await removeItem(PURCHASED_ITEMS_KEY);
 }
 
 // React Hook for Purchased Items
-export const usePurchasedItems = () => {
+export const usePurchasedItems = (): [
+  PurchasedItem[],
+  (value: PurchasedItem[]) => void,
+] => {
   const [purchasedItems, setPurchasedItems] = useMMKVString(
     PURCHASED_ITEMS_KEY,
     storage
   );
-  return [
-    purchasedItems ? JSON.parse(purchasedItems) || [] : [],
-    setPurchasedItems,
-  ] as const;
+  const value = purchasedItems ? JSON.parse(purchasedItems) || [] : [];
+  const setter = (newValue: PurchasedItem[]) => {
+    setPurchasedItems(JSON.stringify(newValue));
+  };
+  return [value, setter] as const;
 };
 
 // Hybrid Health Data Storage - Core data batched, large datasets separate
@@ -553,18 +603,20 @@ export function getHealthCore(): Partial<HealthCore> {
   }
 }
 
-export async function setHealthCore(data: Partial<HealthCore>) {
+export async function setHealthCore(data: Partial<HealthCore>): Promise<void> {
   await setItem(HEALTH_CORE_KEY, data);
 }
 
-export async function updateHealthCore(updates: Partial<HealthCore>) {
+export async function updateHealthCore(
+  updates: Partial<HealthCore>
+): Promise<void> {
   const currentData = getHealthCore();
   const updatedData = { ...currentData, ...updates };
   await setHealthCore(updatedData);
 }
 
 // Migration helper to move from old separate keys to new batched core
-export async function migrateToHealthCore() {
+export async function migrateToHealthCore(): Promise<void> {
   const coreData: Partial<HealthCore> = {};
 
   // Migrate individual keys to core batch
@@ -596,7 +648,7 @@ export async function migrateToHealthCore() {
   }
 }
 
-export async function migrateManualStepEntries() {
+export async function migrateManualStepEntries(): Promise<void> {
   const existingSteps = getStepsByDay();
   const existingManualSteps = getManualStepsByDay();
 
@@ -617,21 +669,26 @@ export async function migrateManualStepEntries() {
   };
 
   // Convert old step data to manual entry format
-  const migratedEntries: ManualStepEntry[] = existingSteps.map((step) => ({
-    date: getDateString(step.date),
-    steps: step.steps,
-    source: 'manual' as const,
-  }));
+  const migratedEntries: ManualStepEntry[] = existingSteps.map(
+    (step: { date: Date; steps: number }) => ({
+      date: getDateString(step.date),
+      steps: step.steps,
+      source: 'manual' as const,
+    })
+  );
 
   // Merge with existing manual entries, avoiding duplicates
   const allEntries = [...existingManualSteps, ...migratedEntries];
-  const uniqueEntries = allEntries.reduce((acc, entry) => {
-    const existing = acc.find((e) => e.date === entry.date);
-    if (!existing) {
-      acc.push(entry);
-    }
-    return acc;
-  }, [] as ManualStepEntry[]);
+  const uniqueEntries = allEntries.reduce(
+    (acc: ManualStepEntry[], entry: ManualStepEntry) => {
+      const existing = acc.find((e: ManualStepEntry) => e.date === entry.date);
+      if (!existing) {
+        acc.push(entry);
+      }
+      return acc;
+    },
+    [] as ManualStepEntry[]
+  );
 
   // Sort by date
   uniqueEntries.sort((a, b) => a.date.localeCompare(b.date));
@@ -639,40 +696,44 @@ export async function migrateManualStepEntries() {
   await setManualStepsByDay(uniqueEntries);
 }
 
-export function clearAllStorage() {
+export function clearAllStorage(): void {
   storage.clearAll();
 }
 
-export function validateManualStepEntry(entry: any): entry is ManualStepEntry {
+export function validateManualStepEntry(
+  entry: unknown
+): entry is ManualStepEntry {
   // Check if entry is an object
   if (!entry || typeof entry !== 'object') {
     return false;
   }
 
+  const obj = entry as Record<string, unknown>;
+
   // Check required fields
-  if (!entry.date || typeof entry.date !== 'string') {
+  if (!obj.date || typeof obj.date !== 'string') {
     return false;
   }
 
-  if (typeof entry.steps !== 'number') {
+  if (typeof obj.steps !== 'number') {
     return false;
   }
 
-  if (entry.source !== 'manual') {
+  if (obj.source !== 'manual') {
     return false;
   }
 
   // Validate date format (YYYY-MM-DD)
   const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-  if (!dateRegex.test(entry.date)) {
+  if (!dateRegex.test(obj.date)) {
     return false;
   }
 
   // Validate steps (non-negative number, reasonable upper limit)
-  if (entry.steps < 0) {
+  if (obj.steps < 0) {
     return false;
   }
-  if (entry.steps > 100000) {
+  if (obj.steps > 100000) {
     return false;
   }
 

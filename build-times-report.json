@@ -1,0 +1,19 @@
+{
+  "fileCounts": {
+    "srcFiles": 172,
+    "mockFiles": 13,
+    "totalFiles": 185
+  },
+  "dependencies": {
+    "dependencies": 37,
+    "devDependencies": 44,
+    "totalDependencies": 81
+  },
+  "buildTimes": {
+    "TypeScript Type Check": 1985,
+    "ESLint Linting": 6991,
+    "Jest Testing": 3790,
+    "Full Check (lint + type-check + test)": 9004
+  },
+  "totalTime": 21770
+}
