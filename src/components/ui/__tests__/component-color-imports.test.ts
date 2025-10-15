@@ -6,7 +6,7 @@ describe('Component Color Imports', () => {
 
   // List of files that are expected to use the centralized color system
   const filesToAudit = [
-    'src/components/character/character-avatar.tsx',
+    // 'src/components/character/character-avatar.tsx', // Now uses pure Tailwind classes
     'src/components/character/experience-field.tsx',
     'src/components/character/name-field.tsx',
     'src/components/dungeon-game/currency-display.tsx',

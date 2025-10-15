@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Dimensions, View } from 'react-native';
 
 import type { Character } from '../../types/character';
 import { CharacterAvatar } from './character-avatar';
@@ -27,17 +27,24 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
     [onChange]
   );
 
-  return (
-    <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-900">
-      <View className="space-y-6 p-4">
-        {/* Character Avatar */}
-        <View className="items-center py-4">
-          <CharacterAvatar character={character} size={140} isWalking={true} />
-        </View>
+  const { height: screenHeight } = Dimensions.get('window');
+  const maxAvatarHeight = screenHeight * 0.5; // 50% of screen height
 
+  return (
+    <View className="flex-1 bg-gray-50 dark:bg-gray-900">
+      {/* Character Avatar - Fills remaining space */}
+      <View
+        className="flex-1 items-center justify-center px-4"
+        style={{ maxHeight: maxAvatarHeight }}
+      >
+        <CharacterAvatar character={character} />
+      </View>
+
+      {/* Character Details - Takes natural space */}
+      <View className="p-4">
         <NameField character={character} updateField={updateField} />
         <LevelExpFields character={character} />
       </View>
-    </ScrollView>
+    </View>
   );
 };
