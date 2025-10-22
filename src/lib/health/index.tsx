@@ -12,6 +12,18 @@ import React, {
 } from 'react';
 import { useMMKVString } from 'react-native-mmkv';
 
+// Delver's Descent integration
+import {
+  type DailyStepsData,
+  formatDateForDelving,
+  getAllQueuedRuns,
+  getDailyStepsForDate,
+  getDailyStepsForDateRange,
+  getDelvingRunStatistics,
+  getTodayStepsData,
+  hasQueuedDelvingRuns,
+  syncHealthKitWithDelvingRuns,
+} from '../delvers-descent/healthkit-integration';
 import {
   getCumulativeExperience,
   getCurrency,
@@ -1292,5 +1304,141 @@ export const useCurrencySystem = (): {
     convertCurrentExperience,
     spend,
     conversionRate: CURRENCY_CONVERSION_RATES.XP_TO_CURRENCY,
+  };
+};
+
+/**
+ * Hook for Delver's Descent daily runs integration
+ *
+ * This hook provides integration between HealthKit step data and
+ * the Delver's Descent daily runs queue system.
+ *
+ * @returns Object containing delving runs data and functions
+ */
+export const useDelvingRunsIntegration = (): {
+  todayStepsData: DailyStepsData | null;
+  hasQueuedRuns: boolean;
+  queuedRuns: any[];
+  runStatistics: any;
+  syncWithHealthKit: () => Promise<void>;
+  isLoading: boolean;
+  error: string | null;
+} => {
+  const { stepsByDay, refreshExperience } = useExperienceData();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Get today's steps data
+  const todayStepsData = React.useMemo(() => {
+    return getTodayStepsData(stepsByDay);
+  }, [stepsByDay]);
+
+  // Get queued runs data
+  const hasQueuedRuns = React.useMemo(() => {
+    return hasQueuedDelvingRuns();
+  }, [stepsByDay]);
+
+  const queuedRuns = React.useMemo(() => {
+    return getAllQueuedRuns();
+  }, [stepsByDay]);
+
+  const runStatistics = React.useMemo(() => {
+    return getDelvingRunStatistics();
+  }, [stepsByDay]);
+
+  // Sync function to update delving runs from HealthKit data
+  const syncWithHealthKit = React.useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // First refresh HealthKit data
+      await refreshExperience();
+
+      // Then sync with delving runs
+      await syncHealthKitWithDelvingRuns(stepsByDay);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      setError(errorMessage);
+      console.error('Error syncing HealthKit with delving runs:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [refreshExperience, stepsByDay]);
+
+  // Auto-sync when stepsByDay changes
+  React.useEffect(() => {
+    if (stepsByDay.length > 0) {
+      syncWithHealthKit().catch((err) => {
+        console.error('Auto-sync failed:', err);
+      });
+    }
+  }, [stepsByDay, syncWithHealthKit]);
+
+  return {
+    todayStepsData,
+    hasQueuedRuns,
+    queuedRuns,
+    runStatistics,
+    syncWithHealthKit,
+    isLoading,
+    error,
+  };
+};
+
+/**
+ * Hook for getting daily steps data for Delver's Descent
+ *
+ * This hook provides easy access to daily steps data formatted
+ * for use with the Delver's Descent system.
+ *
+ * @returns Object containing daily steps data and utilities
+ */
+export const useDailyStepsForDelving = (): {
+  stepsByDay: DailyStepsData[];
+  todaySteps: DailyStepsData | null;
+  getStepsForDate: (date: string) => DailyStepsData | null;
+  getStepsForDateRange: (
+    startDate: string,
+    endDate: string
+  ) => DailyStepsData[];
+  isLoading: boolean;
+} => {
+  const { stepsByDay: healthKitStepsByDay } = useExperienceData();
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Convert HealthKit data to Delver's Descent format
+  const stepsByDay = React.useMemo(() => {
+    return healthKitStepsByDay.map((day: { date: Date; steps: number }) => ({
+      date: formatDateForDelving(day.date),
+      steps: day.steps,
+      hasStreakBonus: day.steps >= 10000,
+    }));
+  }, [healthKitStepsByDay]);
+
+  const todaySteps = React.useMemo(() => {
+    return getTodayStepsData(healthKitStepsByDay);
+  }, [healthKitStepsByDay]);
+
+  const getStepsForDate = React.useCallback(
+    (date: string) => {
+      return getDailyStepsForDate(date, healthKitStepsByDay);
+    },
+    [healthKitStepsByDay]
+  );
+
+  const getStepsForDateRange = React.useCallback(
+    (startDate: string, endDate: string) => {
+      return getDailyStepsForDateRange(startDate, endDate, healthKitStepsByDay);
+    },
+    [healthKitStepsByDay]
+  );
+
+  return {
+    stepsByDay,
+    todaySteps,
+    getStepsForDate,
+    getStepsForDateRange,
+    isLoading,
   };
 };
