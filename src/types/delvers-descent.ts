@@ -97,14 +97,13 @@ export interface Region {
 }
 
 export interface DelvingStats {
-  totalRunsCompleted: number;
-  totalRunsBusted: number;
-  deepestDepthReached: number;
-  totalItemsCollected: number;
-  setsCompleted: number;
-  regionsUnlocked: number;
-  averageRunLength: number;
-  longestStreak: number;
+  totalRuns: number;
+  queuedRuns: number;
+  completedRuns: number;
+  bustedRuns: number;
+  activeRuns: number;
+  totalSteps: number;
+  averageSteps: number;
 }
 
 // Type guards for runtime validation

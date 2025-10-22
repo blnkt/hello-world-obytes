@@ -297,24 +297,22 @@ describe("Delver's Descent Types", () => {
   describe('DelvingStats interface', () => {
     it('should create a valid DelvingStats object', () => {
       const stats: DelvingStats = {
-        totalRunsCompleted: 15,
-        totalRunsBusted: 3,
-        deepestDepthReached: 5,
-        totalItemsCollected: 42,
-        setsCompleted: 2,
-        regionsUnlocked: 1,
-        averageRunLength: 3.2,
-        longestStreak: 7,
+        totalRuns: 15,
+        queuedRuns: 2,
+        completedRuns: 12,
+        bustedRuns: 3,
+        activeRuns: 1,
+        totalSteps: 150000,
+        averageSteps: 10000,
       };
 
-      expect(stats.totalRunsCompleted).toBe(15);
-      expect(stats.totalRunsBusted).toBe(3);
-      expect(stats.deepestDepthReached).toBe(5);
-      expect(stats.totalItemsCollected).toBe(42);
-      expect(stats.setsCompleted).toBe(2);
-      expect(stats.regionsUnlocked).toBe(1);
-      expect(stats.averageRunLength).toBe(3.2);
-      expect(stats.longestStreak).toBe(7);
+      expect(stats.totalRuns).toBe(15);
+      expect(stats.queuedRuns).toBe(2);
+      expect(stats.completedRuns).toBe(12);
+      expect(stats.bustedRuns).toBe(3);
+      expect(stats.activeRuns).toBe(1);
+      expect(stats.totalSteps).toBe(150000);
+      expect(stats.averageSteps).toBe(10000);
     });
   });
 

@@ -332,3 +332,13 @@ export class EnergyCalculator {
     };
   }
 }
+
+// Singleton instance
+let energyCalculatorInstance: EnergyCalculator;
+
+export function getEnergyCalculator(): EnergyCalculator {
+  if (!energyCalculatorInstance) {
+    energyCalculatorInstance = new EnergyCalculator();
+  }
+  return energyCalculatorInstance;
+}

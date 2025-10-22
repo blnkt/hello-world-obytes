@@ -419,3 +419,13 @@ export class DungeonMapGenerator {
     };
   }
 }
+
+// Singleton instance
+let dungeonMapGeneratorInstance: DungeonMapGenerator;
+
+export function getDungeonMapGenerator(): DungeonMapGenerator {
+  if (!dungeonMapGeneratorInstance) {
+    dungeonMapGeneratorInstance = new DungeonMapGenerator();
+  }
+  return dungeonMapGeneratorInstance;
+}
