@@ -2,7 +2,9 @@ import { getItem, setItem } from '@/lib/storage';
 import type {
   EncounterOutcome,
   EncounterState,
+  EncounterStatistics,
   EncounterType,
+  FailureConsequences,
 } from '@/types/delvers-descent';
 
 const ENCOUNTER_STATE_KEY = 'delvers_descent_active_encounter';
@@ -10,11 +12,26 @@ const ENCOUNTER_STATE_KEY = 'delvers_descent_active_encounter';
 export class EncounterResolver {
   private currentState: EncounterState | null = null;
   private encounterHistory: EncounterState[] = [];
+  private encounterStatistics: EncounterStatistics = {
+    totalEncounters: 0,
+    successfulEncounters: 0,
+    failedEncounters: 0,
+    averageRewardValue: 0,
+    totalRewardValue: 0,
+    averageEncounterDuration: 0,
+  };
   private readonly supportedEncounterTypes: EncounterType[] = [
     'puzzle_chamber',
     'trade_opportunity',
     'discovery_site',
   ];
+  private readonly encounterTypeMultipliers: Partial<
+    Record<EncounterType, number>
+  > = {
+    puzzle_chamber: 1.0,
+    trade_opportunity: 1.2,
+    discovery_site: 1.1,
+  };
 
   constructor() {
     // Load persisted state on initialization
@@ -168,6 +185,151 @@ export class EncounterResolver {
     } catch (error) {
       console.error('Error clearing persisted encounter state:', error);
     }
+  }
+
+  processEncounterOutcome(outcome: EncounterOutcome): EncounterOutcome {
+    if (!this.validateEncounterOutcome(outcome)) {
+      throw new Error('Invalid encounter outcome');
+    }
+
+    const processedOutcome = { ...outcome };
+    const currentDepth = this.currentState?.depth || 1;
+    const encounterType = this.currentState?.type || 'puzzle_chamber';
+
+    if (outcome.success) {
+      // Process successful outcomes
+      processedOutcome.rewards = outcome.rewards.map((reward) => ({
+        ...reward,
+        value: this.calculateFinalReward(
+          reward.value,
+          encounterType,
+          currentDepth
+        ),
+      }));
+
+      processedOutcome.totalRewardValue = processedOutcome.rewards.reduce(
+        (sum, reward) => sum + reward.value,
+        0
+      );
+    } else {
+      // Process failed outcomes
+      processedOutcome.consequences = this.calculateFailureConsequences(
+        outcome.failureType || 'objective_failed',
+        currentDepth
+      );
+    }
+
+    // Update statistics
+    this.updateEncounterStatistics(processedOutcome);
+
+    return processedOutcome;
+  }
+
+  calculateRewardScaling(depth: number): number {
+    return 1 + depth * 0.2;
+  }
+
+  scaleRewardByDepth(baseReward: number, depth: number): number {
+    return Math.round(baseReward * this.calculateRewardScaling(depth));
+  }
+
+  getEncounterTypeMultiplier(type: EncounterType): number {
+    return this.encounterTypeMultipliers[type] || 1.0;
+  }
+
+  calculateFinalReward(
+    baseReward: number,
+    type: EncounterType,
+    depth: number
+  ): number {
+    const depthScaling = this.calculateRewardScaling(depth);
+    const typeMultiplier = this.getEncounterTypeMultiplier(type);
+    const scaledReward = baseReward * depthScaling * typeMultiplier;
+
+    return Math.round(this.generateRandomRewardVariation(scaledReward, depth));
+  }
+
+  calculateFailureConsequences(
+    failureType: string,
+    depth: number
+  ): FailureConsequences {
+    const baseEnergyLoss = 5 + depth * 2;
+    const baseItemLossRisk = 0.1 + depth * 0.05;
+
+    switch (failureType) {
+      case 'energy_exhausted':
+        return {
+          energyLoss: baseEnergyLoss,
+          itemLossRisk: baseItemLossRisk,
+          encounterLockout: false,
+        };
+      case 'objective_failed':
+        return {
+          energyLoss: baseEnergyLoss * 1.5,
+          itemLossRisk: baseItemLossRisk * 1.5,
+          encounterLockout: false,
+        };
+      case 'forced_retreat':
+        return {
+          energyLoss: baseEnergyLoss * 2,
+          itemLossRisk: baseItemLossRisk * 2,
+          encounterLockout: false,
+          forcedRetreat: true,
+        };
+      case 'encounter_lockout':
+        return {
+          energyLoss: baseEnergyLoss * 3,
+          itemLossRisk: baseItemLossRisk * 3,
+          encounterLockout: true,
+        };
+      default:
+        return {
+          energyLoss: baseEnergyLoss,
+          itemLossRisk: baseItemLossRisk,
+          encounterLockout: false,
+        };
+    }
+  }
+
+  generateRandomRewardVariation(baseReward: number, depth: number): number {
+    const minVariation = 0.85; // Always at least 85% of base
+    const maxVariation = 1.5 + depth * 0.1; // Up to 150-200% of base
+
+    const randomFactor =
+      minVariation + Math.random() * (maxVariation - minVariation);
+    return Math.round(baseReward * randomFactor);
+  }
+
+  validateEncounterOutcome(outcome: any): outcome is EncounterOutcome {
+    return (
+      outcome &&
+      typeof outcome === 'object' &&
+      typeof outcome.success === 'boolean' &&
+      Array.isArray(outcome.rewards) &&
+      typeof outcome.energyUsed === 'number' &&
+      Array.isArray(outcome.itemsGained) &&
+      Array.isArray(outcome.itemsLost)
+    );
+  }
+
+  getEncounterStatistics(): EncounterStatistics {
+    return { ...this.encounterStatistics };
+  }
+
+  private updateEncounterStatistics(outcome: EncounterOutcome): void {
+    this.encounterStatistics.totalEncounters++;
+
+    if (outcome.success) {
+      this.encounterStatistics.successfulEncounters++;
+      this.encounterStatistics.totalRewardValue +=
+        outcome.totalRewardValue || 0;
+    } else {
+      this.encounterStatistics.failedEncounters++;
+    }
+
+    this.encounterStatistics.averageRewardValue =
+      this.encounterStatistics.totalRewardValue /
+      Math.max(this.encounterStatistics.successfulEncounters, 1);
   }
 
   private isValidEncounterState(state: any): state is EncounterState {

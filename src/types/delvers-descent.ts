@@ -132,6 +132,25 @@ export interface EncounterOutcome {
     | 'forced_retreat'
     | 'encounter_lockout';
   additionalEffects?: Record<string, any>;
+  // Extended fields for outcome processing
+  totalRewardValue?: number;
+  consequences?: FailureConsequences;
+}
+
+export interface FailureConsequences {
+  energyLoss: number;
+  itemLossRisk: number; // 0-1 probability
+  encounterLockout: boolean;
+  forcedRetreat?: boolean;
+}
+
+export interface EncounterStatistics {
+  totalEncounters: number;
+  successfulEncounters: number;
+  failedEncounters: number;
+  averageRewardValue: number;
+  totalRewardValue: number;
+  averageEncounterDuration: number;
 }
 
 export interface EncounterProgress {

@@ -506,6 +506,235 @@ describe('EncounterResolver', () => {
     });
   });
 
+  describe('encounter outcome processing system', () => {
+    it('should process successful encounter outcomes with rewards', () => {
+      const encounterData = {
+        type: 'puzzle_chamber' as EncounterType,
+        nodeId: 'node-1',
+        depth: 2,
+        energyCost: 20,
+      };
+
+      encounterResolver.startEncounter(encounterData);
+
+      const outcome: EncounterOutcome = {
+        success: true,
+        rewards: [
+          {
+            id: 'reward-1',
+            type: 'trade_good',
+            setId: 'gems',
+            value: 150,
+            name: 'Ancient Gem',
+            description: 'A valuable gem found in the chamber',
+          },
+        ],
+        energyUsed: 20,
+        itemsGained: [],
+        itemsLost: [],
+      };
+
+      const processedOutcome =
+        encounterResolver.processEncounterOutcome(outcome);
+
+      expect(processedOutcome.success).toBe(true);
+      expect(processedOutcome.rewards).toHaveLength(1);
+      expect(processedOutcome.rewards[0].value).toBeGreaterThan(150); // Should be scaled by depth
+      expect(processedOutcome.totalRewardValue).toBeGreaterThan(150);
+    });
+
+    it('should process failed encounter outcomes with consequences', () => {
+      const encounterData = {
+        type: 'trade_opportunity' as EncounterType,
+        nodeId: 'node-2',
+        depth: 3,
+        energyCost: 25,
+      };
+
+      encounterResolver.startEncounter(encounterData);
+
+      const outcome: EncounterOutcome = {
+        success: false,
+        rewards: [],
+        energyUsed: 25,
+        itemsGained: [],
+        itemsLost: [
+          {
+            id: 'item-1',
+            type: 'trade_good',
+            setId: 'coins',
+            value: 50,
+            name: 'Gold Coin',
+            description: 'Lost during failed negotiation',
+          },
+        ],
+        failureType: 'objective_failed',
+      };
+
+      const processedOutcome =
+        encounterResolver.processEncounterOutcome(outcome);
+
+      expect(processedOutcome.success).toBe(false);
+      expect(processedOutcome.failureType).toBe('objective_failed');
+      expect(processedOutcome.consequences).toBeDefined();
+      expect(processedOutcome.consequences?.energyLoss).toBeGreaterThan(0);
+    });
+
+    it('should calculate depth-based reward scaling', () => {
+      const baseReward = 100;
+      const depth1Scaling = encounterResolver.calculateRewardScaling(1);
+      const depth3Scaling = encounterResolver.calculateRewardScaling(3);
+      const depth5Scaling = encounterResolver.calculateRewardScaling(5);
+
+      expect(depth1Scaling).toBeCloseTo(1.2, 1); // 1 + (1 * 0.2) = 1.2
+      expect(depth3Scaling).toBeCloseTo(1.6, 1); // 1 + (3 * 0.2) = 1.6
+      expect(depth5Scaling).toBeCloseTo(2.0, 1); // 1 + (5 * 0.2) = 2.0
+
+      const scaledReward1 = encounterResolver.scaleRewardByDepth(baseReward, 1);
+      const scaledReward3 = encounterResolver.scaleRewardByDepth(baseReward, 3);
+      const scaledReward5 = encounterResolver.scaleRewardByDepth(baseReward, 5);
+
+      expect(scaledReward1).toBeCloseTo(120, 0);
+      expect(scaledReward3).toBeCloseTo(160, 0);
+      expect(scaledReward5).toBeCloseTo(200, 0);
+    });
+
+    it('should apply encounter type multipliers to rewards', () => {
+      const baseReward = 100;
+      const depth = 2;
+
+      const puzzleChamberMultiplier =
+        encounterResolver.getEncounterTypeMultiplier('puzzle_chamber');
+      const tradeMultiplier =
+        encounterResolver.getEncounterTypeMultiplier('trade_opportunity');
+      const discoveryMultiplier =
+        encounterResolver.getEncounterTypeMultiplier('discovery_site');
+
+      expect(puzzleChamberMultiplier).toBeGreaterThan(0);
+      expect(tradeMultiplier).toBeGreaterThan(0);
+      expect(discoveryMultiplier).toBeGreaterThan(0);
+
+      const puzzleReward = encounterResolver.calculateFinalReward(
+        baseReward,
+        'puzzle_chamber',
+        depth
+      );
+      const tradeReward = encounterResolver.calculateFinalReward(
+        baseReward,
+        'trade_opportunity',
+        depth
+      );
+      const discoveryReward = encounterResolver.calculateFinalReward(
+        baseReward,
+        'discovery_site',
+        depth
+      );
+
+      expect(puzzleReward).toBeGreaterThan(baseReward);
+      expect(tradeReward).toBeGreaterThan(baseReward);
+      expect(discoveryReward).toBeGreaterThan(baseReward);
+    });
+
+    it('should handle failure consequences with different severity levels', () => {
+      const mildFailure = encounterResolver.calculateFailureConsequences(
+        'energy_exhausted',
+        2
+      );
+      const severeFailure = encounterResolver.calculateFailureConsequences(
+        'forced_retreat',
+        2
+      );
+      const criticalFailure = encounterResolver.calculateFailureConsequences(
+        'encounter_lockout',
+        2
+      );
+
+      expect(mildFailure.energyLoss).toBeGreaterThan(0);
+      expect(mildFailure.itemLossRisk).toBeLessThan(0.5);
+
+      expect(severeFailure.energyLoss).toBeGreaterThan(mildFailure.energyLoss);
+      expect(severeFailure.itemLossRisk).toBeGreaterThan(
+        mildFailure.itemLossRisk
+      );
+
+      expect(criticalFailure.energyLoss).toBeGreaterThan(
+        severeFailure.energyLoss
+      );
+      expect(criticalFailure.itemLossRisk).toBeGreaterThan(
+        severeFailure.itemLossRisk
+      );
+      expect(criticalFailure.encounterLockout).toBe(true);
+    });
+
+    it('should generate random reward variations within depth ranges', () => {
+      const baseReward = 100;
+      const depth = 2;
+
+      // Generate multiple rewards to test variation
+      const rewards = Array.from({ length: 10 }, () =>
+        encounterResolver.generateRandomRewardVariation(baseReward, depth)
+      );
+
+      // All rewards should be within reasonable bounds
+      rewards.forEach((reward) => {
+        expect(reward).toBeGreaterThan(baseReward * 0.8); // At least 80% of base
+        expect(reward).toBeLessThan(baseReward * 2.0); // At most 200% of base
+      });
+
+      // Should have some variation (not all identical)
+      const uniqueRewards = new Set(rewards);
+      expect(uniqueRewards.size).toBeGreaterThan(1);
+    });
+
+    it('should validate encounter outcomes before processing', () => {
+      const validOutcome: EncounterOutcome = {
+        success: true,
+        rewards: [],
+        energyUsed: 20,
+        itemsGained: [],
+        itemsLost: [],
+      };
+
+      const invalidOutcome = {
+        success: true,
+        // Missing required fields
+      } as any;
+
+      expect(encounterResolver.validateEncounterOutcome(validOutcome)).toBe(
+        true
+      );
+      expect(encounterResolver.validateEncounterOutcome(invalidOutcome)).toBe(
+        false
+      );
+    });
+
+    it('should track encounter statistics after processing', () => {
+      const encounterData = {
+        type: 'puzzle_chamber' as EncounterType,
+        nodeId: 'node-1',
+        depth: 1,
+        energyCost: 15,
+      };
+
+      encounterResolver.startEncounter(encounterData);
+
+      const outcome: EncounterOutcome = {
+        success: true,
+        rewards: [],
+        energyUsed: 15,
+        itemsGained: [],
+        itemsLost: [],
+      };
+
+      encounterResolver.processEncounterOutcome(outcome);
+
+      const stats = encounterResolver.getEncounterStatistics();
+      expect(stats.totalEncounters).toBeGreaterThan(0);
+      expect(stats.successfulEncounters).toBeGreaterThan(0);
+      expect(stats.averageRewardValue).toBeGreaterThanOrEqual(0);
+    });
+  });
+
   describe('clearEncounterState', () => {
     it('should clear current encounter state', () => {
       const encounterData = {
