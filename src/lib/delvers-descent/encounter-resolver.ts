@@ -127,6 +127,9 @@ export class EncounterResolver {
       this.currentState.outcome = outcome;
       this.currentState.endTime = Date.now();
 
+      // Update statistics
+      this.updateEncounterStatistics(outcome);
+
       // Add to history
       this.encounterHistory.push({ ...this.currentState });
 

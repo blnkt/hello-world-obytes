@@ -966,6 +966,385 @@ describe('EncounterResolver', () => {
     });
   });
 
+  describe('comprehensive unit tests and edge cases', () => {
+    it('should handle extreme depth values correctly', () => {
+      const extremeDepthData = {
+        type: 'puzzle_chamber' as EncounterType,
+        nodeId: 'node-extreme',
+        depth: 100,
+        energyCost: 1000,
+      };
+
+      encounterResolver.startEncounter(extremeDepthData);
+
+      const outcome: EncounterOutcome = {
+        success: true,
+        rewards: [
+          {
+            id: 'reward-extreme',
+            type: 'trade_good',
+            setId: 'gems',
+            value: 100,
+            name: 'Extreme Gem',
+            description: 'A gem from extreme depth',
+          },
+        ],
+        energyUsed: 1000,
+        itemsGained: [],
+        itemsLost: [],
+      };
+
+      const processedOutcome =
+        encounterResolver.processEncounterOutcome(outcome);
+
+      // Should handle extreme depth scaling
+      expect(processedOutcome.rewards[0].value).toBeGreaterThan(100);
+      expect(processedOutcome.totalRewardValue).toBeGreaterThan(100);
+    });
+
+    it('should handle empty and null values gracefully', () => {
+      // Test with empty strings
+      expect(() => {
+        encounterResolver.startEncounter({
+          type: 'puzzle_chamber' as EncounterType,
+          nodeId: '',
+          depth: 1,
+          energyCost: 15,
+        });
+      }).toThrow('Invalid node ID');
+
+      // Test with null values
+      expect(() => {
+        encounterResolver.startEncounter(null as any);
+      }).toThrow('Invalid encounter data');
+
+      // Test with undefined values
+      expect(() => {
+        encounterResolver.startEncounter(undefined as any);
+      }).toThrow('Invalid encounter data');
+    });
+
+    it('should handle boundary energy cost values', () => {
+      // Test minimum energy cost
+      expect(() => {
+        encounterResolver.startEncounter({
+          type: 'puzzle_chamber' as EncounterType,
+          nodeId: 'node-min',
+          depth: 1,
+          energyCost: 0,
+        });
+      }).toThrow('Invalid energy cost');
+
+      // Test negative energy cost
+      expect(() => {
+        encounterResolver.startEncounter({
+          type: 'puzzle_chamber' as EncounterType,
+          nodeId: 'node-neg',
+          depth: 1,
+          energyCost: -10,
+        });
+      }).toThrow('Invalid energy cost');
+    });
+
+    it('should handle boundary depth values', () => {
+      // Test zero depth
+      expect(() => {
+        encounterResolver.startEncounter({
+          type: 'puzzle_chamber' as EncounterType,
+          nodeId: 'node-zero',
+          depth: 0,
+          energyCost: 15,
+        });
+      }).toThrow('Invalid depth value');
+
+      // Test negative depth
+      expect(() => {
+        encounterResolver.startEncounter({
+          type: 'puzzle_chamber' as EncounterType,
+          nodeId: 'node-neg',
+          depth: -5,
+          energyCost: 15,
+        });
+      }).toThrow('Invalid depth value');
+    });
+
+    it('should handle large numbers without overflow', () => {
+      const largeNumberData = {
+        type: 'trade_opportunity' as EncounterType,
+        nodeId: 'node-large',
+        depth: 50,
+        energyCost: 999999,
+      };
+
+      encounterResolver.startEncounter(largeNumberData);
+
+      const outcome: EncounterOutcome = {
+        success: true,
+        rewards: [
+          {
+            id: 'reward-large',
+            type: 'trade_good',
+            setId: 'coins',
+            value: 999999,
+            name: 'Large Coin',
+            description: 'A very valuable coin',
+          },
+        ],
+        energyUsed: 999999,
+        itemsGained: [],
+        itemsLost: [],
+      };
+
+      const processedOutcome =
+        encounterResolver.processEncounterOutcome(outcome);
+
+      // Should handle large numbers without overflow
+      expect(processedOutcome.totalRewardValue).toBeGreaterThan(999999);
+      expect(processedOutcome.totalRewardValue).toBeLessThan(
+        Number.MAX_SAFE_INTEGER
+      );
+    });
+
+    it('should maintain data integrity across multiple operations', () => {
+      const encounterData = {
+        type: 'discovery_site' as EncounterType,
+        nodeId: 'node-integrity',
+        depth: 5,
+        energyCost: 50,
+      };
+
+      encounterResolver.startEncounter(encounterData);
+
+      // Perform multiple operations
+      encounterResolver.updateEncounterProgress({ step1: 'explore' });
+      encounterResolver.updateEncounterProgress({
+        step2: 'discover',
+        step1: 'explore',
+      });
+      encounterResolver.updateEncounterProgress({
+        step3: 'analyze',
+        step2: 'discover',
+        step1: 'explore',
+      });
+
+      const state = encounterResolver.getCurrentState();
+      expect(state?.progress?.step1).toBe('explore');
+      expect(state?.progress?.step2).toBe('discover');
+      expect(state?.progress?.step3).toBe('analyze');
+
+      // Complete encounter
+      const outcome: EncounterOutcome = {
+        success: true,
+        rewards: [],
+        energyUsed: 50,
+        itemsGained: [],
+        itemsLost: [],
+      };
+
+      encounterResolver.completeEncounter('success', outcome);
+
+      // Verify history integrity
+      const history = encounterResolver.getEncounterHistory();
+      expect(history).toHaveLength(1);
+      expect(history[0].progress?.step3).toBe('analyze');
+    });
+
+    it('should handle rapid state transitions', () => {
+      const encounterData = {
+        type: 'puzzle_chamber' as EncounterType,
+        nodeId: 'node-rapid',
+        depth: 1,
+        energyCost: 15,
+      };
+
+      // Rapid start -> progress -> complete cycle
+      encounterResolver.startEncounter(encounterData);
+      encounterResolver.updateEncounterProgress({ rapid: true });
+
+      const outcome: EncounterOutcome = {
+        success: true,
+        rewards: [],
+        energyUsed: 15,
+        itemsGained: [],
+        itemsLost: [],
+      };
+
+      encounterResolver.completeEncounter('success', outcome);
+
+      // Should be ready for next encounter immediately
+      expect(encounterResolver.canStartEncounter()).toBe(true);
+      expect(encounterResolver.getCurrentState()).toBeNull();
+    });
+
+    it('should handle memory pressure scenarios', () => {
+      // Create many encounters to test memory handling
+      const encounterData = {
+        type: 'puzzle_chamber' as EncounterType,
+        nodeId: 'node-memory',
+        depth: 1,
+        energyCost: 15,
+      };
+
+      for (let i = 0; i < 100; i++) {
+        encounterResolver.startEncounter({
+          ...encounterData,
+          nodeId: `node-memory-${i}`,
+        });
+
+        const outcome: EncounterOutcome = {
+          success: true,
+          rewards: [],
+          energyUsed: 15,
+          itemsGained: [],
+          itemsLost: [],
+        };
+
+        encounterResolver.completeEncounter('success', outcome);
+      }
+
+      // Should handle large history without issues
+      const history = encounterResolver.getEncounterHistory();
+      expect(history).toHaveLength(100);
+      expect(history[99].nodeId).toBe('node-memory-99');
+    });
+
+    it('should handle concurrent access simulation', () => {
+      const encounterData = {
+        type: 'trade_opportunity' as EncounterType,
+        nodeId: 'node-concurrent',
+        depth: 2,
+        energyCost: 20,
+      };
+
+      encounterResolver.startEncounter(encounterData);
+
+      // Test that we can update progress multiple times
+      encounterResolver.updateEncounterProgress({ concurrent: 1 });
+      encounterResolver.updateEncounterProgress({ concurrent: 2 });
+      encounterResolver.updateEncounterProgress({ concurrent: 3 });
+
+      // Should have handled multiple updates gracefully
+      const state = encounterResolver.getCurrentState();
+      expect(state).not.toBeNull();
+      expect(state?.status).toBe('active');
+      expect(state?.progress?.concurrent).toBe(3);
+    });
+
+    it('should handle invalid encounter types gracefully', () => {
+      expect(() => {
+        encounterResolver.startEncounter({
+          type: 'invalid_type' as any,
+          nodeId: 'node-invalid',
+          depth: 1,
+          energyCost: 15,
+        });
+      }).toThrow('Invalid encounter type');
+    });
+
+    it('should handle corrupted state recovery', () => {
+      // Simulate corrupted state with invalid type
+      const corruptedState = {
+        id: 'corrupted-id',
+        type: 'invalid_type',
+        nodeId: 'corrupted-node',
+        depth: 1,
+        energyCost: 15,
+        status: 'active',
+        startTime: Date.now(),
+        progress: null, // Corrupted progress
+      };
+
+      encounterResolver.loadEncounterState(corruptedState as any);
+
+      // Should handle corrupted state gracefully
+      const state = encounterResolver.getCurrentState();
+      expect(state).toBeNull();
+    });
+
+    it('should handle statistics edge cases', () => {
+      // Test that statistics are properly maintained
+      const initialStats = encounterResolver.getEncounterStatistics();
+      expect(initialStats.totalEncounters).toBeGreaterThanOrEqual(0);
+      expect(initialStats.successfulEncounters).toBeGreaterThanOrEqual(0);
+      expect(initialStats.failedEncounters).toBeGreaterThanOrEqual(0);
+      expect(initialStats.averageRewardValue).toBeGreaterThanOrEqual(0);
+
+      // Test with a new encounter
+      const encounterData = {
+        type: 'puzzle_chamber' as EncounterType,
+        nodeId: 'node-stats-test',
+        depth: 1,
+        energyCost: 15,
+      };
+
+      encounterResolver.startEncounter(encounterData);
+
+      const outcome: EncounterOutcome = {
+        success: true,
+        rewards: [
+          {
+            id: 'reward-stats',
+            type: 'trade_good',
+            setId: 'coins',
+            value: 100,
+            name: 'Test Coin',
+            description: 'A test coin for statistics',
+          },
+        ],
+        energyUsed: 15,
+        itemsGained: [],
+        itemsLost: [],
+      };
+
+      encounterResolver.completeEncounter('success', outcome);
+
+      const finalStats = encounterResolver.getEncounterStatistics();
+      expect(finalStats.totalEncounters).toBeGreaterThan(
+        initialStats.totalEncounters
+      );
+      expect(finalStats.successfulEncounters).toBeGreaterThan(
+        initialStats.successfulEncounters
+      );
+    });
+
+    it('should handle performance under load', () => {
+      const startTime = Date.now();
+
+      // Perform many operations quickly
+      for (let i = 0; i < 50; i++) {
+        const encounterData = {
+          type: 'puzzle_chamber' as EncounterType,
+          nodeId: `node-perf-${i}`,
+          depth: 1,
+          energyCost: 15,
+        };
+
+        encounterResolver.startEncounter(encounterData);
+        encounterResolver.updateEncounterProgress({ iteration: i });
+
+        const outcome: EncounterOutcome = {
+          success: true,
+          rewards: [],
+          energyUsed: 15,
+          itemsGained: [],
+          itemsLost: [],
+        };
+
+        encounterResolver.completeEncounter('success', outcome);
+      }
+
+      const endTime = Date.now();
+      const duration = endTime - startTime;
+
+      // Should complete within reasonable time (less than 1 second)
+      expect(duration).toBeLessThan(1000);
+
+      // Verify all operations completed successfully
+      const history = encounterResolver.getEncounterHistory();
+      expect(history).toHaveLength(50);
+    });
+  });
+
   describe('clearEncounterState', () => {
     it('should clear current encounter state', () => {
       const encounterData = {
