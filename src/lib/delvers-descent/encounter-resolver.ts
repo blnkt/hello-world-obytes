@@ -1,8 +1,11 @@
+import { getItem, setItem } from '@/lib/storage';
 import type {
   EncounterOutcome,
   EncounterState,
   EncounterType,
 } from '@/types/delvers-descent';
+
+const ENCOUNTER_STATE_KEY = 'delvers_descent_active_encounter';
 
 export class EncounterResolver {
   private currentState: EncounterState | null = null;
@@ -12,6 +15,11 @@ export class EncounterResolver {
     'trade_opportunity',
     'discovery_site',
   ];
+
+  constructor() {
+    // Load persisted state on initialization
+    this.loadPersistedState();
+  }
 
   getCurrentState(): EncounterState | null {
     return this.currentState;
@@ -71,6 +79,8 @@ export class EncounterResolver {
 
     if (this.currentState) {
       this.currentState.progress = progressData;
+      // Auto-save progress to persistence
+      this.saveEncounterState();
     }
   }
 
@@ -90,8 +100,9 @@ export class EncounterResolver {
       // Add to history
       this.encounterHistory.push({ ...this.currentState });
 
-      // Clear current state
+      // Clear current state and persisted state
       this.currentState = null;
+      this.clearPersistedState();
     }
   }
 
@@ -101,6 +112,76 @@ export class EncounterResolver {
 
   clearEncounterState(): void {
     this.currentState = null;
+  }
+
+  getEncounterStartTime(): number | null {
+    return this.currentState?.startTime || null;
+  }
+
+  getEncounterDuration(): number | null {
+    if (!this.currentState) {
+      return null;
+    }
+
+    const endTime = this.currentState.endTime || Date.now();
+    return endTime - this.currentState.startTime;
+  }
+
+  loadEncounterState(state: EncounterState | null): void {
+    if (!state) {
+      this.currentState = null;
+      return;
+    }
+
+    // Validate the state before loading
+    if (this.isValidEncounterState(state)) {
+      this.currentState = state;
+    } else {
+      this.currentState = null;
+    }
+  }
+
+  saveEncounterState(): void {
+    if (this.currentState) {
+      setItem(ENCOUNTER_STATE_KEY, this.currentState);
+    }
+  }
+
+  loadPersistedState(): EncounterState | null {
+    try {
+      const state = getItem<EncounterState>(ENCOUNTER_STATE_KEY);
+      if (state && this.isValidEncounterState(state)) {
+        this.currentState = state;
+        return state;
+      }
+    } catch (error) {
+      console.error('Error loading persisted encounter state:', error);
+    }
+
+    this.currentState = null;
+    return null;
+  }
+
+  clearPersistedState(): void {
+    try {
+      setItem(ENCOUNTER_STATE_KEY, null);
+    } catch (error) {
+      console.error('Error clearing persisted encounter state:', error);
+    }
+  }
+
+  private isValidEncounterState(state: any): state is EncounterState {
+    return (
+      state &&
+      typeof state === 'object' &&
+      typeof state.id === 'string' &&
+      this.isValidEncounterType(state.type) &&
+      typeof state.nodeId === 'string' &&
+      typeof state.depth === 'number' &&
+      typeof state.energyCost === 'number' &&
+      ['active', 'completed', 'failed'].includes(state.status) &&
+      typeof state.startTime === 'number'
+    );
   }
 
   private generateEncounterId(): string {
