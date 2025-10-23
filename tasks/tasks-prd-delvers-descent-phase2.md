@@ -59,14 +59,14 @@
   - [x] 3.6 Implement failure consequences for bad trades (lost resources/energy)
   - [x] 3.7 Add comprehensive unit tests for Trade Opportunity encounter
 
-- [ ] 4.0 Discovery Site Encounters
-  - [ ] 4.1 Create DiscoverySiteEncounter class with exploration mechanics
-  - [ ] 4.2 Implement branching choice system with multiple paths
-  - [ ] 4.3 Create lore collection system for regional history and world-building
-  - [ ] 4.4 Implement map information rewards (intel about deeper paths/shortcuts)
-  - [ ] 4.5 Add regional discovery items for collection sets
-  - [ ] 4.6 Implement risk/reward decision mechanics with varying failure consequences
-  - [ ] 4.7 Add comprehensive unit tests for Discovery Site encounter
+- [x] 4.0 Discovery Site Encounters
+  - [x] 4.1 Create DiscoverySiteEncounter class with exploration mechanics
+  - [x] 4.2 Implement branching choice system with multiple paths
+  - [x] 4.3 Create lore collection system for regional history and world-building
+  - [x] 4.4 Implement map information rewards (intel about deeper paths/shortcuts)
+  - [x] 4.5 Add regional discovery items for collection sets
+  - [x] 4.6 Implement risk/reward decision mechanics with varying failure consequences
+  - [x] 4.7 Add comprehensive unit tests for Discovery Site encounter
 
 - [ ] 5.0 Reward and Failure Systems
   - [ ] 5.1 Create RewardCalculator class with depth-based scaling (base × (1 + depth × 0.2))

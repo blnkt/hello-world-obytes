@@ -424,3 +424,14 @@ DelvingRunScreen (container)
 - `src/components/dungeon-game/` - Complete refactor to spatial navigation
 - `src/components/dungeon-game/dungeon-game.tsx` - Repurpose as Puzzle Chamber encounter
 - New files needed for run queue, map generation, encounter system
+
+### To-dos
+
+- [ ] Task 1: Core Type Definitions - Create all TypeScript interfaces and types with tests
+- [ ] Task 2: Daily Runs Queue System - Implement run queue management with persistence
+- [ ] Task 3: Spatial Map Generation - Implement dungeon map generation algorithms
+- [ ] Task 4: Energy Calculation System - Implement energy and return cost calculations
+- [ ] Task 5: Run State Management - Implement active run state tracking and persistence
+- [ ] Task 6: HealthKit Integration - Extend existing HealthKit for daily runs
+- [ ] Task 7: React Hooks - Create UI integration hooks for all systems
+- [ ] Task 8: Integration Testing - End-to-end tests and validation
