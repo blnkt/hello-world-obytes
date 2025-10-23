@@ -44,8 +44,8 @@
 - [ ] 2.0 Puzzle Chamber Integration
   - [x] 2.1 Analyze existing dungeon game mechanics and tile distribution
   - [x] 2.2 Create PuzzleChamberEncounter class with limited tile reveals (8-12 reveals)
-  - [ ] 2.3 Implement exit discovery goal with ~80-85% success probability
-  - [ ] 2.4 Adapt existing tile types (treasure, trap, exit, bonus, neutral) for encounter context
+  - [x] 2.3 Implement exit discovery goal with ~80-85% success probability
+  - [x] 2.4 Adapt existing tile types (treasure, trap, exit, bonus, neutral) for encounter context
   - [ ] 2.5 Create depth-based reward scaling for Puzzle Chamber rewards
   - [ ] 2.6 Implement failure handling when tile reveals are exhausted
   - [ ] 2.7 Add comprehensive unit tests for Puzzle Chamber encounter
