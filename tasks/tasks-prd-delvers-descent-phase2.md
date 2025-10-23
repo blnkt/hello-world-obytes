@@ -68,15 +68,15 @@
   - [x] 4.6 Implement risk/reward decision mechanics with varying failure consequences
   - [x] 4.7 Add comprehensive unit tests for Discovery Site encounter
 
-- [ ] 5.0 Reward and Failure Systems
-  - [ ] 5.1 Create RewardCalculator class with depth-based scaling (base × (1 + depth × 0.2))
-  - [ ] 5.2 Implement encounter type multipliers for different base reward values
-  - [ ] 5.3 Create collection set integration for trade goods, discoveries, and legendaries
-  - [ ] 5.4 Implement variable reward system with random variation within depth ranges
-  - [ ] 5.5 Create FailureConsequenceManager with multiple failure types
-  - [ ] 5.6 Implement energy loss, item loss risk, and forced retreat consequences
-  - [ ] 5.7 Add encounter lockout and cascading failure severity systems
-  - [ ] 5.8 Add comprehensive unit tests for reward and failure systems
+- [x] 5.0 Reward and Failure Systems
+  - [x] 5.1 Create RewardCalculator class with depth-based scaling (base × (1 + depth × 0.2))
+  - [x] 5.2 Implement encounter type multipliers for different base reward values
+  - [x] 5.3 Create collection set integration for trade goods, discoveries, and legendaries
+  - [x] 5.4 Implement variable reward system with random variation within depth ranges
+  - [x] 5.5 Create FailureConsequenceManager with multiple failure types
+  - [x] 5.6 Implement energy loss, item loss risk, and forced retreat consequences
+  - [x] 5.7 Add encounter lockout and cascading failure severity systems
+  - [x] 5.8 Add comprehensive unit tests for reward and failure systems
 
 - [ ] 6.0 Encounter UI Integration
   - [ ] 6.1 Create main EncounterScreen component with encounter type routing
