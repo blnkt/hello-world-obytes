@@ -78,6 +78,9 @@ export class EncounterResolver {
       throw new Error('Encounter is already active');
     }
 
+    // Validate encounter data
+    this.validateEncounterData(encounterData);
+
     this.currentState = {
       id: this.generateEncounterId(),
       type: encounterData.type,
@@ -94,6 +97,11 @@ export class EncounterResolver {
       throw new Error('No active encounter');
     }
 
+    // Validate progress data
+    if (!progressData || typeof progressData !== 'object') {
+      throw new Error('Invalid progress data');
+    }
+
     if (this.currentState) {
       this.currentState.progress = progressData;
       // Auto-save progress to persistence
@@ -107,6 +115,11 @@ export class EncounterResolver {
   ): void {
     if (!this.isEncounterActive()) {
       throw new Error('No active encounter');
+    }
+
+    // Validate outcome data
+    if (!outcome || typeof outcome !== 'object') {
+      throw new Error('Invalid outcome data');
     }
 
     if (this.currentState) {
@@ -314,6 +327,50 @@ export class EncounterResolver {
 
   getEncounterStatistics(): EncounterStatistics {
     return { ...this.encounterStatistics };
+  }
+
+  // State transition validation methods
+  canStartEncounter(): boolean {
+    return !this.isEncounterActive();
+  }
+
+  canUpdateProgress(): boolean {
+    return this.isEncounterActive();
+  }
+
+  canCompleteEncounter(): boolean {
+    return this.isEncounterActive();
+  }
+
+  private validateEncounterData(data: {
+    type: EncounterType;
+    nodeId: string;
+    depth: number;
+    energyCost: number;
+  }): void {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid encounter data');
+    }
+
+    if (!this.isValidEncounterType(data.type)) {
+      throw new Error('Invalid encounter type');
+    }
+
+    if (
+      !data.nodeId ||
+      typeof data.nodeId !== 'string' ||
+      data.nodeId.trim() === ''
+    ) {
+      throw new Error('Invalid node ID');
+    }
+
+    if (typeof data.depth !== 'number' || data.depth < 1) {
+      throw new Error('Invalid depth value');
+    }
+
+    if (typeof data.energyCost !== 'number' || data.energyCost < 1) {
+      throw new Error('Invalid energy cost');
+    }
   }
 
   private updateEncounterStatistics(outcome: EncounterOutcome): void {

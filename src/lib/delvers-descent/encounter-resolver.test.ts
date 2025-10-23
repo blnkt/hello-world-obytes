@@ -735,6 +735,237 @@ describe('EncounterResolver', () => {
     });
   });
 
+  describe('encounter state transitions', () => {
+    it('should validate state transitions from inactive to active', () => {
+      const encounterData = {
+        type: 'puzzle_chamber' as EncounterType,
+        nodeId: 'node-1',
+        depth: 1,
+        energyCost: 15,
+      };
+
+      // Should be able to start from inactive state
+      expect(encounterResolver.canStartEncounter()).toBe(true);
+
+      encounterResolver.startEncounter(encounterData);
+
+      // Should not be able to start another encounter
+      expect(encounterResolver.canStartEncounter()).toBe(false);
+      expect(encounterResolver.getCurrentState()?.status).toBe('active');
+    });
+
+    it('should validate state transitions from active to progress', () => {
+      const encounterData = {
+        type: 'trade_opportunity' as EncounterType,
+        nodeId: 'node-2',
+        depth: 2,
+        energyCost: 20,
+      };
+
+      encounterResolver.startEncounter(encounterData);
+
+      // Should be able to update progress in active state
+      expect(encounterResolver.canUpdateProgress()).toBe(true);
+
+      encounterResolver.updateEncounterProgress({
+        tradeOptions: ['buy', 'sell'],
+        selectedOption: 'buy',
+      });
+
+      const state = encounterResolver.getCurrentState();
+      expect(state?.status).toBe('active');
+      expect(state?.progress?.selectedOption).toBe('buy');
+    });
+
+    it('should validate state transitions from active to completed', () => {
+      const encounterData = {
+        type: 'discovery_site' as EncounterType,
+        nodeId: 'node-3',
+        depth: 3,
+        energyCost: 25,
+      };
+
+      encounterResolver.startEncounter(encounterData);
+
+      // Should be able to complete from active state
+      expect(encounterResolver.canCompleteEncounter()).toBe(true);
+
+      const outcome: EncounterOutcome = {
+        success: true,
+        rewards: [],
+        energyUsed: 25,
+        itemsGained: [],
+        itemsLost: [],
+      };
+
+      encounterResolver.completeEncounter('success', outcome);
+
+      // Should be back to inactive state
+      expect(encounterResolver.getCurrentState()).toBeNull();
+      expect(encounterResolver.canStartEncounter()).toBe(true);
+    });
+
+    it('should validate state transitions from active to failed', () => {
+      const encounterData = {
+        type: 'puzzle_chamber' as EncounterType,
+        nodeId: 'node-1',
+        depth: 1,
+        energyCost: 15,
+      };
+
+      encounterResolver.startEncounter(encounterData);
+
+      const outcome: EncounterOutcome = {
+        success: false,
+        rewards: [],
+        energyUsed: 15,
+        itemsGained: [],
+        itemsLost: [],
+        failureType: 'energy_exhausted',
+      };
+
+      encounterResolver.completeEncounter('failure', outcome);
+
+      // Should be back to inactive state
+      expect(encounterResolver.getCurrentState()).toBeNull();
+      expect(encounterResolver.canStartEncounter()).toBe(true);
+    });
+
+    it('should prevent invalid state transitions', () => {
+      // Should not be able to update progress without active encounter
+      expect(encounterResolver.canUpdateProgress()).toBe(false);
+
+      // Should not be able to complete without active encounter
+      expect(encounterResolver.canCompleteEncounter()).toBe(false);
+
+      const outcome: EncounterOutcome = {
+        success: true,
+        rewards: [],
+        energyUsed: 15,
+        itemsGained: [],
+        itemsLost: [],
+      };
+
+      // Should throw error when trying to complete without active encounter
+      expect(() => {
+        encounterResolver.completeEncounter('success', outcome);
+      }).toThrow('No active encounter');
+    });
+
+    it('should track state transition history', () => {
+      const encounterData = {
+        type: 'puzzle_chamber' as EncounterType,
+        nodeId: 'node-1',
+        depth: 1,
+        energyCost: 15,
+      };
+
+      encounterResolver.startEncounter(encounterData);
+      encounterResolver.updateEncounterProgress({ tilesRevealed: 3 });
+
+      const outcome: EncounterOutcome = {
+        success: true,
+        rewards: [],
+        energyUsed: 15,
+        itemsGained: [],
+        itemsLost: [],
+      };
+
+      encounterResolver.completeEncounter('success', outcome);
+
+      const history = encounterResolver.getEncounterHistory();
+      expect(history).toHaveLength(1);
+      expect(history[0].status).toBe('completed');
+      expect(history[0].progress?.tilesRevealed).toBe(3);
+    });
+
+    it('should handle state transition errors gracefully', () => {
+      const encounterData = {
+        type: 'trade_opportunity' as EncounterType,
+        nodeId: 'node-2',
+        depth: 2,
+        energyCost: 20,
+      };
+
+      encounterResolver.startEncounter(encounterData);
+
+      // Should handle invalid progress data
+      expect(() => {
+        encounterResolver.updateEncounterProgress(null as any);
+      }).toThrow();
+
+      // Should handle invalid outcome data
+      expect(() => {
+        encounterResolver.completeEncounter('success', null as any);
+      }).toThrow();
+    });
+
+    it('should validate encounter data before state transitions', () => {
+      const invalidEncounterData = {
+        type: 'invalid_type' as any,
+        nodeId: '',
+        depth: -1,
+        energyCost: 0,
+      };
+
+      // Should throw error for invalid encounter data
+      expect(() => {
+        encounterResolver.startEncounter(invalidEncounterData);
+      }).toThrow();
+    });
+
+    it('should enforce encounter state consistency', () => {
+      const encounterData = {
+        type: 'discovery_site' as EncounterType,
+        nodeId: 'node-3',
+        depth: 3,
+        energyCost: 25,
+      };
+
+      encounterResolver.startEncounter(encounterData);
+
+      const state = encounterResolver.getCurrentState();
+      expect(state).not.toBeNull();
+      expect(state?.status).toBe('active');
+      expect(state?.type).toBe('discovery_site');
+      expect(state?.depth).toBe(3);
+      expect(state?.energyCost).toBe(25);
+
+      // State should remain consistent throughout encounter
+      encounterResolver.updateEncounterProgress({
+        explorationChoices: ['ruins'],
+      });
+
+      const updatedState = encounterResolver.getCurrentState();
+      expect(updatedState?.status).toBe('active');
+      expect(updatedState?.type).toBe('discovery_site');
+      expect(updatedState?.depth).toBe(3);
+      expect(updatedState?.energyCost).toBe(25);
+    });
+
+    it('should handle concurrent state transition attempts', () => {
+      const encounterData = {
+        type: 'puzzle_chamber' as EncounterType,
+        nodeId: 'node-1',
+        depth: 1,
+        energyCost: 15,
+      };
+
+      encounterResolver.startEncounter(encounterData);
+
+      // Should prevent multiple simultaneous state changes
+      expect(() => {
+        encounterResolver.startEncounter(encounterData);
+      }).toThrow('Encounter is already active');
+
+      // Should allow normal progression
+      encounterResolver.updateEncounterProgress({ tilesRevealed: 1 });
+      expect(encounterResolver.getCurrentState()?.progress?.tilesRevealed).toBe(
+        1
+      );
+    });
+  });
+
   describe('clearEncounterState', () => {
     it('should clear current encounter state', () => {
       const encounterData = {
