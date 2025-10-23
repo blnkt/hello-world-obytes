@@ -203,6 +203,118 @@ describe('EncounterResolver', () => {
     });
   });
 
+  describe('encounter type detection and routing', () => {
+    it('should detect puzzle chamber encounter type', () => {
+      const encounterData = {
+        type: 'puzzle_chamber' as EncounterType,
+        nodeId: 'node-1',
+        depth: 1,
+        energyCost: 15,
+      };
+
+      encounterResolver.startEncounter(encounterData);
+      const state = encounterResolver.getCurrentState();
+
+      expect(state?.type).toBe('puzzle_chamber');
+      expect(encounterResolver.getEncounterType()).toBe('puzzle_chamber');
+    });
+
+    it('should detect trade opportunity encounter type', () => {
+      const encounterData = {
+        type: 'trade_opportunity' as EncounterType,
+        nodeId: 'node-2',
+        depth: 2,
+        energyCost: 20,
+      };
+
+      encounterResolver.startEncounter(encounterData);
+      const state = encounterResolver.getCurrentState();
+
+      expect(state?.type).toBe('trade_opportunity');
+      expect(encounterResolver.getEncounterType()).toBe('trade_opportunity');
+    });
+
+    it('should detect discovery site encounter type', () => {
+      const encounterData = {
+        type: 'discovery_site' as EncounterType,
+        nodeId: 'node-3',
+        depth: 3,
+        energyCost: 25,
+      };
+
+      encounterResolver.startEncounter(encounterData);
+      const state = encounterResolver.getCurrentState();
+
+      expect(state?.type).toBe('discovery_site');
+      expect(encounterResolver.getEncounterType()).toBe('discovery_site');
+    });
+
+    it('should return null for encounter type when no encounter is active', () => {
+      expect(encounterResolver.getEncounterType()).toBeNull();
+    });
+
+    it('should route puzzle chamber encounters to appropriate handler', () => {
+      const encounterData = {
+        type: 'puzzle_chamber' as EncounterType,
+        nodeId: 'node-1',
+        depth: 1,
+        energyCost: 15,
+      };
+
+      encounterResolver.startEncounter(encounterData);
+      const handler = encounterResolver.getEncounterHandler();
+
+      expect(handler).toBe('puzzle_chamber_handler');
+    });
+
+    it('should route trade opportunity encounters to appropriate handler', () => {
+      const encounterData = {
+        type: 'trade_opportunity' as EncounterType,
+        nodeId: 'node-2',
+        depth: 2,
+        energyCost: 20,
+      };
+
+      encounterResolver.startEncounter(encounterData);
+      const handler = encounterResolver.getEncounterHandler();
+
+      expect(handler).toBe('trade_opportunity_handler');
+    });
+
+    it('should route discovery site encounters to appropriate handler', () => {
+      const encounterData = {
+        type: 'discovery_site' as EncounterType,
+        nodeId: 'node-3',
+        depth: 3,
+        energyCost: 25,
+      };
+
+      encounterResolver.startEncounter(encounterData);
+      const handler = encounterResolver.getEncounterHandler();
+
+      expect(handler).toBe('discovery_site_handler');
+    });
+
+    it('should return null for handler when no encounter is active', () => {
+      expect(encounterResolver.getEncounterHandler()).toBeNull();
+    });
+
+    it('should validate encounter type against supported types', () => {
+      expect(encounterResolver.isValidEncounterType('puzzle_chamber')).toBe(
+        true
+      );
+      expect(encounterResolver.isValidEncounterType('trade_opportunity')).toBe(
+        true
+      );
+      expect(encounterResolver.isValidEncounterType('discovery_site')).toBe(
+        true
+      );
+      expect(encounterResolver.isValidEncounterType('invalid_type')).toBe(
+        false
+      );
+    });
+  });
+
   describe('clearEncounterState', () => {
     it('should clear current encounter state', () => {
       const encounterData = {

@@ -7,9 +7,36 @@ import type {
 export class EncounterResolver {
   private currentState: EncounterState | null = null;
   private encounterHistory: EncounterState[] = [];
+  private readonly supportedEncounterTypes: EncounterType[] = [
+    'puzzle_chamber',
+    'trade_opportunity',
+    'discovery_site',
+  ];
 
   getCurrentState(): EncounterState | null {
     return this.currentState;
+  }
+
+  getEncounterType(): EncounterType | null {
+    return this.currentState?.type || null;
+  }
+
+  getEncounterHandler(): string | null {
+    if (!this.currentState) {
+      return null;
+    }
+
+    const handlerMap: Partial<Record<EncounterType, string>> = {
+      puzzle_chamber: 'puzzle_chamber_handler',
+      trade_opportunity: 'trade_opportunity_handler',
+      discovery_site: 'discovery_site_handler',
+    };
+
+    return handlerMap[this.currentState.type] || null;
+  }
+
+  isValidEncounterType(type: string): boolean {
+    return this.supportedEncounterTypes.includes(type as EncounterType);
   }
 
   isEncounterActive(): boolean {
