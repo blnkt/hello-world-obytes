@@ -54,10 +54,10 @@
   - [x] 3.1 Create TradeOpportunityEncounter class with resource trading mechanics
   - [x] 3.2 Implement decision-based gameplay with A/B/C choice options
   - [x] 3.3 Create arbitrage opportunities with price differences between trade posts
-  - [ ] 3.4 Implement collection set item rewards (trade goods)
-  - [ ] 3.5 Add depth-based inventory scaling (better goods at deeper depths)
-  - [ ] 3.6 Implement failure consequences for bad trades (lost resources/energy)
-  - [ ] 3.7 Add comprehensive unit tests for Trade Opportunity encounter
+  - [x] 3.4 Implement collection set item rewards (trade goods)
+  - [x] 3.5 Add depth-based inventory scaling (better goods at deeper depths)
+  - [x] 3.6 Implement failure consequences for bad trades (lost resources/energy)
+  - [x] 3.7 Add comprehensive unit tests for Trade Opportunity encounter
 
 - [ ] 4.0 Discovery Site Encounters
   - [ ] 4.1 Create DiscoverySiteEncounter class with exploration mechanics

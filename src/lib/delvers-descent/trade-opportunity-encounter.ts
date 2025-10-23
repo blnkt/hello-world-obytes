@@ -1,4 +1,8 @@
-import type { CollectedItem, EncounterType } from '@/types/delvers-descent';
+import type {
+  CollectedItem,
+  CollectionSet,
+  EncounterType,
+} from '@/types/delvers-descent';
 
 export interface TradeOption {
   id: 'A' | 'B' | 'C';
@@ -37,6 +41,53 @@ export interface TradeHistoryEntry {
   outcome: TradeOutcome;
 }
 
+export interface InventoryItem {
+  id: string;
+  name: string;
+  value: number;
+  rarity: 'common' | 'rare' | 'exotic';
+  collectionSet: string;
+  description: string;
+}
+
+export interface InventoryAvailability {
+  totalItems: number;
+  commonItems: number;
+  rareItems: number;
+  exoticItems: number;
+}
+
+export interface TradeQuality {
+  rating: 'excellent' | 'good' | 'fair' | 'poor' | 'terrible';
+  score: number;
+  factors: string[];
+}
+
+export interface TradeConsequences {
+  isBadTrade: boolean;
+  energyLoss: number;
+  itemLossRisk: number;
+  description: string;
+}
+
+export interface TradeStatistics {
+  totalTrades: number;
+  goodTrades: number;
+  badTrades: number;
+  averageTradeQuality: number;
+}
+
+export interface CollectionProgress {
+  totalItems: number;
+  completedSets: string[];
+  partialSets: { setId: string; progress: number; total: number }[];
+}
+
+export interface TradeRiskAssessment {
+  overallRisk: 'low' | 'medium' | 'high';
+  factors: string[];
+}
+
 export class TradeOpportunityEncounter {
   private encounterType: EncounterType = 'trade_opportunity';
   private depth: number;
@@ -45,10 +96,21 @@ export class TradeOpportunityEncounter {
   private tradeHistory: TradeHistoryEntry[] = [];
   private encounterComplete: boolean = false;
   private encounterResult: 'success' | 'failure' | null = null;
+  private availableInventory: InventoryItem[] = [];
+  private collectionSets: CollectionSet[] = [];
+  private tradeStatistics: TradeStatistics = {
+    totalTrades: 0,
+    goodTrades: 0,
+    badTrades: 0,
+    averageTradeQuality: 0,
+  };
+  private lastTradeQuality: TradeQuality | null = null;
 
   constructor(depth: number = 1) {
     this.depth = depth;
     this.initializeTradePosts();
+    this.initializeCollectionSets();
+    this.generateAvailableInventory();
     this.generateTradeOptions();
   }
 
@@ -137,6 +199,11 @@ export class TradeOpportunityEncounter {
       return { success: false, error: 'Option already traded' };
     }
 
+    // Evaluate trade quality
+    const tradeQuality = this.evaluateTradeQuality(option);
+    this.lastTradeQuality = tradeQuality;
+    this.updateTradeStatistics(tradeQuality);
+
     // Process the trade
     const scaledOutcome = this.scaleOutcomeByDepth(option.outcome);
 
@@ -199,6 +266,149 @@ export class TradeOpportunityEncounter {
     Object.assign(post.prices, newPrices);
   }
 
+  // Collection Set Integration Methods
+  getAvailableCollectionSets(): CollectionSet[] {
+    return [...this.collectionSets];
+  }
+
+  getCollectionProgress(): CollectionProgress {
+    const totalItems = this.tradeHistory.reduce(
+      (sum, entry) => sum + entry.outcome.rewards.length,
+      0
+    );
+    const completedSets: string[] = [];
+    const partialSets: { setId: string; progress: number; total: number }[] =
+      [];
+
+    this.collectionSets.forEach((set) => {
+      const collectedItems = this.tradeHistory.reduce((count, entry) => {
+        return (
+          count +
+          entry.outcome.rewards.filter((reward) => reward.setId === set.id)
+            .length
+        );
+      }, 0);
+
+      if (collectedItems >= set.items.length) {
+        completedSets.push(set.id);
+      } else if (collectedItems > 0) {
+        partialSets.push({
+          setId: set.id,
+          progress: collectedItems,
+          total: set.items.length,
+        });
+      }
+    });
+
+    return {
+      totalItems,
+      completedSets,
+      partialSets,
+    };
+  }
+
+  // Inventory Scaling Methods
+  getAvailableInventory(): InventoryItem[] {
+    return [...this.availableInventory];
+  }
+
+  getInventoryByRarity(rarity: 'common' | 'rare' | 'exotic'): InventoryItem[] {
+    return this.availableInventory.filter((item) => item.rarity === rarity);
+  }
+
+  getInventoryAvailability(): InventoryAvailability {
+    const commonItems = this.availableInventory.filter(
+      (item) => item.rarity === 'common'
+    ).length;
+    const rareItems = this.availableInventory.filter(
+      (item) => item.rarity === 'rare'
+    ).length;
+    const exoticItems = this.availableInventory.filter(
+      (item) => item.rarity === 'exotic'
+    ).length;
+
+    return {
+      totalItems: this.availableInventory.length,
+      commonItems,
+      rareItems,
+      exoticItems,
+    };
+  }
+
+  // Trade Quality and Consequences Methods
+  getLastTradeQuality(): TradeQuality | null {
+    return this.lastTradeQuality;
+  }
+
+  getTradeConsequences(): TradeConsequences {
+    if (!this.lastTradeQuality) {
+      return {
+        isBadTrade: false,
+        energyLoss: 0,
+        itemLossRisk: 0,
+        description: 'No recent trade',
+      };
+    }
+
+    const isBadTrade = ['poor', 'terrible'].includes(
+      this.lastTradeQuality.rating
+    );
+    const energyLoss = isBadTrade ? Math.round(5 + this.depth * 2) : 0;
+    const itemLossRisk = isBadTrade ? 0.1 + this.depth * 0.05 : 0;
+
+    return {
+      isBadTrade,
+      energyLoss,
+      itemLossRisk,
+      description: isBadTrade
+        ? `Bad trade detected: ${this.lastTradeQuality.rating}`
+        : 'Good trade',
+    };
+  }
+
+  getTradeStatistics(): TradeStatistics {
+    return { ...this.tradeStatistics };
+  }
+
+  getTradeRiskAssessment(): TradeRiskAssessment {
+    const factors: string[] = [];
+    let overallRisk: 'low' | 'medium' | 'high' = 'low';
+
+    // Assess based on depth
+    if (this.depth > 5) {
+      factors.push('High depth increases risk');
+      overallRisk = 'high';
+    } else if (this.depth > 3) {
+      factors.push('Medium depth increases risk');
+      overallRisk = 'medium';
+    }
+
+    // Assess based on trade history
+    const badTradeRate =
+      this.tradeStatistics.totalTrades > 0
+        ? this.tradeStatistics.badTrades / this.tradeStatistics.totalTrades
+        : 0;
+
+    if (badTradeRate > 0.3) {
+      factors.push('High bad trade rate');
+      overallRisk = overallRisk === 'low' ? 'medium' : 'high';
+    }
+
+    // Assess based on recent trades
+    if (
+      this.lastTradeQuality &&
+      ['poor', 'terrible'].includes(this.lastTradeQuality.rating)
+    ) {
+      factors.push('Recent bad trade');
+      overallRisk = overallRisk === 'low' ? 'medium' : 'high';
+    }
+
+    return {
+      overallRisk,
+      factors,
+    };
+  }
+
   private initializeTradePosts(): void {
     const baseItems = ['common_item', 'rare_item', 'exotic_item', 'trade_good'];
 
@@ -226,7 +436,7 @@ export class TradeOpportunityEncounter {
     multiplier: number
   ): Record<string, number> {
     const prices: Record<string, number> = {};
-    const basePrices = {
+    const basePrices: Record<string, number> = {
       common_item: 10,
       rare_item: 25,
       exotic_item: 50,
@@ -247,13 +457,20 @@ export class TradeOpportunityEncounter {
   }
 
   private generateTradeOptions(): void {
+    const collectionSets = [
+      'silk_road_set',
+      'spice_trade_set',
+      'gem_merchant_set',
+      'exotic_goods_set',
+    ];
+
     const baseOptions: TradeOption[] = [
       {
         id: 'A',
         type: 'buy',
         description: 'Purchase valuable trade goods from the merchant',
         outcome: {
-          rewards: [this.createReward('trade_good', 50)],
+          rewards: [this.createReward(collectionSets[0], 50)],
           consequences: [this.createConsequence('lose_energy', 10)],
         },
       },
@@ -262,7 +479,7 @@ export class TradeOpportunityEncounter {
         type: 'sell',
         description: 'Sell your collected items for profit',
         outcome: {
-          rewards: [this.createReward('trade_good', 30)],
+          rewards: [this.createReward(collectionSets[1], 30)],
           consequences: [this.createConsequence('lose_item', 1)],
         },
       },
@@ -271,7 +488,7 @@ export class TradeOpportunityEncounter {
         type: 'exchange',
         description: 'Exchange items for better equipment',
         outcome: {
-          rewards: [this.createReward('rare_item', 40)],
+          rewards: [this.createReward(collectionSets[2], 40)],
           consequences: [this.createConsequence('lose_energy', 15)],
         },
       },
@@ -283,14 +500,33 @@ export class TradeOpportunityEncounter {
     }));
   }
 
-  private createReward(type: string, value: number): CollectedItem {
+  private createReward(collectionSet: string, value: number): CollectedItem {
+    const setNames: Record<string, string> = {
+      silk_road_set: 'Silk Road',
+      spice_trade_set: 'Spice Trade',
+      gem_merchant_set: 'Gem Merchant',
+      exotic_goods_set: 'Exotic Goods',
+    };
+
+    const itemNames: Record<string, string[]> = {
+      silk_road_set: ['Silk Fabric', 'Fine Silk', 'Royal Silk'],
+      spice_trade_set: ['Spice Blend', 'Rare Spice', 'Legendary Spice'],
+      gem_merchant_set: ['Common Gem', 'Precious Gem', 'Dragon Gem'],
+      exotic_goods_set: ['Basic Potion', 'Elixir', 'Phoenix Elixir'],
+    };
+
+    const setName = setNames[collectionSet] || 'Trade Good';
+    const availableItems = itemNames[collectionSet] || ['Trade Item'];
+    const itemName =
+      availableItems[Math.floor(Math.random() * availableItems.length)];
+
     return {
-      id: `trade-reward-${Date.now()}-${Math.random()}`,
+      id: `trade-reward-${collectionSet}-${Date.now()}-${Math.random()}`,
       type: 'trade_good',
-      setId: 'trade_goods',
+      setId: collectionSet,
       value,
-      name: `${type.charAt(0).toUpperCase() + type.slice(1)} Item`,
-      description: `A valuable ${type} obtained through trade`,
+      name: itemName,
+      description: `A valuable ${itemName.toLowerCase()} from the ${setName.toLowerCase()} collection`,
     };
   }
 
@@ -315,5 +551,264 @@ export class TradeOpportunityEncounter {
         value: Math.round(consequence.value * scaleFactor),
       })),
     };
+  }
+
+  private initializeCollectionSets(): void {
+    this.collectionSets = [
+      {
+        id: 'silk_road_set',
+        name: 'Silk Road Collection',
+        items: [],
+        completionBonus: '+10% energy efficiency',
+        bonusType: 'energy_efficiency',
+        bonusValue: 10,
+      },
+      {
+        id: 'spice_trade_set',
+        name: 'Spice Trade Collection',
+        items: [],
+        completionBonus: 'Start runs with 10 gold',
+        bonusType: 'starting_bonus',
+        bonusValue: 10,
+      },
+      {
+        id: 'gem_merchant_set',
+        name: 'Gem Merchant Collection',
+        items: [],
+        completionBonus: 'Unlock Crystal Caverns region',
+        bonusType: 'unlock_region',
+        bonusValue: 1,
+      },
+      {
+        id: 'exotic_goods_set',
+        name: 'Exotic Goods Collection',
+        items: [],
+        completionBonus: '+15% starting energy',
+        bonusType: 'permanent_ability',
+        bonusValue: 15,
+      },
+    ];
+  }
+
+  private generateAvailableInventory(): void {
+    const baseItems = this.getBaseInventoryItems();
+    const depthMultiplier = 1 + this.depth * 0.3;
+    const maxItems = Math.min(8 + this.depth * 2, 20);
+
+    this.availableInventory = baseItems
+      .filter((item) => this.shouldIncludeItem(item))
+      .slice(0, maxItems)
+      .map((item, index) =>
+        this.createInventoryItem(item, index, depthMultiplier)
+      );
+  }
+
+  private getBaseInventoryItems(): {
+    name: string;
+    rarity: 'common' | 'rare' | 'exotic';
+    collectionSet: string;
+    baseValue: number;
+  }[] {
+    return [
+      ...this.getCommonItems(),
+      ...this.getRareItems(),
+      ...this.getExoticItems(),
+    ];
+  }
+
+  private getCommonItems(): {
+    name: string;
+    rarity: 'common';
+    collectionSet: string;
+    baseValue: number;
+  }[] {
+    return [
+      {
+        name: 'Silk Fabric',
+        rarity: 'common',
+        collectionSet: 'silk_road_set',
+        baseValue: 15,
+      },
+      {
+        name: 'Spice Blend',
+        rarity: 'common',
+        collectionSet: 'spice_trade_set',
+        baseValue: 12,
+      },
+      {
+        name: 'Common Gem',
+        rarity: 'common',
+        collectionSet: 'gem_merchant_set',
+        baseValue: 20,
+      },
+      {
+        name: 'Basic Potion',
+        rarity: 'common',
+        collectionSet: 'exotic_goods_set',
+        baseValue: 18,
+      },
+    ];
+  }
+
+  private getRareItems(): {
+    name: string;
+    rarity: 'rare';
+    collectionSet: string;
+    baseValue: number;
+  }[] {
+    return [
+      {
+        name: 'Fine Silk',
+        rarity: 'rare',
+        collectionSet: 'silk_road_set',
+        baseValue: 35,
+      },
+      {
+        name: 'Rare Spice',
+        rarity: 'rare',
+        collectionSet: 'spice_trade_set',
+        baseValue: 30,
+      },
+      {
+        name: 'Precious Gem',
+        rarity: 'rare',
+        collectionSet: 'gem_merchant_set',
+        baseValue: 45,
+      },
+      {
+        name: 'Elixir',
+        rarity: 'rare',
+        collectionSet: 'exotic_goods_set',
+        baseValue: 40,
+      },
+    ];
+  }
+
+  private getExoticItems(): {
+    name: string;
+    rarity: 'exotic';
+    collectionSet: string;
+    baseValue: number;
+  }[] {
+    return [
+      {
+        name: 'Royal Silk',
+        rarity: 'exotic',
+        collectionSet: 'silk_road_set',
+        baseValue: 80,
+      },
+      {
+        name: 'Legendary Spice',
+        rarity: 'exotic',
+        collectionSet: 'spice_trade_set',
+        baseValue: 75,
+      },
+      {
+        name: 'Dragon Gem',
+        rarity: 'exotic',
+        collectionSet: 'gem_merchant_set',
+        baseValue: 100,
+      },
+      {
+        name: 'Phoenix Elixir',
+        rarity: 'exotic',
+        collectionSet: 'exotic_goods_set',
+        baseValue: 90,
+      },
+    ];
+  }
+
+  private shouldIncludeItem(item: {
+    rarity: 'common' | 'rare' | 'exotic';
+  }): boolean {
+    if (item.rarity === 'exotic' && this.depth < 3) return false;
+    if (item.rarity === 'rare' && this.depth < 2) return false;
+    return true;
+  }
+
+  private createInventoryItem(
+    item: {
+      name: string;
+      rarity: 'common' | 'rare' | 'exotic';
+      collectionSet: string;
+      baseValue: number;
+    },
+    index: number,
+    depthMultiplier: number
+  ): InventoryItem {
+    return {
+      id: `inventory-${item.name.toLowerCase().replace(/\s+/g, '-')}-${index}`,
+      name: item.name,
+      value: Math.round(item.baseValue * depthMultiplier),
+      rarity: item.rarity,
+      collectionSet: item.collectionSet,
+      description: `A ${item.rarity} ${item.name.toLowerCase()} from the trade markets`,
+    };
+  }
+
+  private evaluateTradeQuality(option: TradeOption): TradeQuality {
+    const factors: string[] = [];
+    let score = 50; // Base score
+
+    // Evaluate based on option type
+    switch (option.type) {
+      case 'buy':
+        score += 10;
+        factors.push('Buying low');
+        break;
+      case 'sell':
+        score += 5;
+        factors.push('Selling high');
+        break;
+      case 'exchange':
+        score += 15;
+        factors.push('Strategic exchange');
+        break;
+    }
+
+    // Evaluate based on depth (deeper = riskier but potentially more profitable)
+    if (this.depth > 5) {
+      score += 20;
+      factors.push('High depth premium');
+    } else if (this.depth > 3) {
+      score += 10;
+      factors.push('Medium depth bonus');
+    }
+
+    // Add some randomness for realistic trade outcomes
+    const randomFactor = Math.random() * 40 - 20; // -20 to +20
+    score += randomFactor;
+
+    // Determine rating
+    let rating: TradeQuality['rating'];
+    if (score >= 80) rating = 'excellent';
+    else if (score >= 65) rating = 'good';
+    else if (score >= 50) rating = 'fair';
+    else if (score >= 35) rating = 'poor';
+    else rating = 'terrible';
+
+    return {
+      rating,
+      score: Math.max(0, Math.min(100, score)),
+      factors,
+    };
+  }
+
+  private updateTradeStatistics(quality: TradeQuality): void {
+    this.tradeStatistics.totalTrades++;
+
+    if (['excellent', 'good', 'fair'].includes(quality.rating)) {
+      this.tradeStatistics.goodTrades++;
+    } else {
+      this.tradeStatistics.badTrades++;
+    }
+
+    // Update average quality
+    const totalScore =
+      this.tradeStatistics.averageTradeQuality *
+        (this.tradeStatistics.totalTrades - 1) +
+      quality.score;
+    this.tradeStatistics.averageTradeQuality =
+      totalScore / this.tradeStatistics.totalTrades;
   }
 }
