@@ -106,6 +106,38 @@ export interface DelvingStats {
   averageSteps: number;
 }
 
+// Encounter System Types
+export interface EncounterState {
+  id: string;
+  type: EncounterType;
+  nodeId: string;
+  depth: number;
+  energyCost: number;
+  status: 'active' | 'completed' | 'failed';
+  progress?: Record<string, any>;
+  outcome?: EncounterOutcome;
+  startTime: number;
+  endTime?: number;
+}
+
+export interface EncounterOutcome {
+  success: boolean;
+  rewards: CollectedItem[];
+  energyUsed: number;
+  itemsGained: CollectedItem[];
+  itemsLost: CollectedItem[];
+  failureType?:
+    | 'energy_exhausted'
+    | 'objective_failed'
+    | 'forced_retreat'
+    | 'encounter_lockout';
+  additionalEffects?: Record<string, any>;
+}
+
+export interface EncounterProgress {
+  [key: string]: any;
+}
+
 // Type guards for runtime validation
 export const isDelvingRun = (obj: any): obj is DelvingRun => {
   return (

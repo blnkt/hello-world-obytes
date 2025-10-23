@@ -1,7 +1,7 @@
 ## Relevant Files
 
-- `src/lib/delvers-descent/encounter-resolver.ts` - Core encounter resolution engine and state management
-- `src/lib/delvers-descent/encounter-resolver.test.ts` - Unit tests for encounter resolver
+- `src/lib/delvers-descent/encounter-resolver.ts` - Core encounter resolution engine and state management ✅
+- `src/lib/delvers-descent/encounter-resolver.test.ts` - Unit tests for encounter resolver ✅
 - `src/lib/delvers-descent/puzzle-chamber-encounter.ts` - Puzzle Chamber encounter logic with limited tile reveals
 - `src/lib/delvers-descent/puzzle-chamber-encounter.test.ts` - Unit tests for Puzzle Chamber encounter
 - `src/lib/delvers-descent/trade-opportunity-encounter.ts` - Trade Opportunity encounter logic and mechanics
@@ -34,7 +34,7 @@
 ## Tasks
 
 - [ ] 1.0 Encounter Resolution Framework
-  - [ ] 1.1 Create core EncounterResolver class with state management
+  - [x] 1.1 Create core EncounterResolver class with state management
   - [ ] 1.2 Implement encounter type detection and routing logic
   - [ ] 1.3 Add encounter progress tracking and persistence
   - [ ] 1.4 Create encounter outcome processing system

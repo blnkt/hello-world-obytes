@@ -70,7 +70,6 @@ Phase 2 implements the encounter resolution system for Delver's Descent, transfo
 - [ ] **Encounter Type Multipliers**: Different base reward values per encounter type
 - [ ] **Collection Set Integration**: Rewards contribute to trade goods, discoveries, and legendaries
 - [ ] **Variable Rewards**: Random variation within depth-based ranges
-- [ ] **Bonus Rewards**: Special rewards for perfect encounters or optimal choices
 
 ### Failure Consequence System
 
