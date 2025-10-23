@@ -41,19 +41,19 @@
   - [x] 1.5 Implement encounter state transitions (start, progress, complete, fail)
   - [x] 1.6 Add comprehensive unit tests for encounter resolver
 
-- [ ] 2.0 Puzzle Chamber Integration
+- [x] 2.0 Puzzle Chamber Integration
   - [x] 2.1 Analyze existing dungeon game mechanics and tile distribution
   - [x] 2.2 Create PuzzleChamberEncounter class with limited tile reveals (8-12 reveals)
   - [x] 2.3 Implement exit discovery goal with ~80-85% success probability
   - [x] 2.4 Adapt existing tile types (treasure, trap, exit, bonus, neutral) for encounter context
-  - [ ] 2.5 Create depth-based reward scaling for Puzzle Chamber rewards
-  - [ ] 2.6 Implement failure handling when tile reveals are exhausted
-  - [ ] 2.7 Add comprehensive unit tests for Puzzle Chamber encounter
+  - [x] 2.5 Create depth-based reward scaling for Puzzle Chamber rewards
+  - [x] 2.6 Implement failure handling when tile reveals are exhausted
+  - [x] 2.7 Add comprehensive unit tests for Puzzle Chamber encounter
 
-- [ ] 3.0 Trade Opportunity Encounters
-  - [ ] 3.1 Create TradeOpportunityEncounter class with resource trading mechanics
-  - [ ] 3.2 Implement decision-based gameplay with A/B/C choice options
-  - [ ] 3.3 Create arbitrage opportunities with price differences between trade posts
+- [x] 3.0 Trade Opportunity Encounters
+  - [x] 3.1 Create TradeOpportunityEncounter class with resource trading mechanics
+  - [x] 3.2 Implement decision-based gameplay with A/B/C choice options
+  - [x] 3.3 Create arbitrage opportunities with price differences between trade posts
   - [ ] 3.4 Implement collection set item rewards (trade goods)
   - [ ] 3.5 Add depth-based inventory scaling (better goods at deeper depths)
   - [ ] 3.6 Implement failure consequences for bad trades (lost resources/energy)
