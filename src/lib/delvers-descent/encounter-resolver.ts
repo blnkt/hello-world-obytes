@@ -42,6 +42,10 @@ export class EncounterResolver {
     return this.currentState;
   }
 
+  getEncounterState(): EncounterState | null {
+    return this.currentState;
+  }
+
   getEncounterType(): EncounterType | null {
     return this.currentState?.type || null;
   }

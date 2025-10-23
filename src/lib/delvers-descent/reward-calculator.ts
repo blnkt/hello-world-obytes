@@ -34,7 +34,7 @@ export interface FailureStatistics {
 export class RewardCalculator {
   private depthScalingFactor: number;
   private encounterTypeMultipliers: EncounterTypeMultipliers;
-  private collectionSets: CollectionSetInfo[];
+  private collectionSets: CollectionSetInfo[] = [];
 
   constructor(depthScalingFactor: number = 0.2) {
     this.depthScalingFactor = depthScalingFactor;

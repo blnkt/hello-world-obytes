@@ -78,13 +78,13 @@
   - [x] 5.7 Add encounter lockout and cascading failure severity systems
   - [x] 5.8 Add comprehensive unit tests for reward and failure systems
 
-- [ ] 6.0 Encounter UI Integration
-  - [ ] 6.1 Create main EncounterScreen component with encounter type routing
-  - [ ] 6.2 Implement PuzzleChamberScreen with limited tile reveal UI
-  - [ ] 6.3 Create TradeOpportunityScreen with resource trading interface
-  - [ ] 6.4 Implement DiscoverySiteScreen with branching choice interface
-  - [ ] 6.5 Add smooth transitions between map view and encounter screens
-  - [ ] 6.6 Implement return to map functionality after encounter completion
-  - [ ] 6.7 Create useEncounterResolver React hook for UI integration
-  - [ ] 6.8 Add comprehensive unit tests for all encounter UI components
-  - [ ] 6.9 Create integration tests for complete encounter system workflow
+- [x] 6.0 Encounter UI Integration
+  - [x] 6.1 Create main EncounterScreen component with encounter type routing
+  - [x] 6.2 Implement PuzzleChamberScreen with limited tile reveal UI
+  - [x] 6.3 Create TradeOpportunityScreen with resource trading interface
+  - [x] 6.4 Implement DiscoverySiteScreen with branching choice interface
+  - [x] 6.5 Add smooth transitions between map view and encounter screens
+  - [x] 6.6 Implement return to map functionality after encounter completion
+  - [x] 6.7 Create useEncounterResolver React hook for UI integration
+  - [x] 6.8 Add comprehensive unit tests for all encounter UI components
+  - [x] 6.9 Create integration tests for complete encounter system workflow
