@@ -80,28 +80,32 @@ export class ShortcutManager {
    * Get shortcuts available at a specific depth
    */
   getShortcutsAtDepth(depth: number): ShortcutInfo[] {
-    return this.getAllShortcuts().filter(shortcut => shortcut.depth <= depth);
+    return this.getAllShortcuts().filter((shortcut) => shortcut.depth <= depth);
   }
 
   /**
    * Get shortcut IDs available at a specific depth
    */
   getShortcutIdsAtDepth(depth: number): string[] {
-    return this.getShortcutsAtDepth(depth).map(shortcut => shortcut.id);
+    return this.getShortcutsAtDepth(depth).map((shortcut) => shortcut.id);
   }
 
   /**
    * Calculate effective reduction factor for multiple shortcuts
    */
-  calculateEffectiveReduction(currentDepth: number, shortcutIds: string[]): number {
+  calculateEffectiveReduction(
+    currentDepth: number,
+    shortcutIds: string[]
+  ): number {
     if (!shortcutIds || shortcutIds.length === 0) {
       return 0;
     }
 
     const applicableShortcuts = shortcutIds
-      .map(id => this.shortcuts.get(id))
-      .filter((shortcut): shortcut is ShortcutInfo => 
-        shortcut !== undefined && shortcut.depth <= currentDepth
+      .map((id) => this.shortcuts.get(id))
+      .filter(
+        (shortcut): shortcut is ShortcutInfo =>
+          shortcut !== undefined && shortcut.depth <= currentDepth
       );
 
     if (applicableShortcuts.length === 0) {
@@ -124,14 +128,14 @@ export class ShortcutManager {
     if (this.shortcuts.has(shortcutId)) {
       const currentUsage = this.shortcutUsage.get(shortcutId) ?? 0;
       this.shortcutUsage.set(shortcutId, currentUsage + 1);
-      
+
       // Update usage count in shortcut info
       const shortcut = this.shortcuts.get(shortcutId);
       if (shortcut) {
         shortcut.usageCount = (shortcut.usageCount ?? 0) + 1;
         this.shortcuts.set(shortcutId, shortcut);
       }
-      
+
       this.saveShortcuts();
     }
   }
@@ -145,13 +149,14 @@ export class ShortcutManager {
     let totalReductionFactor = 0;
     const shortcutUsage: Record<string, number> = {};
 
-    shortcuts.forEach(shortcut => {
+    shortcuts.forEach((shortcut) => {
       // Count shortcuts by depth
-      shortcutsByDepth[shortcut.depth] = (shortcutsByDepth[shortcut.depth] ?? 0) + 1;
-      
+      shortcutsByDepth[shortcut.depth] =
+        (shortcutsByDepth[shortcut.depth] ?? 0) + 1;
+
       // Sum reduction factors
       totalReductionFactor += shortcut.reductionFactor;
-      
+
       // Record usage
       shortcutUsage[shortcut.id] = this.shortcutUsage.get(shortcut.id) ?? 0;
     });
@@ -169,7 +174,8 @@ export class ShortcutManager {
     return {
       totalShortcuts: shortcuts.length,
       shortcutsByDepth,
-      averageReductionFactor: shortcuts.length > 0 ? totalReductionFactor / shortcuts.length : 0,
+      averageReductionFactor:
+        shortcuts.length > 0 ? totalReductionFactor / shortcuts.length : 0,
       shortcutUsage,
       mostUsedShortcut: maxUsage > 0 ? mostUsedShortcut : undefined,
     };
@@ -190,16 +196,16 @@ export class ShortcutManager {
   private loadShortcuts(): void {
     try {
       const storedData = getItem(SHORTCUT_STORAGE_KEY);
-      if (storedData) {
-        const data = JSON.parse(storedData);
-        
+      if (storedData && typeof storedData === 'string') {
+        const data = JSON.parse(storedData) as any;
+
         // Load shortcuts
         if (data.shortcuts) {
           Object.entries(data.shortcuts).forEach(([id, shortcut]) => {
             this.shortcuts.set(id, shortcut as ShortcutInfo);
           });
         }
-        
+
         // Load usage statistics
         if (data.usage) {
           Object.entries(data.usage).forEach(([id, count]) => {
@@ -244,13 +250,13 @@ export class ShortcutManager {
    * Validate shortcut data
    */
   private isValidShortcut(shortcut: ShortcutInfo): boolean {
-    return (
+    return Boolean(
       shortcut.id &&
-      shortcut.id.length > 0 &&
-      shortcut.depth > 0 &&
-      shortcut.reductionFactor >= 0 && // Allow values > 1, they'll be clamped
-      shortcut.description &&
-      shortcut.description.length > 0
+        shortcut.id.length > 0 &&
+        shortcut.depth > 0 &&
+        shortcut.reductionFactor >= 0 && // Allow values > 1, they'll be clamped
+        shortcut.description &&
+        shortcut.description.length > 0
     );
   }
 }

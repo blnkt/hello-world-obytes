@@ -1,19 +1,19 @@
 import { ReturnCostCalculator } from './return-cost-calculator';
-import { ShortcutManager } from './shortcut-manager';
-import { SafetyMarginManager } from './safety-margin-manager';
 import { RiskEscalationManager } from './risk-escalation-manager';
+import { SafetyMarginManager } from './safety-margin-manager';
+import { ShortcutManager } from './shortcut-manager';
 
 describe('Configurable Scaling Factors Integration', () => {
   let calculator: ReturnCostCalculator;
   let shortcutManager: ShortcutManager;
-  let safetyManager: SafetyMarginManager;
+  let _safetyManager: SafetyMarginManager;
   let riskManager: RiskEscalationManager;
 
   beforeEach(() => {
     calculator = new ReturnCostCalculator();
     shortcutManager = new ShortcutManager();
     shortcutManager.clearAllShortcuts();
-    safetyManager = new SafetyMarginManager(calculator);
+    _safetyManager = new SafetyMarginManager(calculator);
     riskManager = new RiskEscalationManager();
   });
 
@@ -30,7 +30,7 @@ describe('Configurable Scaling Factors Integration', () => {
 
       // Custom should be different from default
       expect(depth3Cost).not.toBeCloseTo(defaultDepth3Cost, 1);
-      
+
       // Custom should use 10 * 3^2 = 90
       expect(depth3Cost).toBeCloseTo(90, 1);
     });
@@ -64,8 +64,12 @@ describe('Configurable Scaling Factors Integration', () => {
       });
 
       const baseCost = calculator.calculateCumulativeReturnCost(3);
-      const weakShortcutCost = weakShortcuts.calculateReturnCostWithShortcuts(3, ['shortcut-1']);
-      const strongShortcutCost = strongShortcuts.calculateReturnCostWithShortcuts(3, ['shortcut-1']);
+      const weakShortcutCost = weakShortcuts.calculateReturnCostWithShortcuts(
+        3,
+        ['shortcut-1']
+      );
+      const strongShortcutCost =
+        strongShortcuts.calculateReturnCostWithShortcuts(3, ['shortcut-1']);
 
       expect(weakShortcutCost).toBeGreaterThan(strongShortcutCost);
       expect(weakShortcutCost).toBeLessThan(baseCost);
@@ -78,26 +82,34 @@ describe('Configurable Scaling Factors Integration', () => {
         id: 'weak-shortcut',
         depth: 2,
         reductionFactor: 0.3, // 30% reduction
-        description: 'Weak shortcut'
+        description: 'Weak shortcut',
       };
 
       const strongShortcut = {
         id: 'strong-shortcut',
         depth: 2,
         reductionFactor: 0.8, // 80% reduction
-        description: 'Strong shortcut'
+        description: 'Strong shortcut',
       };
 
       shortcutManager.discoverShortcut(weakShortcut);
       shortcutManager.discoverShortcut(strongShortcut);
 
-      const shortcutMap = shortcutManager.getAllShortcuts().reduce((map, shortcut) => {
-        map.set(shortcut.id, shortcut);
-        return map;
-      }, new Map());
+      const shortcutMap = shortcutManager
+        .getAllShortcuts()
+        .reduce((map, shortcut) => {
+          map.set(shortcut.id, shortcut);
+          return map;
+        }, new Map());
 
-      const weakCost = calculator.calculateOptimalReturnCost(2, [], ['weak-shortcut'], shortcutMap);
-      const strongCost = calculator.calculateOptimalReturnCost(2, [], ['strong-shortcut'], shortcutMap);
+      const weakCost = calculator.calculateOptimalReturnCost(2, {
+        availableShortcuts: ['weak-shortcut'],
+        shortcutMap,
+      });
+      const strongCost = calculator.calculateOptimalReturnCost(2, {
+        availableShortcuts: ['strong-shortcut'],
+        shortcutMap,
+      });
 
       expect(strongCost).toBeLessThan(weakCost);
     });
@@ -122,8 +134,16 @@ describe('Configurable Scaling Factors Integration', () => {
       const currentEnergy = 100;
       const returnCost = 60; // 40% safety margin
 
-      const conservativeZone = conservativeManager.getSafetyZone(currentEnergy, returnCost, 3);
-      const aggressiveZone = aggressiveManager.getSafetyZone(currentEnergy, returnCost, 3);
+      const conservativeZone = conservativeManager.getSafetyZone(
+        currentEnergy,
+        returnCost,
+        3
+      );
+      const aggressiveZone = aggressiveManager.getSafetyZone(
+        currentEnergy,
+        returnCost,
+        3
+      );
 
       expect(conservativeZone).toBe('danger'); // 40% < 50% caution threshold, so danger
       expect(aggressiveZone).toBe('safe'); // 40% >= 40% safe threshold
@@ -141,8 +161,16 @@ describe('Configurable Scaling Factors Integration', () => {
       const currentEnergy = 55;
       const returnCost = 50;
 
-      const highBufferPointOfNoReturn = highBufferManager.isPointOfNoReturn(currentEnergy, returnCost, 3);
-      const lowBufferPointOfNoReturn = lowBufferManager.isPointOfNoReturn(currentEnergy, returnCost, 3);
+      const highBufferPointOfNoReturn = highBufferManager.isPointOfNoReturn(
+        currentEnergy,
+        returnCost,
+        3
+      );
+      const lowBufferPointOfNoReturn = lowBufferManager.isPointOfNoReturn(
+        currentEnergy,
+        returnCost,
+        3
+      );
 
       // High buffer: 50 * 1.3 = 65, so 55 < 65 = true (point of no return)
       // Low buffer: 50 * 1.05 = 52.5, so 55 > 52.5 = false (not point of no return)
@@ -193,8 +221,14 @@ describe('Configurable Scaling Factors Integration', () => {
       });
 
       const baseDifficulty = 50;
-      const depth3EasyDifficulty = easyManager.scaleEncounterDifficulty(baseDifficulty, 3);
-      const depth3HardDifficulty = hardManager.scaleEncounterDifficulty(baseDifficulty, 3);
+      const depth3EasyDifficulty = easyManager.scaleEncounterDifficulty(
+        baseDifficulty,
+        3
+      );
+      const depth3HardDifficulty = hardManager.scaleEncounterDifficulty(
+        baseDifficulty,
+        3
+      );
 
       expect(depth3HardDifficulty).toBeGreaterThan(depth3EasyDifficulty);
     });
@@ -208,7 +242,7 @@ describe('Configurable Scaling Factors Integration', () => {
         shortcutReductionFactor: 0.8, // Strong shortcuts
       });
 
-      const easySafetyManager = new SafetyMarginManager(easyCalculator, {
+      const _easySafetyManager = new SafetyMarginManager(easyCalculator, {
         safeThreshold: 0.5, // Lower safe threshold
         safetyBuffer: 0.2, // Higher safety buffer
       });
@@ -236,7 +270,7 @@ describe('Configurable Scaling Factors Integration', () => {
         shortcutReductionFactor: 0.3, // Weak shortcuts
       });
 
-      const hardSafetyManager = new SafetyMarginManager(hardCalculator, {
+      const _hardSafetyManager = new SafetyMarginManager(hardCalculator, {
         safeThreshold: 0.8, // Higher safe threshold
         safetyBuffer: 0.05, // Lower safety buffer
       });
@@ -279,17 +313,19 @@ describe('Configurable Scaling Factors Integration', () => {
       });
 
       const startTime = performance.now();
-      
+
       // Perform many calculations with custom config
       for (let i = 0; i < 1000; i++) {
         customCalculator.calculateBaseReturnCost(i % 20);
         customCalculator.calculateCumulativeReturnCost(i % 20);
-        customCalculator.calculateReturnCostWithShortcuts(i % 20, ['shortcut-1']);
+        customCalculator.calculateReturnCostWithShortcuts(i % 20, [
+          'shortcut-1',
+        ]);
       }
-      
+
       const endTime = performance.now();
       const duration = endTime - startTime;
-      
+
       // Should still complete within performance requirements
       expect(duration).toBeLessThan(50);
     });

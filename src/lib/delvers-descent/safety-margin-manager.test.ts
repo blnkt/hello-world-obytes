@@ -1,5 +1,5 @@
-import { SafetyMarginManager } from './safety-margin-manager';
 import { ReturnCostCalculator } from './return-cost-calculator';
+import { SafetyMarginManager } from './safety-margin-manager';
 
 describe('SafetyMarginManager', () => {
   let safetyManager: SafetyMarginManager;
@@ -15,9 +15,13 @@ describe('SafetyMarginManager', () => {
       const currentEnergy = 100;
       const returnCost = 50;
       const currentDepth = 3;
-      
-      const safetyMargin = safetyManager.calculateSafetyMargin(currentEnergy, returnCost, currentDepth);
-      
+
+      const safetyMargin = safetyManager.calculateSafetyMargin(
+        currentEnergy,
+        returnCost,
+        currentDepth
+      );
+
       expect(safetyMargin).toBeDefined();
       expect(safetyMargin.remainingEnergy).toBe(currentEnergy - returnCost);
       expect(safetyMargin.safetyPercentage).toBeCloseTo(50, 1); // (100-50)/100 * 100
@@ -27,9 +31,13 @@ describe('SafetyMarginManager', () => {
       const currentEnergy = 100;
       const returnCost = 0;
       const currentDepth = 0;
-      
-      const safetyMargin = safetyManager.calculateSafetyMargin(currentEnergy, returnCost, currentDepth);
-      
+
+      const safetyMargin = safetyManager.calculateSafetyMargin(
+        currentEnergy,
+        returnCost,
+        currentDepth
+      );
+
       expect(safetyMargin.remainingEnergy).toBe(100);
       expect(safetyMargin.safetyPercentage).toBe(100);
     });
@@ -38,9 +46,13 @@ describe('SafetyMarginManager', () => {
       const currentEnergy = 30;
       const returnCost = 50;
       const currentDepth = 3;
-      
-      const safetyMargin = safetyManager.calculateSafetyMargin(currentEnergy, returnCost, currentDepth);
-      
+
+      const safetyMargin = safetyManager.calculateSafetyMargin(
+        currentEnergy,
+        returnCost,
+        currentDepth
+      );
+
       expect(safetyMargin.remainingEnergy).toBe(-20);
       expect(safetyMargin.safetyPercentage).toBeCloseTo(-66.7, 1); // (30-50)/30 * 100
     });
@@ -51,9 +63,13 @@ describe('SafetyMarginManager', () => {
       const currentEnergy = 100;
       const returnCost = 20; // 80% safety margin
       const currentDepth = 3;
-      
-      const safetyZone = safetyManager.getSafetyZone(currentEnergy, returnCost, currentDepth);
-      
+
+      const safetyZone = safetyManager.getSafetyZone(
+        currentEnergy,
+        returnCost,
+        currentDepth
+      );
+
       expect(safetyZone).toBe('safe');
     });
 
@@ -61,9 +77,13 @@ describe('SafetyMarginManager', () => {
       const currentEnergy = 100;
       const returnCost = 60; // 40% safety margin
       const currentDepth = 3;
-      
-      const safetyZone = safetyManager.getSafetyZone(currentEnergy, returnCost, currentDepth);
-      
+
+      const safetyZone = safetyManager.getSafetyZone(
+        currentEnergy,
+        returnCost,
+        currentDepth
+      );
+
       expect(safetyZone).toBe('caution');
     });
 
@@ -71,9 +91,13 @@ describe('SafetyMarginManager', () => {
       const currentEnergy = 100;
       const returnCost = 90; // 10% safety margin
       const currentDepth = 3;
-      
-      const safetyZone = safetyManager.getSafetyZone(currentEnergy, returnCost, currentDepth);
-      
+
+      const safetyZone = safetyManager.getSafetyZone(
+        currentEnergy,
+        returnCost,
+        currentDepth
+      );
+
       expect(safetyZone).toBe('danger');
     });
 
@@ -81,9 +105,13 @@ describe('SafetyMarginManager', () => {
       const currentEnergy = 100;
       const returnCost = 100; // 0% safety margin
       const currentDepth = 3;
-      
-      const safetyZone = safetyManager.getSafetyZone(currentEnergy, returnCost, currentDepth);
-      
+
+      const safetyZone = safetyManager.getSafetyZone(
+        currentEnergy,
+        returnCost,
+        currentDepth
+      );
+
       expect(safetyZone).toBe('critical');
     });
   });
@@ -93,9 +121,13 @@ describe('SafetyMarginManager', () => {
       const currentEnergy = 50;
       const returnCost = 60;
       const currentDepth = 3;
-      
-      const isPointOfNoReturn = safetyManager.isPointOfNoReturn(currentEnergy, returnCost, currentDepth);
-      
+
+      const isPointOfNoReturn = safetyManager.isPointOfNoReturn(
+        currentEnergy,
+        returnCost,
+        currentDepth
+      );
+
       expect(isPointOfNoReturn).toBe(true);
     });
 
@@ -103,9 +135,13 @@ describe('SafetyMarginManager', () => {
       const currentEnergy = 100;
       const returnCost = 50;
       const currentDepth = 3;
-      
-      const isPointOfNoReturn = safetyManager.isPointOfNoReturn(currentEnergy, returnCost, currentDepth);
-      
+
+      const isPointOfNoReturn = safetyManager.isPointOfNoReturn(
+        currentEnergy,
+        returnCost,
+        currentDepth
+      );
+
       expect(isPointOfNoReturn).toBe(false);
     });
 
@@ -113,11 +149,15 @@ describe('SafetyMarginManager', () => {
       const currentEnergy = 60; // Increased to ensure safety with buffer
       const returnCost = 50;
       const currentDepth = 3;
-      
+
       // With default 10% safety buffer, 60 energy with 50 return cost should be safe
       // Buffered return cost = 50 * 1.1 = 55, so 60 > 55
-      const isPointOfNoReturn = safetyManager.isPointOfNoReturn(currentEnergy, returnCost, currentDepth);
-      
+      const isPointOfNoReturn = safetyManager.isPointOfNoReturn(
+        currentEnergy,
+        returnCost,
+        currentDepth
+      );
+
       expect(isPointOfNoReturn).toBe(false);
     });
   });
@@ -127,31 +167,43 @@ describe('SafetyMarginManager', () => {
       const currentEnergy = 100;
       const returnCost = 60; // 40% safety margin - should be caution zone
       const currentDepth = 3;
-      
-      const warnings = safetyManager.getRiskWarnings(currentEnergy, returnCost, currentDepth);
-      
+
+      const warnings = safetyManager.getRiskWarnings(
+        currentEnergy,
+        returnCost,
+        currentDepth
+      );
+
       expect(warnings).toBeDefined();
       expect(warnings.length).toBeGreaterThan(0);
-      expect(warnings.some(w => w.type === 'caution')).toBe(true);
+      expect(warnings.some((w) => w.type === 'caution')).toBe(true);
     });
 
     it('should generate critical warnings for dangerous situations', () => {
       const currentEnergy = 100;
       const returnCost = 95;
       const currentDepth = 3;
-      
-      const warnings = safetyManager.getRiskWarnings(currentEnergy, returnCost, currentDepth);
-      
-      expect(warnings.some(w => w.type === 'critical')).toBe(true);
+
+      const warnings = safetyManager.getRiskWarnings(
+        currentEnergy,
+        returnCost,
+        currentDepth
+      );
+
+      expect(warnings.some((w) => w.type === 'critical')).toBe(true);
     });
 
     it('should not generate warnings for safe situations', () => {
       const currentEnergy = 100;
       const returnCost = 20;
       const currentDepth = 3;
-      
-      const warnings = safetyManager.getRiskWarnings(currentEnergy, returnCost, currentDepth);
-      
+
+      const warnings = safetyManager.getRiskWarnings(
+        currentEnergy,
+        returnCost,
+        currentDepth
+      );
+
       expect(warnings.length).toBe(0);
     });
   });
@@ -162,27 +214,35 @@ describe('SafetyMarginManager', () => {
         safeThreshold: 0.8, // 80% safety margin for safe zone
         cautionThreshold: 0.5, // 50% safety margin for caution zone
         dangerThreshold: 0.2, // 20% safety margin for danger zone
-        safetyBuffer: 0.15 // 15% safety buffer
+        safetyBuffer: 0.15, // 15% safety buffer
       });
 
       const currentEnergy = 100;
       const returnCost = 30; // 70% safety margin
       const currentDepth = 3;
-      
-      const safetyZone = customManager.getSafetyZone(currentEnergy, returnCost, currentDepth);
-      
+
+      const safetyZone = customManager.getSafetyZone(
+        currentEnergy,
+        returnCost,
+        currentDepth
+      );
+
       expect(safetyZone).toBe('caution'); // Should be caution with 70% margin and 80% threshold
     });
 
     it('should use default thresholds when not specified', () => {
       const defaultManager = new SafetyMarginManager(calculator);
-      
+
       const currentEnergy = 100;
       const returnCost = 30; // 70% safety margin
       const currentDepth = 3;
-      
-      const safetyZone = defaultManager.getSafetyZone(currentEnergy, returnCost, currentDepth);
-      
+
+      const safetyZone = defaultManager.getSafetyZone(
+        currentEnergy,
+        returnCost,
+        currentDepth
+      );
+
       expect(safetyZone).toBe('safe'); // Should be safe with default thresholds
     });
   });
@@ -191,21 +251,39 @@ describe('SafetyMarginManager', () => {
     it('should increase risk warnings at greater depths', () => {
       const currentEnergy = 100;
       const returnCost = 50; // 50% safety margin
-      
-      const shallowWarnings = safetyManager.getRiskWarnings(currentEnergy, returnCost, 2);
-      const deepWarnings = safetyManager.getRiskWarnings(currentEnergy, returnCost, 5);
-      
+
+      const shallowWarnings = safetyManager.getRiskWarnings(
+        currentEnergy,
+        returnCost,
+        2
+      );
+      const deepWarnings = safetyManager.getRiskWarnings(
+        currentEnergy,
+        returnCost,
+        5
+      );
+
       // Deeper depths should have more or stronger warnings
-      expect(deepWarnings.length).toBeGreaterThanOrEqual(shallowWarnings.length);
+      expect(deepWarnings.length).toBeGreaterThanOrEqual(
+        shallowWarnings.length
+      );
     });
 
     it('should consider depth in point of no return detection', () => {
       const currentEnergy = 60;
       const returnCost = 50;
-      
-      const shallowPointOfNoReturn = safetyManager.isPointOfNoReturn(currentEnergy, returnCost, 2);
-      const deepPointOfNoReturn = safetyManager.isPointOfNoReturn(currentEnergy, returnCost, 5);
-      
+
+      const shallowPointOfNoReturn = safetyManager.isPointOfNoReturn(
+        currentEnergy,
+        returnCost,
+        2
+      );
+      const deepPointOfNoReturn = safetyManager.isPointOfNoReturn(
+        currentEnergy,
+        returnCost,
+        5
+      );
+
       // Deeper depths should be more likely to trigger point of no return
       if (shallowPointOfNoReturn) {
         expect(deepPointOfNoReturn).toBe(true);
@@ -218,10 +296,18 @@ describe('SafetyMarginManager', () => {
       const currentEnergy = 0;
       const returnCost = 50;
       const currentDepth = 3;
-      
-      const safetyZone = safetyManager.getSafetyZone(currentEnergy, returnCost, currentDepth);
-      const isPointOfNoReturn = safetyManager.isPointOfNoReturn(currentEnergy, returnCost, currentDepth);
-      
+
+      const safetyZone = safetyManager.getSafetyZone(
+        currentEnergy,
+        returnCost,
+        currentDepth
+      );
+      const isPointOfNoReturn = safetyManager.isPointOfNoReturn(
+        currentEnergy,
+        returnCost,
+        currentDepth
+      );
+
       expect(safetyZone).toBe('critical');
       expect(isPointOfNoReturn).toBe(true);
     });
@@ -230,10 +316,18 @@ describe('SafetyMarginManager', () => {
       const currentEnergy = -10;
       const returnCost = 50;
       const currentDepth = 3;
-      
-      const safetyZone = safetyManager.getSafetyZone(currentEnergy, returnCost, currentDepth);
-      const isPointOfNoReturn = safetyManager.isPointOfNoReturn(currentEnergy, returnCost, currentDepth);
-      
+
+      const safetyZone = safetyManager.getSafetyZone(
+        currentEnergy,
+        returnCost,
+        currentDepth
+      );
+      const isPointOfNoReturn = safetyManager.isPointOfNoReturn(
+        currentEnergy,
+        returnCost,
+        currentDepth
+      );
+
       expect(safetyZone).toBe('critical');
       expect(isPointOfNoReturn).toBe(true);
     });
@@ -242,10 +336,18 @@ describe('SafetyMarginManager', () => {
       const currentEnergy = 100;
       const returnCost = 1000;
       const currentDepth = 3;
-      
-      const safetyZone = safetyManager.getSafetyZone(currentEnergy, returnCost, currentDepth);
-      const isPointOfNoReturn = safetyManager.isPointOfNoReturn(currentEnergy, returnCost, currentDepth);
-      
+
+      const safetyZone = safetyManager.getSafetyZone(
+        currentEnergy,
+        returnCost,
+        currentDepth
+      );
+      const isPointOfNoReturn = safetyManager.isPointOfNoReturn(
+        currentEnergy,
+        returnCost,
+        currentDepth
+      );
+
       expect(safetyZone).toBe('critical');
       expect(isPointOfNoReturn).toBe(true);
     });
@@ -254,7 +356,7 @@ describe('SafetyMarginManager', () => {
   describe('performance', () => {
     it('should complete safety calculations within performance requirements', () => {
       const startTime = performance.now();
-      
+
       // Perform many safety calculations
       for (let i = 0; i < 1000; i++) {
         safetyManager.calculateSafetyMargin(100, 50, 3);
@@ -262,10 +364,10 @@ describe('SafetyMarginManager', () => {
         safetyManager.isPointOfNoReturn(100, 50, 3);
         safetyManager.getRiskWarnings(100, 50, 3);
       }
-      
+
       const endTime = performance.now();
       const duration = endTime - startTime;
-      
+
       // Should complete within 50ms as per PRD requirements
       expect(duration).toBeLessThan(50);
     });

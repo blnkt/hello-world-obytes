@@ -1,4 +1,4 @@
-import { ReturnCostCalculator } from './return-cost-calculator';
+import { type ReturnCostCalculator } from './return-cost-calculator';
 
 export interface SafetyMarginConfig {
   safeThreshold?: number; // Percentage (0-1) for safe zone
@@ -24,7 +24,10 @@ export class SafetyMarginManager {
   private readonly calculator: ReturnCostCalculator;
   private readonly config: Required<SafetyMarginConfig>;
 
-  constructor(calculator: ReturnCostCalculator, config: SafetyMarginConfig = {}) {
+  constructor(
+    calculator: ReturnCostCalculator,
+    config: SafetyMarginConfig = {}
+  ) {
     this.calculator = calculator;
     this.config = {
       safeThreshold: config.safeThreshold ?? 0.6, // 60% safety margin for safe zone
@@ -43,9 +46,18 @@ export class SafetyMarginManager {
     currentDepth: number
   ): SafetyMargin {
     const remainingEnergy = currentEnergy - returnCost;
-    const safetyPercentage = currentEnergy > 0 ? (remainingEnergy / currentEnergy) * 100 : -100;
-    const safetyZone = this.getSafetyZone(currentEnergy, returnCost, currentDepth);
-    const isPointOfNoReturn = this.isPointOfNoReturn(currentEnergy, returnCost, currentDepth);
+    const safetyPercentage =
+      currentEnergy > 0 ? (remainingEnergy / currentEnergy) * 100 : -100;
+    const safetyZone = this.getSafetyZone(
+      currentEnergy,
+      returnCost,
+      currentDepth
+    );
+    const isPointOfNoReturn = this.isPointOfNoReturn(
+      currentEnergy,
+      returnCost,
+      currentDepth
+    );
 
     return {
       remainingEnergy,
@@ -61,13 +73,14 @@ export class SafetyMarginManager {
   getSafetyZone(
     currentEnergy: number,
     returnCost: number,
-    currentDepth: number
+    _currentDepth: number
   ): 'safe' | 'caution' | 'danger' | 'critical' {
     if (currentEnergy <= 0) {
       return 'critical';
     }
 
-    const safetyPercentage = ((currentEnergy - returnCost) / currentEnergy) * 100;
+    const safetyPercentage =
+      ((currentEnergy - returnCost) / currentEnergy) * 100;
 
     if (safetyPercentage >= this.config.safeThreshold * 100) {
       return 'safe';
@@ -86,7 +99,7 @@ export class SafetyMarginManager {
   isPointOfNoReturn(
     currentEnergy: number,
     returnCost: number,
-    currentDepth: number
+    _currentDepth: number
   ): boolean {
     if (currentEnergy <= 0) {
       return true;
@@ -94,7 +107,7 @@ export class SafetyMarginManager {
 
     // Apply safety buffer to return cost
     const bufferedReturnCost = returnCost * (1 + this.config.safetyBuffer);
-    
+
     return currentEnergy < bufferedReturnCost;
   }
 
@@ -107,10 +120,42 @@ export class SafetyMarginManager {
     currentDepth: number
   ): RiskWarning[] {
     const warnings: RiskWarning[] = [];
-    const safetyZone = this.getSafetyZone(currentEnergy, returnCost, currentDepth);
-    const isPointOfNoReturn = this.isPointOfNoReturn(currentEnergy, returnCost, currentDepth);
+    const safetyZone = this.getSafetyZone(
+      currentEnergy,
+      returnCost,
+      currentDepth
+    );
+    const isPointOfNoReturn = this.isPointOfNoReturn(
+      currentEnergy,
+      returnCost,
+      currentDepth
+    );
 
     // Generate warnings based on safety zone
+    this.addSafetyZoneWarnings(warnings, safetyZone);
+
+    // Add depth-based warnings
+    this.addDepthWarnings(warnings, currentDepth);
+
+    // Add point of no return warning
+    if (isPointOfNoReturn) {
+      warnings.push({
+        type: 'critical',
+        message: 'POINT OF NO RETURN! You cannot afford to return!',
+        severity: 10,
+      });
+    }
+
+    return warnings;
+  }
+
+  /**
+   * Add warnings based on safety zone
+   */
+  private addSafetyZoneWarnings(
+    warnings: RiskWarning[],
+    safetyZone: 'safe' | 'caution' | 'danger' | 'critical'
+  ): void {
     switch (safetyZone) {
       case 'caution':
         warnings.push({
@@ -122,7 +167,8 @@ export class SafetyMarginManager {
       case 'danger':
         warnings.push({
           type: 'danger',
-          message: 'Danger! Energy levels are critically low. Return immediately!',
+          message:
+            'Danger! Energy levels are critically low. Return immediately!',
           severity: 7,
         });
         break;
@@ -134,8 +180,15 @@ export class SafetyMarginManager {
         });
         break;
     }
+  }
 
-    // Add depth-based warnings
+  /**
+   * Add depth-based warnings
+   */
+  private addDepthWarnings(
+    warnings: RiskWarning[],
+    currentDepth: number
+  ): void {
     if (currentDepth >= 5) {
       warnings.push({
         type: 'caution',
@@ -151,17 +204,6 @@ export class SafetyMarginManager {
         severity: 8,
       });
     }
-
-    // Add point of no return warning
-    if (isPointOfNoReturn) {
-      warnings.push({
-        type: 'critical',
-        message: 'POINT OF NO RETURN! You cannot afford to return!',
-        severity: 10,
-      });
-    }
-
-    return warnings;
   }
 
   /**
@@ -170,10 +212,18 @@ export class SafetyMarginManager {
   getRecommendedAction(
     currentEnergy: number,
     returnCost: number,
-    currentDepth: number
+    _currentDepth: number
   ): string {
-    const safetyZone = this.getSafetyZone(currentEnergy, returnCost, currentDepth);
-    const isPointOfNoReturn = this.isPointOfNoReturn(currentEnergy, returnCost, currentDepth);
+    const safetyZone = this.getSafetyZone(
+      currentEnergy,
+      returnCost,
+      _currentDepth
+    );
+    const isPointOfNoReturn = this.isPointOfNoReturn(
+      currentEnergy,
+      returnCost,
+      _currentDepth
+    );
 
     if (isPointOfNoReturn) {
       return 'You must find a way to reduce return costs or gain more energy immediately!';
@@ -208,10 +258,12 @@ export class SafetyMarginManager {
     let maxDepth = currentDepth;
     let testDepth = currentDepth + 1;
 
-    while (testDepth <= 20) { // Reasonable upper limit
-      const returnCost = this.calculator.calculateCumulativeReturnCost(testDepth);
+    while (testDepth <= 20) {
+      // Reasonable upper limit
+      const returnCost =
+        this.calculator.calculateCumulativeReturnCost(testDepth);
       const bufferedReturnCost = returnCost * (1 + this.config.safetyBuffer);
-      
+
       if (currentEnergy >= bufferedReturnCost) {
         maxDepth = testDepth;
         testDepth++;

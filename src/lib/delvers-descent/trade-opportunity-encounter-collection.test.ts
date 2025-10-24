@@ -27,7 +27,7 @@ describe('TradeOpportunityEncounter - Collection Set Integration', () => {
     });
 
     it('should provide different collection sets based on trade post', () => {
-      const tradePosts = tradeEncounter.getAllTradePosts();
+      const _tradePosts = tradeEncounter.getAllTradePosts();
       const collectionSets = new Set<string>();
 
       // Generate rewards from different posts to see variety
@@ -139,7 +139,7 @@ describe('TradeOpportunityEncounter - Collection Set Integration', () => {
     });
 
     it('should provide inventory filtering by rarity', () => {
-      const inventory = tradeEncounter.getAvailableInventory();
+      const _inventory = tradeEncounter.getAvailableInventory();
 
       const commonItems = tradeEncounter.getInventoryByRarity('common');
       const rareItems = tradeEncounter.getInventoryByRarity('rare');
@@ -277,8 +277,8 @@ describe('TradeOpportunityEncounter - Collection Set Integration', () => {
       const arbitrage = tradeEncounter.getArbitrageOpportunities();
       expect(arbitrage.length).toBeGreaterThan(0);
 
-      const tradePosts = tradeEncounter.getAllTradePosts();
-      expect(tradePosts.length).toBeGreaterThan(1);
+      const _tradePosts = tradeEncounter.getAllTradePosts();
+      expect(_tradePosts.length).toBeGreaterThan(1);
     });
 
     it('should handle edge cases gracefully', () => {

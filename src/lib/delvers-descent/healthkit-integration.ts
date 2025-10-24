@@ -110,7 +110,7 @@ export async function generateDelvingRunsFromStepHistory(
 
   // Calculate streak bonus dates
   const streakBonusData = calculateStreakBonusData(stepsByDay);
-  const streakDates = new Set(
+  const _streakDates = new Set(
     streakBonusData
       .filter((data) => data.qualifiesForBonus)
       .map((data) => data.date)

@@ -1,13 +1,9 @@
+import { type ShortcutInfo } from './shortcut-manager';
+
 export interface ReturnCostCalculatorConfig {
   baseMultiplier?: number;
   exponent?: number;
   shortcutReductionFactor?: number;
-}
-
-export interface ShortcutInfo {
-  id: string;
-  depth: number;
-  reductionFactor: number;
 }
 
 export class ReturnCostCalculator {
@@ -18,7 +14,10 @@ export class ReturnCostCalculator {
   constructor(config: ReturnCostCalculatorConfig = {}) {
     this.baseMultiplier = Math.max(0.1, config.baseMultiplier ?? 5); // Clamp to positive values
     this.exponent = Math.max(0.1, config.exponent ?? 1.5); // Clamp to positive values
-    this.shortcutReductionFactor = Math.max(0, Math.min(1, config.shortcutReductionFactor ?? 0.3)); // Clamp to 0-1 range
+    this.shortcutReductionFactor = Math.max(
+      0,
+      Math.min(1, config.shortcutReductionFactor ?? 0.3)
+    ); // Clamp to 0-1 range
   }
 
   /**
@@ -29,7 +28,7 @@ export class ReturnCostCalculator {
     if (depth <= 0) {
       return 0;
     }
-    
+
     return this.baseMultiplier * Math.pow(depth, this.exponent);
   }
 
@@ -46,7 +45,7 @@ export class ReturnCostCalculator {
     for (let depth = 1; depth <= currentDepth; depth++) {
       totalCost += this.calculateBaseReturnCost(depth);
     }
-    
+
     return totalCost;
   }
 
@@ -62,7 +61,7 @@ export class ReturnCostCalculator {
     shortcutMap?: Map<string, ShortcutInfo>
   ): number {
     const baseCost = this.calculateCumulativeReturnCost(currentDepth);
-    
+
     if (!availableShortcuts || availableShortcuts.length === 0) {
       return baseCost;
     }
@@ -103,30 +102,44 @@ export class ReturnCostCalculator {
    */
   calculateOptimalReturnCost(
     currentDepth: number,
-    visitedNodes: string[] = [],
-    availableShortcuts: string[] = [],
-    shortcutMap?: Map<string, ShortcutInfo>
+    options: {
+      visitedNodes?: string[];
+      availableShortcuts?: string[];
+      shortcutMap?: Map<string, ShortcutInfo>;
+    } = {}
   ): number {
+    const {
+      visitedNodes: _visitedNodes = [],
+      availableShortcuts = [],
+      shortcutMap,
+    } = options;
     if (currentDepth <= 0) {
       return 0;
     }
 
     // If no shortcuts available, return basic cumulative cost
-    if (!availableShortcuts || availableShortcuts.length === 0 || !shortcutMap) {
+    if (
+      !availableShortcuts ||
+      availableShortcuts.length === 0 ||
+      !shortcutMap
+    ) {
       return this.calculateCumulativeReturnCost(currentDepth);
     }
 
     // Create a map of depth to best shortcut for that depth
     const depthToShortcut = new Map<number, ShortcutInfo>();
-    
-    availableShortcuts.forEach(shortcutId => {
+
+    availableShortcuts.forEach((shortcutId) => {
       const shortcut = shortcutMap.get(shortcutId);
       if (shortcut && shortcut.depth <= currentDepth) {
         // Only use shortcuts for depths that have been visited
         // For now, we'll assume that if we're at depth N, we've visited depths 1 through N
         // This could be enhanced to check actual visited node depths
         const existingShortcut = depthToShortcut.get(shortcut.depth);
-        if (!existingShortcut || shortcut.reductionFactor > existingShortcut.reductionFactor) {
+        if (
+          !existingShortcut ||
+          shortcut.reductionFactor > existingShortcut.reductionFactor
+        ) {
           depthToShortcut.set(shortcut.depth, shortcut);
         }
       }
@@ -134,11 +147,11 @@ export class ReturnCostCalculator {
 
     // Calculate optimal cost by considering shortcuts at each depth
     let totalCost = 0;
-    
+
     for (let depth = 1; depth <= currentDepth; depth++) {
       const baseCost = this.calculateBaseReturnCost(depth);
       const shortcut = depthToShortcut.get(depth);
-      
+
       if (shortcut) {
         // Apply shortcut reduction
         const reductionFactor = 1 - shortcut.reductionFactor;
@@ -166,11 +179,14 @@ export class ReturnCostCalculator {
   /**
    * Create a new calculator with updated configuration
    */
-  withConfig(config: Partial<ReturnCostCalculatorConfig>): ReturnCostCalculator {
+  withConfig(
+    config: Partial<ReturnCostCalculatorConfig>
+  ): ReturnCostCalculator {
     return new ReturnCostCalculator({
       baseMultiplier: config.baseMultiplier ?? this.baseMultiplier,
       exponent: config.exponent ?? this.exponent,
-      shortcutReductionFactor: config.shortcutReductionFactor ?? this.shortcutReductionFactor,
+      shortcutReductionFactor:
+        config.shortcutReductionFactor ?? this.shortcutReductionFactor,
     });
   }
 }

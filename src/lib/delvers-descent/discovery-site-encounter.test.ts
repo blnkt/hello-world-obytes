@@ -320,7 +320,7 @@ describe('DiscoverySiteEncounter', () => {
       // Simulate multiple failed explorations
       for (let i = 0; i < 5; i++) {
         const testEncounter = new DiscoverySiteEncounter();
-        const paths = testEncounter.getExplorationPaths();
+        const _paths = testEncounter.getExplorationPaths();
         testEncounter.processExplorationDecision('invalid_path');
       }
 

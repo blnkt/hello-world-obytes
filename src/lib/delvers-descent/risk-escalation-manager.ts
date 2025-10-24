@@ -59,8 +59,9 @@ export class RiskEscalationManager {
     }
 
     const riskMultiplier = this.getRiskMultiplier(depth);
-    const scaledDifficulty = baseDifficulty * riskMultiplier * this.config.difficultyScalingFactor;
-    
+    const scaledDifficulty =
+      baseDifficulty * riskMultiplier * this.config.difficultyScalingFactor;
+
     // Cap maximum difficulty to prevent impossible encounters
     const maxDifficulty = baseDifficulty * 5;
     return Math.min(scaledDifficulty, maxDifficulty);
@@ -84,7 +85,10 @@ export class RiskEscalationManager {
   scaleFailureConsequence(
     baseConsequence: number,
     depth: number,
-    consequenceType: 'energy_loss' | 'item_loss' | 'forced_retreat' = 'energy_loss'
+    consequenceType:
+      | 'energy_loss'
+      | 'item_loss'
+      | 'forced_retreat' = 'energy_loss'
   ): number {
     if (baseConsequence <= 0) {
       return 0;
@@ -149,7 +153,8 @@ export class RiskEscalationManager {
       case 'danger':
         warnings.push({
           type: 'danger',
-          message: 'DANGER! You are in high-risk territory. Failure consequences are severe.',
+          message:
+            'DANGER! You are in high-risk territory. Failure consequences are severe.',
           severity: 7,
         });
         warnings.push({
@@ -200,7 +205,10 @@ export class RiskEscalationManager {
   /**
    * Calculate recommended maximum depth for given energy
    */
-  calculateRecommendedMaxDepth(currentEnergy: number, currentDepth: number = 0): number {
+  calculateRecommendedMaxDepth(
+    currentEnergy: number,
+    currentDepth: number = 0
+  ): number {
     if (currentEnergy <= 0) {
       return currentDepth;
     }
@@ -209,14 +217,15 @@ export class RiskEscalationManager {
     let maxDepth = currentDepth;
     let testDepth = currentDepth + 1;
 
-    while (testDepth <= 20) { // Reasonable upper limit
+    while (testDepth <= 20) {
+      // Reasonable upper limit
       const riskMultiplier = this.getRiskMultiplier(testDepth);
-      
+
       // If risk becomes too high (more than 5x base), stop
       if (riskMultiplier > 5) {
         break;
       }
-      
+
       maxDepth = testDepth;
       testDepth++;
     }
@@ -227,7 +236,10 @@ export class RiskEscalationManager {
   /**
    * Get risk statistics for a given depth range
    */
-  getRiskStatistics(startDepth: number, endDepth: number): {
+  getRiskStatistics(
+    startDepth: number,
+    endDepth: number
+  ): {
     averageRisk: number;
     maxRisk: number;
     riskIncrease: number;
@@ -245,9 +257,13 @@ export class RiskEscalationManager {
     }
 
     const averageRisk = count > 0 ? totalRisk / count : 0;
-    const riskIncrease = endDepth > startDepth ? 
-      (this.getRiskMultiplier(endDepth) - this.getRiskMultiplier(startDepth)) / this.getRiskMultiplier(startDepth) : 0;
-    
+    const riskIncrease =
+      endDepth > startDepth
+        ? (this.getRiskMultiplier(endDepth) -
+            this.getRiskMultiplier(startDepth)) /
+          this.getRiskMultiplier(startDepth)
+        : 0;
+
     const recommendedDepth = Math.min(endDepth, this.depthThresholds.caution);
 
     return {

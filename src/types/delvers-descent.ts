@@ -40,6 +40,17 @@ export interface CollectedItem {
   description: string;
 }
 
+export interface AdvancedEncounterItem {
+  id: string;
+  name: string;
+  quantity: number;
+  rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+  type: 'trade_good' | 'discovery' | 'legendary';
+  setId: string;
+  value: number;
+  description: string;
+}
+
 export interface Shortcut {
   id: string;
   fromDepth: number;
@@ -118,6 +129,12 @@ export interface EncounterState {
   outcome?: EncounterOutcome;
   startTime: number;
   endTime?: number;
+}
+
+export interface EncounterReward {
+  energy: number;
+  items: AdvancedEncounterItem[];
+  xp: number;
 }
 
 export interface EncounterOutcome {
