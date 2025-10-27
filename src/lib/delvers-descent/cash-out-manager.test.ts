@@ -178,4 +178,80 @@ describe('CashOutManager', () => {
       expect(summary.rewardDetails).toBeDefined();
     });
   });
+
+  describe('risk warning system - Task 3.2', () => {
+    it('should calculate safety percentage correctly', () => {
+      const currentEnergy = 100;
+      const returnCost = 30; // 70% remaining = safe
+
+      const warning = manager.getRiskWarning(currentEnergy, returnCost);
+
+      expect(warning.safetyMargin).toBe(70);
+      expect(warning.level).toBe('safe');
+    });
+
+    it('should handle edge case at threshold boundaries', () => {
+      const currentEnergy = 100;
+
+      // Test at exactly 50% threshold (safe/caution boundary)
+      const warning1 = manager.getRiskWarning(currentEnergy, 50);
+      expect(warning1.level).toBe('safe'); // >= 50% = safe
+
+      // Test just below 50% threshold
+      const warning2 = manager.getRiskWarning(currentEnergy, 51);
+      expect(warning2.level).toBe('caution');
+    });
+
+    it('should handle zero energy gracefully', () => {
+      const warning = manager.getRiskWarning(0, 50);
+
+      expect(warning.level).toBe('critical');
+      expect(warning.safetyMargin).toBe(0);
+    });
+
+    it('should provide severity-based messages', () => {
+      const testCases = [
+        { energy: 100, cost: 10, expectedLevel: 'safe' }, // 90 remaining = safe
+        { energy: 100, cost: 60, expectedLevel: 'caution' }, // 40 remaining = caution
+        { energy: 100, cost: 90, expectedLevel: 'danger' }, // 10 remaining = danger
+        { energy: 100, cost: 100, expectedLevel: 'critical' }, // 0 remaining = critical
+      ];
+
+      testCases.forEach(({ energy, cost, expectedLevel }) => {
+        const warning = manager.getRiskWarning(energy, cost);
+        expect(warning.level).toBe(expectedLevel);
+        expect(warning.message).toBeDefined();
+        expect(warning.safetyMargin).toBeDefined();
+      });
+    });
+
+    it('should account for depth in risk escalation', () => {
+      // Simulate deeper descent = higher return costs
+      const depth1Cost = 50;
+      const depth3Cost = 150;
+      const currentEnergy = 200;
+
+      const warning1 = manager.getRiskWarning(currentEnergy, depth1Cost);
+      const warning3 = manager.getRiskWarning(currentEnergy, depth3Cost);
+
+      expect(warning1.safetyMargin).toBeGreaterThan(warning3.safetyMargin);
+      expect(warning1.level).toBe('safe'); // 150 remaining = safe
+      expect(warning3.level).toBe('danger'); // 50 remaining = danger
+    });
+
+    it('should handle very large energy values', () => {
+      const warning = manager.getRiskWarning(10000, 5000);
+
+      expect(warning.level).toBe('safe');
+      expect(warning.safetyMargin).toBe(5000);
+    });
+
+    it('should handle return cost exceeding energy', () => {
+      const warning = manager.getRiskWarning(100, 200);
+
+      expect(warning.level).toBe('critical');
+      expect(warning.safetyMargin).toBe(0);
+      expect(warning.message).toContain('CRITICAL');
+    });
+  });
 });
