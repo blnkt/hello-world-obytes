@@ -4,6 +4,8 @@ import type {
   Shortcut,
 } from '@/types/delvers-descent';
 
+import { ReturnCostCalculator } from './return-cost-calculator';
+
 export class DungeonMapGenerator {
   private readonly encounterTypes: EncounterType[] = [
     'puzzle_chamber',
@@ -13,6 +15,14 @@ export class DungeonMapGenerator {
     'hazard',
     'rest_site',
   ];
+  private readonly returnCostCalculator: ReturnCostCalculator;
+
+  constructor(config?: { baseMultiplier?: number; exponent?: number }) {
+    this.returnCostCalculator = new ReturnCostCalculator({
+      baseMultiplier: config?.baseMultiplier ?? 5,
+      exponent: config?.exponent ?? 1.5,
+    });
+  }
 
   /**
    * Generate a single depth level with 2-3 nodes
@@ -174,13 +184,12 @@ export class DungeonMapGenerator {
 
   /**
    * Calculate return cost from current depth to surface
+   * Now uses ReturnCostCalculator for consistency
    */
   private calculateReturnCost(depth: number): number {
-    let cost = 0;
-    for (let d = depth; d > 0; d--) {
-      cost += 5 * Math.pow(d, 1.5);
-    }
-    return Math.round(cost);
+    return Math.round(
+      this.returnCostCalculator.calculateCumulativeReturnCost(depth)
+    );
   }
 
   /**
