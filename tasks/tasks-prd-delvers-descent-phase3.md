@@ -74,7 +74,7 @@
 
 - [ ] 4.0 System Integration & State Management
   - [ ] 4.1 Integrate return cost calculations with existing spatial navigation system
-  - [ ] 4.2 Integrate advanced encounter types with existing encounter resolution framework
+  - [x] 4.2 Integrate advanced encounter types with existing encounter resolution framework
   - [ ] 4.3 Integrate push-your-luck mechanics with existing energy management system
   - [ ] 4.4 Integrate advanced encounters with existing reward calculation system
   - [ ] 4.5 Create ShortcutManager for discovery and persistence across runs

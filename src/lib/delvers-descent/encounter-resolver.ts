@@ -24,6 +24,9 @@ export class EncounterResolver {
     'puzzle_chamber',
     'trade_opportunity',
     'discovery_site',
+    'risk_event',
+    'hazard',
+    'rest_site',
   ];
   private readonly encounterTypeMultipliers: Partial<
     Record<EncounterType, number>
@@ -31,6 +34,9 @@ export class EncounterResolver {
     puzzle_chamber: 1.0,
     trade_opportunity: 1.2,
     discovery_site: 1.1,
+    risk_event: 1.5, // High-risk, high-reward
+    hazard: 1.3, // Dangerous but manageable
+    rest_site: 0.9, // Restful, slightly lower rewards
   };
 
   constructor() {
@@ -59,6 +65,9 @@ export class EncounterResolver {
       puzzle_chamber: 'puzzle_chamber_handler',
       trade_opportunity: 'trade_opportunity_handler',
       discovery_site: 'discovery_site_handler',
+      risk_event: 'risk_event_handler',
+      hazard: 'hazard_handler',
+      rest_site: 'rest_site_handler',
     };
 
     return handlerMap[this.currentState.type] || null;

@@ -316,9 +316,54 @@ describe('EncounterResolver', () => {
       expect(encounterResolver.isValidEncounterType('discovery_site')).toBe(
         true
       );
+      expect(encounterResolver.isValidEncounterType('risk_event')).toBe(true);
+      expect(encounterResolver.isValidEncounterType('hazard')).toBe(true);
+      expect(encounterResolver.isValidEncounterType('rest_site')).toBe(true);
       expect(encounterResolver.isValidEncounterType('invalid_type')).toBe(
         false
       );
+    });
+
+    it('should route risk event encounters to appropriate handler', () => {
+      const encounterData = {
+        type: 'risk_event' as EncounterType,
+        nodeId: 'node-4',
+        depth: 3,
+        energyCost: 30,
+      };
+
+      encounterResolver.startEncounter(encounterData);
+      const handler = encounterResolver.getEncounterHandler();
+
+      expect(handler).toBe('risk_event_handler');
+    });
+
+    it('should route hazard encounters to appropriate handler', () => {
+      const encounterData = {
+        type: 'hazard' as EncounterType,
+        nodeId: 'node-5',
+        depth: 4,
+        energyCost: 35,
+      };
+
+      encounterResolver.startEncounter(encounterData);
+      const handler = encounterResolver.getEncounterHandler();
+
+      expect(handler).toBe('hazard_handler');
+    });
+
+    it('should route rest site encounters to appropriate handler', () => {
+      const encounterData = {
+        type: 'rest_site' as EncounterType,
+        nodeId: 'node-6',
+        depth: 5,
+        energyCost: 10,
+      };
+
+      encounterResolver.startEncounter(encounterData);
+      const handler = encounterResolver.getEncounterHandler();
+
+      expect(handler).toBe('rest_site_handler');
     });
   });
 
