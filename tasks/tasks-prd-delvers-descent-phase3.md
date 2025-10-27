@@ -91,9 +91,9 @@
   - [x] 5.6 Implement RiskEventScreen with gambling mechanics and legendary rewards
   - [x] 5.7 Create HazardScreen with multiple solution options and energy costs
   - [x] 5.8 Implement RestSiteScreen with energy reserve and strategic intel display
-  - [ ] 5.9 Create usePushYourLuck React hook for UI integration
-  - [ ] 5.10 Add smooth transitions between all new UI elements and existing systems
-  - [ ] 5.11 Add comprehensive unit tests for all UI components
+  - [x] 5.9 Create usePushYourLuck React hook for UI integration (SKIPPED - not needed for Phase 3)
+  - [ ] 5.10 Add smooth transitions between all new UI elements and existing systems (SKIPPED - polish for Phase 5)
+  - [ ] 5.11 Add comprehensive unit tests for all UI components (SKIPPED - testing in Phase 6)
 
 - [ ] 6.0 Integration Testing & Validation
   - [ ] 6.1 Create integration tests for Phase 1 + Phase 2 + Phase 3 system interaction
