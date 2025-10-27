@@ -99,7 +99,7 @@
   - [x] 6.1 Create integration tests for Phase 1 + Phase 2 + Phase 3 system interaction
   - [x] 6.2 Test return cost calculations with various depth and shortcut scenarios (covered in 6.1)
   - [x] 6.3 Test cash out/bust logic with edge cases and boundary conditions
-  - [ ] 6.4 Test advanced encounter integration with existing encounter system
+  - [x] 6.4 Test advanced encounter integration with existing encounter system
   - [ ] 6.5 Test state persistence across app sessions and run transitions
   - [ ] 6.6 Test performance requirements (50ms return costs, 200ms UI transitions)
   - [ ] 6.7 Test user experience flows for decision-making and risk communication
