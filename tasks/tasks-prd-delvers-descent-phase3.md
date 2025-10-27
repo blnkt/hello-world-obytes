@@ -45,26 +45,26 @@
 
 ## Tasks
 
-- [ ] 1.0 Push-Your-Luck Core Mechanics
-  - [ ] 1.1 Create ReturnCostCalculator class with exponential scaling algorithm (5 \* depth^1.5)
-  - [ ] 1.2 Implement shortcut integration with configurable cost reduction (70% default)
-  - [ ] 1.3 Create path optimization algorithm considering shortcuts and visited nodes
-  - [ ] 1.4 Implement SafetyMarginManager for point of no return detection
-  - [ ] 1.5 Create RiskEscalationManager for depth-based difficulty scaling
-  - [ ] 1.6 Add configurable scaling factors for exponential curves and shortcut effectiveness
-  - [ ] 1.7 Add comprehensive unit tests for all push-your-luck algorithms
+- [x] 1.0 Push-Your-Luck Core Mechanics
+  - [x] 1.1 Create ReturnCostCalculator class with exponential scaling algorithm (5 \* depth^1.5)
+  - [x] 1.2 Implement shortcut integration with configurable cost reduction (70% default)
+  - [x] 1.3 Create path optimization algorithm considering shortcuts and visited nodes
+  - [x] 1.4 Implement SafetyMarginManager for point of no return detection
+  - [x] 1.5 Create RiskEscalationManager for depth-based difficulty scaling
+  - [x] 1.6 Add configurable scaling factors for exponential curves and shortcut effectiveness
+  - [x] 1.7 Add comprehensive unit tests for all push-your-luck algorithms
 
-- [ ] 2.0 Advanced Encounter Types Implementation
-  - [ ] 2.1 Create RiskEventEncounter class with high-stakes gambling mechanics
-  - [ ] 2.2 Implement multiple risk levels with varying success rates and legendary rewards
-  - [ ] 2.3 Create HazardEncounter class with obstacle types and multiple solution paths
-  - [ ] 2.4 Implement energy cost options (pay toll, alternate route, risky gamble)
-  - [ ] 2.5 Create RestSiteEncounter class with energy reserve and strategic intel
-  - [ ] 2.6 Implement depth-based scaling for all advanced encounter types
-  - [ ] 2.7 Add comprehensive unit tests for all advanced encounter mechanics
+- [x] 2.0 Advanced Encounter Types Implementation
+  - [x] 2.1 Create RiskEventEncounter class with high-stakes gambling mechanics
+  - [x] 2.2 Implement multiple risk levels with varying success rates and legendary rewards
+  - [x] 2.3 Create HazardEncounter class with obstacle types and multiple solution paths
+  - [x] 2.4 Implement energy cost options (pay toll, alternate route, risky gamble)
+  - [x] 2.5 Create RestSiteEncounter class with energy reserve and strategic intel
+  - [x] 2.6 Implement depth-based scaling for all advanced encounter types
+  - [x] 2.7 Add comprehensive unit tests for all advanced encounter mechanics
 
 - [ ] 3.0 Cash Out & Bust Logic System
-  - [ ] 3.1 Create CashOutManager class with player choice system (no forced busts)
+  - [x] 3.1 Create CashOutManager class with player choice system (no forced busts)
   - [ ] 3.2 Implement risk warning system with clear danger level indicators
   - [ ] 3.3 Create reward banking system for secure item collection on cash out
   - [ ] 3.4 Implement XP preservation logic (steps always count regardless of outcome)
