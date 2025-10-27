@@ -1,9 +1,12 @@
 import React from 'react';
+import { Pressable, ScrollView, Text, View } from 'react-native';
+
+import type { DelvingRun, DungeonNode } from '@/types/delvers-descent';
+
+import { useEncounterResolver } from '../hooks/use-encounter-resolver';
+import { DiscoverySiteScreen } from './discovery-site-screen';
 import { PuzzleChamberScreen } from './puzzle-chamber-screen';
 import { TradeOpportunityScreen } from './trade-opportunity-screen';
-import { DiscoverySiteScreen } from './discovery-site-screen';
-import { useEncounterResolver } from '../hooks/use-encounter-resolver';
-import type { DelvingRun, DungeonNode, EncounterType } from '@/types/delvers-descent';
 
 interface EncounterScreenProps {
   run: DelvingRun;
@@ -11,6 +14,134 @@ interface EncounterScreenProps {
   onReturnToMap: () => void;
   onEncounterComplete: (result: 'success' | 'failure', rewards?: any[]) => void;
 }
+
+const LoadingScreen: React.FC = () => (
+  <View
+    testID="encounter-loading"
+    className="flex min-h-screen items-center justify-center"
+  >
+    <View>
+      <View className="mx-auto size-32 animate-spin rounded-full border-b-2 border-blue-500" />
+      <Text className="mt-4 text-center text-lg text-gray-600">
+        Loading encounter...
+      </Text>
+    </View>
+  </View>
+);
+
+const ErrorScreen: React.FC<{ error: string; onReturn: () => void }> = ({
+  error,
+  onReturn,
+}) => (
+  <View
+    testID="encounter-error"
+    className="flex min-h-screen items-center justify-center"
+  >
+    <View>
+      <Text className="mb-4 text-center text-6xl text-red-500">⚠️</Text>
+      <Text className="mb-2 text-center text-2xl font-bold text-gray-800">
+        Encounter Error
+      </Text>
+      <Text className="mb-4 text-center text-gray-600">{error}</Text>
+      <Pressable
+        onPress={onReturn}
+        className="rounded-lg bg-blue-500 px-6 py-3"
+      >
+        <Text className="text-center text-white">Return to Map</Text>
+      </Pressable>
+    </View>
+  </View>
+);
+
+const UnsupportedEncounterScreen: React.FC<{
+  nodeType: string;
+  onReturn: () => void;
+}> = ({ nodeType, onReturn }) => (
+  <View
+    testID="encounter-error"
+    className="flex min-h-screen items-center justify-center"
+  >
+    <View>
+      <Text className="mb-4 text-center text-6xl text-yellow-500">❓</Text>
+      <Text className="mb-2 text-center text-2xl font-bold text-gray-800">
+        Unsupported Encounter
+      </Text>
+      <Text className="mb-4 text-center text-gray-600">
+        This encounter type ({nodeType}) is not yet supported.
+      </Text>
+      <Pressable
+        onPress={onReturn}
+        className="rounded-lg bg-blue-500 px-6 py-3"
+      >
+        <Text className="text-center text-white">Return to Map</Text>
+      </Pressable>
+    </View>
+  </View>
+);
+
+const ReadyToBeginScreen: React.FC<{ onStart: () => void }> = ({ onStart }) => (
+  <View className="flex min-h-screen items-center justify-center">
+    <View>
+      <Text className="mb-4 text-center text-2xl font-bold text-gray-800">
+        Ready to Begin
+      </Text>
+      <Text className="mb-6 text-center text-gray-600">
+        Start your encounter to begin!
+      </Text>
+      <Pressable
+        testID="start-encounter"
+        onPress={onStart}
+        className="rounded-lg bg-blue-500 px-6 py-3"
+      >
+        <Text className="text-center text-white">Start Encounter</Text>
+      </Pressable>
+    </View>
+  </View>
+);
+
+const EncounterContent: React.FC<{
+  run: DelvingRun;
+  node: DungeonNode;
+  onReturnToMap: () => void;
+  onEncounterComplete: (result: 'success' | 'failure', rewards?: any[]) => void;
+}> = ({ run, node, onReturnToMap, onEncounterComplete }) => {
+  if (node.type === 'puzzle_chamber') {
+    return (
+      <PuzzleChamberScreen
+        run={run}
+        node={node}
+        onReturnToMap={onReturnToMap}
+        onEncounterComplete={onEncounterComplete}
+      />
+    );
+  }
+
+  if (node.type === 'trade_opportunity') {
+    return (
+      <TradeOpportunityScreen
+        run={run}
+        node={node}
+        onReturnToMap={onReturnToMap}
+        onEncounterComplete={onEncounterComplete}
+      />
+    );
+  }
+
+  if (node.type === 'discovery_site') {
+    return (
+      <DiscoverySiteScreen
+        run={run}
+        node={node}
+        onReturnToMap={onReturnToMap}
+        onEncounterComplete={onEncounterComplete}
+      />
+    );
+  }
+
+  return (
+    <UnsupportedEncounterScreen nodeType={node.type} onReturn={onReturnToMap} />
+  );
+};
 
 export const EncounterScreen: React.FC<EncounterScreenProps> = ({
   run,
@@ -23,39 +154,18 @@ export const EncounterScreen: React.FC<EncounterScreenProps> = ({
     isLoading,
     error,
     startEncounter,
-      updateEncounterProgress: _updateEncounterProgress,
-      completeEncounter,
-      getEncounterState: _getEncounterState,
-      clearEncounterState: _clearEncounterState,
+    updateEncounterProgress: _updateEncounterProgress,
+    completeEncounter,
+    getEncounterState: _getEncounterState,
+    clearEncounterState: _clearEncounterState,
   } = useEncounterResolver(run, node);
 
   if (isLoading) {
-    return (
-      <div data-testid="encounter-loading" className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-4 text-lg text-gray-600">Loading encounter...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (error) {
-    return (
-      <div data-testid="encounter-error" className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="text-red-500 text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Encounter Error</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <button
-            onClick={onReturnToMap}
-            className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            Return to Map
-          </button>
-        </div>
-      </div>
-    );
+    return <ErrorScreen error={error} onReturn={onReturnToMap} />;
   }
 
   const handleStartEncounter = async () => {
@@ -64,7 +174,10 @@ export const EncounterScreen: React.FC<EncounterScreenProps> = ({
     }
   };
 
-  const handleEncounterComplete = async (result: 'success' | 'failure', rewards?: any[]) => {
+  const handleEncounterComplete = async (
+    result: 'success' | 'failure',
+    rewards?: any[]
+  ) => {
     if (encounterResolver) {
       await completeEncounter(result, rewards);
       onEncounterComplete(result, rewards);
@@ -72,66 +185,19 @@ export const EncounterScreen: React.FC<EncounterScreenProps> = ({
   };
 
   return (
-    <div data-testid="encounter-screen" className="min-h-screen bg-gray-50">
+    <ScrollView testID="encounter-screen" className="min-h-screen bg-gray-50">
       {encounterResolver && !encounterResolver.getEncounterState() ? (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Ready to Begin</h2>
-            <p className="text-gray-600 mb-6">Start your encounter to begin!</p>
-            <button
-              data-testid="start-encounter"
-              onClick={handleStartEncounter}
-              className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-            >
-              Start Encounter
-            </button>
-          </div>
-        </div>
+        <ReadyToBeginScreen onStart={handleStartEncounter} />
       ) : (
-        <div className="min-h-screen bg-gray-50">
-          {node.type === 'puzzle_chamber' && (
-            <PuzzleChamberScreen
-              run={run}
-              node={node}
-              onReturnToMap={onReturnToMap}
-              onEncounterComplete={handleEncounterComplete}
-            />
-          )}
-          {node.type === 'trade_opportunity' && (
-            <TradeOpportunityScreen
-              run={run}
-              node={node}
-              onReturnToMap={onReturnToMap}
-              onEncounterComplete={handleEncounterComplete}
-            />
-          )}
-          {node.type === 'discovery_site' && (
-            <DiscoverySiteScreen
-              run={run}
-              node={node}
-              onReturnToMap={onReturnToMap}
-              onEncounterComplete={handleEncounterComplete}
-            />
-          )}
-          {!['puzzle_chamber', 'trade_opportunity', 'discovery_site'].includes(node.type) && (
-            <div data-testid="encounter-error" className="flex items-center justify-center min-h-screen">
-              <div className="text-center">
-                <div className="text-yellow-500 text-6xl mb-4">❓</div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">Unsupported Encounter</h2>
-                <p className="text-gray-600 mb-4">
-                  This encounter type ({node.type}) is not yet supported.
-                </p>
-                <button
-                  onClick={onReturnToMap}
-                  className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                >
-                  Return to Map
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+        <View className="min-h-screen bg-gray-50">
+          <EncounterContent
+            run={run}
+            node={node}
+            onReturnToMap={onReturnToMap}
+            onEncounterComplete={handleEncounterComplete}
+          />
+        </View>
       )}
-    </div>
+    </ScrollView>
   );
 };
