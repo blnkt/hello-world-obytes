@@ -87,12 +87,12 @@ Based on: `tasks/prd-delvers-descent-phase4.md`
   - [x] 6.6 Write persistence integration tests (covered by existing tests)
   - [x] 6.7 Test data migration scenarios (deferred)
 
-- [ ] 7.0 Integration Testing & Validation
-  - [ ] 7.1 Test collection system integration with reward system
-  - [ ] 7.2 Test bonus application to run initialization
-  - [ ] 7.3 Test region unlock and selection flow
-  - [ ] 7.4 Test collection progress persistence across multiple runs
-  - [ ] 7.5 Test UI integration with collection and bonus systems
-  - [ ] 7.6 Validate all success metrics from PRD
-  - [ ] 7.7 Test performance requirements (lookups < 10ms, UI < 100ms)
-  - [ ] 7.8 Conduct balance testing for collection bonuses
+- [x] 7.0 Integration Testing & Validation
+  - [x] 7.1 Test collection system integration with reward system (phase4-integration.test.ts)
+  - [x] 7.2 Test bonus application to run initialization (phase4-integration.test.ts)
+  - [x] 7.3 Test region unlock and selection flow (phase4-integration.test.ts)
+  - [x] 7.4 Test collection progress persistence across multiple runs (phase4-integration.test.ts)
+  - [x] 7.5 Test UI integration with collection and bonus systems (covered by component tests)
+  - [x] 7.6 Validate all success metrics from PRD (phase4-integration.test.ts)
+  - [x] 7.7 Test performance requirements (lookups < 10ms, UI < 100ms) (phase4-integration.test.ts)
+  - [x] 7.8 Conduct balance testing for collection bonuses (phase4-integration.test.ts)
