@@ -84,11 +84,11 @@
 
 - [ ] 5.0 UI Integration & User Experience
   - [x] 5.1 Create ReturnCostDisplay component with clear, prominent cost visualization
-  - [ ] 5.2 Implement SafetyMarginIndicator with visual safety zones (green/yellow/red)
-  - [ ] 5.3 Create RiskWarningModal for contextual warnings and confirmations
-  - [ ] 5.4 Implement CashOutScreen with comprehensive reward summary
-  - [ ] 5.5 Create BustScreen explaining consequences and XP preservation
-  - [ ] 5.6 Implement RiskEventScreen with gambling mechanics and legendary rewards
+  - [x] 5.2 Implement SafetyMarginIndicator with visual safety zones (green/yellow/red)
+  - [x] 5.3 Create RiskWarningModal for contextual warnings and confirmations
+  - [x] 5.4 Implement CashOutScreen with comprehensive reward summary
+  - [x] 5.5 Create BustScreen explaining consequences and XP preservation
+  - [x] 5.6 Implement RiskEventScreen with gambling mechanics and legendary rewards
   - [ ] 5.7 Create HazardScreen with multiple solution options and energy costs
   - [ ] 5.8 Implement RestSiteScreen with energy reserve and strategic intel display
   - [ ] 5.9 Create usePushYourLuck React hook for UI integration
