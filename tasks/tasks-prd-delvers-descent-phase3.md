@@ -63,14 +63,14 @@
   - [x] 2.6 Implement depth-based scaling for all advanced encounter types
   - [x] 2.7 Add comprehensive unit tests for all advanced encounter mechanics
 
-- [ ] 3.0 Cash Out & Bust Logic System
+- [x] 3.0 Cash Out & Bust Logic System
   - [x] 3.1 Create CashOutManager class with player choice system (no forced busts)
   - [x] 3.2 Implement risk warning system with clear danger level indicators
   - [x] 3.3 Create reward banking system for secure item collection on cash out
   - [x] 3.4 Implement XP preservation logic (steps always count regardless of outcome)
   - [x] 3.5 Add bust confirmation with clear consequence explanations
   - [x] 3.6 Create cash out confirmation modal with reward summary
-  - [ ] 3.7 Add comprehensive unit tests for cash out and bust logic
+  - [x] 3.7 Add comprehensive unit tests for cash out and bust logic
 
 - [ ] 4.0 System Integration & State Management
   - [ ] 4.1 Integrate return cost calculations with existing spatial navigation system

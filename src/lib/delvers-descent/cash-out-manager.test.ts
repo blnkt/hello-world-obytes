@@ -788,4 +788,328 @@ describe('CashOutManager', () => {
       expect(summary.rewardDetails).toBe('Item A, Item B, Item C');
     });
   });
+
+  describe('comprehensive unit tests - Task 3.7', () => {
+    describe('edge cases', () => {
+      it('should handle negative energy values gracefully', () => {
+        const warning = manager.getRiskWarning(100, 150);
+
+        expect(warning.safetyMargin).toBe(0);
+        expect(warning.level).toBe('critical');
+      });
+
+      it('should handle very large reward values', () => {
+        const rewards = {
+          energy: 0,
+          items: [
+            {
+              id: 'huge',
+              name: 'Huge Reward',
+              quantity: 999,
+              rarity: 'legendary' as const,
+              type: 'legendary' as const,
+              setId: 'legendary_set',
+              value: 9999,
+              description: 'Huge',
+            },
+          ],
+          xp: 999999,
+        };
+
+        const summary = manager.getCashOutSummary(rewards);
+
+        expect(summary.totalItems).toBe(1);
+        expect(summary.totalXP).toBe(999999);
+        expect(summary.totalValue).toBe(999 * 9999);
+      });
+
+      it('should handle empty energy on cash out', () => {
+        const rewards = { energy: 0, items: [], xp: 100 };
+
+        const result = manager.canCashOut(0, 100, rewards);
+
+        expect(result).toBe(false); // Can't cash out without energy
+      });
+
+      it('should handle all item types together', () => {
+        const rewards = {
+          energy: 0,
+          items: [
+            {
+              id: 'tg1',
+              name: 'TG1',
+              quantity: 1,
+              rarity: 'common' as const,
+              type: 'trade_good' as const,
+              setId: 'tg',
+              value: 10,
+              description: 'd',
+            },
+            {
+              id: 'tg2',
+              name: 'TG2',
+              quantity: 2,
+              rarity: 'uncommon' as const,
+              type: 'trade_good' as const,
+              setId: 'tg',
+              value: 10,
+              description: 'd',
+            },
+            {
+              id: 'd1',
+              name: 'D1',
+              quantity: 1,
+              rarity: 'rare' as const,
+              type: 'discovery' as const,
+              setId: 'd',
+              value: 50,
+              description: 'd',
+            },
+            {
+              id: 'l1',
+              name: 'L1',
+              quantity: 1,
+              rarity: 'legendary' as const,
+              type: 'legendary' as const,
+              setId: 'l',
+              value: 500,
+              description: 'd',
+            },
+          ],
+          xp: 1000,
+        };
+
+        const summary = manager.getCashOutSummary(rewards);
+
+        expect(summary.totalItems).toBe(4);
+        expect(summary.itemTypes.trade_goods).toBe(2);
+        expect(summary.itemTypes.discoveries).toBe(1);
+        expect(summary.itemTypes.legendaries).toBe(1);
+      });
+    });
+
+    describe('integration scenarios', () => {
+      it('should handle complete cash out flow', () => {
+        const rewards = {
+          energy: 50,
+          items: [
+            {
+              id: 'item1',
+              name: 'Item 1',
+              quantity: 2,
+              rarity: 'common' as const,
+              type: 'trade_good' as const,
+              setId: 's',
+              value: 10,
+              description: 'd',
+            },
+          ],
+          xp: 200,
+        };
+
+        // Get summary
+        const summary = manager.getCashOutSummary(rewards);
+        expect(summary.totalItems).toBe(1);
+        expect(summary.totalXP).toBe(200);
+
+        // Process cash out
+        const result = manager.processCashOut(rewards);
+        expect(result.success).toBe(true);
+        expect(result.xpPreserved).toBe(true);
+        expect(result.preservedXp).toBe(200);
+      });
+
+      it('should handle complete bust flow', () => {
+        const rewards = {
+          energy: 0,
+          items: [
+            {
+              id: 'lost1',
+              name: 'Lost 1',
+              quantity: 3,
+              rarity: 'epic' as const,
+              type: 'legendary' as const,
+              setId: 'l',
+              value: 1000,
+              description: 'd',
+            },
+          ],
+          xp: 500,
+        };
+
+        // Get consequence
+        const consequence = manager.getBustConsequence({ itemsLost: 3 });
+        expect(consequence.xpPreserved).toBe(true);
+        expect(consequence.itemsLost).toBe(true);
+
+        // Process bust
+        const result = manager.processBust(rewards);
+        expect(result.xpPreserved).toBe(true);
+        expect(result.preservedXp).toBe(500);
+        expect(result.itemsLost).toBe(1);
+      });
+
+      it('should handle zero energy with items', () => {
+        const rewards = {
+          energy: 0,
+          items: [
+            {
+              id: 'item1',
+              name: 'Item',
+              quantity: 1,
+              rarity: 'common' as const,
+              type: 'trade_good' as const,
+              setId: 's',
+              value: 10,
+              description: 'd',
+            },
+          ],
+          xp: 100,
+        };
+
+        const canCashOut = manager.canCashOut(0, 50, rewards);
+        expect(canCashOut).toBe(false);
+      });
+    });
+
+    describe('boundary conditions', () => {
+      it('should handle exactly 50% safety margin threshold', () => {
+        const warning = manager.getRiskWarning(100, 50);
+
+        expect(warning.level).toBe('safe');
+        expect(warning.safetyMargin).toBe(50);
+      });
+
+      it('should handle exactly 30% safety margin threshold', () => {
+        const warning = manager.getRiskWarning(100, 70);
+
+        expect(warning.level).toBe('caution');
+        expect(warning.safetyMargin).toBe(30);
+      });
+
+      it('should handle exactly 10% safety margin threshold', () => {
+        const warning = manager.getRiskWarning(100, 90);
+
+        expect(warning.level).toBe('danger');
+        expect(warning.safetyMargin).toBe(10);
+      });
+
+      it('should handle exactly 0% safety margin threshold', () => {
+        const warning = manager.getRiskWarning(100, 100);
+
+        expect(warning.level).toBe('critical');
+        expect(warning.safetyMargin).toBe(0);
+      });
+    });
+
+    describe('quantity handling', () => {
+      it('should handle items with quantity > 1 in summary', () => {
+        const rewards = {
+          energy: 0,
+          items: [
+            {
+              id: 'gem',
+              name: 'Gem',
+              quantity: 10,
+              rarity: 'common' as const,
+              type: 'trade_good' as const,
+              setId: 's',
+              value: 5,
+              description: 'd',
+            },
+          ],
+          xp: 50,
+        };
+
+        const summary = manager.getCashOutSummary(rewards);
+
+        expect(summary.totalItems).toBe(1);
+        expect(summary.totalValue).toBe(50); // 10 * 5
+      });
+
+      it('should sum quantities correctly across multiple items', () => {
+        const rewards = {
+          energy: 0,
+          items: [
+            {
+              id: 'item1',
+              name: 'Item A',
+              quantity: 3,
+              rarity: 'common' as const,
+              type: 'trade_good' as const,
+              setId: 's',
+              value: 10,
+              description: 'd',
+            },
+            {
+              id: 'item2',
+              name: 'Item B',
+              quantity: 5,
+              rarity: 'uncommon' as const,
+              type: 'discovery' as const,
+              setId: 's',
+              value: 20,
+              description: 'd',
+            },
+            {
+              id: 'item3',
+              name: 'Item C',
+              quantity: 2,
+              rarity: 'rare' as const,
+              type: 'legendary' as const,
+              setId: 's',
+              value: 100,
+              description: 'd',
+            },
+          ],
+          xp: 0,
+        };
+
+        const summary = manager.getCashOutSummary(rewards);
+
+        // 3*10 + 5*20 + 2*100 = 30 + 100 + 200 = 330
+        expect(summary.totalValue).toBe(330);
+      });
+    });
+
+    describe('performance and reliability', () => {
+      it('should handle large number of items efficiently', () => {
+        const items = Array.from({ length: 100 }, (_, i) => ({
+          id: `item${i}`,
+          name: `Item ${i}`,
+          quantity: 1,
+          rarity: 'common' as const,
+          type: 'trade_good' as const,
+          setId: 'set',
+          value: i,
+          description: 'Test',
+        }));
+
+        const rewards = { energy: 0, items, xp: 1000 };
+
+        const startTime = performance.now();
+        const summary = manager.getCashOutSummary(rewards);
+        const endTime = performance.now();
+
+        expect(summary.totalItems).toBe(100);
+        expect(endTime - startTime).toBeLessThan(10); // Should be fast
+      });
+
+      it('should handle concurrent operations safely', () => {
+        const rewards = { energy: 100, items: [], xp: 500 };
+
+        const promise1 = Promise.resolve(manager.getRiskWarning(100, 50));
+        const promise2 = Promise.resolve(manager.getCashOutSummary(rewards));
+        const promise3 = Promise.resolve(manager.processCashOut(rewards));
+
+        return Promise.all([promise1, promise2, promise3]).then(
+          ([warning, summary, result]) => {
+            expect(warning.level).toBe('safe');
+            expect(summary.totalXP).toBe(500);
+            expect(result.xpPreserved).toBe(true);
+          }
+        );
+      });
+    });
+  });
 });
