@@ -28,46 +28,55 @@ The UI components (Tasks 5.1-5.8) are complete but isolated. They need:
 
 **Solution**:
 
-1. **Create a simplified hook that exposes manager instances and computed values**:
+1. **Create a HYBRID hook that provides convenience + flexibility**:
    - Initialize ReturnCostCalculator, SafetyMarginManager once
-   - Calculate derived values: returnCost, safetyMargin, riskWarnings
-   - Expose the raw manager instances for direct use
-   - Provide convenience methods that wrap manager APIs
+   - Cache commonly-needed returnCost using useMemo
+   - Expose raw manager instances for full flexibility
+   - Provide convenience getters (getSafetyMargin, getRiskWarnings, getRiskLevel)
+   - Let components call managers directly when they need custom logic
 
-2. **Key exports**:
+2. **Key exports (Hybrid Approach)**:
 
    ```typescript
    interface UsePushYourLuckReturn {
-     // Computed values
+     // Cached convenience value (most common)
      returnCost: number;
-     safetyMargin: SafetyMargin;
-     riskWarnings: RiskWarning[];
 
-     // Manager instances
+     // Manager instances (for flexibility)
      returnCostCalculator: ReturnCostCalculator;
      safetyMarginManager: SafetyMarginManager;
      cashOutManager: CashOutManager;
 
-     // Convenience methods
-     canContinue: (currentEnergy: number) => boolean;
-     canCashOut: (currentEnergy: number) => boolean;
-     getRiskLevel: () => 'safe' | 'caution' | 'danger' | 'critical';
+     // Convenience getters (compute on-demand)
+     getSafetyMargin: (currentEnergy: number, depth: number) => SafetyMargin;
+     getRiskWarnings: (currentEnergy: number, depth: number) => RiskWarning[];
+     getRiskLevel: (
+       currentEnergy: number,
+       depth: number
+     ) => 'safe' | 'caution' | 'danger' | 'critical';
    }
    ```
+
+   **Why Hybrid?**
+   - Matches existing codebase pattern (see `use-encounter-resolver` and `risk-event-screen.tsx`)
+   - Simple API for common cases: `hook.returnCost`
+   - Full flexibility for edge cases: `hook.safetyMarginManager.calculateSafetyMargin(...)`
+   - Components can choose between convenience or direct manager calls
 
 3. **Dependencies**:
    - Import from `@/lib/delvers-descent/return-cost-calculator`
    - Import from `@/lib/delvers-descent/safety-margin-manager`
    - Import from `@/lib/delvers-descent/cash-out-manager`
-   - Use `useMemo` for expensive calculations
-   - Use `useCallback` for stable function references
+   - Use `useMemo` for returnCost (expensive calculation)
+   - Use `useCallback` for convenience getters (don't cache, compute on-demand)
 
 **Implementation Steps**:
 
-- Create hook with proper TypeScript interfaces
+- Create hook with hybrid interface (cached returnCost + raw managers)
 - Initialize managers using useState with lazy initialization
-- Calculate derived values using useMemo
-- Export convenience methods using useCallback
+- Cache returnCost using useMemo (most common calculation)
+- Export convenience getters using useCallback (compute on-demand, not cached)
+- Expose raw managers for full flexibility
 - Handle edge cases (zero energy, negative depth)
 
 ### Task 5.10: Add Smooth Transitions
@@ -163,9 +172,10 @@ The UI components (Tasks 5.1-5.8) are complete but isolated. They need:
 
 ## Implementation Order
 
-1. **Task 5.9**: Create usePushYourLuck hook (TDD approach)
-   - Write failing tests first
-   - Implement hook to pass tests
+1. **Task 5.9**: Create usePushYourLuck hook (TDD approach with Hybrid pattern)
+   - Write failing tests first (test hybrid return type)
+   - Implement hook with returnCost cache + exposed managers
+   - Add convenience getters with useCallback
    - Refactor for optimization
 
 2. **Task 5.10**: Add transitions to components
