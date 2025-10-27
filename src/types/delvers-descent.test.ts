@@ -245,18 +245,27 @@ describe("Delver's Descent Types", () => {
       const set: CollectionSet = {
         id: 'silk_road_set',
         name: 'Silk Road Collection',
+        description: 'Ancient trading route treasures',
+        category: 'trade_goods',
         items: [],
-        completionBonus: '+10% energy efficiency',
-        bonusType: 'energy_efficiency',
-        bonusValue: 10,
+        bonuses: [
+          {
+            type: 'energy_efficiency',
+            value: 10,
+            description: '+10% energy efficiency',
+            stackingType: 'additive',
+          },
+        ],
       };
 
       expect(set.id).toBe('silk_road_set');
       expect(set.name).toBe('Silk Road Collection');
+      expect(set.description).toBe('Ancient trading route treasures');
+      expect(set.category).toBe('trade_goods');
       expect(set.items).toEqual([]);
-      expect(set.completionBonus).toBe('+10% energy efficiency');
-      expect(set.bonusType).toBe('energy_efficiency');
-      expect(set.bonusValue).toBe(10);
+      expect(set.bonuses).toHaveLength(1);
+      expect(set.bonuses[0].type).toBe('energy_efficiency');
+      expect(set.bonuses[0].value).toBe(10);
     });
 
     it('should support all bonus types', () => {
@@ -264,12 +273,19 @@ describe("Delver's Descent Types", () => {
         const set: CollectionSet = {
           id: 'test',
           name: 'Test Set',
+          description: 'Test collection',
+          category: 'trade_goods',
           items: [],
-          completionBonus: 'Test bonus',
-          bonusType,
-          bonusValue: 5,
+          bonuses: [
+            {
+              type: bonusType,
+              value: 5,
+              description: 'Test bonus',
+              stackingType: 'additive',
+            },
+          ],
         };
-        expect(set.bonusType).toBe(bonusType);
+        expect(set.bonuses[0].type).toBe(bonusType);
       });
     });
   });
@@ -280,17 +296,30 @@ describe("Delver's Descent Types", () => {
         id: 'forest_depths',
         name: 'Forest Depths',
         description: 'Ancient woodland with hidden paths',
+        theme: 'ancient_forest',
         isUnlocked: false,
-        encounterTable: ['puzzle_chamber', 'discovery_site'],
-        startingBonuses: ['extra_energy'],
+        unlockRequirements: {},
+        startingBonus: {
+          energyBonus: 0,
+          itemsBonus: 0,
+        },
+        encounterDistribution: {
+          puzzle_chamber: 20,
+          trade_opportunity: 20,
+          discovery_site: 20,
+          risk_event: 10,
+          hazard: 15,
+          rest_site: 15,
+        },
       };
 
       expect(region.id).toBe('forest_depths');
       expect(region.name).toBe('Forest Depths');
       expect(region.description).toBe('Ancient woodland with hidden paths');
+      expect(region.theme).toBe('ancient_forest');
       expect(region.isUnlocked).toBe(false);
-      expect(region.encounterTable).toHaveLength(2);
-      expect(region.startingBonuses).toHaveLength(1);
+      expect(region.encounterDistribution.puzzle_chamber).toBe(20);
+      expect(region.startingBonus.energyBonus).toBe(0);
     });
   });
 

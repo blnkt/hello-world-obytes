@@ -69,7 +69,10 @@ describe('TradeOpportunityEncounter - Collection Set Integration', () => {
       collectionSets.forEach((set) => {
         expect(set.id).toBeDefined();
         expect(set.name).toBeDefined();
-        expect(set.completionBonus).toBeDefined();
+        expect(set.description).toBeDefined();
+        expect(set.category).toBeDefined();
+        expect(set.bonuses).toBeDefined();
+        expect(Array.isArray(set.bonuses)).toBe(true);
         expect(set.items).toBeDefined();
         expect(Array.isArray(set.items)).toBe(true);
       });
