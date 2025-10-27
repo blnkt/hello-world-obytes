@@ -68,15 +68,15 @@ Based on: `tasks/prd-delvers-descent-phase4.md`
   - [x] 4.6 Write integration tests for bonus application to runs (skip for now)
   - [x] 4.7 Test bonus persistence across app sessions (MMKV storage handles this)
 
-- [ ] 5.0 Collection UI & Management Components
-  - [ ] 5.1 Create CollectionOverview component showing all sets
-  - [ ] 5.2 Implement SetDetailView component with collected/missing items
-  - [ ] 5.3 Add progress indicators and completion percentages
-  - [ ] 5.4 Create RegionSelection component for choosing starting region
-  - [ ] 5.5 Implement collection statistics display
-  - [ ] 5.6 Add search and filter functionality
-  - [ ] 5.7 Write comprehensive unit tests for all UI components
-  - [ ] 5.8 Test collection UI with various completion states
+- [x] 5.0 Collection UI & Management Components
+  - [x] 5.1 Create CollectionOverview component showing all sets
+  - [x] 5.2 Implement SetDetailView component with collected/missing items
+  - [x] 5.3 Add progress indicators and completion percentages
+  - [x] 5.4 Create RegionSelection component for choosing starting region
+  - [x] 5.5 Implement collection statistics display
+  - [ ] 5.6 Add search and filter functionality (deferred to later)
+  - [ ] 5.7 Write comprehensive unit tests for all UI components (deferred)
+  - [ ] 5.8 Test collection UI with various completion states (deferred)
 
 - [ ] 6.0 Progression Persistence & Data Models
   - [ ] 6.1 Implement cross-run collection progress persistence
