@@ -89,8 +89,8 @@
   - [x] 5.4 Implement CashOutScreen with comprehensive reward summary
   - [x] 5.5 Create BustScreen explaining consequences and XP preservation
   - [x] 5.6 Implement RiskEventScreen with gambling mechanics and legendary rewards
-  - [ ] 5.7 Create HazardScreen with multiple solution options and energy costs
-  - [ ] 5.8 Implement RestSiteScreen with energy reserve and strategic intel display
+  - [x] 5.7 Create HazardScreen with multiple solution options and energy costs
+  - [x] 5.8 Implement RestSiteScreen with energy reserve and strategic intel display
   - [ ] 5.9 Create usePushYourLuck React hook for UI integration
   - [ ] 5.10 Add smooth transitions between all new UI elements and existing systems
   - [ ] 5.11 Add comprehensive unit tests for all UI components
