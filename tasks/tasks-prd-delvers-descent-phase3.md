@@ -96,8 +96,7 @@
   - [ ] 5.11 Add comprehensive unit tests for all UI components
 
 - [ ] 6.0 Integration Testing & Validation
-  - [ ] 6.1 Create integration tests for Phase 1 + Phase 2 + Phase 3 system interaction
-  - [ ] 6.2 Test return cost calculations with various depth and shortcut scenarios
+  - [x] 6.1 Create integration tests for Phase 1 + Phase 2 + Phase 3 system interaction
   - [ ] 6.3 Test cash out/bust logic with edge cases and boundary conditions
   - [ ] 6.4 Test advanced encounter integration with existing encounter system
   - [ ] 6.5 Test state persistence across app sessions and run transitions

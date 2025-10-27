@@ -1,5 +1,3 @@
-<!-- 5ddeb193-ae2b-458a-9365-4a76638b3619 29dd3aa3-6880-48ea-9b8d-c908a04cc722 -->
-
 # Phase 3 Tasks 5.9-5.11 Completion Plan
 
 ## Overview
@@ -169,6 +167,7 @@ The UI components (Tasks 5.1-5.8) are complete but isolated. They need:
    - Write failing tests first
    - Implement hook to pass tests
    - Refactor for optimization
+
 2. **Task 5.10**: Add transitions to components
    - Start with ReturnCostDisplay
    - Add to modal components
@@ -189,24 +188,13 @@ The UI components (Tasks 5.1-5.8) are complete but isolated. They need:
 ## Risks & Mitigations
 
 **Risk**: Hook API still doesn't match component expectations
+
 **Mitigation**: Start with minimal hook, expand based on actual component usage
 
 **Risk**: Animations cause performance issues
+
 **Mitigation**: Use CSS transitions only, avoid JavaScript animations
 
 **Risk**: Test coverage is insufficient
+
 **Mitigation**: Follow TDD approach, write tests first
-
-### To-dos
-
-- [ ] Create usePushYourLuck React hook with proper manager integration
-- [ ] Write failing tests for usePushYourLuck hook
-- [ ] Implement hook with manager initialization and derived values
-- [ ] Add convenience methods and optimize with useMemo/useCallback
-- [ ] Add smooth transitions to UI components
-- [ ] Add transitions to ReturnCostDisplay and SafetyMarginIndicator
-- [ ] Add animations to modal components (RiskWarningModal, CashOutScreen, BustScreen)
-- [ ] Add comprehensive unit tests for all UI components
-- [ ] Create missing component test files (SafetyMarginIndicator, RiskWarningModal)
-- [ ] Create phase3-ui-integration.test.ts for end-to-end testing
-- [ ] Verify all tests pass and coverage targets are met
