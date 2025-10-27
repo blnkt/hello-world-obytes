@@ -68,7 +68,7 @@ Based on: `tasks/prd-delvers-descent-phase5.md`
 ## Tasks
 
 - [ ] 1.0 Visual Design & UI Polish
-  - [ ] 1.1 Create visual design mockups for spatial navigation map
+  - [x] 1.1 Create visual design mockups for spatial navigation map
   - [ ] 1.2 Design node visualization cards with encounter type indicators
   - [ ] 1.3 Implement path connection visualization between nodes
   - [ ] 1.4 Create depth level display with clear visual hierarchy
