@@ -405,4 +405,113 @@ describe('CashOutManager', () => {
       expect(result.bankedItems).toBe(2);
     });
   });
+
+  describe('XP preservation logic - Task 3.4', () => {
+    it('should preserve XP even when player busts', () => {
+      const rewards = {
+        energy: 0,
+        items: [
+          {
+            id: 'item1',
+            name: 'Lost Item',
+            quantity: 1,
+            rarity: 'epic' as const,
+            type: 'legendary' as const,
+            setId: 'legendary_set',
+            value: 500,
+            description: 'Epic item',
+          },
+        ],
+        xp: 1000,
+      };
+
+      const bustResult = manager.processBust(rewards);
+
+      expect(bustResult.xpPreserved).toBe(true);
+      expect(bustResult.preservedXp).toBe(1000); // XP preserved even on bust
+      expect(bustResult.itemsLost).toBe(1); // But items are lost
+    });
+
+    it('should preserve XP on successful cash out', () => {
+      const rewards = {
+        energy: 50,
+        items: [
+          {
+            id: 'item1',
+            name: 'Saved Item',
+            quantity: 2,
+            rarity: 'rare' as const,
+            type: 'discovery' as const,
+            setId: 'discovery_set',
+            value: 100,
+            description: 'Rare item',
+          },
+        ],
+        xp: 750,
+      };
+
+      const cashOutResult = manager.processCashOut(rewards);
+
+      expect(cashOutResult.xpPreserved).toBe(true);
+      expect(cashOutResult.preservedXp).toBe(750); // XP preserved
+      expect(cashOutResult.bankedItems).toBe(1); // Items saved
+    });
+
+    it('should handle fractional XP values correctly', () => {
+      const rewards = { energy: 0, items: [], xp: 123.45 };
+
+      const result = manager.processCashOut(rewards);
+
+      expect(result.preservedXp).toBeCloseTo(123.45);
+    });
+
+    it('should handle zero XP scenarios', () => {
+      const rewards = { energy: 100, items: [], xp: 0 };
+
+      const result = manager.processCashOut(rewards);
+
+      expect(result.xpPreserved).toBe(true);
+      expect(result.preservedXp).toBe(0);
+    });
+
+    it('should preserve XP from steps even when run fails', () => {
+      // Simulate a bust scenario where player loses items but keeps XP from steps
+      const rewards = {
+        energy: 0,
+        items: [
+          {
+            id: 'lost',
+            name: 'Lost Item',
+            quantity: 1,
+            rarity: 'epic' as const,
+            type: 'legendary' as const,
+            setId: 'legendary_set',
+            value: 1000,
+            description: 'Lost',
+          },
+        ],
+        xp: 5000, // Step-based XP should be preserved
+      };
+
+      const bustResult = manager.processBust(rewards);
+
+      // XP is always preserved (from steps)
+      expect(bustResult.xpPreserved).toBe(true);
+      expect(bustResult.preservedXp).toBe(5000);
+    });
+
+    it('should ensure steps always count for XP regardless of outcome', () => {
+      // This test verifies the core principle: steps always count
+      const successRewards = { energy: 100, items: [], xp: 10000 };
+      const bustRewards = { energy: 0, items: [], xp: 10000 };
+
+      const successResult = manager.processCashOut(successRewards);
+      const bustResult = manager.processBust(bustRewards);
+
+      // Both outcomes preserve the same XP
+      expect(successResult.preservedXp).toBe(10000);
+      expect(bustResult.preservedXp).toBe(10000);
+      expect(successResult.preservedXp).toBe(bustResult.preservedXp);
+    });
+  });
 });

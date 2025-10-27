@@ -67,7 +67,7 @@
   - [x] 3.1 Create CashOutManager class with player choice system (no forced busts)
   - [x] 3.2 Implement risk warning system with clear danger level indicators
   - [x] 3.3 Create reward banking system for secure item collection on cash out
-  - [ ] 3.4 Implement XP preservation logic (steps always count regardless of outcome)
+  - [x] 3.4 Implement XP preservation logic (steps always count regardless of outcome)
   - [ ] 3.5 Add bust confirmation with clear consequence explanations
   - [ ] 3.6 Create cash out confirmation modal with reward summary
   - [ ] 3.7 Add comprehensive unit tests for cash out and bust logic
