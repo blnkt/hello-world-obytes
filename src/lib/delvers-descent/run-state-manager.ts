@@ -119,6 +119,18 @@ export class RunStateManager {
   }
 
   /**
+   * Update depth (for testing and push-your-luck integration)
+   */
+  async updateDepth(newDepth: number): Promise<void> {
+    if (!this.currentState) {
+      throw new Error('No active run to update depth for');
+    }
+
+    this.currentState.currentDepth = Math.max(0, newDepth);
+    await this.saveState();
+  }
+
+  /**
    * Add discovered shortcut
    */
   async addShortcut(shortcut: Shortcut): Promise<void> {

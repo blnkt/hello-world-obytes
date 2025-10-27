@@ -73,9 +73,9 @@
   - [x] 3.7 Add comprehensive unit tests for cash out and bust logic
 
 - [ ] 4.0 System Integration & State Management
-  - [ ] 4.1 Integrate return cost calculations with existing spatial navigation system
+  - [x] 4.1 Integrate return cost calculations with existing spatial navigation system
   - [x] 4.2 Integrate advanced encounter types with existing encounter resolution framework
-  - [ ] 4.3 Integrate push-your-luck mechanics with existing energy management system
+  - [x] 4.3 Integrate push-your-luck mechanics with existing energy management system
   - [ ] 4.4 Integrate advanced encounters with existing reward calculation system
   - [ ] 4.5 Create ShortcutManager for discovery and persistence across runs
   - [ ] 4.6 Implement state persistence for all new mechanics across app sessions
