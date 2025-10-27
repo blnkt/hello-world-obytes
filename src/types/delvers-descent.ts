@@ -152,6 +152,7 @@ export interface ActiveBonus {
   value: number;
   source: string; // setId that granted this bonus
   isActive: boolean;
+  description: string;
 }
 
 export interface CollectionBonusSummary {
