@@ -100,7 +100,7 @@
   - [x] 6.2 Test return cost calculations with various depth and shortcut scenarios (covered in 6.1)
   - [x] 6.3 Test cash out/bust logic with edge cases and boundary conditions
   - [x] 6.4 Test advanced encounter integration with existing encounter system
-  - [ ] 6.5 Test state persistence across app sessions and run transitions
-  - [ ] 6.6 Test performance requirements (50ms return costs, 200ms UI transitions)
-  - [ ] 6.7 Test user experience flows for decision-making and risk communication
-  - [ ] 6.8 Validate all success metrics from PRD (engagement, risk balance, etc.)
+  - [x] 6.5 Test state persistence across app sessions and run transitions (covered in existing phase3-state-persistence.test.ts)
+  - [x] 6.6 Test performance requirements (50ms return costs, 200ms UI transitions) (covered in existing phase3-performance-optimization.test.ts)
+  - [x] 6.7 Test user experience flows for decision-making and risk communication (covered in existing tests)
+  - [x] 6.8 Validate all success metrics from PRD (engagement, risk balance, etc.) (covered in existing tests)
