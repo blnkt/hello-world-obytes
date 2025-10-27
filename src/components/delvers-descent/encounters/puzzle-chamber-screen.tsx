@@ -29,7 +29,9 @@ const ResultScreen: React.FC<{
     className="flex min-h-screen items-center justify-center bg-gray-50"
   >
     <View className="mx-auto max-w-md p-6">
-      <Text className="mb-4 text-center text-6xl">{result === 'success' ? '🎉' : '😞'}</Text>
+      <Text className="mb-4 text-center text-6xl">
+        {result === 'success' ? '🎉' : '😞'}
+      </Text>
       <Text className="mb-4 text-center text-2xl font-bold text-gray-800">
         {result === 'success' ? 'Puzzle Solved!' : 'Puzzle Failed'}
       </Text>
@@ -43,7 +45,9 @@ const ResultScreen: React.FC<{
             {rewards.map((reward, index) => (
               <View key={index} className="rounded-lg bg-yellow-100 p-3">
                 <Text className="font-medium">{reward.name}</Text>
-                <Text className="text-sm text-gray-600">Value: {reward.value}</Text>
+                <Text className="text-sm text-gray-600">
+                  Value: {reward.value}
+                </Text>
               </View>
             ))}
           </View>
@@ -86,9 +90,16 @@ const TileComponent: React.FC<{
   colIndex: number;
   disabled: boolean;
   onPress: () => void;
-}> = ({ tile, rowIndex: _rowIndex, colIndex: _colIndex, disabled, onPress }) => {
+}> = ({
+  tile,
+  rowIndex: _rowIndex,
+  colIndex: _colIndex,
+  disabled,
+  onPress,
+}) => {
   const getTileStyle = () => {
-    const base = 'h-12 w-12 items-center justify-center rounded border text-lg font-bold';
+    const base =
+      'h-12 w-12 items-center justify-center rounded border text-lg font-bold';
     if (!tile.revealed) {
       return `${base} border-gray-300 bg-gray-200`;
     }
@@ -170,7 +181,10 @@ const PuzzleContent: React.FC<{
       </View>
 
       <View className="flex-row justify-center gap-4">
-        <Pressable onPress={onReturn} className="rounded-lg bg-gray-500 px-6 py-3">
+        <Pressable
+          onPress={onReturn}
+          className="rounded-lg bg-gray-500 px-6 py-3"
+        >
           <Text className="text-center text-white">Return to Map</Text>
         </Pressable>
         <Pressable
@@ -273,9 +287,46 @@ const initializeEncounter = (config: InitializeConfig) => {
   const initialTiles: TileState[][] = Array(5)
     .fill(null)
     .map(() =>
-      Array(5).fill(null).map(() => ({ revealed: false, type: 'neutral' }))
+      Array(5)
+        .fill(null)
+        .map(() => ({ revealed: false, type: 'neutral' }))
     );
   setTiles(initialTiles);
+};
+
+const usePuzzleChamberState = (
+  nodeDepth: number,
+  _onComplete: (result: 'success' | 'failure', rewards?: any[]) => void
+) => {
+  const [encounter, setEncounter] = useState<PuzzleChamberEncounter | null>(null);
+  const [tiles, setTiles] = useState<TileState[][]>([]);
+  const [remainingReveals, setRemainingReveals] = useState(0);
+  const [encounterComplete, setEncounterComplete] = useState(false);
+  const [encounterResult, setEncounterResult] = useState<'success' | 'failure' | null>(null);
+  const [rewards, setRewards] = useState<any[]>([]);
+  const rewardCalculator = useState(() => new RewardCalculator())[0];
+  const failureManager = useState(() => new FailureConsequenceManager())[0];
+
+  useEffect(() => {
+    initializeEncounter({ nodeDepth, setEncounter, setRemainingReveals, setTiles });
+  }, [nodeDepth]);
+
+  return {
+    encounter,
+    tiles,
+    remainingReveals,
+    encounterComplete,
+    encounterResult,
+    rewards,
+    rewardCalculator,
+    failureManager,
+    setEncounter,
+    setTiles,
+    setRemainingReveals,
+    setEncounterComplete,
+    setEncounterResult,
+    setRewards,
+  };
 };
 
 export const PuzzleChamberScreen: React.FC<PuzzleChamberScreenProps> = ({
@@ -284,66 +335,51 @@ export const PuzzleChamberScreen: React.FC<PuzzleChamberScreenProps> = ({
   onReturnToMap,
   onEncounterComplete,
 }) => {
-  const [encounter, setEncounter] = useState<PuzzleChamberEncounter | null>(null);
-  const [tiles, setTiles] = useState<TileState[][]>([]);
-  const [remainingReveals, setRemainingReveals] = useState(0);
-  const [encounterComplete, setEncounterComplete] = useState(false);
-  const [encounterResult, setEncounterResult] = useState<'success' | 'failure' | null>(null);
-  const [rewards, setRewards] = useState<any[]>([]);
-  const [rewardCalculator] = useState(() => new RewardCalculator());
-  const [failureManager] = useState(() => new FailureConsequenceManager());
-
-  useEffect(() => {
-    initializeEncounter({
-      nodeDepth: node.depth,
-      setEncounter,
-      setRemainingReveals,
-      setTiles,
-    });
-  }, [node.depth]);
+  const state = usePuzzleChamberState(node.depth, onEncounterComplete);
 
   const handleTileClick = (row: number, col: number) => {
-    if (!encounter || encounterComplete || remainingReveals <= 0) return;
-    const result = encounter.revealTile(row, col);
+    if (!state.encounter || state.encounterComplete || state.remainingReveals <= 0) return;
+    const result = state.encounter.revealTile(row, col);
     handleTileLogic({
       result,
       row,
       col,
-      tiles,
-      encounter,
-      rewardCalculator,
+      tiles: state.tiles,
+      encounter: state.encounter,
+      rewardCalculator: state.rewardCalculator,
       node,
-      failureManager,
+      failureManager: state.failureManager,
       setters: {
-        setTiles,
-        setRemainingReveals,
-        setEncounterComplete,
-        setEncounterResult,
-        setRewards,
+        setTiles: state.setTiles,
+        setRemainingReveals: state.setRemainingReveals,
+        setEncounterComplete: state.setEncounterComplete,
+        setEncounterResult: state.setEncounterResult,
+        setRewards: state.setRewards,
       },
       onEncounterComplete,
     });
   };
 
   const handleFailEncounter = () => {
-    setEncounterComplete(true);
-    setEncounterResult('failure');
+    state.setEncounterComplete(true);
+    state.setEncounterResult('failure');
     onEncounterComplete('failure');
   };
 
-  if (encounterComplete && encounterResult) {
-    return <ResultScreen result={encounterResult} rewards={rewards} onReturn={onReturnToMap} />;
-  }
-
-  return (
+  const renderContent = () => (
     <PuzzleContent
-      tiles={tiles}
-      remainingReveals={remainingReveals}
+      tiles={state.tiles}
+      remainingReveals={state.remainingReveals}
       node={node}
       onTileClick={handleTileClick}
       onReturn={onReturnToMap}
       onFail={handleFailEncounter}
     />
   );
-};
 
+  if (state.encounterComplete && state.encounterResult) {
+    return <ResultScreen result={state.encounterResult} rewards={state.rewards} onReturn={onReturnToMap} />;
+  }
+
+  return renderContent();
+};

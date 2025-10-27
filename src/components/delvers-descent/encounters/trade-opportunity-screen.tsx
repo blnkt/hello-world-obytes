@@ -49,7 +49,9 @@ const SuccessScreen: React.FC<{
             {rewards.map((reward, index) => (
               <View key={index} className="rounded-lg bg-yellow-100 p-3">
                 <Text className="font-medium">{reward.name}</Text>
-                <Text className="text-sm text-gray-600">Value: {reward.value}</Text>
+                <Text className="text-sm text-gray-600">
+                  Value: {reward.value}
+                </Text>
               </View>
             ))}
           </View>
@@ -87,9 +89,7 @@ const TradeOptionCard: React.FC<{
     testID={`trade-option-${option.id}`}
     onPress={() => onPress(option.id)}
     className={`w-full rounded-lg border p-4 ${
-      selected
-        ? 'border-blue-500 bg-blue-50'
-        : 'border-gray-200 bg-white'
+      selected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'
     }`}
   >
     <View className="mb-2 flex-row items-start justify-between">
@@ -121,10 +121,16 @@ const TradePostsSection: React.FC<{ posts: any[] }> = ({ posts }) => (
       {posts.map((post) => (
         <View key={post.id} className="rounded-lg border border-gray-200 p-3">
           <Text className="font-medium text-gray-800">{post.name}</Text>
-          <Text className="text-sm text-gray-600">Trade post offering various goods</Text>
+          <Text className="text-sm text-gray-600">
+            Trade post offering various goods
+          </Text>
           <View className="mt-2">
-            <Text className="text-sm text-green-600">Buy Price: {post.prices.buy || 0}</Text>
-            <Text className="text-sm text-red-600">Sell Price: {post.prices.sell || 0}</Text>
+            <Text className="text-sm text-green-600">
+              Buy Price: {post.prices.buy || 0}
+            </Text>
+            <Text className="text-sm text-red-600">
+              Sell Price: {post.prices.sell || 0}
+            </Text>
           </View>
         </View>
       ))}
@@ -151,7 +157,9 @@ const ArbitrageSection: React.FC<{ opportunities: any[] }> = ({
           <Text className="text-sm text-gray-600">
             Buy from {opportunity.buyFrom}, sell to {opportunity.sellTo}
           </Text>
-          <Text className="text-sm text-gray-600">Profit: {opportunity.profit}</Text>
+          <Text className="text-sm text-gray-600">
+            Profit: {opportunity.profit}
+          </Text>
         </View>
       ))}
     </View>
@@ -159,8 +167,13 @@ const ArbitrageSection: React.FC<{ opportunities: any[] }> = ({
 );
 
 const TradeResultSection: React.FC<{ result: any }> = ({ result }) => (
-  <View testID="trade-result" className="mb-6 rounded-lg bg-white p-6 shadow-lg">
-    <Text className="mb-4 text-xl font-semibold text-gray-800">Trade Result</Text>
+  <View
+    testID="trade-result"
+    className="mb-6 rounded-lg bg-white p-6 shadow-lg"
+  >
+    <Text className="mb-4 text-xl font-semibold text-gray-800">
+      Trade Result
+    </Text>
     <View
       className={`rounded-lg p-4 ${result.success ? 'bg-green-100' : 'bg-red-100'}`}
     >
@@ -190,7 +203,10 @@ const TradeContent: React.FC<{
   const arbitrageOpportunities = encounter.getArbitrageOpportunities();
 
   return (
-    <ScrollView testID="trade-opportunity-screen" className="min-h-screen bg-gray-50 p-6">
+    <ScrollView
+      testID="trade-opportunity-screen"
+      className="min-h-screen bg-gray-50 p-6"
+    >
       <View className="mx-auto max-w-6xl">
         <View className="mb-8">
           <Text className="mb-2 text-center text-3xl font-bold text-gray-800">
@@ -227,7 +243,10 @@ const TradeContent: React.FC<{
         {tradeResult && <TradeResultSection result={tradeResult} />}
 
         <View>
-          <Pressable onPress={onReturn} className="rounded-lg bg-gray-500 px-6 py-3">
+          <Pressable
+            onPress={onReturn}
+            className="rounded-lg bg-gray-500 px-6 py-3"
+          >
             <Text className="text-center text-white">Return to Map</Text>
           </Pressable>
         </View>
@@ -236,9 +255,12 @@ const TradeContent: React.FC<{
   );
 };
 
-export const TradeOpportunityScreen: React.FC<
-  TradeOpportunityScreenProps
-> = ({ run: _run, node, onReturnToMap, onEncounterComplete }) => {
+export const TradeOpportunityScreen: React.FC<TradeOpportunityScreenProps> = ({
+  run: _run,
+  node,
+  onReturnToMap,
+  onEncounterComplete,
+}) => {
   const [encounter, setEncounter] = useState<TradeOpportunityEncounter | null>(
     null
   );
