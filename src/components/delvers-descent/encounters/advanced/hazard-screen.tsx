@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import {
   type AdvancedEncounterOutcome,
@@ -31,48 +32,52 @@ const OutcomeDisplay: React.FC<{
   outcome: AdvancedEncounterOutcome;
   onComplete: (outcome: AdvancedEncounterOutcome) => void;
 }> = ({ outcome, onComplete }) => (
-  <div className="min-h-screen bg-gray-50 p-6">
-    <div className="mx-auto max-w-2xl">
-      <div className="rounded-lg bg-white p-6 shadow-lg">
-        <h2 className="mb-4 text-2xl font-bold text-gray-800">
+  <ScrollView className="min-h-screen bg-gray-50 p-6">
+    <View className="mx-auto max-w-2xl">
+      <View className="rounded-lg bg-white p-6 shadow-lg">
+        <Text className="mb-4 text-2xl font-bold text-gray-800">
           {outcome.type === 'success' ? 'Success!' : 'Failure!'}
-        </h2>
-        <p className="mb-6 text-gray-700">{outcome.message}</p>
+        </Text>
+        <Text className="mb-6 text-gray-700">{outcome.message}</Text>
         {outcome.reward && (
-          <div className="mb-6 rounded bg-green-50 p-4">
-            <h3 className="mb-2 font-semibold text-green-800">Rewards</h3>
-            <p className="text-green-700">Energy: +{outcome.reward.energy}</p>
-            <p className="text-green-700">XP: +{outcome.reward.xp}</p>
-          </div>
+          <View className="mb-6 rounded bg-green-50 p-4">
+            <Text className="mb-2 font-semibold text-green-800">Rewards</Text>
+            <Text className="text-green-700">
+              Energy: +{outcome.reward.energy}
+            </Text>
+            <Text className="text-green-700">XP: +{outcome.reward.xp}</Text>
+          </View>
         )}
-        <button
-          onClick={() => onComplete(outcome)}
-          className="w-full rounded-lg bg-blue-600 px-4 py-3 text-white hover:bg-blue-700"
+        <Pressable
+          onPress={() => onComplete(outcome)}
+          className="w-full rounded-lg bg-blue-600 px-4 py-3"
         >
-          Continue
-        </button>
-      </div>
-    </div>
-  </div>
+          <Text className="text-center text-white">Continue</Text>
+        </Pressable>
+      </View>
+    </View>
+  </ScrollView>
 );
 
 const HazardHeader: React.FC<{ obstacleType: string; difficulty: number }> = ({
   obstacleType,
   difficulty,
 }) => (
-  <div className="mb-6 text-center">
-    <h1 className="text-3xl font-bold text-gray-800">
+  <View className="mb-6">
+    <Text className="text-center text-3xl font-bold text-gray-800">
       {getObstacleName(obstacleType)}
-    </h1>
-    <p className="mt-2 text-gray-600">
+    </Text>
+    <Text className="mt-2 text-center text-gray-600">
       A dangerous obstacle blocks your path. Choose your solution carefully.
-    </p>
-    <div className="mt-3">
-      <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold text-orange-800">
-        Difficulty: {difficulty}/10
-      </span>
-    </div>
-  </div>
+    </Text>
+    <View className="mt-3">
+      <View className="rounded-full bg-orange-100 px-3 py-1">
+        <Text className="text-center text-xs font-semibold text-orange-800">
+          Difficulty: {difficulty}/10
+        </Text>
+      </View>
+    </View>
+  </View>
 );
 
 const HazardPaths: React.FC<{
@@ -80,39 +85,41 @@ const HazardPaths: React.FC<{
   selectedPath?: SolutionPath;
   onSelect: (pathId: string) => void;
 }> = ({ paths, selectedPath, onSelect }) => (
-  <div className="space-y-4">
+  <View className="gap-4">
     {paths.map((path) => (
-      <button
+      <Pressable
         key={path.id}
-        data-testid={`path-${path.id}`}
-        onClick={() => onSelect(path.id)}
+        testID={`path-${path.id}`}
+        onPress={() => onSelect(path.id)}
         disabled={selectedPath?.id === path.id}
-        className={`w-full rounded-lg border-2 p-4 text-left transition-all ${
+        className={`w-full rounded-lg border-2 p-4 ${
           selectedPath?.id === path.id
             ? 'border-blue-500 bg-blue-50'
-            : 'border-gray-300 bg-white hover:bg-gray-50'
+            : 'border-gray-300 bg-white'
         }`}
       >
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="font-semibold text-gray-800">{path.name}</h3>
-            <p className="text-sm text-gray-600">{path.description}</p>
+        <View className="flex-row items-center justify-between">
+          <View className="flex-1">
+            <Text className="font-semibold text-gray-800">{path.name}</Text>
+            <Text className="text-sm text-gray-600">{path.description}</Text>
             {path.specialEffect && (
-              <p className="mt-1 text-xs text-blue-600">{path.specialEffect}</p>
+              <Text className="mt-1 text-xs text-blue-600">
+                {path.specialEffect}
+              </Text>
             )}
-          </div>
-          <div className="text-right">
-            <div className="text-sm text-red-600">
+          </View>
+          <View>
+            <Text className="text-right text-sm text-red-600">
               Energy: {path.energyCost}
-            </div>
-            <div className="text-sm text-gray-500">
+            </Text>
+            <Text className="text-right text-sm text-gray-500">
               Success: {Math.round(path.successRate * 100)}%
-            </div>
-          </div>
-        </div>
-      </button>
+            </Text>
+          </View>
+        </View>
+      </Pressable>
     ))}
-  </div>
+  </View>
 );
 
 const HazardActions: React.FC<{
@@ -122,32 +129,29 @@ const HazardActions: React.FC<{
 }> = ({ hasSelectedPath, onResolve, onReturn }) => (
   <>
     {hasSelectedPath && (
-      <div className="mt-6">
-        <button
-          data-testid="resolve-button"
-          onClick={onResolve}
-          className="w-full rounded-lg bg-green-600 px-6 py-3 text-lg font-semibold text-white hover:bg-green-700"
+      <View className="mt-6">
+        <Pressable
+          testID="resolve-button"
+          onPress={onResolve}
+          className="w-full rounded-lg bg-green-600 px-6 py-3"
         >
-          Attempt Solution
-        </button>
-      </div>
+          <Text className="text-center text-lg font-semibold text-white">
+            Attempt Solution
+          </Text>
+        </Pressable>
+      </View>
     )}
-    <div className="mt-6 text-center">
-      <button
-        onClick={onReturn}
-        className="rounded-lg border-2 border-gray-300 bg-white px-6 py-2 text-gray-700 hover:bg-gray-50"
+    <View className="mt-6">
+      <Pressable
+        onPress={onReturn}
+        className="rounded-lg border-2 border-gray-300 bg-white px-6 py-2"
       >
-        Return to Map
-      </button>
-    </div>
+        <Text className="text-center text-gray-700">Return to Map</Text>
+      </Pressable>
+    </View>
   </>
 );
 
-/**
- * HazardScreen - Multiple solution options with energy costs
- *
- * Displays hazard obstacle and allows player to choose from multiple solution paths.
- */
 export const HazardScreen: React.FC<HazardScreenProps> = ({
   encounter,
   onComplete,
@@ -172,8 +176,8 @@ export const HazardScreen: React.FC<HazardScreenProps> = ({
   }
 
   return (
-    <div data-testid="hazard-screen" className="min-h-screen bg-gray-50 p-6">
-      <div className="mx-auto max-w-2xl">
+    <ScrollView testID="hazard-screen" className="min-h-screen bg-gray-50 p-6">
+      <View className="mx-auto max-w-2xl">
         <HazardHeader
           obstacleType={state.config.obstacleType}
           difficulty={state.config.difficulty}
@@ -188,7 +192,7 @@ export const HazardScreen: React.FC<HazardScreenProps> = ({
           onResolve={handleResolve}
           onReturn={onReturn}
         />
-      </div>
-    </div>
+      </View>
+    </ScrollView>
   );
 };
