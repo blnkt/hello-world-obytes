@@ -83,7 +83,7 @@
   - [x] 4.8 Extend existing TypeScript interfaces for all new mechanics
 
 - [ ] 5.0 UI Integration & User Experience
-  - [ ] 5.1 Create ReturnCostDisplay component with clear, prominent cost visualization
+  - [x] 5.1 Create ReturnCostDisplay component with clear, prominent cost visualization
   - [ ] 5.2 Implement SafetyMarginIndicator with visual safety zones (green/yellow/red)
   - [ ] 5.3 Create RiskWarningModal for contextual warnings and confirmations
   - [ ] 5.4 Implement CashOutScreen with comprehensive reward summary
