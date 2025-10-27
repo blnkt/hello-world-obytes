@@ -77,7 +77,7 @@
   - [x] 4.2 Integrate advanced encounter types with existing encounter resolution framework
   - [x] 4.3 Integrate push-your-luck mechanics with existing energy management system
   - [x] 4.4 Integrate advanced encounters with existing reward calculation system
-  - [ ] 4.5 Create ShortcutManager for discovery and persistence across runs
+  - [x] 4.5 Create ShortcutManager for discovery and persistence across runs
   - [ ] 4.6 Implement state persistence for all new mechanics across app sessions
   - [ ] 4.7 Add performance optimization for complex return cost scenarios
   - [ ] 4.8 Extend existing TypeScript interfaces for all new mechanics
