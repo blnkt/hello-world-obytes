@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Text, View } from 'react-native';
 
 import { DungeonMapVisualization } from '@/components/delvers-descent/map/dungeon-map-visualization';
 import { NodeCard } from '@/components/delvers-descent/map/node-card';
@@ -92,26 +93,26 @@ export default function MapPreviewScreen() {
   const [mockRunState] = useState<RunState>(mockRunStateData);
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">
+    <View className="flex-1 bg-gray-100 p-6">
+      <View className="mb-6">
+        <Text className="text-3xl font-bold text-gray-800">
           Map Preview - Phase 5 Visual Design
-        </h1>
-        <p className="mt-2 text-gray-600">
+        </Text>
+        <Text className="mt-2 text-gray-600">
           Preview of the dungeon map visualization components
-        </p>
-      </div>
+        </Text>
+      </View>
 
-      <div className="mb-8 rounded-lg bg-white p-6 shadow">
-        <h2 className="mb-4 text-xl font-semibold">
+      <View className="mb-8 rounded-lg bg-white p-6">
+        <Text className="mb-4 text-xl font-semibold">
           Dungeon Map Visualization
-        </h2>
+        </Text>
         <DungeonMapVisualization nodes={mockNodes} runState={mockRunState} />
-      </div>
+      </View>
 
-      <div className="mb-8 rounded-lg bg-white p-6 shadow">
-        <h2 className="mb-4 text-xl font-semibold">Node Cards Sample</h2>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <View className="mb-8 rounded-lg bg-white p-6">
+        <Text className="mb-4 text-xl font-semibold">Node Cards Sample</Text>
+        <View className="flex-row flex-wrap gap-4">
           <NodeCard
             node={mockNodes[0]}
             isCurrent={false}
@@ -120,8 +121,8 @@ export default function MapPreviewScreen() {
           />
           <NodeCard node={mockNodes[2]} isCurrent={true} isVisited={true} />
           <NodeCard node={mockNodes[5]} isCurrent={false} isVisited={false} />
-        </div>
-      </div>
-    </div>
+        </View>
+      </View>
+    </View>
   );
 }
