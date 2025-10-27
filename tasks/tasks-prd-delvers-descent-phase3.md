@@ -69,7 +69,7 @@
   - [x] 3.3 Create reward banking system for secure item collection on cash out
   - [x] 3.4 Implement XP preservation logic (steps always count regardless of outcome)
   - [x] 3.5 Add bust confirmation with clear consequence explanations
-  - [ ] 3.6 Create cash out confirmation modal with reward summary
+  - [x] 3.6 Create cash out confirmation modal with reward summary
   - [ ] 3.7 Add comprehensive unit tests for cash out and bust logic
 
 - [ ] 4.0 System Integration & State Management

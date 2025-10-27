@@ -18,6 +18,12 @@ export interface CashOutSummary {
   totalXP: number;
   totalEnergy: number;
   rewardDetails: string;
+  itemTypes: {
+    trade_goods: number;
+    discoveries: number;
+    legendaries: number;
+  };
+  totalValue: number;
 }
 
 export interface CashOutResult {
@@ -176,11 +182,37 @@ export class CashOutManager {
   getCashOutSummary(rewards: EncounterReward): CashOutSummary {
     const itemNames = rewards.items.map((item) => item.name).join(', ');
 
+    // Count items by type
+    const itemTypes = {
+      trade_goods: 0,
+      discoveries: 0,
+      legendaries: 0,
+    };
+
+    let totalValue = 0;
+
+    rewards.items.forEach((item) => {
+      switch (item.type) {
+        case 'trade_good':
+          itemTypes.trade_goods++;
+          break;
+        case 'discovery':
+          itemTypes.discoveries++;
+          break;
+        case 'legendary':
+          itemTypes.legendaries++;
+          break;
+      }
+      totalValue += item.value * item.quantity;
+    });
+
     return {
       totalItems: rewards.items.length,
       totalXP: rewards.xp,
       totalEnergy: rewards.energy,
       rewardDetails: itemNames || 'No items collected',
+      itemTypes,
+      totalValue,
     };
   }
 }

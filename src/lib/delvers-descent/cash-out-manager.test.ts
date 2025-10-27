@@ -577,4 +577,215 @@ describe('CashOutManager', () => {
       expect(consequence.xpPreserved).toBe(true);
     });
   });
+
+  describe('cash out confirmation - Task 3.6', () => {
+    it('should provide comprehensive reward summary', () => {
+      const rewards = {
+        energy: 150,
+        items: [
+          {
+            id: 'item1',
+            name: 'Rare Gem',
+            quantity: 1,
+            rarity: 'rare' as const,
+            type: 'trade_good' as const,
+            setId: 'trade_set',
+            value: 100,
+            description: 'A rare gem',
+          },
+        ],
+        xp: 500,
+      };
+
+      const summary = manager.getCashOutSummary(rewards);
+
+      expect(summary.totalItems).toBe(1);
+      expect(summary.totalXP).toBe(500);
+      expect(summary.totalEnergy).toBe(150);
+      expect(summary.rewardDetails).toBe('Rare Gem');
+    });
+
+    it('should categorize items by type in summary', () => {
+      const rewards = {
+        energy: 0,
+        items: [
+          {
+            id: 'trade1',
+            name: 'Trade Good 1',
+            quantity: 3,
+            rarity: 'common' as const,
+            type: 'trade_good' as const,
+            setId: 'trade_set',
+            value: 10,
+            description: 'Common good',
+          },
+          {
+            id: 'discovery1',
+            name: 'Discovery 1',
+            quantity: 1,
+            rarity: 'rare' as const,
+            type: 'discovery' as const,
+            setId: 'discovery_set',
+            value: 50,
+            description: 'Rare discovery',
+          },
+          {
+            id: 'legendary1',
+            name: 'Legendary 1',
+            quantity: 1,
+            rarity: 'legendary' as const,
+            type: 'legendary' as const,
+            setId: 'legendary_set',
+            value: 500,
+            description: 'Legendary item',
+          },
+        ],
+        xp: 1000,
+      };
+
+      const summary = manager.getCashOutSummary(rewards);
+
+      expect(summary.itemTypes.trade_goods).toBe(1);
+      expect(summary.itemTypes.discoveries).toBe(1);
+      expect(summary.itemTypes.legendaries).toBe(1);
+    });
+
+    it('should calculate total item value correctly', () => {
+      const rewards = {
+        energy: 0,
+        items: [
+          {
+            id: 'item1',
+            name: 'Item 1',
+            quantity: 5,
+            rarity: 'common' as const,
+            type: 'trade_good' as const,
+            setId: 'trade_set',
+            value: 10,
+            description: 'Test',
+          },
+          {
+            id: 'item2',
+            name: 'Item 2',
+            quantity: 2,
+            rarity: 'uncommon' as const,
+            type: 'discovery' as const,
+            setId: 'discovery_set',
+            value: 25,
+            description: 'Test',
+          },
+        ],
+        xp: 0,
+      };
+
+      const summary = manager.getCashOutSummary(rewards);
+
+      // (5 * 10) + (2 * 25) = 50 + 50 = 100
+      expect(summary.totalValue).toBe(100);
+    });
+
+    it('should handle summary for mixed item types', () => {
+      const rewards = {
+        energy: 200,
+        items: [
+          {
+            id: 'trade1',
+            name: 'Gold Coin',
+            quantity: 10,
+            rarity: 'common' as const,
+            type: 'trade_good' as const,
+            setId: 'trade_set',
+            value: 5,
+            description: 'Gold coin',
+          },
+          {
+            id: 'trade2',
+            name: 'Silver Coin',
+            quantity: 5,
+            rarity: 'common' as const,
+            type: 'trade_good' as const,
+            setId: 'trade_set',
+            value: 2,
+            description: 'Silver coin',
+          },
+          {
+            id: 'discovery1',
+            name: 'Ancient Artifact',
+            quantity: 1,
+            rarity: 'epic' as const,
+            type: 'discovery' as const,
+            setId: 'discovery_set',
+            value: 200,
+            description: 'Ancient',
+          },
+        ],
+        xp: 750,
+      };
+
+      const summary = manager.getCashOutSummary(rewards);
+
+      expect(summary.totalItems).toBe(3);
+      expect(summary.itemTypes.trade_goods).toBe(2);
+      expect(summary.itemTypes.discoveries).toBe(1);
+      expect(summary.itemTypes.legendaries).toBe(0);
+      // (10 * 5) + (5 * 2) + (1 * 200) = 50 + 10 + 200 = 260
+      expect(summary.totalValue).toBe(260);
+    });
+
+    it('should handle empty reward summary', () => {
+      const rewards = { energy: 100, items: [], xp: 50 };
+
+      const summary = manager.getCashOutSummary(rewards);
+
+      expect(summary.totalItems).toBe(0);
+      expect(summary.rewardDetails).toBe('No items collected');
+      expect(summary.itemTypes.trade_goods).toBe(0);
+      expect(summary.itemTypes.discoveries).toBe(0);
+      expect(summary.itemTypes.legendaries).toBe(0);
+      expect(summary.totalValue).toBe(0);
+    });
+
+    it('should list all item names in reward details', () => {
+      const rewards = {
+        energy: 0,
+        items: [
+          {
+            id: 'item1',
+            name: 'Item A',
+            quantity: 1,
+            rarity: 'common' as const,
+            type: 'trade_good' as const,
+            setId: 'set',
+            value: 10,
+            description: 'Test',
+          },
+          {
+            id: 'item2',
+            name: 'Item B',
+            quantity: 1,
+            rarity: 'uncommon' as const,
+            type: 'discovery' as const,
+            setId: 'set',
+            value: 20,
+            description: 'Test',
+          },
+          {
+            id: 'item3',
+            name: 'Item C',
+            quantity: 1,
+            rarity: 'rare' as const,
+            type: 'legendary' as const,
+            setId: 'set',
+            value: 30,
+            description: 'Test',
+          },
+        ],
+        xp: 100,
+      };
+
+      const summary = manager.getCashOutSummary(rewards);
+
+      expect(summary.rewardDetails).toBe('Item A, Item B, Item C');
+    });
+  });
 });
