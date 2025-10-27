@@ -49,6 +49,7 @@ export class BonusManager {
           value: bonus.value,
           source: completedSetId,
           isActive: true,
+          description: bonus.description,
         });
       }
     }
