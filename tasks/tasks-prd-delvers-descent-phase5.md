@@ -69,8 +69,8 @@ Based on: `tasks/prd-delvers-descent-phase5.md`
 
 - [ ] 1.0 Visual Design & UI Polish
   - [x] 1.1 Create visual design mockups for spatial navigation map
-  - [ ] 1.2 Design node visualization cards with encounter type indicators
-  - [ ] 1.3 Implement path connection visualization between nodes
+  - [x] 1.2 Design node visualization cards with encounter type indicators
+  - [x] 1.3 Implement path connection visualization between nodes
   - [ ] 1.4 Create depth level display with clear visual hierarchy
   - [ ] 1.5 Design energy cost visualization components
   - [ ] 1.6 Implement return cost indicators and safety margin display
