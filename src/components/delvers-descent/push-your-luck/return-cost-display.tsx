@@ -30,7 +30,8 @@ const getContainerClass = (
   highlightMode: 'none' | 'prominent' | 'critical',
   safetyLevel: 'safe' | 'caution' | 'danger' | 'critical'
 ): string => {
-  const baseClasses = 'rounded-lg p-4 border-2 transition-all duration-200';
+  const baseClasses =
+    'rounded-lg p-4 border-2 transition-all duration-300 ease-in-out';
 
   if (highlightMode === 'critical') {
     return `${baseClasses} bg-red-50 border-red-500 animate-pulse`;
@@ -126,7 +127,7 @@ const SafetyIndicatorBar: React.FC<{
       <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-200">
         <div
           data-testid="safety-indicator-bar"
-          className={`h-full transition-all duration-300 ${
+          className={`h-full transition-all duration-300 ease-in-out ${
             safetyLevel === 'safe'
               ? 'bg-green-500'
               : safetyLevel === 'caution'

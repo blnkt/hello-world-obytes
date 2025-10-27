@@ -38,7 +38,7 @@ const BustInfoSection: React.FC<{
  */
 const BustHeader: React.FC = () => (
   <div className="mb-6 text-center">
-    <div className="mx-auto mb-4 flex size-20 items-center justify-center rounded-full bg-red-500 text-5xl text-white">
+    <div className="mx-auto mb-4 flex size-20 animate-bounce-in items-center justify-center rounded-full bg-red-500 text-5xl text-white">
       ⚠
     </div>
     <h2 className="text-3xl font-bold text-gray-800">You Busted!</h2>
@@ -51,7 +51,7 @@ const BustHeader: React.FC = () => (
 const BustMainContent: React.FC<{ consequence: BustConsequence }> = ({
   consequence,
 }) => (
-  <div className="mb-6 rounded-lg bg-white p-6 shadow-lg">
+  <div className="mb-6 animate-fade-in rounded-lg bg-white p-6 shadow-lg">
     <h3 className="mb-4 text-xl font-semibold text-gray-800">What Happened</h3>
 
     <div className="mb-4 space-y-2">
@@ -74,7 +74,7 @@ const BustMainContent: React.FC<{ consequence: BustConsequence }> = ({
       />
     </div>
 
-    <div className="rounded-lg bg-green-50 p-4">
+    <div className="animate-pulse rounded-lg bg-green-50 p-4">
       <h4 className="mb-2 text-lg font-semibold text-green-700">
         Progress Preserved
       </h4>

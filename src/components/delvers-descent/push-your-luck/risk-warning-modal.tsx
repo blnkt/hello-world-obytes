@@ -66,7 +66,7 @@ const ModalOverlay: React.FC<{ blocking?: boolean; onCancel: () => void }> = ({
   return (
     <div
       data-testid="modal-overlay"
-      className="fixed inset-0 z-50 bg-black/50"
+      className="fixed inset-0 z-50 animate-fade-in bg-black/50"
       onClick={onCancel}
     />
   );
@@ -90,11 +90,11 @@ export const RiskWarningModal: React.FC<RiskWarningModalProps> = ({
       <ModalOverlay blocking={blocking} onCancel={onCancel} />
       <div
         data-testid="risk-warning-modal"
-        className={`fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg border-2 p-6 shadow-xl ${warningClasses.bgColor} ${warningClasses.borderColor}`}
+        className={`fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 animate-slide-up rounded-lg border-2 p-6 shadow-xl ${warningClasses.bgColor} ${warningClasses.borderColor}`}
       >
         <div className="mb-4 text-center">
           <div
-            className={`mx-auto mb-4 flex size-16 items-center justify-center rounded-full text-4xl ${warningClasses.bgColor}`}
+            className={`mx-auto mb-4 flex size-16 animate-bounce-in items-center justify-center rounded-full text-4xl ${warningClasses.bgColor}`}
           >
             {warningClasses.icon}
           </div>

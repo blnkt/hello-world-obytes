@@ -22,7 +22,8 @@ const RewardItemSection: React.FC<{
         {items.map((item, index) => (
           <div
             key={index}
-            className="flex items-center justify-between rounded bg-gray-50 p-2"
+            className="flex animate-fade-in items-center justify-between rounded bg-gray-50 p-2"
+            style={{ animationDelay: `${index * 50}ms` }}
           >
             <span className="text-sm text-gray-800">{item.name}</span>
             <span className="text-sm font-medium text-gray-600">
@@ -43,7 +44,7 @@ const RewardItemSection: React.FC<{
  */
 const CashOutHeader: React.FC = () => (
   <div className="mb-6 text-center">
-    <div className="mx-auto mb-4 flex size-20 items-center justify-center rounded-full bg-green-500 text-5xl text-white">
+    <div className="mx-auto mb-4 flex size-20 animate-bounce-in items-center justify-center rounded-full bg-green-500 text-5xl text-white">
       ✓
     </div>
     <h2 className="text-3xl font-bold text-gray-800">Cash Out Successful</h2>
@@ -54,7 +55,7 @@ const CashOutHeader: React.FC = () => (
 const CashOutRewardSummary: React.FC<{ summary: CashOutSummary }> = ({
   summary,
 }) => (
-  <div className="mb-6 rounded-lg bg-white p-6 shadow-lg">
+  <div className="mb-6 animate-fade-in rounded-lg bg-white p-6 shadow-lg">
     <h3 className="mb-4 text-xl font-semibold text-gray-800">Reward Summary</h3>
 
     <div className="mb-4 border-b pb-4">
