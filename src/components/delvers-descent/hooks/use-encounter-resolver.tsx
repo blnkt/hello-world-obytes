@@ -1,11 +1,17 @@
-import { useState, useEffect, useCallback } from 'react';
-import { EncounterResolver } from '@/lib/delvers-descent/encounter-resolver';
-import { PuzzleChamberEncounter } from '@/lib/delvers-descent/puzzle-chamber-encounter';
-import { TradeOpportunityEncounter } from '@/lib/delvers-descent/trade-opportunity-encounter';
+import { useCallback, useEffect, useState } from 'react';
+
 import { DiscoverySiteEncounter } from '@/lib/delvers-descent/discovery-site-encounter';
-import { RewardCalculator } from '@/lib/delvers-descent/reward-calculator';
+import { EncounterResolver } from '@/lib/delvers-descent/encounter-resolver';
 import { FailureConsequenceManager } from '@/lib/delvers-descent/failure-consequence-manager';
-import type { DelvingRun, DungeonNode, EncounterType, EncounterOutcome } from '@/types/delvers-descent';
+import { PuzzleChamberEncounter } from '@/lib/delvers-descent/puzzle-chamber-encounter';
+import { RewardCalculator } from '@/lib/delvers-descent/reward-calculator';
+import { TradeOpportunityEncounter } from '@/lib/delvers-descent/trade-opportunity-encounter';
+import type {
+  DelvingRun,
+  DungeonNode,
+  EncounterOutcome,
+  EncounterType,
+} from '@/types/delvers-descent';
 
 interface UseEncounterResolverReturn {
   encounterResolver: EncounterResolver | null;
@@ -13,7 +19,11 @@ interface UseEncounterResolverReturn {
   error: string | null;
   startEncounter: () => Promise<void>;
   updateEncounterProgress: (progress: any) => Promise<void>;
-  completeEncounter: (result: 'success' | 'failure', rewards?: any[], callback?: (result: 'success' | 'failure', rewards?: any[]) => void) => Promise<void>;
+  completeEncounter: (
+    result: 'success' | 'failure',
+    rewards?: any[],
+    callback?: (result: 'success' | 'failure', rewards?: any[]) => void
+  ) => Promise<void>;
   getEncounterState: () => any;
   clearEncounterState: () => void;
 }
@@ -22,7 +32,8 @@ export const useEncounterResolver = (
   run: DelvingRun,
   node: DungeonNode
 ): UseEncounterResolverReturn => {
-  const [encounterResolver, setEncounterResolver] = useState<EncounterResolver | null>(null);
+  const [encounterResolver, setEncounterResolver] =
+    useState<EncounterResolver | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [rewardCalculator] = useState(() => new RewardCalculator());
@@ -36,7 +47,7 @@ export const useEncounterResolver = (
 
         // Create encounter resolver
         const resolver = new EncounterResolver();
-        
+
         // Create specific encounter based on node type
         let _encounter;
         switch (node.type) {
@@ -60,10 +71,12 @@ export const useEncounterResolver = (
           depth: node.depth,
           energyCost: node.energyCost,
         });
-        
+
         setEncounterResolver(resolver);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to initialize encounter');
+        setError(
+          err instanceof Error ? err.message : 'Failed to initialize encounter'
+        );
       } finally {
         setIsLoading(false);
       }
@@ -74,102 +87,132 @@ export const useEncounterResolver = (
 
   const startEncounter = useCallback(async () => {
     if (!encounterResolver) return;
-    
+
     try {
       setError(null);
       // Encounter is already started in useEffect
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to start encounter');
+      setError(
+        err instanceof Error ? err.message : 'Failed to start encounter'
+      );
     }
   }, [encounterResolver]);
 
-  const updateEncounterProgress = useCallback(async (progress: any) => {
-    if (!encounterResolver) return;
-    
-    try {
-      setError(null);
-      await encounterResolver.updateEncounterProgress(progress);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update encounter progress');
-    }
-  }, [encounterResolver]);
+  const updateEncounterProgress = useCallback(
+    async (progress: any) => {
+      if (!encounterResolver) return;
 
-  const completeEncounter = useCallback(async (
-    result: 'success' | 'failure',
-    rewards?: any[],
-    callback?: (result: 'success' | 'failure', rewards?: any[]) => void
-  ) => {
-    if (!encounterResolver) return;
-    
-    try {
-      setError(null);
-      
-      // Process rewards if successful
-      let processedRewards = rewards;
-      if (result === 'success' && rewards) {
-        processedRewards = rewardCalculator.processEncounterRewards(
-          rewards,
-          node.type as EncounterType,
-          node.depth
+      try {
+        setError(null);
+        await encounterResolver.updateEncounterProgress(progress);
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'Failed to update encounter progress'
         );
       }
-      
-      // Process failure consequences if failed
-      if (result === 'failure') {
-        const _consequences = failureManager.processFailureConsequences(
-          'objective_failed',
-          node.depth,
-          node.id
+    },
+    [encounterResolver]
+  );
+
+  const completeEncounter = useCallback(
+    async (
+      result: 'success' | 'failure',
+      rewards?: any[],
+      callback?: (result: 'success' | 'failure', rewards?: any[]) => void
+    ) => {
+      if (!encounterResolver) return;
+
+      try {
+        setError(null);
+
+        // Process rewards if successful
+        let processedRewards = rewards;
+        if (result === 'success' && rewards) {
+          processedRewards = rewardCalculator.processEncounterRewards(
+            rewards,
+            node.type as EncounterType,
+            node.depth
+          );
+        }
+
+        // Process failure consequences if failed
+        if (result === 'failure') {
+          const _consequences = failureManager.processFailureConsequences(
+            'objective_failed',
+            node.depth,
+            node.id
+          );
+          // Apply consequences (energy loss, item loss, etc.)
+        }
+
+        // Complete the encounter
+        const encounterOutcome: EncounterOutcome = {
+          success: result === 'success',
+          rewards: processedRewards || [],
+          energyUsed: node.energyCost,
+          itemsGained: processedRewards || [],
+          itemsLost: [],
+          failureType: result === 'failure' ? 'objective_failed' : undefined,
+          additionalEffects: {},
+          totalRewardValue:
+            processedRewards?.reduce((sum, reward) => sum + reward.value, 0) ||
+            0,
+          consequences:
+            result === 'failure'
+              ? {
+                  energyLoss: node.energyCost,
+                  itemLossRisk: 0.2,
+                  encounterLockout: false,
+                }
+              : undefined,
+        };
+
+        await encounterResolver.completeEncounter(result, encounterOutcome);
+
+        // Call the callback if provided
+        if (callback) {
+          callback(result, processedRewards);
+        }
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : 'Failed to complete encounter'
         );
-        // Apply consequences (energy loss, item loss, etc.)
       }
-      
-      // Complete the encounter
-      const encounterOutcome: EncounterOutcome = {
-        success: result === 'success',
-        rewards: processedRewards || [],
-        energyUsed: node.energyCost,
-        itemsGained: processedRewards || [],
-        itemsLost: [],
-        failureType: result === 'failure' ? 'objective_failed' : undefined,
-        additionalEffects: {},
-        totalRewardValue: processedRewards?.reduce((sum, reward) => sum + reward.value, 0) || 0,
-        consequences: result === 'failure' ? {
-          energyLoss: node.energyCost,
-          itemLossRisk: 0.2,
-          encounterLockout: false,
-        } : undefined,
-      };
-      
-      await encounterResolver.completeEncounter(result, encounterOutcome);
-      
-      // Call the callback if provided
-      if (callback) {
-        callback(result, processedRewards);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to complete encounter');
-    }
-  }, [encounterResolver, rewardCalculator, failureManager, node.type, node.depth, node.id]);
+    },
+    [
+      encounterResolver,
+      rewardCalculator,
+      failureManager,
+      node.type,
+      node.depth,
+      node.id,
+    ]
+  );
 
   const getEncounterState = useCallback(() => {
     if (!encounterResolver) return null;
-    
+
     try {
       return encounterResolver.getEncounterState();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to get encounter state');
+      setError(
+        err instanceof Error ? err.message : 'Failed to get encounter state'
+      );
       return null;
     }
   }, [encounterResolver]);
 
   const clearEncounterState = useCallback(() => {
     if (!encounterResolver) return;
-    
+
     try {
       encounterResolver.clearEncounterState();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to clear encounter state');
+      setError(
+        err instanceof Error ? err.message : 'Failed to clear encounter state'
+      );
     }
   }, [encounterResolver]);
 

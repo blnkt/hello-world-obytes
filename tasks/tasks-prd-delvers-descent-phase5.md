@@ -80,7 +80,7 @@ Based on: `tasks/prd-delvers-descent-phase5.md`
   - [x] 1.10 Write visual design documentation
 
 - [ ] 2.0 Game Balance Optimization
-  - [ ] 2.1 Create balance configuration system for easy tuning
+  - [x] 2.1 Create balance configuration system for easy tuning
   - [ ] 2.2 Implement energy cost balancing parameters
   - [ ] 2.3 Tune encounter reward values for appropriate progression
   - [ ] 2.4 Optimize difficulty curve scaling with depth
