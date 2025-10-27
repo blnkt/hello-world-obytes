@@ -514,4 +514,67 @@ describe('CashOutManager', () => {
       expect(successResult.preservedXp).toBe(bustResult.preservedXp);
     });
   });
+
+  describe('bust confirmation - Task 3.5', () => {
+    it('should provide clear consequence explanation for bust', () => {
+      const consequence = manager.getBustConsequence();
+
+      expect(consequence.message).toBeDefined();
+      expect(consequence.xpPreserved).toBe(true);
+      expect(consequence.itemsLost).toBeDefined();
+    });
+
+    it('should provide context-aware explanations based on items lost', () => {
+      const oneItemContext = manager.getBustConsequence({ itemsLost: 1 });
+      const multipleItemsContext = manager.getBustConsequence({ itemsLost: 5 });
+      const noItemsContext = manager.getBustConsequence({ itemsLost: 0 });
+
+      expect(oneItemContext.message).toContain(
+        '1 collected item has been lost'
+      );
+      expect(multipleItemsContext.message).toContain(
+        '5 collected items have been lost'
+      );
+      expect(noItemsContext.message).toContain('Your collected items are lost');
+    });
+
+    it('should always mention XP preservation in bust consequence', () => {
+      const consequence = manager.getBustConsequence();
+
+      expect(consequence.message).toContain('XP');
+      expect(consequence.message).toContain('preserved');
+      expect(consequence.xpPreserved).toBe(true);
+    });
+
+    it('should explain that step progress is retained', () => {
+      const consequence = manager.getBustConsequence({ itemsLost: 3 });
+
+      expect(consequence.message).toContain('step progress');
+      expect(consequence.message).toContain('preserved');
+    });
+
+    it('should provide different messages for different item counts', () => {
+      const consequence1 = manager.getBustConsequence({ itemsLost: 1 });
+      const consequence2 = manager.getBustConsequence({ itemsLost: 10 });
+
+      expect(consequence1.message).toContain('1 collected item has been lost');
+      expect(consequence1.message).toContain('has'); // singular form
+
+      expect(consequence2.message).toContain(
+        '10 collected items have been lost'
+      );
+      expect(consequence2.message).toContain('have'); // plural form
+    });
+
+    it('should be clear about what is lost vs preserved', () => {
+      const consequence = manager.getBustConsequence({ itemsLost: 5 });
+
+      // Should mention what's lost
+      expect(consequence.message).toContain('lost');
+      // Should mention what's preserved
+      expect(consequence.message).toContain('preserved');
+      // Should be clear about XP preservation
+      expect(consequence.xpPreserved).toBe(true);
+    });
+  });
 });

@@ -140,15 +140,33 @@ export class CashOutManager {
   }
 
   /**
-   * Get bust consequence explanation
+   * Get bust consequence explanation with context
    */
-  getBustConsequence(): BustConsequence {
+  getBustConsequence(context?: {
+    currentEnergy?: number;
+    returnCost?: number;
+    itemsLost?: number;
+  }): BustConsequence {
+    const itemsLost = context?.itemsLost ?? 0;
+    const energyLost = context?.currentEnergy ?? 100;
+
+    let message =
+      'You have exhausted your energy and cannot afford to return to the surface safely. ';
+
+    if (itemsLost > 0) {
+      message += `Your ${itemsLost} collected item${itemsLost === 1 ? '' : 's'} ${itemsLost === 1 ? 'has' : 'have'} been lost. `;
+    } else {
+      message += 'Your collected items are lost. ';
+    }
+
+    message +=
+      'However, your XP (step progress) is preserved and you will retain your progression.';
+
     return {
-      message:
-        'You have exhausted your energy and cannot afford to return to the surface safely. Your collected items are lost, but your XP (step progress) is preserved.',
+      message,
       xpPreserved: true,
       itemsLost: true,
-      energyLost: 100,
+      energyLost,
     };
   }
 
