@@ -237,12 +237,12 @@ let globalBalanceManager: BalanceManager | null = null;
 
 export function getBalanceManager(): BalanceManager {
   if (!globalBalanceManager) {
-    globalBalanceManager = new BalanceManager();
+    globalBalanceManager = new BalanceManager(DEFAULT_BALANCE_CONFIG);
   }
 
   return globalBalanceManager;
 }
 
 export function resetBalanceManager(): void {
-  globalBalanceManager = new BalanceManager();
+  globalBalanceManager = new BalanceManager(DEFAULT_BALANCE_CONFIG);
 }
