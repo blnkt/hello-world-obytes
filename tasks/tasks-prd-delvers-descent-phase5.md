@@ -81,7 +81,7 @@ Based on: `tasks/prd-delvers-descent-phase5.md`
 
 - [ ] 2.0 Game Balance Optimization
   - [x] 2.1 Create balance configuration system for easy tuning
-  - [ ] 2.2 Implement energy cost balancing parameters
+  - [x] 2.2 Implement energy cost balancing parameters
   - [ ] 2.3 Tune encounter reward values for appropriate progression
   - [ ] 2.4 Optimize difficulty curve scaling with depth
   - [ ] 2.5 Balance bust rate to maintain 20-30% target

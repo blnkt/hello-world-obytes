@@ -19,11 +19,6 @@ describe('Reward and Failure Systems', () => {
         expect(rewardCalculator.getEncounterTypeMultipliers()).toBeDefined();
         expect(rewardCalculator.getDepthScalingFactor()).toBe(0.2);
       });
-
-      it('should initialize with custom depth scaling factor', () => {
-        const customCalculator = new RewardCalculator(0.3);
-        expect(customCalculator.getDepthScalingFactor()).toBe(0.3);
-      });
     });
 
     describe('depth-based scaling', () => {

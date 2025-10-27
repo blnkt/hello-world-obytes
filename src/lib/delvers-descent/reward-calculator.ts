@@ -1,5 +1,7 @@
 import type { CollectedItem, EncounterType } from '@/types/delvers-descent';
 
+import { getBalanceManager } from './balance-manager';
+
 export interface EncounterTypeMultipliers {
   puzzle_chamber: number;
   trade_opportunity: number;
@@ -32,55 +34,57 @@ export interface FailureStatistics {
 }
 
 export class RewardCalculator {
-  private depthScalingFactor: number;
-  private encounterTypeMultipliers: EncounterTypeMultipliers;
   private collectionSets: CollectionSetInfo[] = [];
 
-  constructor(depthScalingFactor: number = 0.2) {
-    this.depthScalingFactor = depthScalingFactor;
-    this.encounterTypeMultipliers = {
-      puzzle_chamber: 1.0,
-      trade_opportunity: 1.2,
-      discovery_site: 1.1,
-      risk_event: 1.5,
-      hazard: 0.8,
-      rest_site: 0.5,
-    };
+  constructor() {
     this.initializeCollectionSets();
   }
 
+  /**
+   * Get depth scaling factor from balance configuration
+   */
   getDepthScalingFactor(): number {
-    return this.depthScalingFactor;
+    const balanceManager = getBalanceManager();
+    return balanceManager.getConfig().reward.depthScalingFactor;
   }
 
+  /**
+   * Get encounter type multipliers from balance configuration
+   */
   getEncounterTypeMultipliers(): EncounterTypeMultipliers {
-    return { ...this.encounterTypeMultipliers };
+    const balanceManager = getBalanceManager();
+    return balanceManager.getConfig().reward.typeMultipliers;
   }
 
+  /**
+   * Calculate depth scaling using balance configuration
+   */
   calculateDepthScaling(depth: number): number {
-    return 1 + Math.max(0, depth) * this.depthScalingFactor;
+    const balanceManager = getBalanceManager();
+    return balanceManager.calculateDepthRewardScaling(depth);
   }
 
+  /**
+   * Scale reward by depth using balance configuration
+   */
   scaleRewardByDepth(baseReward: number, depth: number): number {
     return Math.round(baseReward * this.calculateDepthScaling(depth));
   }
 
+  /**
+   * Calculate final reward using balance configuration
+   */
   calculateFinalReward(
     baseReward: number,
     encounterType: EncounterType,
     depth: number
   ): number {
-    const depthScaling = this.calculateDepthScaling(depth);
-    const encounterMultiplier =
-      this.encounterTypeMultipliers[encounterType] || 1.0;
-    const baseFinalReward = baseReward * encounterMultiplier * depthScaling;
-
-    // Add random variation (±15% to ±30% based on depth)
-    const variationRange = 0.15 + depth * 0.02;
-    const variation = (Math.random() - 0.5) * 2 * variationRange;
-    const finalReward = baseFinalReward * (1 + variation);
-
-    return Math.round(Math.max(1, finalReward));
+    const balanceManager = getBalanceManager();
+    return balanceManager.calculateRewardValue(
+      baseReward,
+      encounterType,
+      depth
+    );
   }
 
   generateCollectionReward(
