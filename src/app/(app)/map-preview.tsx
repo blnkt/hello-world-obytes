@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 
 import { DungeonMapVisualization } from '@/components/delvers-descent/map/dungeon-map-visualization';
 import { NodeCard } from '@/components/delvers-descent/map/node-card';
@@ -93,36 +93,38 @@ export default function MapPreviewScreen() {
   const [mockRunState] = useState<RunState>(mockRunStateData);
 
   return (
-    <View className="flex-1 bg-gray-100 p-6">
-      <View className="mb-6">
-        <Text className="text-3xl font-bold text-gray-800">
-          Map Preview - Phase 5 Visual Design
-        </Text>
-        <Text className="mt-2 text-gray-600">
-          Preview of the dungeon map visualization components
-        </Text>
-      </View>
+    <ScrollView className="flex-1 bg-gray-100">
+      <View className="p-6">
+        <View className="mb-6">
+          <Text className="text-3xl font-bold text-gray-800">
+            Map Preview - Phase 5 Visual Design
+          </Text>
+          <Text className="mt-2 text-gray-600">
+            Preview of the dungeon map visualization components
+          </Text>
+        </View>
 
-      <View className="mb-8 rounded-lg bg-white p-6">
-        <Text className="mb-4 text-xl font-semibold">
-          Dungeon Map Visualization
-        </Text>
-        <DungeonMapVisualization nodes={mockNodes} runState={mockRunState} />
-      </View>
+        <View className="mb-8 rounded-lg bg-white p-6">
+          <Text className="mb-4 text-xl font-semibold">
+            Dungeon Map Visualization
+          </Text>
+          <DungeonMapVisualization nodes={mockNodes} runState={mockRunState} />
+        </View>
 
-      <View className="mb-8 rounded-lg bg-white p-6">
-        <Text className="mb-4 text-xl font-semibold">Node Cards Sample</Text>
-        <View className="flex-row flex-wrap gap-4">
-          <NodeCard
-            node={mockNodes[0]}
-            isCurrent={false}
-            isVisited={true}
-            onSelect={(id) => console.log('Selected:', id)}
-          />
-          <NodeCard node={mockNodes[2]} isCurrent={true} isVisited={true} />
-          <NodeCard node={mockNodes[5]} isCurrent={false} isVisited={false} />
+        <View className="mb-8 rounded-lg bg-white p-6">
+          <Text className="mb-4 text-xl font-semibold">Node Cards Sample</Text>
+          <View className="flex-row flex-wrap gap-4">
+            <NodeCard
+              node={mockNodes[0]}
+              isCurrent={false}
+              isVisited={true}
+              onSelect={(id) => console.log('Selected:', id)}
+            />
+            <NodeCard node={mockNodes[2]} isCurrent={true} isVisited={true} />
+            <NodeCard node={mockNodes[5]} isCurrent={false} isVisited={false} />
+          </View>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
