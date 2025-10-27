@@ -88,23 +88,125 @@ export type EncounterType =
 export interface CollectionSet {
   id: string;
   name: string;
-  items: CollectedItem[];
-  completionBonus: string;
-  bonusType:
-    | 'energy_efficiency'
-    | 'starting_bonus'
-    | 'unlock_region'
-    | 'permanent_ability';
-  bonusValue: number;
+  description: string;
+  category: 'trade_goods' | 'discoveries' | 'legendaries';
+  items: CollectionItem[];
+  bonuses: SetBonus[];
+  unlockRequirements?: UnlockRequirement;
+}
+
+export interface CollectionItem {
+  id: string;
+  name: string;
+  description: string;
+  category: 'trade_goods' | 'discoveries' | 'legendaries';
+  rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+  value: number;
+  setId: string;
+  iconName?: string;
+}
+
+export interface SetBonus {
+  type: BonusType;
+  value: number;
+  description: string;
+  stackingType: 'additive' | 'multiplicative';
+}
+
+export interface UnlockRequirement {
+  completedSets?: string[];
+  characterLevel?: number;
+  totalItemsCollected?: number;
+  specificRegionCompleted?: string;
+}
+
+export interface CollectionProgress {
+  totalItems: number;
+  totalSets: number;
+  completedSets: string[];
+  partialSets: SetProgress[];
+  totalXP: number;
+  byCategory: {
+    trade_goods: CategoryProgress;
+    discoveries: CategoryProgress;
+    legendaries: CategoryProgress;
+  };
+}
+
+export interface SetProgress {
+  setId: string;
+  collected: number;
+  total: number;
+  items: string[]; // collected item IDs
+}
+
+export interface CategoryProgress {
+  total: number;
+  collected: number;
+  sets: number;
+  completedSets: number;
+}
+
+export interface ActiveBonus {
+  type: BonusType;
+  value: number;
+  source: string; // setId that granted this bonus
+  isActive: boolean;
+}
+
+export interface CollectionBonusSummary {
+  totalBonuses: number;
+  activeBonuses: ActiveBonus[];
+  energyEfficiency: number;
+  startingEnergyBonus: number;
+  startingItemsBonus: number;
+  encounterOddsBonus: number;
+  shortcutChanceBonus: number;
 }
 
 export interface Region {
   id: string;
   name: string;
   description: string;
+  theme: string;
   isUnlocked: boolean;
-  encounterTable: EncounterType[];
-  startingBonuses: string[];
+  unlockRequirements: UnlockRequirement;
+  startingBonus: {
+    energyBonus: number;
+    itemsBonus: number;
+  };
+  encounterDistribution: EncounterDistribution;
+  visualTheme?: {
+    primaryColor: string;
+    secondaryColor: string;
+    backgroundType: string;
+  };
+}
+
+export interface EncounterDistribution {
+  puzzle_chamber: number;
+  trade_opportunity: number;
+  discovery_site: number;
+  risk_event: number;
+  hazard: number;
+  rest_site: number;
+}
+
+export interface CollectionStatistics {
+  totalRunsCompleted: number;
+  totalItemsCollected: number;
+  setsCompleted: number;
+  collectionCompletionRate: number;
+  favoriteSets: string[];
+  lastCollectionUpdate: number;
+}
+
+export interface CollectedItemTracking {
+  itemId: string;
+  setId: string;
+  collectedDate: number;
+  runId?: string;
+  source?: 'encounter' | 'discovery' | 'trade' | 'special';
 }
 
 export interface DelvingStats {
@@ -271,3 +373,16 @@ export const BONUS_TYPES = [
 ] as const;
 
 export type BonusType = (typeof BONUS_TYPES)[number];
+
+// Extended bonus types for Phase 4
+export type ExtendedBonusType =
+  | 'energy_efficiency'
+  | 'starting_bonus'
+  | 'unlock_region'
+  | 'permanent_ability'
+  | 'starting_energy'
+  | 'starting_items'
+  | 'encounter_odds'
+  | 'shortcut_chance'
+  | 'region_unlock'
+  | 'set_bonus';

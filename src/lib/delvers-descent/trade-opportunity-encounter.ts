@@ -558,34 +558,62 @@ export class TradeOpportunityEncounter {
       {
         id: 'silk_road_set',
         name: 'Silk Road Collection',
+        description: 'Ancient trading route treasures',
+        category: 'trade_goods',
         items: [],
-        completionBonus: '+10% energy efficiency',
-        bonusType: 'energy_efficiency',
-        bonusValue: 10,
+        bonuses: [
+          {
+            type: 'energy_efficiency',
+            value: 10,
+            description: '+10% energy efficiency',
+            stackingType: 'additive',
+          },
+        ],
       },
       {
         id: 'spice_trade_set',
         name: 'Spice Trade Collection',
+        description: 'Rare spices from distant lands',
+        category: 'trade_goods',
         items: [],
-        completionBonus: 'Start runs with 10 gold',
-        bonusType: 'starting_bonus',
-        bonusValue: 10,
+        bonuses: [
+          {
+            type: 'starting_bonus',
+            value: 10,
+            description: 'Start runs with 10 gold',
+            stackingType: 'additive',
+          },
+        ],
       },
       {
         id: 'gem_merchant_set',
         name: 'Gem Merchant Collection',
+        description: 'Precious gems and jewels',
+        category: 'trade_goods',
         items: [],
-        completionBonus: 'Unlock Crystal Caverns region',
-        bonusType: 'unlock_region',
-        bonusValue: 1,
+        bonuses: [
+          {
+            type: 'unlock_region',
+            value: 1,
+            description: 'Unlock Crystal Caverns region',
+            stackingType: 'multiplicative',
+          },
+        ],
       },
       {
         id: 'exotic_goods_set',
         name: 'Exotic Goods Collection',
+        description: 'Mysterious exotic items',
+        category: 'trade_goods',
         items: [],
-        completionBonus: '+15% starting energy',
-        bonusType: 'permanent_ability',
-        bonusValue: 15,
+        bonuses: [
+          {
+            type: 'permanent_ability',
+            value: 15,
+            description: '+15% starting energy',
+            stackingType: 'additive',
+          },
+        ],
       },
     ];
   }
