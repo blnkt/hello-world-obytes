@@ -1,4 +1,5 @@
 import React from 'react';
+import { ScrollView, Text, View } from 'react-native';
 
 import type { DungeonNode, RunState } from '@/types/delvers-descent';
 
@@ -21,46 +22,43 @@ export const DungeonMapVisualization: React.FC<
   ).sort();
 
   return (
-    <div data-testid="dungeon-map" className="bg-gray-50 p-4">
-      <div data-testid="energy-display" className="mb-4 text-center">
-        <h3 className="text-lg font-semibold text-gray-800">
+    <ScrollView testID="dungeon-map" className="bg-gray-50 p-4">
+      <View testID="energy-display" className="mb-4">
+        <Text className="text-center text-lg font-semibold text-gray-800">
           Energy: {runState.energyRemaining}
-        </h3>
-      </div>
+        </Text>
+      </View>
 
-      <div className="flex flex-col gap-8">
+      <View className="gap-8">
         {depths.map((depth) => (
-          <div
+          <View
             key={depth}
-            data-testid={`depth-level-${depth}`}
-            className="rounded-lg bg-white p-4 shadow"
+            testID={`depth-level-${depth}`}
+            className="rounded-lg bg-white p-4"
           >
-            <h4 className="mb-2 font-semibold text-gray-700">
+            <Text className="mb-2 font-semibold text-gray-700">
               Depth {depth}
               {depth === runState.currentDepth && (
-                <span
-                  data-testid="current-depth"
-                  className="ml-2 text-blue-600"
-                >
+                <Text testID="current-depth" className="ml-2 text-blue-600">
                   (Current)
-                </span>
+                </Text>
               )}
-            </h4>
-            <div className="grid-cols-auto grid gap-2">
+            </Text>
+            <View className="flex-row flex-wrap gap-2">
               {nodes
                 .filter((node: DungeonNode) => node.depth === depth)
                 .map((node: DungeonNode) => (
-                  <div
+                  <View
                     key={node.id}
                     className="rounded border border-gray-300 p-2"
                   >
-                    <span className="text-sm text-gray-600">{node.type}</span>
-                  </div>
+                    <Text className="text-sm text-gray-600">{node.type}</Text>
+                  </View>
                 ))}
-            </div>
-          </div>
+            </View>
+          </View>
         ))}
-      </div>
-    </div>
+      </View>
+    </ScrollView>
   );
 };

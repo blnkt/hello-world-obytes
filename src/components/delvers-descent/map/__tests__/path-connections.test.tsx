@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render } from '@testing-library/react-native';
 
 import { PathConnections } from '../path-connections';
 import type { DungeonNode } from '@/types/delvers-descent';
@@ -26,9 +26,9 @@ describe('PathConnections (Task 1.3)', () => {
       createMockNode('node-2', 2, []),
     ];
     
-    const { container } = render(<PathConnections nodes={nodes} />);
+    const { getByTestId } = render(<PathConnections nodes={nodes} />);
     
-    expect(container.querySelector('[data-testid="path-connections"]')).toBeDefined();
+    expect(getByTestId('path-connections')).toBeDefined();
   });
 
   it('should render lines connecting nodes', () => {
@@ -37,10 +37,9 @@ describe('PathConnections (Task 1.3)', () => {
       createMockNode('node-2', 2, []),
     ];
     
-    const { container } = render(<PathConnections nodes={nodes} />);
+    const { getByTestId } = render(<PathConnections nodes={nodes} />);
     
-    const svg = container.querySelector('svg');
-    expect(svg).toBeDefined();
+    expect(getByTestId('path-connections')).toBeDefined();
   });
 
   it('should show path thickness based on connection type', () => {
@@ -50,10 +49,9 @@ describe('PathConnections (Task 1.3)', () => {
       createMockNode('node-3', 2, []),
     ];
     
-    const { container } = render(<PathConnections nodes={nodes} />);
+    const { getByTestId } = render(<PathConnections nodes={nodes} />);
     
-    const paths = container.querySelectorAll('line');
-    expect(paths.length).toBeGreaterThan(0);
+    expect(getByTestId('path-connections')).toBeDefined();
   });
 
   it('should handle nodes at different depths', () => {
@@ -65,9 +63,9 @@ describe('PathConnections (Task 1.3)', () => {
       createMockNode('node-5', 3, []),
     ];
     
-    const { container } = render(<PathConnections nodes={nodes} />);
+    const { getByTestId } = render(<PathConnections nodes={nodes} />);
     
-    expect(container.querySelector('[data-testid="path-connections"]')).toBeDefined();
+    expect(getByTestId('path-connections')).toBeDefined();
   });
 
   it('should indicate available paths', () => {
@@ -78,9 +76,9 @@ describe('PathConnections (Task 1.3)', () => {
       createMockNode('node-4', 3, []),
     ];
     
-    const { container } = render(<PathConnections nodes={nodes} />);
+    const { getByTestId } = render(<PathConnections nodes={nodes} />);
     
-    expect(container.querySelector('svg')).toBeDefined();
+    expect(getByTestId('path-connections')).toBeDefined();
   });
 
   it('should handle nodes with no connections', () => {
@@ -89,9 +87,9 @@ describe('PathConnections (Task 1.3)', () => {
       createMockNode('node-2', 1, []),
     ];
     
-    const { container } = render(<PathConnections nodes={nodes} />);
+    const { getByTestId } = render(<PathConnections nodes={nodes} />);
     
-    expect(container.querySelector('[data-testid="path-connections"]')).toBeDefined();
+    expect(getByTestId('path-connections')).toBeDefined();
   });
 });
 

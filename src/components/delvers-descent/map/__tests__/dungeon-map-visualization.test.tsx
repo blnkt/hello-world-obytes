@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render } from '@testing-library/react-native';
 
 import { DungeonMapVisualization } from '../dungeon-map-visualization';
 import type { DungeonNode, RunState } from '@/types/delvers-descent';
@@ -34,20 +34,20 @@ describe('DungeonMapVisualization (Task 1.1)', () => {
   };
 
   it('should render the spatial navigation map', () => {
-    const { container } = render(
+    const { getByTestId } = render(
       <DungeonMapVisualization nodes={mockNodes} runState={mockRunState} />
     );
     
-    expect(container.querySelector('[data-testid="dungeon-map"]')).toBeDefined();
+    expect(getByTestId('dungeon-map')).toBeDefined();
   });
 
   it('should display depth levels with visual hierarchy', () => {
-    const { container } = render(
+    const { getByTestId } = render(
       <DungeonMapVisualization nodes={mockNodes} runState={mockRunState} />
     );
     
-    expect(container.querySelector('[data-testid="depth-level-1"]')).toBeDefined();
-    expect(container.querySelector('[data-testid="depth-level-2"]')).toBeDefined();
+    expect(getByTestId('depth-level-1')).toBeDefined();
+    expect(getByTestId('depth-level-2')).toBeDefined();
   });
 
   it('should show all nodes at each depth level', () => {
@@ -59,19 +59,19 @@ describe('DungeonMapVisualization (Task 1.1)', () => {
   });
 
   it('should display energy cost information', () => {
-    const { container } = render(
+    const { getByTestId } = render(
       <DungeonMapVisualization nodes={mockNodes} runState={mockRunState} />
     );
     
-    expect(container.querySelector('[data-testid="energy-display"]')).toBeDefined();
+    expect(getByTestId('energy-display')).toBeDefined();
   });
 
   it('should indicate current depth level', () => {
-    const { container } = render(
+    const { getByTestId } = render(
       <DungeonMapVisualization nodes={mockNodes} runState={mockRunState} />
     );
     
-    expect(container.querySelector('[data-testid="current-depth"]')).toBeDefined();
+    expect(getByTestId('current-depth')).toBeDefined();
   });
 });
 

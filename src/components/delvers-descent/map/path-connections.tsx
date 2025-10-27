@@ -1,4 +1,6 @@
 import React from 'react';
+import { View } from 'react-native';
+import Svg, { Line } from 'react-native-svg';
 
 import type { DungeonNode } from '@/types/delvers-descent';
 
@@ -35,8 +37,8 @@ export const PathConnections: React.FC<PathConnectionsProps> = ({ nodes }) => {
   });
 
   return (
-    <div data-testid="path-connections" className="absolute inset-0">
-      <svg className="size-full">
+    <View testID="path-connections" className="absolute inset-0">
+      <Svg height="100%" width="100%">
         {lines.map((line, index) => {
           const fromPos = nodePositions.get(line.from.id);
           const toPos = nodePositions.get(line.to.id);
@@ -46,7 +48,7 @@ export const PathConnections: React.FC<PathConnectionsProps> = ({ nodes }) => {
           const strokeWidth = line.from.depth < line.to.depth ? 2 : 1.5;
 
           return (
-            <line
+            <Line
               key={`path-${line.from.id}-${line.to.id}-${index}`}
               x1={fromPos.x}
               y1={fromPos.y}
@@ -58,7 +60,7 @@ export const PathConnections: React.FC<PathConnectionsProps> = ({ nodes }) => {
             />
           );
         })}
-      </svg>
-    </div>
+      </Svg>
+    </View>
   );
 };

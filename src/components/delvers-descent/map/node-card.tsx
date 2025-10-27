@@ -1,4 +1,5 @@
 import React from 'react';
+import { Pressable, Text, View } from 'react-native';
 
 import type { DungeonNode } from '@/types/delvers-descent';
 
@@ -40,39 +41,43 @@ export const NodeCard: React.FC<NodeCardProps> = ({
     }
   };
 
-  const handleClick = () => {
-    if (onSelect && node.isRevealed) {
+  const handlePress = () => {
+    if (onSelect && node.isRevealed && !isCurrent) {
       onSelect(node.id);
     }
   };
 
   return (
-    <button
-      data-testid={`node-card-${node.id}`}
-      onClick={handleClick}
+    <Pressable
+      testID={`node-card-${node.id}`}
+      onPress={handlePress}
       disabled={!node.isRevealed || isCurrent}
-      className={`rounded-lg border-2 p-3 text-left transition-all ${
+      className={`w-32 rounded-lg border-2 p-3 ${
         isCurrent
-          ? 'bg-blue-500 text-white'
+          ? 'bg-blue-500'
           : isVisited
             ? 'bg-gray-300 opacity-60'
             : getTypeColor()
       } ${!node.isRevealed ? 'opacity-50' : ''}`}
     >
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="font-semibold capitalize">{node.type}</div>
-          <div className="text-xs">
+      <View className="flex-row items-center justify-between">
+        <View>
+          <Text className="font-semibold capitalize text-gray-800">
+            {node.type}
+          </Text>
+          <Text className="text-xs text-gray-600">
             {node.isRevealed ? `Depth ${node.depth}` : 'Hidden'}
-          </div>
-        </div>
+          </Text>
+        </View>
         {node.isRevealed && (
-          <div className="text-right text-xs">
-            <div>Energy: {node.energyCost}</div>
-            {isCurrent && <div className="mt-1 font-bold">Current</div>}
-          </div>
+          <View className="items-end">
+            <Text className="text-xs text-gray-700">
+              Energy: {node.energyCost}
+            </Text>
+            {isCurrent && <Text className="mt-1 font-bold">Current</Text>}
+          </View>
         )}
-      </div>
-    </button>
+      </View>
+    </Pressable>
   );
 };
