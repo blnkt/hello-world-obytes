@@ -254,4 +254,155 @@ describe('CashOutManager', () => {
       expect(warning.message).toContain('CRITICAL');
     });
   });
+
+  describe('reward banking system - Task 3.3', () => {
+    it('should create deep copy of items to prevent mutation', () => {
+      const originalItems = [
+        {
+          id: 'item1',
+          name: 'Test Item',
+          quantity: 1,
+          rarity: 'common' as const,
+          type: 'trade_good' as const,
+          setId: 'test_set',
+          value: 10,
+          description: 'Test',
+        },
+      ];
+      const rewards = {
+        energy: 50,
+        items: originalItems,
+        xp: 100,
+      };
+
+      const banked = manager.bankRewards(rewards);
+
+      // Modify original items
+      originalItems[0].quantity = 99;
+
+      // Banked items should not be affected
+      expect(banked.items[0].quantity).toBe(1);
+    });
+
+    it('should preserve all item properties during banking', () => {
+      const rewards = {
+        energy: 0,
+        items: [
+          {
+            id: 'legendary1',
+            name: 'Legendary Item',
+            quantity: 5,
+            rarity: 'legendary' as const,
+            type: 'legendary' as const,
+            setId: 'legendary_set',
+            value: 1000,
+            description: 'Very rare item',
+          },
+        ],
+        xp: 500,
+      };
+
+      const banked = manager.bankRewards(rewards);
+
+      expect(banked.items[0]).toEqual({
+        id: 'legendary1',
+        name: 'Legendary Item',
+        quantity: 5,
+        rarity: 'legendary' as const,
+        type: 'legendary' as const,
+        setId: 'legendary_set',
+        value: 1000,
+        description: 'Very rare item',
+      });
+    });
+
+    it('should handle banking multiple item types correctly', () => {
+      const rewards = {
+        energy: 0,
+        items: [
+          {
+            id: 'trade1',
+            name: 'Trade Good',
+            quantity: 3,
+            rarity: 'common' as const,
+            type: 'trade_good' as const,
+            setId: 'trade_set',
+            value: 10,
+            description: 'Common good',
+          },
+          {
+            id: 'discovery1',
+            name: 'Discovery',
+            quantity: 1,
+            rarity: 'rare' as const,
+            type: 'discovery' as const,
+            setId: 'discovery_set',
+            value: 50,
+            description: 'Rare discovery',
+          },
+          {
+            id: 'legendary1',
+            name: 'Legendary',
+            quantity: 1,
+            rarity: 'legendary' as const,
+            type: 'legendary' as const,
+            setId: 'legendary_set',
+            value: 500,
+            description: 'Legendary item',
+          },
+        ],
+        xp: 200,
+      };
+
+      const banked = manager.bankRewards(rewards);
+
+      expect(banked.items).toHaveLength(3);
+      expect(banked.items[0].type).toBe('trade_good');
+      expect(banked.items[1].type).toBe('discovery');
+      expect(banked.items[2].type).toBe('legendary');
+    });
+
+    it('should handle empty item list gracefully', () => {
+      const rewards = { energy: 100, items: [], xp: 50 };
+
+      const banked = manager.bankRewards(rewards);
+
+      expect(banked.items).toHaveLength(0);
+      expect(banked.energy).toBe(100);
+      expect(banked.xp).toBe(50);
+    });
+
+    it('should track banked items count for statistics', () => {
+      const rewards = {
+        energy: 0,
+        items: [
+          {
+            id: 'i1',
+            name: 'Item 1',
+            quantity: 1,
+            rarity: 'common' as const,
+            type: 'trade_good' as const,
+            setId: 's',
+            value: 10,
+            description: 'd',
+          },
+          {
+            id: 'i2',
+            name: 'Item 2',
+            quantity: 2,
+            rarity: 'uncommon' as const,
+            type: 'discovery' as const,
+            setId: 's',
+            value: 20,
+            description: 'd',
+          },
+        ],
+        xp: 100,
+      };
+
+      const result = manager.processCashOut(rewards);
+
+      expect(result.bankedItems).toBe(2);
+    });
+  });
 });

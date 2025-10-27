@@ -108,7 +108,7 @@ export class CashOutManager {
     // Return a deep copy to prevent mutation
     return {
       energy: rewards.energy,
-      items: [...rewards.items],
+      items: rewards.items.map((item) => ({ ...item })),
       xp: rewards.xp,
     };
   }
