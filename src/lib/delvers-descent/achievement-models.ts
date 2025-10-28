@@ -218,7 +218,8 @@ export class AchievementDataModel {
           data.efficiency <= requirements.threshold;
         break;
       case 'exploration':
-        matched = type === 'exploration' && requirements.threshold === 1;
+        // Exploration achievements match on exploration events
+        matched = type === 'exploration';
         break;
       case 'custom':
         matched = this.checkCustomRequirement(event, requirements);
@@ -252,6 +253,14 @@ export class AchievementDataModel {
     event: AchievementEvent,
     requirements: AchievementRequirements
   ): boolean {
+    // For exploration-all-regions and similar achievements with threshold > 1
+    // They need to track multiple exploration events
+    if (requirements.threshold > 1) {
+      // These achievements track progress through multiple events
+      // Each exploration event increments progress
+      return event.type === 'exploration';
+    }
+
     if (requirements.additionalCriteria) {
       if (requirements.additionalCriteria.cashOut === true) {
         // This is the risk-cashout-deep achievement
