@@ -131,7 +131,7 @@ Based on: `tasks/prd-delvers-descent-phase5.md`
   - [x] 5.11 Document performance targets and achievements
 
 - [ ] 6.0 User Feedback Enhancement
-  - [ ] 6.1 Create decision feedback system for player actions
+  - [x] 6.1 Create decision feedback system for player actions
   - [ ] 6.2 Implement risk warning feedback for dangerous decisions
   - [ ] 6.3 Design success/failure feedback for encounter outcomes
   - [ ] 6.4 Create progress feedback system for collections
@@ -142,16 +142,3 @@ Based on: `tasks/prd-delvers-descent-phase5.md`
   - [ ] 6.9 Add feedback UI components
   - [ ] 6.10 Test feedback system integration
   - [ ] 6.11 Document feedback patterns and usage
-
-- [ ] 7.0 Accessibility Features
-  - [ ] 7.1 Implement color blind support with alternative color schemes
-  - [ ] 7.2 Add adjustable text size options
-  - [ ] 7.3 Create high contrast mode
-  - [ ] 7.4 Implement screen reader support
-  - [ ] 7.5 Add motor accessibility features
-  - [ ] 7.6 Create audio accessibility cues for visual elements
-  - [ ] 7.7 Implement cognitive accessibility improvements
-  - [ ] 7.8 Create extensive customization options
-  - [ ] 7.9 Add accessibility settings UI
-  - [ ] 7.10 Test accessibility features with users
-  - [ ] 7.11 Document accessibility features and usage
