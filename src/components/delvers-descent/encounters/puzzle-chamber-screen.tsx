@@ -143,6 +143,7 @@ const PuzzleContent: React.FC<{
   <ScrollView
     testID="puzzle-chamber-screen"
     className="min-h-screen bg-gray-50 p-6"
+    contentContainerStyle={{ flexGrow: 1 }}
   >
     <View className="mx-auto max-w-4xl">
       <View className="mb-8">
