@@ -74,7 +74,7 @@ Based on: `tasks/prd-delvers-descent-gameplay-integration.md`
   - [x] 3.5 Add "Return to Map" button to all encounter screens
   - [x] 3.6 Handle encounter outcomes (rewards, items, energy used)
   - [x] 3.7 Update run state after encounter completion
-  - [ ] 3.8 Implement failure handling and consequences
+  - [x] 3.8 Implement failure handling and consequences
   - [ ] 3.9 Create tests for encounter flow integration
 
 - [ ] 4.0 Decision-Making UI
