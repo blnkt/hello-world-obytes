@@ -86,7 +86,7 @@ Based on: `tasks/prd-delvers-descent-phase5.md`
   - [x] 2.4 Optimize difficulty curve scaling with depth
   - [x] 2.5 Balance bust rate to maintain 20-30% target
   - [x] 2.6 Fine-tune collection bonus values
-  - [ ] 2.7 Scale region difficulty for equal challenge
+  - [x] 2.7 Scale region difficulty for equal challenge
   - [ ] 2.8 Tune encounter frequency distributions
   - [ ] 2.9 Optimize exponential return cost curves
   - [ ] 2.10 Create balance testing framework
