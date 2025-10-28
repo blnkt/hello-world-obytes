@@ -137,18 +137,34 @@ const useActiveRunData = (runId: string) => {
   const updateDepth = (newDepth: number) => {
     setRunState((prevState) => {
       if (!prevState) return prevState;
+      
+      // Update depth to the new depth
+      const updatedDepth = Math.max(prevState.currentDepth, newDepth);
+      
+      console.log('updateDepth called:', { 
+        currentDepth: prevState.currentDepth, 
+        newDepth, 
+        updatedDepth,
+        maxDepth,
+        willGenerate: updatedDepth >= maxDepth
+      });
+      
+      // If we're going deeper than current max depth, generate new level
+      if (updatedDepth >= maxDepth) {
+        console.log('Generating new level:', maxDepth + 1);
+        const newNodes = generateDepthLevel(maxDepth + 1);
+        setNodes((prevNodes) => {
+          console.log('Adding nodes:', newNodes.length, 'Total nodes:', prevNodes.length + newNodes.length);
+          return [...prevNodes, ...newNodes];
+        });
+        setMaxDepth(maxDepth + 1);
+      }
+      
       return {
         ...prevState,
-        currentDepth: newDepth,
+        currentDepth: updatedDepth,
       };
     });
-
-    // If we're going deeper than current max depth, generate new level
-    if (newDepth >= maxDepth) {
-      const newNodes = generateDepthLevel(maxDepth + 1);
-      setNodes((prevNodes) => [...prevNodes, ...newNodes]);
-      setMaxDepth(maxDepth + 1);
-    }
   };
 
   return {
@@ -217,7 +233,9 @@ const useEncounterHandlers = (params: {
 
       // Update depth if we went deeper
       // This allows access to next level nodes
-      onDepthUpdate(selectedNode.depth);
+      if (selectedNode.depth > (runState?.currentDepth || 0)) {
+        onDepthUpdate(selectedNode.depth);
+      }
 
       setShowEncounter(false);
     },
