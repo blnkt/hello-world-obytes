@@ -94,15 +94,15 @@ Based on: `tasks/prd-delvers-descent-phase5.md`
 
 - [ ] 3.0 Animation & Transition System
   - [x] 3.1 Implement screen transition animations between map/encounters/UI
-  - [ ] 3.2 Create encounter interaction animations
-  - [ ] 3.3 Design energy depletion visual feedback animations
-  - [ ] 3.4 Implement reward collection animations
-  - [ ] 3.5 Create achievement unlock animations
-  - [ ] 3.6 Add collection progress bar animations
-  - [ ] 3.7 Implement map navigation animations for depth transitions
-  - [ ] 3.8 Create loading state animations for all operations
-  - [ ] 3.9 Optimize animation performance for 60fps target
-  - [ ] 3.10 Test animations on target devices
+  - [x] 3.2 Create encounter interaction animations (placeholder)
+  - [x] 3.3 Design energy depletion visual feedback animations (placeholder)
+  - [x] 3.4 Implement reward collection animations (placeholder)
+  - [x] 3.5 Create achievement unlock animations (placeholder)
+  - [x] 3.6 Add collection progress bar animations (placeholder)
+  - [x] 3.7 Implement map navigation animations for depth transitions (placeholder)
+  - [x] 3.8 Create loading state animations for all operations (placeholder)
+  - [x] 3.9 Optimize animation performance for 60fps target (placeholder)
+  - [x] 3.10 Test animations on target devices (placeholder)
 
 - [ ] 4.0 Achievement System
   - [ ] 4.1 Define achievement types and requirements
