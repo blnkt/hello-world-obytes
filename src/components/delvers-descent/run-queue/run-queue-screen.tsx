@@ -1,8 +1,9 @@
 import { useRouter } from 'expo-router';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 
 import { useDelvingRuns } from '@/components/delvers-descent/hooks/use-delving-runs';
+import { useDelvingRunsIntegration } from '@/lib/health';
 import type { DelvingRun } from '@/types/delvers-descent';
 
 import { RunCard } from './run-card';
@@ -145,7 +146,19 @@ export const RunQueueScreen: React.FC = () => {
     getActiveRuns,
     getCompletedRuns,
     getBustedRuns,
+    refreshData,
   } = useDelvingRuns();
+
+  // Auto-sync with HealthKit to generate runs from step data
+  const { syncWithHealthKit, isLoading: isSyncing } =
+    useDelvingRunsIntegration();
+
+  // Refresh when sync completes
+  useEffect(() => {
+    if (!isSyncing) {
+      refreshData();
+    }
+  }, [isSyncing, refreshData]);
 
   const handleStartRun = (runId: string) => {
     router.push(`/active-run?id=${runId}`);
@@ -155,7 +168,7 @@ export const RunQueueScreen: React.FC = () => {
     router.push(`/active-run?id=${runId}`);
   };
 
-  if (isLoading) {
+  if (isLoading || isSyncing) {
     return <LoadingView />;
   }
 
