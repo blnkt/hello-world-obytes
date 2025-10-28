@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 
 import { InteractiveMap } from '@/components/delvers-descent/active-run/interactive-map';
@@ -98,41 +98,47 @@ const useActiveRunData = (runId: string) => {
     }
   }, [runId, generateFullMap]);
 
-  const updateEnergy = (newEnergy: number) => {
-    if (runState) {
-      setRunState({
-        ...runState,
-        energyRemaining: newEnergy,
-      });
-    }
+  const updateEnergy = (newEnergy: number | ((current: number) => number)) => {
+    setRunState((prevState) => {
+      if (!prevState) return prevState;
+      const energyValue =
+        typeof newEnergy === 'function' ? newEnergy(prevState.energyRemaining) : newEnergy;
+      return {
+        ...prevState,
+        energyRemaining: energyValue,
+      };
+    });
   };
 
   const addToInventory = (item: any) => {
-    if (runState) {
-      setRunState({
-        ...runState,
-        inventory: [...runState.inventory, item],
-      });
-    }
+    setRunState((prevState) => {
+      if (!prevState) return prevState;
+      return {
+        ...prevState,
+        inventory: [...prevState.inventory, item],
+      };
+    });
   };
 
   const markNodeVisited = (nodeId: string) => {
-    if (runState && !runState.visitedNodes.includes(nodeId)) {
-      setRunState({
-        ...runState,
-        visitedNodes: [...runState.visitedNodes, nodeId],
+    setRunState((prevState) => {
+      if (!prevState || prevState.visitedNodes.includes(nodeId)) return prevState;
+      return {
+        ...prevState,
+        visitedNodes: [...prevState.visitedNodes, nodeId],
         currentNode: nodeId,
-      });
-    }
+      };
+    });
   };
 
   const updateDepth = (newDepth: number) => {
-    if (runState) {
-      setRunState({
-        ...runState,
+    setRunState((prevState) => {
+      if (!prevState) return prevState;
+      return {
+        ...prevState,
         currentDepth: newDepth,
-      });
-    }
+      };
+    });
   };
 
   return {
@@ -273,11 +279,12 @@ export default function ActiveRunRoute() {
     updateDepth,
   } = useActiveRunData(runId);
 
-  const handleEnergyUpdate = (energyDelta: number) => {
-    if (runState) {
-      updateEnergy(runState.energyRemaining + energyDelta);
-    }
-  };
+  const handleEnergyUpdate = useCallback(
+    (energyDelta: number) => {
+      updateEnergy((currentEnergy: number) => currentEnergy + energyDelta);
+    },
+    [updateEnergy]
+  );
 
   const handleInventoryUpdate = (items: any[]) => {
     items.forEach((item) => {
