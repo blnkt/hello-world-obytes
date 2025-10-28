@@ -81,8 +81,8 @@ Based on: `tasks/prd-delvers-descent-gameplay-integration.md`
   - [x] 4.1 Create cash out button with confirmation modal
   - [x] 4.2 Implement cash out confirmation with reward summary
   - [x] 4.3 Create continue button with conditional risk warning
-  - [ ] 4.4 Implement risk warning modal for dangerous energy levels
-  - [ ] 4.5 Add safety margin display to decision-making UI
+  - [x] 4.4 Implement risk warning modal for dangerous energy levels
+  - [x] 4.5 Add safety margin display to decision-making UI
   - [ ] 4.6 Create bust screen component
   - [ ] 4.7 Implement bust handling (XP preserved, items lost)
   - [ ] 4.8 Add return to run queue from bust screen
