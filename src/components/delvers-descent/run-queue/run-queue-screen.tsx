@@ -147,11 +147,11 @@ export const RunQueueScreen: React.FC = () => {
     getCompletedRuns,
     getBustedRuns,
     refreshData,
+    updateRunStatus,
   } = useDelvingRuns();
 
   // Auto-sync with HealthKit to generate runs from step data
-  const { syncWithHealthKit, isLoading: isSyncing } =
-    useDelvingRunsIntegration();
+  const { isLoading: isSyncing } = useDelvingRunsIntegration();
 
   // Refresh when sync completes
   useEffect(() => {
@@ -160,15 +160,60 @@ export const RunQueueScreen: React.FC = () => {
     }
   }, [isSyncing, refreshData]);
 
-  const handleStartRun = (runId: string) => {
-    router.push(`/active-run?id=${runId}`);
+  return (
+    <RunQueueMainContent
+      isLoading={isLoading || isSyncing}
+      error={error}
+      router={router}
+      updateRunStatus={updateRunStatus}
+      refreshData={refreshData}
+      getQueuedRuns={getQueuedRuns}
+      getActiveRuns={getActiveRuns}
+      getCompletedRuns={getCompletedRuns}
+      getBustedRuns={getBustedRuns}
+    />
+  );
+};
+
+const RunQueueMainContent: React.FC<{
+  isLoading: boolean;
+  error: string | null;
+  router: any;
+  updateRunStatus: (
+    runId: string,
+    status: DelvingRun['status']
+  ) => Promise<void>;
+  refreshData: () => Promise<void>;
+  getQueuedRuns: () => DelvingRun[];
+  getActiveRuns: () => DelvingRun[];
+  getCompletedRuns: () => DelvingRun[];
+  getBustedRuns: () => DelvingRun[];
+}> = ({
+  isLoading,
+  error,
+  router,
+  updateRunStatus,
+  refreshData,
+  getQueuedRuns,
+  getActiveRuns,
+  getCompletedRuns,
+  getBustedRuns,
+}) => {
+  const handleStartRun = async (runId: string) => {
+    try {
+      await updateRunStatus(runId, 'active');
+      await refreshData();
+      router.push(`/active-run?id=${runId}`);
+    } catch (error) {
+      console.error('Failed to start run:', error);
+    }
   };
 
   const handleRunPress = (runId: string) => {
     router.push(`/active-run?id=${runId}`);
   };
 
-  if (isLoading || isSyncing) {
+  if (isLoading) {
     return <LoadingView />;
   }
 
