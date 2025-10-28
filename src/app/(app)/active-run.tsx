@@ -98,16 +98,50 @@ const useActiveRunData = (runId: string) => {
     }
   }, [runId, generateFullMap]);
 
-  return { run, nodes, runState, isLoading, error };
+  const updateEnergy = (newEnergy: number) => {
+    if (runState) {
+      setRunState({
+        ...runState,
+        energyRemaining: newEnergy,
+      });
+    }
+  };
+
+  const addToInventory = (item: any) => {
+    if (runState) {
+      setRunState({
+        ...runState,
+        inventory: [...runState.inventory, item],
+      });
+    }
+  };
+
+  return {
+    run,
+    nodes,
+    runState,
+    isLoading,
+    error,
+    updateEnergy,
+    addToInventory,
+  };
 };
 
-const useEncounterHandlers = () => {
+const useEncounterHandlers = (params: {
+  runState: RunState | null;
+  onEnergyUpdate: (energyDelta: number) => void;
+  onInventoryUpdate: (items: any[]) => void;
+}) => {
+  const { runState, onEnergyUpdate, onInventoryUpdate } = params;
   const [selectedNode, setSelectedNode] = useState<DungeonNode | null>(null);
   const [showEncounter, setShowEncounter] = useState(false);
 
-  const handleNodePress = (node: DungeonNode, runState: RunState | null) => {
-    if (!runState) return false;
-    if (runState.energyRemaining < node.energyCost) {
+  const handleNodePress = (
+    node: DungeonNode,
+    currentRunState: RunState | null
+  ) => {
+    if (!currentRunState) return false;
+    if (currentRunState.energyRemaining < node.energyCost) {
       alert('Not enough energy to reach this node!');
       return false;
     }
@@ -116,17 +150,40 @@ const useEncounterHandlers = () => {
     return true;
   };
 
+  const handleEncounterComplete = (
+    result: 'success' | 'failure',
+    rewards?: any[]
+  ) => {
+    if (!selectedNode || !runState) {
+      setShowEncounter(false);
+      return;
+    }
+
+    // Consume energy for visiting the node
+    onEnergyUpdate(-selectedNode.energyCost);
+
+    // Add rewards to inventory if successful
+    if (result === 'success' && rewards) {
+      onInventoryUpdate(rewards);
+    }
+
+    // Mark node as visited (this would typically update run state)
+    console.log('Encounter completed:', {
+      result,
+      node: selectedNode,
+      rewards,
+      energyUsed: selectedNode.energyCost,
+    });
+
+    setShowEncounter(false);
+  };
+
   return {
     selectedNode,
     showEncounter,
     handleNodePress,
     handleReturnToMap: () => setShowEncounter(false),
-    handleEncounterComplete: (
-      _result: 'success' | 'failure',
-      _rewards?: any[]
-    ) => {
-      setShowEncounter(false);
-    },
+    handleEncounterComplete,
   };
 };
 
@@ -174,8 +231,39 @@ export default function ActiveRunRoute() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const runId = params.id as string;
-  const { run, nodes, runState, isLoading, error } = useActiveRunData(runId);
-  const handlers = useEncounterHandlers();
+  const {
+    run,
+    nodes,
+    runState,
+    isLoading,
+    error,
+    updateEnergy,
+    addToInventory,
+  } = useActiveRunData(runId);
+
+  const handleEnergyUpdate = (energyDelta: number) => {
+    if (runState) {
+      updateEnergy(runState.energyRemaining + energyDelta);
+    }
+  };
+
+  const handleInventoryUpdate = (items: any[]) => {
+    items.forEach((item) => {
+      addToInventory({
+        id: item.id || `item-${Date.now()}`,
+        name: item.name || 'Unknown Item',
+        type: item.type || 'misc',
+        value: item.value || 0,
+        description: item.description || '',
+      });
+    });
+  };
+
+  const handlers = useEncounterHandlers({
+    runState,
+    onEnergyUpdate: handleEnergyUpdate,
+    onInventoryUpdate: handleInventoryUpdate,
+  });
 
   const handleNodePress = (node: DungeonNode) => {
     handlers.handleNodePress(node, runState);
