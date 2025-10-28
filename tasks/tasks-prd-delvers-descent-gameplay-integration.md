@@ -75,7 +75,7 @@ Based on: `tasks/prd-delvers-descent-gameplay-integration.md`
   - [x] 3.6 Handle encounter outcomes (rewards, items, energy used)
   - [x] 3.7 Update run state after encounter completion
   - [x] 3.8 Implement failure handling and consequences
-  - [ ] 3.9 Create tests for encounter flow integration
+  - [x] 3.9 Create tests for encounter flow integration
 
 - [ ] 4.0 Decision-Making UI
   - [ ] 4.1 Create cash out button with confirmation modal
