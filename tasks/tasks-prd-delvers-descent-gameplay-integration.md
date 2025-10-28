@@ -55,7 +55,7 @@ Based on: `tasks/prd-delvers-descent-gameplay-integration.md`
   - [x] 1.8 Add loading states and error handling
 
 - [ ] 2.0 Interactive Map Experience
-  - [ ] 2.1 Create active run screen layout and structure
+  - [x] 2.1 Create active run screen layout and structure
   - [ ] 2.2 Make dungeon map nodes touch-interactive (tap to select)
   - [ ] 2.3 Implement node state management (current, visited, available, unrevealed)
   - [ ] 2.4 Add visual state indication for different node types
