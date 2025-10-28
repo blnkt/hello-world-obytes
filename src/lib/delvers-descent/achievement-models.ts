@@ -42,6 +42,7 @@ export interface AchievementEventData {
   shortcutId?: string;
   regionId?: string;
   efficiency?: number;
+  cashOut?: boolean;
 }
 
 export interface AchievementUnlockEvent {
@@ -186,6 +187,11 @@ export class AchievementDataModel {
           type === 'depth_reached' &&
           data.depth !== undefined &&
           data.depth >= requirements.threshold;
+
+        // Check additional criteria if present
+        if (matched && requirements.additionalCriteria?.cashOut === true) {
+          matched = data.cashOut === true;
+        }
         break;
       case 'collection':
         // For collection achievements, always match on completion
@@ -247,10 +253,13 @@ export class AchievementDataModel {
     requirements: AchievementRequirements
   ): boolean {
     if (requirements.additionalCriteria) {
-      if (event.data.depth !== undefined) {
-        const depthMatches = event.data.depth >= requirements.threshold;
-        const cashOutMatches = requirements.additionalCriteria.cashOut === true;
-        return depthMatches && cashOutMatches;
+      if (requirements.additionalCriteria.cashOut === true) {
+        // This is the risk-cashout-deep achievement
+        // It requires depth >= 15 AND cashOut === true
+        if (event.data.depth !== undefined && event.data.cashOut === true) {
+          return event.data.depth >= requirements.threshold;
+        }
+        return false;
       }
     }
     return false;

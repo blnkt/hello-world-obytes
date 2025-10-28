@@ -109,7 +109,7 @@ Based on: `tasks/prd-delvers-descent-phase5.md`
   - [x] 4.2 Create achievement data models and interfaces
   - [x] 4.3 Implement achievement tracking system
   - [x] 4.4 Create milestone achievements (depth, collection, streaks)
-  - [ ] 4.5 Implement risk achievements for high-risk decisions
+  - [x] 4.5 Implement risk achievements for high-risk decisions
   - [ ] 4.6 Add efficiency achievements for optimal energy usage
   - [ ] 4.7 Create exploration achievements for shortcuts/regions
   - [ ] 4.8 Implement achievement rewards system
