@@ -90,7 +90,7 @@ Based on: `tasks/prd-delvers-descent-phase5.md`
   - [x] 2.8 Tune encounter frequency distributions
   - [x] 2.9 Optimize exponential return cost curves
   - [x] 2.10 Create balance testing framework
-  - [ ] 2.11 Document balance decisions and rationale
+  - [x] 2.11 Document balance decisions and rationale
 
 - [ ] 3.0 Animation & Transition System
   - [ ] 3.1 Implement screen transition animations between map/encounters/UI
