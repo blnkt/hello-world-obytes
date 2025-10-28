@@ -120,6 +120,13 @@ export const RestSiteScreen: React.FC<RestSiteScreenProps> = ({
   const [outcome, setOutcome] = useState<AdvancedEncounterOutcome | null>(null);
 
   const handleRest = () => {
+    // Select the first available action (or you could add UI to choose)
+    if (state.availableActions.length > 0 && !state.selectedAction) {
+      encounter.selectAction(state.availableActions[0].id);
+      const updatedState = encounter.getState();
+      setState(updatedState);
+    }
+
     const result = encounter.resolve();
     setOutcome(result);
     setState(encounter.getState());
