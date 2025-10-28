@@ -8,6 +8,9 @@ import type { DelvingRun } from '@/types/delvers-descent';
 
 import { RunCard } from './run-card';
 
+// Minimum energy required to engage in encounters (deepest node at depth 1)
+const MINIMUM_ENERGY_REQUIRED = 3;
+
 const LoadingView: React.FC = () => (
   <View className="flex-1 items-center justify-center bg-gray-50 dark:bg-gray-900">
     <ActivityIndicator size="large" color="#3B82F6" />
@@ -221,7 +224,9 @@ const RunQueueMainContent: React.FC<{
     return <ErrorView error={error} />;
   }
 
-  const queuedRuns = getQueuedRuns();
+  const queuedRuns = getQueuedRuns().filter(
+    (run) => run.totalEnergy >= MINIMUM_ENERGY_REQUIRED
+  );
   const activeRuns = getActiveRuns();
   const completedRuns = getCompletedRuns();
   const bustedRuns = getBustedRuns();
