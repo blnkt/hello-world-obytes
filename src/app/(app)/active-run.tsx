@@ -2,6 +2,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 
+import { CashOutModal } from '@/components/delvers-descent/active-run/cash-out-modal';
 import { InteractiveMap } from '@/components/delvers-descent/active-run/interactive-map';
 import { NavigationControls } from '@/components/delvers-descent/active-run/navigation-controls';
 import { RunStatusPanel } from '@/components/delvers-descent/active-run/run-status-panel';
@@ -232,7 +233,21 @@ const MapView: React.FC<{
   runState: RunState | null;
   onNodePress: (node: DungeonNode) => void;
   router: any;
-}> = ({ run, nodes, runState, onNodePress, router }) => (
+  showCashOutModal: boolean;
+  onShowCashOut: () => void;
+  onHideCashOut: () => void;
+  onCashOutConfirm: () => void;
+}> = ({
+  run,
+  nodes,
+  runState,
+  onNodePress,
+  router,
+  showCashOutModal,
+  onShowCashOut,
+  onHideCashOut,
+  onCashOutConfirm,
+}) => (
   <View className="flex-1 bg-gray-50 dark:bg-gray-900">
     <View className="p-4">
       <Text className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
@@ -253,16 +268,22 @@ const MapView: React.FC<{
       />
     )}
     <NavigationControls
-      onCashOut={() => {
-        alert('Cash out functionality coming soon!');
-        router.back();
-      }}
+      onCashOut={onShowCashOut}
       onContinue={() => {
         alert('Continue functionality - progress through dungeon deeper');
       }}
       energyRemaining={runState?.energyRemaining || 0}
       returnCost={100}
     />
+    {runState && (
+      <CashOutModal
+        visible={showCashOutModal}
+        runState={runState}
+        returnCost={100}
+        onConfirm={onCashOutConfirm}
+        onCancel={onHideCashOut}
+      />
+    )}
   </View>
 );
 
@@ -270,6 +291,7 @@ export default function ActiveRunRoute() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const runId = params.id as string;
+  const [showCashOutModal, setShowCashOutModal] = useState(false);
   const {
     run,
     nodes,
@@ -313,6 +335,13 @@ export default function ActiveRunRoute() {
     handlers.handleNodePress(node, runState);
   };
 
+  const handleCashOutConfirm = () => {
+    setShowCashOutModal(false);
+    // TODO: Implement actual cash out logic (bank items, update run status, etc.)
+    alert('Cash out completed! Your rewards have been banked.');
+    router.back();
+  };
+
   if (isLoading) return <LoadingView />;
   if (error || !run)
     return <ErrorView error={error || 'Run not found'} router={router} />;
@@ -335,6 +364,10 @@ export default function ActiveRunRoute() {
       runState={runState}
       onNodePress={handleNodePress}
       router={router}
+      showCashOutModal={showCashOutModal}
+      onShowCashOut={() => setShowCashOutModal(true)}
+      onHideCashOut={() => setShowCashOutModal(false)}
+      onCashOutConfirm={handleCashOutConfirm}
     />
   );
 }
