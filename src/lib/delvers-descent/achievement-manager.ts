@@ -53,7 +53,10 @@ export class AchievementManager {
       const result = model.checkRequirement(event);
       if (result.matched && !result.unlocked) {
         const progress = model.getProgress();
-        const update = model.updateProgress(progress.target);
+        // For depth/streak: progress is set to threshold when reached
+        // For collection: progress is incremented by 1
+        const newProgress = Math.max(progress.current + 1, progress.target);
+        const update = model.updateProgress(newProgress);
         updates.push(update);
       }
     });

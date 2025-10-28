@@ -180,16 +180,21 @@ export class AchievementDataModel {
 
     switch (requirements.type) {
       case 'depth':
+        // For depth achievements, unlock all achievements where
+        // current depth >= required threshold
         matched =
           type === 'depth_reached' &&
           data.depth !== undefined &&
           data.depth >= requirements.threshold;
         break;
       case 'collection':
-        matched =
-          type === 'collection_completed' && requirements.threshold === 1;
+        // For collection achievements, always match on completion
+        // Progress will be tracked by count
+        matched = type === 'collection_completed';
         break;
       case 'streak':
+        // For streak achievements, unlock all achievements where
+        // current streak >= required threshold
         matched =
           type === 'streak_milestone' &&
           data.streakDays !== undefined &&
