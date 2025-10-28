@@ -262,19 +262,21 @@ const MapView: React.FC<{
   onShowRiskWarning,
   onHideRiskWarning,
   onConfirmRisk,
-}) => (
-  <View className="flex-1 bg-gray-50 dark:bg-gray-900">
-    <View className="p-4">
-      <Text className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
-        Delver's Descent
-      </Text>
-      <RunDetailsCard run={run} />
-      <RunStatusPanel
-        energyRemaining={runState?.energyRemaining || 0}
-        returnCost={100}
-        currentDepth={runState?.currentDepth || 0}
-      />
-    </View>
+}) => {
+  console.log('MapView rendering with runState.energyRemaining:', runState?.energyRemaining);
+  return (
+    <View className="flex-1 bg-gray-50 dark:bg-gray-900">
+      <View className="p-4">
+        <Text className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
+          Delver's Descent
+        </Text>
+        <RunDetailsCard run={run} />
+        <RunStatusPanel
+          energyRemaining={runState?.energyRemaining || 0}
+          returnCost={100}
+          currentDepth={runState?.currentDepth || 0}
+        />
+      </View>
     {nodes.length > 0 && runState && (
       <InteractiveMap
         nodes={nodes}
@@ -308,7 +310,8 @@ const MapView: React.FC<{
       </>
     )}
   </View>
-);
+  );
+};
 
 export default function ActiveRunRoute() {
   const router = useRouter();
