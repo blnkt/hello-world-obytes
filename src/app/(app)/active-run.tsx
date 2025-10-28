@@ -116,6 +116,25 @@ const useActiveRunData = (runId: string) => {
     }
   };
 
+  const markNodeVisited = (nodeId: string) => {
+    if (runState && !runState.visitedNodes.includes(nodeId)) {
+      setRunState({
+        ...runState,
+        visitedNodes: [...runState.visitedNodes, nodeId],
+        currentNode: nodeId,
+      });
+    }
+  };
+
+  const updateDepth = (newDepth: number) => {
+    if (runState) {
+      setRunState({
+        ...runState,
+        currentDepth: newDepth,
+      });
+    }
+  };
+
   return {
     run,
     nodes,
@@ -124,6 +143,8 @@ const useActiveRunData = (runId: string) => {
     error,
     updateEnergy,
     addToInventory,
+    markNodeVisited,
+    updateDepth,
   };
 };
 
@@ -131,8 +152,10 @@ const useEncounterHandlers = (params: {
   runState: RunState | null;
   onEnergyUpdate: (energyDelta: number) => void;
   onInventoryUpdate: (items: any[]) => void;
+  onNodeVisited: (nodeId: string) => void;
+  onDepthUpdate: (depth: number) => void;
 }) => {
-  const { runState, onEnergyUpdate, onInventoryUpdate } = params;
+  const { runState, onEnergyUpdate, onInventoryUpdate, onNodeVisited, onDepthUpdate } = params;
   const [selectedNode, setSelectedNode] = useState<DungeonNode | null>(null);
   const [showEncounter, setShowEncounter] = useState(false);
 
@@ -167,7 +190,14 @@ const useEncounterHandlers = (params: {
       onInventoryUpdate(rewards);
     }
 
-    // Mark node as visited (this would typically update run state)
+    // Mark node as visited
+    onNodeVisited(selectedNode.id);
+
+    // Update depth if we went deeper
+    if (selectedNode.depth > runState.currentDepth) {
+      onDepthUpdate(selectedNode.depth);
+    }
+
     console.log('Encounter completed:', {
       result,
       node: selectedNode,
@@ -239,6 +269,8 @@ export default function ActiveRunRoute() {
     error,
     updateEnergy,
     addToInventory,
+    markNodeVisited,
+    updateDepth,
   } = useActiveRunData(runId);
 
   const handleEnergyUpdate = (energyDelta: number) => {
@@ -263,6 +295,8 @@ export default function ActiveRunRoute() {
     runState,
     onEnergyUpdate: handleEnergyUpdate,
     onInventoryUpdate: handleInventoryUpdate,
+    onNodeVisited: markNodeVisited,
+    onDepthUpdate: updateDepth,
   });
 
   const handleNodePress = (node: DungeonNode) => {
