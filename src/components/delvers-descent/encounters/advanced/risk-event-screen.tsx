@@ -174,7 +174,7 @@ export const RiskEventScreen: React.FC<RiskEventScreenProps> = ({
     <ScrollView
       testID="risk-event-screen"
       className="min-h-screen bg-gray-50 p-6"
-      contentContainerStyle={{ flexGrow: 1 }}
+      contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}
     >
       <View className="mx-auto max-w-2xl">
         <RiskEventHeader riskLevel={state.config.riskLevel} />

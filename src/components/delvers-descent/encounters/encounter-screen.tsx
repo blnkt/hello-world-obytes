@@ -188,7 +188,7 @@ export const EncounterScreen: React.FC<EncounterScreenProps> = ({
     <ScrollView
       testID="encounter-screen"
       className="min-h-screen bg-gray-50"
-      contentContainerStyle={{ flexGrow: 1 }}
+      contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}
     >
       {encounterResolver && !encounterResolver.getEncounterState() ? (
         <ReadyToBeginScreen onStart={handleStartEncounter} />

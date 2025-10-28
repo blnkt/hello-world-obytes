@@ -179,7 +179,7 @@ export const HazardScreen: React.FC<HazardScreenProps> = ({
     <ScrollView
       testID="hazard-screen"
       className="min-h-screen bg-gray-50 p-6"
-      contentContainerStyle={{ flexGrow: 1 }}
+      contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}
     >
       <View className="mx-auto max-w-2xl">
         <HazardHeader
