@@ -1,15 +1,15 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 
+import { InteractiveMap } from '@/components/delvers-descent/active-run/interactive-map';
+import { useMapGenerator } from '@/components/delvers-descent/hooks/use-map-generator';
 import { getRunQueueManager } from '@/lib/delvers-descent/run-queue';
-import type { DelvingRun } from '@/types/delvers-descent';
+import type {
+  DelvingRun,
+  DungeonNode,
+  RunState,
+} from '@/types/delvers-descent';
 
 const LoadingView: React.FC = () => (
   <View className="flex-1 items-center justify-center bg-gray-50 dark:bg-gray-900">
@@ -54,13 +54,13 @@ const RunDetailsCard: React.FC<{ run: DelvingRun }> = ({ run }) => (
   </View>
 );
 
-export default function ActiveRunRoute() {
-  const router = useRouter();
-  const params = useLocalSearchParams();
-  const runId = params.id as string;
+const useActiveRunData = (runId: string) => {
   const [run, setRun] = useState<DelvingRun | null>(null);
+  const [nodes, setNodes] = useState<DungeonNode[]>([]);
+  const [runState, setRunState] = useState<RunState | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { generateFullMap } = useMapGenerator();
 
   useEffect(() => {
     const loadRun = async () => {
@@ -69,6 +69,17 @@ export default function ActiveRunRoute() {
         const foundRun = manager.getRunById(runId);
         if (foundRun) {
           setRun(foundRun);
+          const mapNodes = generateFullMap(5);
+          setNodes(mapNodes);
+          setRunState({
+            runId: foundRun.id,
+            currentDepth: 0,
+            currentNode: '',
+            energyRemaining: foundRun.totalEnergy,
+            inventory: [],
+            visitedNodes: [],
+            discoveredShortcuts: [],
+          });
         } else {
           setError('Run not found');
         }
@@ -82,7 +93,28 @@ export default function ActiveRunRoute() {
     if (runId) {
       loadRun();
     }
-  }, [runId]);
+  }, [runId, generateFullMap]);
+
+  return { run, nodes, runState, isLoading, error };
+};
+
+export default function ActiveRunRoute() {
+  const router = useRouter();
+  const params = useLocalSearchParams();
+  const runId = params.id as string;
+  const { run, nodes, runState, isLoading, error } = useActiveRunData(runId);
+
+  const handleNodePress = (node: DungeonNode) => {
+    if (!runState || !run) return;
+
+    if (runState.energyRemaining < node.energyCost) {
+      alert('Not enough energy to reach this node!');
+      return;
+    }
+
+    console.log('Node pressed:', node);
+    alert(`Encounter: ${node.type}`);
+  };
 
   if (isLoading) {
     return <LoadingView />;
@@ -93,15 +125,23 @@ export default function ActiveRunRoute() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-900">
+    <View className="flex-1 bg-gray-50 dark:bg-gray-900">
       <View className="p-4">
-        <Text className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
+        <Text className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
           Delver's Descent
         </Text>
         <RunDetailsCard run={run} />
-        <Text className="mb-4 text-center text-gray-600 dark:text-gray-400">
-          Interactive map will be implemented next
-        </Text>
+      </View>
+
+      {nodes.length > 0 && runState && (
+        <InteractiveMap
+          nodes={nodes}
+          runState={runState}
+          onNodePress={handleNodePress}
+        />
+      )}
+
+      <View className="p-4">
         <TouchableOpacity
           onPress={() => router.back()}
           className="rounded-lg bg-blue-500 py-3"
@@ -109,6 +149,6 @@ export default function ActiveRunRoute() {
           <Text className="text-center font-semibold text-white">Go Back</Text>
         </TouchableOpacity>
       </View>
-    </ScrollView>
+    </View>
   );
 }
