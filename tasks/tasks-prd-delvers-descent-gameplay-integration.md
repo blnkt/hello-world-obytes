@@ -77,10 +77,10 @@ Based on: `tasks/prd-delvers-descent-gameplay-integration.md`
   - [x] 3.8 Implement failure handling and consequences
   - [x] 3.9 Create tests for encounter flow integration
 
-- [ ] 4.0 Decision-Making UI
-  - [ ] 4.1 Create cash out button with confirmation modal
-  - [ ] 4.2 Implement cash out confirmation with reward summary
-  - [ ] 4.3 Create continue button with conditional risk warning
+- [x] 4.0 Decision-Making UI
+  - [x] 4.1 Create cash out button with confirmation modal
+  - [x] 4.2 Implement cash out confirmation with reward summary
+  - [x] 4.3 Create continue button with conditional risk warning
   - [ ] 4.4 Implement risk warning modal for dangerous energy levels
   - [ ] 4.5 Add safety margin display to decision-making UI
   - [ ] 4.6 Create bust screen component
