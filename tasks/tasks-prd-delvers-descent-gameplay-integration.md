@@ -67,10 +67,10 @@ Based on: `tasks/prd-delvers-descent-gameplay-integration.md`
   - [ ] 2.10 Create tests for interactive map functionality
 
 - [ ] 3.0 Encounter Flow Integration
-  - [ ] 3.1 Create encounter router to route node types to encounter screens
-  - [ ] 3.2 Implement node click handler to trigger encounter transitions
-  - [ ] 3.3 Integrate existing encounter screens with active run
-  - [ ] 3.4 Implement encounter state management (progress, completion, outcomes)
+  - [x] 3.1 Create encounter router to route node types to encounter screens
+  - [x] 3.2 Implement node click handler to trigger encounter transitions
+  - [x] 3.3 Integrate existing encounter screens with active run
+  - [x] 3.4 Implement encounter state management (progress, completion, outcomes)
   - [ ] 3.5 Add "Return to Map" button to all encounter screens
   - [ ] 3.6 Handle encounter outcomes (rewards, items, energy used)
   - [ ] 3.7 Update run state after encounter completion

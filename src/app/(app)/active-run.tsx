@@ -5,6 +5,7 @@ import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 import { InteractiveMap } from '@/components/delvers-descent/active-run/interactive-map';
 import { NavigationControls } from '@/components/delvers-descent/active-run/navigation-controls';
 import { RunStatusPanel } from '@/components/delvers-descent/active-run/run-status-panel';
+import { EncounterScreen } from '@/components/delvers-descent/encounters/encounter-screen';
 import { useMapGenerator } from '@/components/delvers-descent/hooks/use-map-generator';
 import { getRunQueueManager } from '@/lib/delvers-descent/run-queue';
 import type {
@@ -100,70 +101,108 @@ const useActiveRunData = (runId: string) => {
   return { run, nodes, runState, isLoading, error };
 };
 
+const useEncounterHandlers = () => {
+  const [selectedNode, setSelectedNode] = useState<DungeonNode | null>(null);
+  const [showEncounter, setShowEncounter] = useState(false);
+
+  const handleNodePress = (node: DungeonNode, runState: RunState | null) => {
+    if (!runState) return false;
+    if (runState.energyRemaining < node.energyCost) {
+      alert('Not enough energy to reach this node!');
+      return false;
+    }
+    setSelectedNode(node);
+    setShowEncounter(true);
+    return true;
+  };
+
+  return {
+    selectedNode,
+    showEncounter,
+    handleNodePress,
+    handleReturnToMap: () => setShowEncounter(false),
+    handleEncounterComplete: (
+      _result: 'success' | 'failure',
+      _rewards?: any[]
+    ) => {
+      setShowEncounter(false);
+    },
+  };
+};
+
+const MapView: React.FC<{
+  run: DelvingRun;
+  nodes: DungeonNode[];
+  runState: RunState | null;
+  onNodePress: (node: DungeonNode) => void;
+  router: any;
+}> = ({ run, nodes, runState, onNodePress, router }) => (
+  <View className="flex-1 bg-gray-50 dark:bg-gray-900">
+    <View className="p-4">
+      <Text className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
+        Delver's Descent
+      </Text>
+      <RunDetailsCard run={run} />
+      <RunStatusPanel
+        energyRemaining={runState?.energyRemaining || 0}
+        returnCost={100}
+        currentDepth={runState?.currentDepth || 0}
+      />
+    </View>
+    {nodes.length > 0 && runState && (
+      <InteractiveMap
+        nodes={nodes}
+        runState={runState}
+        onNodePress={onNodePress}
+      />
+    )}
+    <NavigationControls
+      onCashOut={() => {
+        alert('Cash out functionality coming soon!');
+        router.back();
+      }}
+      onContinue={() => {
+        alert('Continue functionality - progress through dungeon deeper');
+      }}
+      energyRemaining={runState?.energyRemaining || 0}
+      returnCost={100}
+    />
+  </View>
+);
+
 export default function ActiveRunRoute() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const runId = params.id as string;
   const { run, nodes, runState, isLoading, error } = useActiveRunData(runId);
+  const handlers = useEncounterHandlers();
 
   const handleNodePress = (node: DungeonNode) => {
-    if (!runState || !run) return;
-
-    if (runState.energyRemaining < node.energyCost) {
-      alert('Not enough energy to reach this node!');
-      return;
-    }
-
-    console.log('Node pressed:', node);
-    alert(`Encounter: ${node.type}`);
+    handlers.handleNodePress(node, runState);
   };
 
-  if (isLoading) {
-    return <LoadingView />;
-  }
-
-  if (error || !run) {
+  if (isLoading) return <LoadingView />;
+  if (error || !run)
     return <ErrorView error={error || 'Run not found'} router={router} />;
-  }
 
-  const currentDepth = runState?.currentDepth || 0;
-  const energyRemaining = runState?.energyRemaining || 0;
-  const returnCost = 100; // TODO: Calculate from current depth
+  if (handlers.showEncounter && handlers.selectedNode && run) {
+    return (
+      <EncounterScreen
+        run={run}
+        node={handlers.selectedNode}
+        onReturnToMap={handlers.handleReturnToMap}
+        onEncounterComplete={handlers.handleEncounterComplete}
+      />
+    );
+  }
 
   return (
-    <View className="flex-1 bg-gray-50 dark:bg-gray-900">
-      <View className="p-4">
-        <Text className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
-          Delver's Descent
-        </Text>
-        <RunDetailsCard run={run} />
-
-        <RunStatusPanel
-          energyRemaining={energyRemaining}
-          returnCost={returnCost}
-          currentDepth={currentDepth}
-        />
-      </View>
-
-      {nodes.length > 0 && runState && (
-        <InteractiveMap
-          nodes={nodes}
-          runState={runState}
-          onNodePress={handleNodePress}
-        />
-      )}
-
-      <NavigationControls
-        onCashOut={() => {
-          alert('Cash out functionality coming soon!');
-          router.back();
-        }}
-        onContinue={() => {
-          alert('Continue functionality - progress through dungeon deeper');
-        }}
-        energyRemaining={energyRemaining}
-        returnCost={returnCost}
-      />
-    </View>
+    <MapView
+      run={run}
+      nodes={nodes}
+      runState={runState}
+      onNodePress={handleNodePress}
+      router={router}
+    />
   );
 }
