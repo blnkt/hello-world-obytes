@@ -76,8 +76,8 @@ const RestSiteBenefits: React.FC<{
           {energyReserve.currentCapacity}/{energyReserve.maxCapacity}
         </Text>
       </View>
-      <View className="flex-row items-center justify-between rounded bg-white p-3">
-        <Text className="text-gray-700">Strategic Intel:</Text>
+      <View className="rounded bg-white p-3">
+        <Text className="mb-2 text-gray-700">Strategic Intel:</Text>
         <Text className="font-bold text-blue-600">
           Map: +{strategicIntel.mapReveals} | Shortcuts: +
           {strategicIntel.shortcutHints} | Warnings: +
@@ -140,6 +140,7 @@ export const RestSiteScreen: React.FC<RestSiteScreenProps> = ({
     <ScrollView
       testID="rest-site-screen"
       className="min-h-screen bg-green-50 p-6"
+      contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}
     >
       <View className="mx-auto max-w-2xl">
         <RestSiteHeader />
