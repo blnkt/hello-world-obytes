@@ -93,7 +93,7 @@ Based on: `tasks/prd-delvers-descent-phase5.md`
   - [x] 2.11 Document balance decisions and rationale
 
 - [ ] 3.0 Animation & Transition System
-  - [ ] 3.1 Implement screen transition animations between map/encounters/UI
+  - [x] 3.1 Implement screen transition animations between map/encounters/UI
   - [ ] 3.2 Create encounter interaction animations
   - [ ] 3.3 Design energy depletion visual feedback animations
   - [ ] 3.4 Implement reward collection animations
