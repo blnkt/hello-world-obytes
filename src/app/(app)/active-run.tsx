@@ -158,6 +158,9 @@ export default function ActiveRunRoute() {
           alert('Cash out functionality coming soon!');
           router.back();
         }}
+        onContinue={() => {
+          alert('Continue functionality - progress through dungeon deeper');
+        }}
         energyRemaining={energyRemaining}
         returnCost={returnCost}
       />
