@@ -298,7 +298,6 @@ const MapView: React.FC<{
     )}
     </View>
   );
-  };
 };
 
 export default function ActiveRunRoute() {
