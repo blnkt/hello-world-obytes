@@ -200,16 +200,21 @@ const useEncounterHandlers = (params: {
       // Mark node as visited
       onNodeVisited(selectedNode.id);
 
+      // Update depth if we went deeper
+      // This allows access to next level nodes
+      onDepthUpdate(selectedNode.depth);
+
       console.log('Encounter completed:', {
         result,
         node: selectedNode,
         rewards,
         energyUsed: selectedNode.energyCost,
+        depth: selectedNode.depth,
       });
 
       setShowEncounter(false);
     },
-    [selectedNode, onEnergyUpdate, onInventoryUpdate, onNodeVisited]
+    [selectedNode, onEnergyUpdate, onInventoryUpdate, onNodeVisited, onDepthUpdate]
   );
 
   return {
