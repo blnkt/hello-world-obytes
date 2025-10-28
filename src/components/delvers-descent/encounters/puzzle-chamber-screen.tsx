@@ -298,17 +298,26 @@ const usePuzzleChamberState = (
   nodeDepth: number,
   _onComplete: (result: 'success' | 'failure', rewards?: any[]) => void
 ) => {
-  const [encounter, setEncounter] = useState<PuzzleChamberEncounter | null>(null);
+  const [encounter, setEncounter] = useState<PuzzleChamberEncounter | null>(
+    null
+  );
   const [tiles, setTiles] = useState<TileState[][]>([]);
   const [remainingReveals, setRemainingReveals] = useState(0);
   const [encounterComplete, setEncounterComplete] = useState(false);
-  const [encounterResult, setEncounterResult] = useState<'success' | 'failure' | null>(null);
+  const [encounterResult, setEncounterResult] = useState<
+    'success' | 'failure' | null
+  >(null);
   const [rewards, setRewards] = useState<any[]>([]);
   const rewardCalculator = useState(() => new RewardCalculator())[0];
   const failureManager = useState(() => new FailureConsequenceManager())[0];
 
   useEffect(() => {
-    initializeEncounter({ nodeDepth, setEncounter, setRemainingReveals, setTiles });
+    initializeEncounter({
+      nodeDepth,
+      setEncounter,
+      setRemainingReveals,
+      setTiles,
+    });
   }, [nodeDepth]);
 
   return {
@@ -338,7 +347,12 @@ export const PuzzleChamberScreen: React.FC<PuzzleChamberScreenProps> = ({
   const state = usePuzzleChamberState(node.depth, onEncounterComplete);
 
   const handleTileClick = (row: number, col: number) => {
-    if (!state.encounter || state.encounterComplete || state.remainingReveals <= 0) return;
+    if (
+      !state.encounter ||
+      state.encounterComplete ||
+      state.remainingReveals <= 0
+    )
+      return;
     const result = state.encounter.revealTile(row, col);
     handleTileLogic({
       result,
@@ -378,7 +392,13 @@ export const PuzzleChamberScreen: React.FC<PuzzleChamberScreenProps> = ({
   );
 
   if (state.encounterComplete && state.encounterResult) {
-    return <ResultScreen result={state.encounterResult} rewards={state.rewards} onReturn={onReturnToMap} />;
+    return (
+      <ResultScreen
+        result={state.encounterResult}
+        rewards={state.rewards}
+        onReturn={onReturnToMap}
+      />
+    );
   }
 
   return renderContent();

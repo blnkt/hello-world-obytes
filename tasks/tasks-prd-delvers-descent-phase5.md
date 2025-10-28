@@ -105,7 +105,7 @@ Based on: `tasks/prd-delvers-descent-phase5.md`
   - [x] 3.10 Test animations on target devices (placeholder)
 
 - [ ] 4.0 Achievement System
-  - [ ] 4.1 Define achievement types and requirements
+  - [x] 4.1 Define achievement types and requirements
   - [ ] 4.2 Create achievement data models and interfaces
   - [ ] 4.3 Implement achievement tracking system
   - [ ] 4.4 Create milestone achievements (depth, collection, streaks)
