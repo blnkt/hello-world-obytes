@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 
 import { InteractiveMap } from '@/components/delvers-descent/active-run/interactive-map';
+import { NavigationControls } from '@/components/delvers-descent/active-run/navigation-controls';
 import { RunStatusPanel } from '@/components/delvers-descent/active-run/run-status-panel';
 import { useMapGenerator } from '@/components/delvers-descent/hooks/use-map-generator';
 import { getRunQueueManager } from '@/lib/delvers-descent/run-queue';
@@ -152,14 +153,14 @@ export default function ActiveRunRoute() {
         />
       )}
 
-      <View className="p-4">
-        <TouchableOpacity
-          onPress={() => router.back()}
-          className="rounded-lg bg-blue-500 py-3"
-        >
-          <Text className="text-center font-semibold text-white">Go Back</Text>
-        </TouchableOpacity>
-      </View>
+      <NavigationControls
+        onCashOut={() => {
+          alert('Cash out functionality coming soon!');
+          router.back();
+        }}
+        energyRemaining={energyRemaining}
+        returnCost={returnCost}
+      />
     </View>
   );
 }
