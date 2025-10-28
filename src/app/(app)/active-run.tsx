@@ -186,11 +186,15 @@ const useEncounterHandlers = (params: {
       result: 'success' | 'failure',
       rewards?: any[]
     ) => {
+      console.log('handleEncounterComplete called:', { result, rewards, selectedNode });
+      
       if (!selectedNode) {
+        console.log('No selected node, closing encounter');
         setShowEncounter(false);
         return;
       }
 
+      console.log('Consuming energy:', selectedNode.energyCost);
       // Consume energy for visiting the node
       onEnergyUpdate(-selectedNode.energyCost);
 
