@@ -309,7 +309,7 @@ const MapView: React.FC<{
         )}
       </>
     )}
-  </View>
+    </View>
   );
 };
 
