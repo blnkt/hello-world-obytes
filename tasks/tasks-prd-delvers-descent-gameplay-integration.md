@@ -83,7 +83,7 @@ Based on: `tasks/prd-delvers-descent-gameplay-integration.md`
   - [x] 4.3 Create continue button with conditional risk warning
   - [x] 4.4 Implement risk warning modal for dangerous energy levels
   - [x] 4.5 Add safety margin display to decision-making UI
-  - [ ] 4.6 Create bust screen component
+  - [x] 4.6 Create bust screen component
   - [ ] 4.7 Implement bust handling (XP preserved, items lost)
   - [ ] 4.8 Add return to run queue from bust screen
   - [ ] 4.9 Create tests for decision-making UI

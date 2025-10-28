@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
@@ -35,20 +35,33 @@ const BustInfoSection: React.FC<{
 
 export default function BustScreen() {
   const router = useRouter();
-  const params = router.params as any;
-
-  // Default consequence if none provided
-  const consequence: BustConsequence = params?.consequence || {
-    itemsLost: 0,
-    energyLost: 0,
-    xpPreserved: true,
-    xpAmount: 0,
-    message: 'You pushed too deep and could not afford to return.',
-  };
+  const params = useLocalSearchParams();
+  
+  // Parse consequence from route params
+  let consequence: BustConsequence;
+  try {
+    consequence = params.consequence 
+      ? JSON.parse(params.consequence as string)
+      : {
+          itemsLost: 0,
+          energyLost: 0,
+          xpPreserved: true,
+          xpAmount: 0,
+          message: 'You pushed too deep and could not afford to return.',
+        };
+  } catch {
+    consequence = {
+      itemsLost: 0,
+      energyLost: 0,
+      xpPreserved: true,
+      xpAmount: 0,
+      message: 'You pushed too deep and could not afford to return.',
+    };
+  }
 
   const handleAcknowledge = () => {
     // Mark run as busted and update status
-    // TODO: Implement actual bust handling logic
+    // TODO: Implement actual bust handling logic (mark run status, update statistics)
     router.push('/(app)/run-queue');
   };
 

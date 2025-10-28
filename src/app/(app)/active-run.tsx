@@ -250,7 +250,8 @@ const MapView: React.FC<{
   onShowRiskWarning,
   onHideRiskWarning,
   onConfirmRisk,
-}) => (
+}) => {
+  return (
     <View className="flex-1 bg-gray-50 dark:bg-gray-900">
       <View className="p-4">
         <Text className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
@@ -297,6 +298,7 @@ const MapView: React.FC<{
     )}
     </View>
   );
+  };
 };
 
 export default function ActiveRunRoute() {
@@ -320,9 +322,34 @@ export default function ActiveRunRoute() {
 
   const handleEnergyUpdate = useCallback(
     (energyDelta: number) => {
-      updateEnergy((currentEnergy: number) => currentEnergy + energyDelta);
+      updateEnergy((currentEnergy: number) => {
+        const newEnergy = currentEnergy + energyDelta;
+        
+        // Check if energy has been exhausted
+        if (newEnergy <= 0 && runState && run) {
+          // Trigger bust
+          const itemsLost = runState.inventory.length;
+          const energyLost = currentEnergy; // All energy was lost
+          
+          // Navigate to bust screen
+          router.push({
+            pathname: '/(app)/bust-screen',
+            params: {
+              consequence: JSON.stringify({
+                itemsLost,
+                energyLost,
+                xpPreserved: true,
+                xpAmount: run.steps, // Preserve XP from steps
+                message: 'You ran out of energy and could not afford to return safely.',
+              }),
+            },
+          });
+        }
+        
+        return newEnergy;
+      });
     },
-    [updateEnergy]
+    [updateEnergy, runState, run, router]
   );
 
   const handleInventoryUpdate = (items: any[]) => {
