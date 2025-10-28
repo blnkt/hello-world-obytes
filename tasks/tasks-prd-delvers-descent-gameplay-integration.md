@@ -71,7 +71,7 @@ Based on: `tasks/prd-delvers-descent-gameplay-integration.md`
   - [x] 3.2 Implement node click handler to trigger encounter transitions
   - [x] 3.3 Integrate existing encounter screens with active run
   - [x] 3.4 Implement encounter state management (progress, completion, outcomes)
-  - [ ] 3.5 Add "Return to Map" button to all encounter screens
+  - [x] 3.5 Add "Return to Map" button to all encounter screens
   - [ ] 3.6 Handle encounter outcomes (rewards, items, energy used)
   - [ ] 3.7 Update run state after encounter completion
   - [ ] 3.8 Implement failure handling and consequences
