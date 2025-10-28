@@ -132,8 +132,8 @@ Based on: `tasks/prd-delvers-descent-phase5.md`
 
 - [ ] 6.0 User Feedback Enhancement
   - [x] 6.1 Create decision feedback system for player actions
-  - [ ] 6.2 Implement risk warning feedback for dangerous decisions
-  - [ ] 6.3 Design success/failure feedback for encounter outcomes
+  - [x] 6.2 Implement risk warning feedback for dangerous decisions
+  - [x] 6.3 Design success/failure feedback for encounter outcomes
   - [ ] 6.4 Create progress feedback system for collections
   - [ ] 6.5 Implement energy status feedback with safety margins
   - [ ] 6.6 Design reward collection feedback animations and UI
