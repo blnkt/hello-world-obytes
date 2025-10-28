@@ -62,7 +62,7 @@ Based on: `tasks/prd-delvers-descent-gameplay-integration.md`
   - [x] 2.5 Create run status panel component (energy, return cost, safety margin)
   - [x] 2.6 Implement safety margin indicator (green/yellow/red)
   - [x] 2.7 Add depth progression display
-  - [ ] 2.8 Create navigation controls (Continue vs Cash Out buttons)
+  - [x] 2.8 Create navigation controls (Continue vs Cash Out buttons)
   - [ ] 2.9 Add smooth transitions between map states
   - [ ] 2.10 Create tests for interactive map functionality
 
