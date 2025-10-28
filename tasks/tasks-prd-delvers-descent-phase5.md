@@ -115,7 +115,7 @@ Based on: `tasks/prd-delvers-descent-phase5.md`
   - [x] 4.8 Implement achievement rewards system
   - [x] 4.9 Add achievement UI components and display
   - [x] 4.10 Implement achievement persistence
-  - [ ] 4.11 Write achievement system tests
+  - [x] 4.11 Write achievement system tests
 
 - [ ] 5.0 Performance Optimization
   - [ ] 5.1 Optimize dungeon map generation for <50ms target
