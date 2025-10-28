@@ -331,9 +331,16 @@ export default function ActiveRunRoute() {
 
   const handleEnergyUpdate = useCallback(
     (energyDelta: number) => {
-      updateEnergy((currentEnergy: number) => currentEnergy + energyDelta);
+      console.log('handleEnergyUpdate called with delta:', energyDelta);
+      const newEnergy = runState ? runState.energyRemaining + energyDelta : 0;
+      console.log('Current energy:', runState?.energyRemaining, 'New energy:', newEnergy);
+      updateEnergy((currentEnergy: number) => {
+        const updated = currentEnergy + energyDelta;
+        console.log('Energy update:', { current: currentEnergy, delta: energyDelta, updated });
+        return updated;
+      });
     },
-    [updateEnergy]
+    [updateEnergy, runState]
   );
 
   const handleInventoryUpdate = (items: any[]) => {
