@@ -176,10 +176,15 @@ const useEncounterHandlers = (params: {
   const [showEncounter, setShowEncounter] = useState(false);
 
   const handleNodePress = useCallback(
-    (node: DungeonNode, currentRunState: RunState | null) => {
+    (node: DungeonNode, currentRunState: RunState | null, onBust?: () => void) => {
       if (!currentRunState) return false;
       if (currentRunState.energyRemaining < node.energyCost) {
-        alert('Not enough energy to reach this node!');
+        // Check if we can't afford this node - might be bust
+        if (onBust) {
+          onBust();
+        } else {
+          alert('Not enough energy to reach this node!');
+        }
         return false;
       }
       setSelectedNode(node);
@@ -380,7 +385,26 @@ export default function ActiveRunRoute() {
   });
 
   const handleNodePress = (node: DungeonNode) => {
-    handlers.handleNodePress(node, runState);
+    handlers.handleNodePress(node, runState, () => {
+      // Trigger bust if can't afford node
+      if (runState && run) {
+        const itemsLost = runState.inventory.length;
+        const energyLost = runState.energyRemaining;
+        
+        router.push({
+          pathname: '/(app)/bust-screen',
+          params: {
+            consequence: JSON.stringify({
+              itemsLost,
+              energyLost,
+              xpPreserved: true,
+              xpAmount: run.steps,
+              message: 'You ran out of energy and could not afford to continue.',
+            }),
+          },
+        });
+      }
+    });
   };
 
   const handleCashOutConfirm = () => {
