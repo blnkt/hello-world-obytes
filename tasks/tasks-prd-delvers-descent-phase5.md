@@ -112,7 +112,7 @@ Based on: `tasks/prd-delvers-descent-phase5.md`
   - [x] 4.5 Implement risk achievements for high-risk decisions
   - [x] 4.6 Add efficiency achievements for optimal energy usage
   - [x] 4.7 Create exploration achievements for shortcuts/regions
-  - [ ] 4.8 Implement achievement rewards system
+  - [x] 4.8 Implement achievement rewards system
   - [ ] 4.9 Add achievement UI components and display
   - [ ] 4.10 Implement achievement persistence
   - [ ] 4.11 Write achievement system tests
