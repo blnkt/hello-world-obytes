@@ -46,6 +46,20 @@ export class AchievementManager {
     );
   }
 
+  getAllAchievements(): AchievementDefinition[] {
+    return this.getAchievements().map((state) => {
+      const original = this.definitions.find((d) => d.id === state.id);
+      if (!original) {
+        throw new Error(`Achievement ${state.id} not found in definitions`);
+      }
+      return {
+        ...original,
+        unlocked: state.unlocked,
+        progress: state.progress,
+      };
+    });
+  }
+
   processEvent(event: AchievementEvent): AchievementProgressUpdate[] {
     const updates: AchievementProgressUpdate[] = [];
 
