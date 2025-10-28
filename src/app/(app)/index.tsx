@@ -242,6 +242,13 @@ const QuickNavigation = () => {
       onPress: () => router.push('/steps-history'),
     },
     {
+      title: 'Map Preview',
+      subtitle: 'Phase 5 Visual Design',
+      icon: '🗺️',
+      color: 'bg-blue-500',
+      onPress: () => router.push('/map-preview'),
+    },
+    {
       title: 'Shop',
       subtitle: 'Spend your coins',
       icon: '💰',

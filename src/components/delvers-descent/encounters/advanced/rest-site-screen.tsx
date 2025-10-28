@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import {
   type AdvancedEncounterOutcome,
@@ -19,96 +20,97 @@ const OutcomeDisplay: React.FC<{
   outcome: AdvancedEncounterOutcome;
   onComplete: (outcome: AdvancedEncounterOutcome) => void;
 }> = ({ outcome, onComplete }) => (
-  <div className="min-h-screen bg-gray-50 p-6">
-    <div className="mx-auto max-w-2xl">
-      <div className="rounded-lg bg-white p-6 shadow-lg">
-        <h2 className="mb-4 text-2xl font-bold text-gray-800">
+  <ScrollView className="min-h-screen bg-gray-50 p-6">
+    <View className="mx-auto max-w-2xl">
+      <View className="rounded-lg bg-white p-6 shadow-lg">
+        <Text className="mb-4 text-2xl font-bold text-gray-800">
           {outcome.type === 'success' ? 'Success!' : 'Failure!'}
-        </h2>
-        <p className="mb-6 text-gray-700">{outcome.message}</p>
+        </Text>
+        <Text className="mb-6 text-gray-700">{outcome.message}</Text>
         {outcome.reward && (
-          <div className="mb-6 rounded bg-green-50 p-4">
-            <h3 className="mb-2 font-semibold text-green-800">Rewards</h3>
-            <p className="text-green-700">Energy: +{outcome.reward.energy}</p>
-            <p className="text-green-700">XP: +{outcome.reward.xp}</p>
-          </div>
+          <View className="mb-6 rounded bg-green-50 p-4">
+            <Text className="mb-2 font-semibold text-green-800">Rewards</Text>
+            <Text className="text-green-700">
+              Energy: +{outcome.reward.energy}
+            </Text>
+            <Text className="text-green-700">XP: +{outcome.reward.xp}</Text>
+          </View>
         )}
-        <button
-          onClick={() => onComplete(outcome)}
-          className="w-full rounded-lg bg-blue-600 px-4 py-3 text-white hover:bg-blue-700"
+        <Pressable
+          onPress={() => onComplete(outcome)}
+          className="w-full rounded-lg bg-blue-600 px-4 py-3"
         >
-          Continue
-        </button>
-      </div>
-    </div>
-  </div>
+          <Text className="text-center text-white">Continue</Text>
+        </Pressable>
+      </View>
+    </View>
+  </ScrollView>
 );
 
 const RestSiteHeader: React.FC = () => (
-  <div className="mb-6 text-center">
-    <div className="mx-auto mb-4 flex size-20 items-center justify-center rounded-full bg-green-500 text-5xl text-white">
-      🛌
-    </div>
-    <h1 className="text-3xl font-bold text-gray-800">Rest Site</h1>
-    <p className="mt-2 text-gray-600">
+  <View className="mb-6">
+    <View className="mx-auto mb-4 size-20 items-center justify-center rounded-full bg-green-500">
+      <Text className="text-5xl text-white">🛌</Text>
+    </View>
+    <Text className="text-center text-3xl font-bold text-gray-800">
+      Rest Site
+    </Text>
+    <Text className="mt-2 text-center text-gray-600">
       A safe haven where you can recover energy and gain strategic intel.
-    </p>
-  </div>
+    </Text>
+  </View>
 );
 
 const RestSiteBenefits: React.FC<{
   energyReserve: RestSiteState['config']['energyReserve'];
   strategicIntel: RestSiteState['config']['strategicIntel'];
 }> = ({ energyReserve, strategicIntel }) => (
-  <div className="mb-6 rounded-lg bg-green-50 p-6">
-    <h3 className="mb-4 text-lg font-semibold text-green-800">
+  <View className="mb-6 rounded-lg bg-green-50 p-6">
+    <Text className="mb-4 text-lg font-semibold text-green-800">
       Available Benefits
-    </h3>
-    <div className="space-y-3">
-      <div className="flex items-center justify-between rounded bg-white p-3">
-        <span className="text-gray-700">Energy Reserve:</span>
-        <span className="font-bold text-green-600">
+    </Text>
+    <View className="gap-3">
+      <View className="flex-row items-center justify-between rounded bg-white p-3">
+        <Text className="text-gray-700">Energy Reserve:</Text>
+        <Text className="font-bold text-green-600">
           {energyReserve.currentCapacity}/{energyReserve.maxCapacity}
-        </span>
-      </div>
-      <div className="flex items-center justify-between rounded bg-white p-3">
-        <span className="text-gray-700">Strategic Intel:</span>
-        <span className="font-bold text-blue-600">
+        </Text>
+      </View>
+      <View className="flex-row items-center justify-between rounded bg-white p-3">
+        <Text className="text-gray-700">Strategic Intel:</Text>
+        <Text className="font-bold text-blue-600">
           Map: +{strategicIntel.mapReveals} | Shortcuts: +
           {strategicIntel.shortcutHints} | Warnings: +
           {strategicIntel.hazardWarnings}
-        </span>
-      </div>
-    </div>
-  </div>
+        </Text>
+      </View>
+    </View>
+  </View>
 );
 
 const RestSiteActions: React.FC<{
   onRest: () => void;
   onReturn: () => void;
 }> = ({ onRest, onReturn }) => (
-  <div className="space-y-4">
-    <button
-      data-testid="rest-button"
-      onClick={onRest}
-      className="w-full rounded-lg bg-green-600 px-6 py-3 text-lg font-semibold text-white hover:bg-green-700"
+  <View className="gap-4">
+    <Pressable
+      testID="rest-button"
+      onPress={onRest}
+      className="w-full rounded-lg bg-green-600 px-6 py-3"
     >
-      Rest and Recover
-    </button>
-    <button
-      onClick={onReturn}
-      className="w-full rounded-lg border-2 border-gray-300 bg-white px-6 py-2 text-gray-700 hover:bg-gray-50"
+      <Text className="text-center text-lg font-semibold text-white">
+        Rest and Recover
+      </Text>
+    </Pressable>
+    <Pressable
+      onPress={onReturn}
+      className="w-full rounded-lg border-2 border-gray-300 bg-white px-6 py-2"
     >
-      Skip Rest
-    </button>
-  </div>
+      <Text className="text-center text-gray-700">Skip Rest</Text>
+    </Pressable>
+  </View>
 );
 
-/**
- * RestSiteScreen - Energy reserve and strategic intel display
- *
- * Provides a safe space for energy recovery and strategic planning.
- */
 export const RestSiteScreen: React.FC<RestSiteScreenProps> = ({
   encounter,
   onComplete,
@@ -128,18 +130,18 @@ export const RestSiteScreen: React.FC<RestSiteScreenProps> = ({
   }
 
   return (
-    <div
-      data-testid="rest-site-screen"
+    <ScrollView
+      testID="rest-site-screen"
       className="min-h-screen bg-green-50 p-6"
     >
-      <div className="mx-auto max-w-2xl">
+      <View className="mx-auto max-w-2xl">
         <RestSiteHeader />
         <RestSiteBenefits
           energyReserve={state.config.energyReserve}
           strategicIntel={state.config.strategicIntel}
         />
         <RestSiteActions onRest={handleRest} onReturn={onReturn} />
-      </div>
-    </div>
+      </View>
+    </ScrollView>
   );
 };

@@ -1,6 +1,17 @@
 import type { EncounterType, Shortcut } from '@/types/delvers-descent';
 
+import { getBalanceManager } from './balance-manager';
+
 export class EnergyCalculator {
+  /**
+   * Calculate energy cost for a specific node using balance configuration
+   * Delegates to BalanceManager for consistent calculations
+   */
+  calculateNodeCost(depth: number, nodeType: EncounterType): number {
+    const balanceManager = getBalanceManager();
+    return balanceManager.calculateNodeCost(depth, nodeType);
+  }
+
   /**
    * Calculate return cost from current depth to surface
    * Uses exponential scaling: 5 * (depth ^ 1.5)
@@ -13,6 +24,7 @@ export class EnergyCalculator {
       return 0;
     }
 
+    const balanceManager = getBalanceManager();
     let cost = 0;
     let depth = currentDepth;
 
@@ -21,47 +33,18 @@ export class EnergyCalculator {
 
       if (shortcut) {
         // Use shortcut - apply reduction
-        const baseCost = 5 * Math.pow(depth, 1.5);
+        const baseCost = balanceManager.calculateReturnCost(depth);
         const shortcutCost = Math.max(1, baseCost - shortcut.energyReduction);
         cost += shortcutCost;
         depth = shortcut.toDepth;
       } else {
         // Normal descent
-        cost += 5 * Math.pow(depth, 1.5);
+        cost += balanceManager.calculateReturnCost(depth);
         depth--;
       }
     }
 
     return Math.round(cost);
-  }
-
-  /**
-   * Calculate energy cost for a specific node
-   * Base cost increases with depth, with variation based on node type
-   */
-  calculateNodeCost(depth: number, nodeType: EncounterType): number {
-    if (depth < 1) {
-      throw new Error('Depth must be at least 1');
-    }
-
-    // Base cost: 5 + (depth - 1) * 2, range 5-25
-    const baseCost = 5 + (depth - 1) * 2;
-
-    // Type-specific modifiers
-    const typeModifiers: { [key in EncounterType]: number } = {
-      puzzle_chamber: 0, // Standard cost
-      trade_opportunity: -2, // Slightly cheaper
-      discovery_site: 1, // Slightly more expensive
-      risk_event: 2, // More expensive due to risk
-      hazard: 3, // Most expensive
-      rest_site: -3, // Cheapest, provides rest
-    };
-
-    const modifier = typeModifiers[nodeType] || 0;
-    const finalCost = baseCost + modifier;
-
-    // Ensure cost is within reasonable bounds
-    return Math.max(3, Math.min(30, finalCost));
   }
 
   /**

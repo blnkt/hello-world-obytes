@@ -69,7 +69,7 @@ describe('Advanced Encounters & Reward System Integration (Task 4.4)', () => {
   describe('RewardCalculator integration', () => {
     it('should have RewardCalculator configured for all encounter types', () => {
       // Verify RewardCalculator supports all advanced encounter types
-      const multipliers = rewardCalculator['encounterTypeMultipliers'];
+      const multipliers = rewardCalculator.getEncounterTypeMultipliers();
       expect(multipliers.risk_event).toBeDefined();
       expect(multipliers.hazard).toBeDefined();
       expect(multipliers.rest_site).toBeDefined();

@@ -1,16 +1,32 @@
-import React from 'react';
-import { render, screen, fireEvent, waitFor, renderHook, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
+
+import {
+  act,
+  fireEvent,
+  render,
+  renderHook,
+  screen,
+  waitFor,
+} from '@testing-library/react';
+import React from 'react';
+
+import type {
+  DelvingRun,
+  DungeonNode,
+  EncounterType,
+} from '@/types/delvers-descent';
+
+import { useEncounterResolver } from '../hooks/use-encounter-resolver';
+import { DiscoverySiteScreen } from './discovery-site-screen';
 import { EncounterScreen } from './encounter-screen';
 import { PuzzleChamberScreen } from './puzzle-chamber-screen';
 import { TradeOpportunityScreen } from './trade-opportunity-screen';
-import { DiscoverySiteScreen } from './discovery-site-screen';
-import { useEncounterResolver } from '../hooks/use-encounter-resolver';
-import type { EncounterType, DelvingRun, DungeonNode } from '@/types/delvers-descent';
 
 // Mock the encounter resolver hook
 jest.mock('../hooks/use-encounter-resolver');
-const mockUseEncounterResolver = useEncounterResolver as jest.MockedFunction<typeof useEncounterResolver>;
+const mockUseEncounterResolver = useEncounterResolver as jest.MockedFunction<
+  typeof useEncounterResolver
+>;
 
 describe('Encounter UI Integration', () => {
   const mockRun: DelvingRun = {
@@ -63,8 +79,11 @@ describe('Encounter UI Integration', () => {
     });
 
     it('should route to PuzzleChamberScreen for puzzle_chamber encounters', () => {
-      const puzzleNode = { ...mockNode, type: 'puzzle_chamber' as EncounterType };
-      
+      const puzzleNode = {
+        ...mockNode,
+        type: 'puzzle_chamber' as EncounterType,
+      };
+
       render(
         <EncounterScreen
           run={mockRun}
@@ -78,8 +97,11 @@ describe('Encounter UI Integration', () => {
     });
 
     it('should route to TradeOpportunityScreen for trade_opportunity encounters', () => {
-      const tradeNode = { ...mockNode, type: 'trade_opportunity' as EncounterType };
-      
+      const tradeNode = {
+        ...mockNode,
+        type: 'trade_opportunity' as EncounterType,
+      };
+
       render(
         <EncounterScreen
           run={mockRun}
@@ -89,12 +111,17 @@ describe('Encounter UI Integration', () => {
         />
       );
 
-      expect(screen.getByTestId('trade-opportunity-screen')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('trade-opportunity-screen')
+      ).toBeInTheDocument();
     });
 
     it('should route to DiscoverySiteScreen for discovery_site encounters', () => {
-      const discoveryNode = { ...mockNode, type: 'discovery_site' as EncounterType };
-      
+      const discoveryNode = {
+        ...mockNode,
+        type: 'discovery_site' as EncounterType,
+      };
+
       render(
         <EncounterScreen
           run={mockRun}
@@ -108,8 +135,11 @@ describe('Encounter UI Integration', () => {
     });
 
     it('should handle unknown encounter types gracefully', () => {
-      const unknownNode = { ...mockNode, type: 'unknown_type' as EncounterType };
-      
+      const unknownNode = {
+        ...mockNode,
+        type: 'unknown_type' as EncounterType,
+      };
+
       render(
         <EncounterScreen
           run={mockRun}
@@ -120,7 +150,9 @@ describe('Encounter UI Integration', () => {
       );
 
       expect(screen.getByTestId('encounter-error')).toBeInTheDocument();
-      expect(screen.getByText(/unsupported encounter type/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/unsupported encounter type/i)
+      ).toBeInTheDocument();
     });
 
     it('should show loading state when encounter resolver is loading', () => {
@@ -216,7 +248,7 @@ describe('Encounter UI Integration', () => {
 
     it('should handle tile reveal interactions', async () => {
       const onEncounterComplete = jest.fn();
-      
+
       render(
         <PuzzleChamberScreen
           run={mockRun}
@@ -249,14 +281,14 @@ describe('Encounter UI Integration', () => {
       expect(remainingReveals).toHaveTextContent('0');
 
       const tiles = screen.getAllByTestId(/^tile-/);
-      tiles.forEach(tile => {
+      tiles.forEach((tile) => {
         expect(tile).toBeDisabled();
       });
     });
 
     it('should show encounter completion when exit found', async () => {
       const onEncounterComplete = jest.fn();
-      
+
       render(
         <PuzzleChamberScreen
           run={mockRun}
@@ -279,8 +311,11 @@ describe('Encounter UI Integration', () => {
 
   describe('TradeOpportunityScreen', () => {
     it('should render trade opportunity interface', () => {
-      const tradeNode = { ...mockNode, type: 'trade_opportunity' as EncounterType };
-      
+      const tradeNode = {
+        ...mockNode,
+        type: 'trade_opportunity' as EncounterType,
+      };
+
       render(
         <TradeOpportunityScreen
           run={mockRun}
@@ -290,13 +325,18 @@ describe('Encounter UI Integration', () => {
         />
       );
 
-      expect(screen.getByTestId('trade-opportunity-screen')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('trade-opportunity-screen')
+      ).toBeInTheDocument();
       expect(screen.getByText(/trade opportunity/i)).toBeInTheDocument();
     });
 
     it('should display trade options', () => {
-      const tradeNode = { ...mockNode, type: 'trade_opportunity' as EncounterType };
-      
+      const tradeNode = {
+        ...mockNode,
+        type: 'trade_opportunity' as EncounterType,
+      };
+
       render(
         <TradeOpportunityScreen
           run={mockRun}
@@ -310,8 +350,11 @@ describe('Encounter UI Integration', () => {
     });
 
     it('should show trade posts information', () => {
-      const tradeNode = { ...mockNode, type: 'trade_opportunity' as EncounterType };
-      
+      const tradeNode = {
+        ...mockNode,
+        type: 'trade_opportunity' as EncounterType,
+      };
+
       render(
         <TradeOpportunityScreen
           run={mockRun}
@@ -326,8 +369,11 @@ describe('Encounter UI Integration', () => {
 
     it('should handle trade decision selection', async () => {
       const onEncounterComplete = jest.fn();
-      const tradeNode = { ...mockNode, type: 'trade_opportunity' as EncounterType };
-      
+      const tradeNode = {
+        ...mockNode,
+        type: 'trade_opportunity' as EncounterType,
+      };
+
       render(
         <TradeOpportunityScreen
           run={mockRun}
@@ -346,8 +392,11 @@ describe('Encounter UI Integration', () => {
     });
 
     it('should show arbitrage opportunities', () => {
-      const tradeNode = { ...mockNode, type: 'trade_opportunity' as EncounterType };
-      
+      const tradeNode = {
+        ...mockNode,
+        type: 'trade_opportunity' as EncounterType,
+      };
+
       render(
         <TradeOpportunityScreen
           run={mockRun}
@@ -363,8 +412,11 @@ describe('Encounter UI Integration', () => {
 
   describe('DiscoverySiteScreen', () => {
     it('should render discovery site interface', () => {
-      const discoveryNode = { ...mockNode, type: 'discovery_site' as EncounterType };
-      
+      const discoveryNode = {
+        ...mockNode,
+        type: 'discovery_site' as EncounterType,
+      };
+
       render(
         <DiscoverySiteScreen
           run={mockRun}
@@ -379,8 +431,11 @@ describe('Encounter UI Integration', () => {
     });
 
     it('should display exploration paths', () => {
-      const discoveryNode = { ...mockNode, type: 'discovery_site' as EncounterType };
-      
+      const discoveryNode = {
+        ...mockNode,
+        type: 'discovery_site' as EncounterType,
+      };
+
       render(
         <DiscoverySiteScreen
           run={mockRun}
@@ -394,8 +449,11 @@ describe('Encounter UI Integration', () => {
     });
 
     it('should show risk assessment for each path', () => {
-      const discoveryNode = { ...mockNode, type: 'discovery_site' as EncounterType };
-      
+      const discoveryNode = {
+        ...mockNode,
+        type: 'discovery_site' as EncounterType,
+      };
+
       render(
         <DiscoverySiteScreen
           run={mockRun}
@@ -410,8 +468,11 @@ describe('Encounter UI Integration', () => {
 
     it('should handle exploration path selection', async () => {
       const onEncounterComplete = jest.fn();
-      const discoveryNode = { ...mockNode, type: 'discovery_site' as EncounterType };
-      
+      const discoveryNode = {
+        ...mockNode,
+        type: 'discovery_site' as EncounterType,
+      };
+
       render(
         <DiscoverySiteScreen
           run={mockRun}
@@ -430,8 +491,11 @@ describe('Encounter UI Integration', () => {
     });
 
     it('should display lore discoveries', () => {
-      const discoveryNode = { ...mockNode, type: 'discovery_site' as EncounterType };
-      
+      const discoveryNode = {
+        ...mockNode,
+        type: 'discovery_site' as EncounterType,
+      };
+
       render(
         <DiscoverySiteScreen
           run={mockRun}
@@ -445,8 +509,11 @@ describe('Encounter UI Integration', () => {
     });
 
     it('should show map intelligence', () => {
-      const discoveryNode = { ...mockNode, type: 'discovery_site' as EncounterType };
-      
+      const discoveryNode = {
+        ...mockNode,
+        type: 'discovery_site' as EncounterType,
+      };
+
       render(
         <DiscoverySiteScreen
           run={mockRun}
@@ -462,7 +529,9 @@ describe('Encounter UI Integration', () => {
 
   describe('useEncounterResolver Hook', () => {
     it('should provide encounter resolver functionality', () => {
-      const { result } = renderHook(() => useEncounterResolver(mockRun, mockNode));
+      const { result } = renderHook(() =>
+        useEncounterResolver(mockRun, mockNode)
+      );
 
       expect(result.current.encounterResolver).toBeDefined();
       expect(result.current.isLoading).toBe(false);
@@ -473,7 +542,9 @@ describe('Encounter UI Integration', () => {
     });
 
     it('should handle encounter state management', async () => {
-      const { result } = renderHook(() => useEncounterResolver(mockRun, mockNode));
+      const { result } = renderHook(() =>
+        useEncounterResolver(mockRun, mockNode)
+      );
 
       await act(async () => {
         await result.current.startEncounter();
@@ -484,17 +555,25 @@ describe('Encounter UI Integration', () => {
 
     it('should handle encounter completion', async () => {
       const onEncounterComplete = jest.fn();
-      const { result } = renderHook(() => useEncounterResolver(mockRun, mockNode));
+      const { result } = renderHook(() =>
+        useEncounterResolver(mockRun, mockNode)
+      );
 
       await act(async () => {
-        await result.current.completeEncounter('success', [], onEncounterComplete);
+        await result.current.completeEncounter(
+          'success',
+          [],
+          onEncounterComplete
+        );
       });
 
       expect(onEncounterComplete).toHaveBeenCalled();
     });
 
     it('should handle encounter errors', async () => {
-      const { result } = renderHook(() => useEncounterResolver(mockRun, mockNode));
+      const { result } = renderHook(() =>
+        useEncounterResolver(mockRun, mockNode)
+      );
 
       await act(async () => {
         await result.current.completeEncounter('failure', [], jest.fn());
@@ -508,7 +587,7 @@ describe('Encounter UI Integration', () => {
     it('should complete full encounter workflow', async () => {
       const onReturnToMap = jest.fn();
       const onEncounterComplete = jest.fn();
-      
+
       render(
         <EncounterScreen
           run={mockRun}
@@ -541,7 +620,7 @@ describe('Encounter UI Integration', () => {
     it('should handle encounter failure gracefully', async () => {
       const onReturnToMap = jest.fn();
       const onEncounterComplete = jest.fn();
-      
+
       render(
         <EncounterScreen
           run={mockRun}
@@ -569,7 +648,7 @@ describe('Encounter UI Integration', () => {
     it('should maintain state across encounter transitions', async () => {
       const onReturnToMap = jest.fn();
       const onEncounterComplete = jest.fn();
-      
+
       const { rerender } = render(
         <EncounterScreen
           run={mockRun}
@@ -588,7 +667,11 @@ describe('Encounter UI Integration', () => {
       });
 
       // Move to next node
-      const nextNode = { ...mockNode, id: 'node-2', type: 'trade_opportunity' as EncounterType };
+      const nextNode = {
+        ...mockNode,
+        id: 'node-2',
+        type: 'trade_opportunity' as EncounterType,
+      };
       rerender(
         <EncounterScreen
           run={mockRun}
@@ -598,7 +681,9 @@ describe('Encounter UI Integration', () => {
         />
       );
 
-      expect(screen.getByTestId('trade-opportunity-screen')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('trade-opportunity-screen')
+      ).toBeInTheDocument();
     });
   });
 });
