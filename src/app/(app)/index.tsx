@@ -228,6 +228,13 @@ const QuickNavigation = () => {
 
   const navigationItems = [
     {
+      title: "Delver's Descent",
+      subtitle: 'Start a dungeon run',
+      icon: '🗡️',
+      color: 'bg-red-600',
+      onPress: () => router.push('/run-queue'),
+    },
+    {
       title: 'Character',
       subtitle: 'View & Edit',
       icon: '⚔️',
