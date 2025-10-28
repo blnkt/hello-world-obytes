@@ -106,8 +106,8 @@ Based on: `tasks/prd-delvers-descent-phase5.md`
 
 - [ ] 4.0 Achievement System
   - [x] 4.1 Define achievement types and requirements
-  - [ ] 4.2 Create achievement data models and interfaces
-  - [ ] 4.3 Implement achievement tracking system
+  - [x] 4.2 Create achievement data models and interfaces
+  - [x] 4.3 Implement achievement tracking system
   - [ ] 4.4 Create milestone achievements (depth, collection, streaks)
   - [ ] 4.5 Implement risk achievements for high-risk decisions
   - [ ] 4.6 Add efficiency achievements for optimal energy usage
