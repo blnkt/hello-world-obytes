@@ -136,7 +136,7 @@ Based on: `tasks/prd-delvers-descent-phase5.md`
   - [x] 6.3 Design success/failure feedback for encounter outcomes
   - [x] 6.4 Create progress feedback system for collections
   - [x] 6.5 Implement energy status feedback with safety margins
-  - [ ] 6.6 Design reward collection feedback animations and UI
+  - [x] 6.6 Design reward collection feedback animations and UI
   - [ ] 6.7 Create error feedback system with recovery suggestions
   - [ ] 6.8 Implement helpful hints and guidance system
   - [ ] 6.9 Add feedback UI components
