@@ -186,15 +186,11 @@ const useEncounterHandlers = (params: {
       result: 'success' | 'failure',
       rewards?: any[]
     ) => {
-      console.log('handleEncounterComplete called:', { result, rewards, selectedNode });
-      
       if (!selectedNode) {
-        console.log('No selected node, closing encounter');
         setShowEncounter(false);
         return;
       }
 
-      console.log('Consuming energy:', selectedNode.energyCost);
       // Consume energy for visiting the node
       onEnergyUpdate(-selectedNode.energyCost);
 
@@ -209,14 +205,6 @@ const useEncounterHandlers = (params: {
       // Update depth if we went deeper
       // This allows access to next level nodes
       onDepthUpdate(selectedNode.depth);
-
-      console.log('Encounter completed:', {
-        result,
-        node: selectedNode,
-        rewards,
-        energyUsed: selectedNode.energyCost,
-        depth: selectedNode.depth,
-      });
 
       setShowEncounter(false);
     },
@@ -262,9 +250,7 @@ const MapView: React.FC<{
   onShowRiskWarning,
   onHideRiskWarning,
   onConfirmRisk,
-}) => {
-  console.log('MapView rendering with runState.energyRemaining:', runState?.energyRemaining);
-  return (
+}) => (
     <View className="flex-1 bg-gray-50 dark:bg-gray-900">
       <View className="p-4">
         <Text className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
@@ -334,16 +320,9 @@ export default function ActiveRunRoute() {
 
   const handleEnergyUpdate = useCallback(
     (energyDelta: number) => {
-      console.log('handleEnergyUpdate called with delta:', energyDelta);
-      const newEnergy = runState ? runState.energyRemaining + energyDelta : 0;
-      console.log('Current energy:', runState?.energyRemaining, 'New energy:', newEnergy);
-      updateEnergy((currentEnergy: number) => {
-        const updated = currentEnergy + energyDelta;
-        console.log('Energy update:', { current: currentEnergy, delta: energyDelta, updated });
-        return updated;
-      });
+      updateEnergy((currentEnergy: number) => currentEnergy + energyDelta);
     },
-    [updateEnergy, runState]
+    [updateEnergy]
   );
 
   const handleInventoryUpdate = (items: any[]) => {
