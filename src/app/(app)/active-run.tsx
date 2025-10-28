@@ -65,7 +65,8 @@ const useActiveRunData = (runId: string) => {
   const [runState, setRunState] = useState<RunState | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { generateFullMap } = useMapGenerator();
+  const [maxDepth, setMaxDepth] = useState(5);
+  const { generateFullMap, generateDepthLevel } = useMapGenerator();
 
   useEffect(() => {
     const loadRun = async () => {
@@ -141,6 +142,13 @@ const useActiveRunData = (runId: string) => {
         currentDepth: newDepth,
       };
     });
+
+    // If we're going deeper than current max depth, generate new level
+    if (newDepth >= maxDepth) {
+      const newNodes = generateDepthLevel(maxDepth + 1);
+      setNodes((prevNodes) => [...prevNodes, ...newNodes]);
+      setMaxDepth(maxDepth + 1);
+    }
   };
 
   return {
@@ -416,8 +424,8 @@ export default function ActiveRunRoute() {
   const handleConfirmRisk = () => {
     setShowRiskWarning(false);
     setRiskWarning(null);
-    // TODO: Implement actual continue logic (unlock next level, etc.)
-    alert('Continuing deeper into the dungeon...');
+    // Unlock the next level for exploration
+    updateDepth((runState?.currentDepth || 0) + 1);
   };
 
   if (isLoading) return <LoadingView />;
