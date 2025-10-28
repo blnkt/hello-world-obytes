@@ -161,58 +161,56 @@ const useEncounterHandlers = (params: {
   onNodeVisited: (nodeId: string) => void;
   onDepthUpdate: (depth: number) => void;
 }) => {
-  const { runState, onEnergyUpdate, onInventoryUpdate, onNodeVisited, onDepthUpdate } = params;
+  const { onEnergyUpdate, onInventoryUpdate, onNodeVisited, onDepthUpdate } = params;
   const [selectedNode, setSelectedNode] = useState<DungeonNode | null>(null);
   const [showEncounter, setShowEncounter] = useState(false);
 
-  const handleNodePress = (
-    node: DungeonNode,
-    currentRunState: RunState | null
-  ) => {
-    if (!currentRunState) return false;
-    if (currentRunState.energyRemaining < node.energyCost) {
-      alert('Not enough energy to reach this node!');
-      return false;
-    }
-    setSelectedNode(node);
-    setShowEncounter(true);
-    return true;
-  };
+  const handleNodePress = useCallback(
+    (node: DungeonNode, currentRunState: RunState | null) => {
+      if (!currentRunState) return false;
+      if (currentRunState.energyRemaining < node.energyCost) {
+        alert('Not enough energy to reach this node!');
+        return false;
+      }
+      setSelectedNode(node);
+      setShowEncounter(true);
+      return true;
+    },
+    []
+  );
 
-  const handleEncounterComplete = (
-    result: 'success' | 'failure',
-    rewards?: any[]
-  ) => {
-    if (!selectedNode || !runState) {
+  const handleEncounterComplete = useCallback(
+    (
+      result: 'success' | 'failure',
+      rewards?: any[]
+    ) => {
+      if (!selectedNode) {
+        setShowEncounter(false);
+        return;
+      }
+
+      // Consume energy for visiting the node
+      onEnergyUpdate(-selectedNode.energyCost);
+
+      // Add rewards to inventory if successful
+      if (result === 'success' && rewards) {
+        onInventoryUpdate(rewards);
+      }
+
+      // Mark node as visited
+      onNodeVisited(selectedNode.id);
+
+      console.log('Encounter completed:', {
+        result,
+        node: selectedNode,
+        rewards,
+        energyUsed: selectedNode.energyCost,
+      });
+
       setShowEncounter(false);
-      return;
-    }
-
-    // Consume energy for visiting the node
-    onEnergyUpdate(-selectedNode.energyCost);
-
-    // Add rewards to inventory if successful
-    if (result === 'success' && rewards) {
-      onInventoryUpdate(rewards);
-    }
-
-    // Mark node as visited
-    onNodeVisited(selectedNode.id);
-
-    // Update depth if we went deeper
-    if (selectedNode.depth > runState.currentDepth) {
-      onDepthUpdate(selectedNode.depth);
-    }
-
-    console.log('Encounter completed:', {
-      result,
-      node: selectedNode,
-      rewards,
-      energyUsed: selectedNode.energyCost,
-    });
-
-    setShowEncounter(false);
-  };
+    },
+    [selectedNode, onEnergyUpdate, onInventoryUpdate, onNodeVisited]
+  );
 
   return {
     selectedNode,
