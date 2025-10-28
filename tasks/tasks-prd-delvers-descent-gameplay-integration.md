@@ -52,7 +52,7 @@ Based on: `tasks/prd-delvers-descent-gameplay-integration.md`
   - [x] 1.5 Implement active run state management and tracking
   - [x] 1.6 Add run status labels (queued, active, completed, busted)
   - [ ] 1.7 Create tests for run queue screen and components
-  - [ ] 1.8 Add loading states and error handling
+  - [x] 1.8 Add loading states and error handling
 
 - [ ] 2.0 Interactive Map Experience
   - [ ] 2.1 Create active run screen layout and structure
