@@ -264,27 +264,41 @@ const EncounterContent: React.FC<{
   );
 };
 
-export const EncounterScreen: React.FC<EncounterScreenProps> = ({
-  run,
-  node,
-  onReturnToMap,
-  onEncounterComplete,
+const renderAdvancedEncounterScreen = (params: {
+  run: DelvingRun;
+  node: DungeonNode;
+  onReturnToMap: () => void;
+  onEncounterComplete: (result: 'success' | 'failure', rewards?: any[]) => void;
 }) => {
-  const {
-    encounterResolver,
-    isLoading,
-    error,
-    startEncounter,
-    completeEncounter,
-  } = useEncounterResolver(run, node);
+  const { run, node, onReturnToMap, onEncounterComplete } = params;
+  return (
+    <ScrollView
+      testID="encounter-screen"
+      className="min-h-screen bg-gray-50"
+      contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}
+    >
+      <View className="min-h-screen bg-gray-50">
+        <EncounterContent
+          run={run}
+          node={node}
+          onReturnToMap={onReturnToMap}
+          onEncounterComplete={onEncounterComplete}
+        />
+      </View>
+    </ScrollView>
+  );
+};
 
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
-
-  if (error) {
-    return <ErrorScreen error={error} onReturn={onReturnToMap} />;
-  }
+const renderStandardEncounterScreen = (params: {
+  run: DelvingRun;
+  node: DungeonNode;
+  onReturnToMap: () => void;
+  onEncounterComplete: (result: 'success' | 'failure', rewards?: any[]) => void;
+  encounterResolver: any;
+  startEncounter: () => Promise<void>;
+  completeEncounter: (result: 'success' | 'failure', rewards?: any[]) => Promise<void>;
+}) => {
+  const { run, node, onReturnToMap, onEncounterComplete, encounterResolver, startEncounter, completeEncounter } = params;
 
   const handleStartEncounter = async () => {
     if (encounterResolver) {
@@ -322,4 +336,46 @@ export const EncounterScreen: React.FC<EncounterScreenProps> = ({
       )}
     </ScrollView>
   );
+};
+
+export const EncounterScreen: React.FC<EncounterScreenProps> = ({
+  run,
+  node,
+  onReturnToMap,
+  onEncounterComplete,
+}) => {
+  const {
+    encounterResolver,
+    isLoading,
+    error,
+    startEncounter,
+    completeEncounter,
+  } = useEncounterResolver(run, node);
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
+  if (error && error.includes('Unsupported encounter type:')) {
+    return renderAdvancedEncounterScreen({ run, node, onReturnToMap, onEncounterComplete });
+  }
+
+  if (error) {
+    return <ErrorScreen error={error} onReturn={onReturnToMap} />;
+  }
+
+  const advancedTypes = ['hazard', 'risk_event', 'rest_site'];
+  if (advancedTypes.includes(node.type)) {
+    return renderAdvancedEncounterScreen({ run, node, onReturnToMap, onEncounterComplete });
+  }
+
+  return renderStandardEncounterScreen({
+    run,
+    node,
+    onReturnToMap,
+    onEncounterComplete,
+    encounterResolver,
+    startEncounter,
+    completeEncounter,
+  });
 };
