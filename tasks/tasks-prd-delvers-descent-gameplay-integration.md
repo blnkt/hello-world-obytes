@@ -49,7 +49,7 @@ Based on: `tasks/prd-delvers-descent-gameplay-integration.md`
   - [x] 1.2 Create run card component with date, steps, energy display
   - [x] 1.3 Implement run queue logic to fetch and display queued runs
   - [x] 1.4 Add "Start Run" button functionality to initialize active run
-  - [ ] 1.5 Implement active run state management and tracking
+  - [x] 1.5 Implement active run state management and tracking
   - [ ] 1.6 Add run status labels (queued, active, completed, busted)
   - [ ] 1.7 Create tests for run queue screen and components
   - [ ] 1.8 Add loading states and error handling
