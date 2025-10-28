@@ -233,9 +233,7 @@ const useEncounterHandlers = (params: {
 
       // Update depth if we went deeper
       // This allows access to next level nodes
-      if (selectedNode.depth > (runState?.currentDepth || 0)) {
-        onDepthUpdate(selectedNode.depth);
-      }
+      onDepthUpdate(selectedNode.depth);
 
       setShowEncounter(false);
     },
