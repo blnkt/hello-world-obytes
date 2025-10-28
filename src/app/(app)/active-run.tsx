@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 
 import { InteractiveMap } from '@/components/delvers-descent/active-run/interactive-map';
+import { RunStatusPanel } from '@/components/delvers-descent/active-run/run-status-panel';
 import { useMapGenerator } from '@/components/delvers-descent/hooks/use-map-generator';
 import { getRunQueueManager } from '@/lib/delvers-descent/run-queue';
 import type {
@@ -124,6 +125,10 @@ export default function ActiveRunRoute() {
     return <ErrorView error={error || 'Run not found'} router={router} />;
   }
 
+  const currentDepth = runState?.currentDepth || 0;
+  const energyRemaining = runState?.energyRemaining || 0;
+  const returnCost = 100; // TODO: Calculate from current depth
+
   return (
     <View className="flex-1 bg-gray-50 dark:bg-gray-900">
       <View className="p-4">
@@ -131,6 +136,12 @@ export default function ActiveRunRoute() {
           Delver's Descent
         </Text>
         <RunDetailsCard run={run} />
+
+        <RunStatusPanel
+          energyRemaining={energyRemaining}
+          returnCost={returnCost}
+          currentDepth={currentDepth}
+        />
       </View>
 
       {nodes.length > 0 && runState && (
