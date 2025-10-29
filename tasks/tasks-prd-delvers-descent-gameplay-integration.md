@@ -105,6 +105,6 @@ Based on: `tasks/prd-delvers-descent-gameplay-integration.md`
   - [x] 6.4 Integrate HealthKit data for run queue generation
   - [x] 6.5 Add character display to dungeon screens (level, name, XP)
   - [x] 6.6 Implement smooth navigation transitions
-  - [ ] 6.7 Add loading states for data fetching
+  - [x] 6.7 Add loading states for data fetching
   - [ ] 6.8 Ensure backward compatibility with existing functionality
   - [ ] 6.9 Create integration tests for full gameplay loop
