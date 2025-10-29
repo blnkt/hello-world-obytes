@@ -235,6 +235,13 @@ const QuickNavigation = () => {
       onPress: () => router.push('/run-queue'),
     },
     {
+      title: 'Collections',
+      subtitle: 'View your collected items',
+      icon: '📦',
+      color: 'bg-indigo-500',
+      onPress: () => router.push('/collections'),
+    },
+    {
       title: 'Character',
       subtitle: 'View & Edit',
       icon: '⚔️',
