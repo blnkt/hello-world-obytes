@@ -192,10 +192,7 @@ export default function TabLayout() {
           <Tabs.Screen
             key={screen.name}
             name={screen.name}
-            options={{
-              ...screen.options,
-              animation: 'slide_from_right',
-            }}
+            options={screen.options}
           />
         ))}
       </Tabs>
