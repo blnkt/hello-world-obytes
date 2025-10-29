@@ -59,10 +59,52 @@ export default function BustScreen() {
     };
   }
 
-  const handleAcknowledge = () => {
-    // Mark run as busted and update status
-    // TODO: Implement actual bust handling logic (mark run status, update statistics)
-    router.push('/(app)/run-queue');
+  const handleAcknowledge = async () => {
+    try {
+      const { getRunQueueManager } = await import('@/lib/delvers-descent/run-queue');
+      const { getRunStateManager } = await import('@/lib/delvers-descent/run-state-manager');
+      const { AchievementManager } = await import('@/lib/delvers-descent/achievement-manager');
+      const { ALL_ACHIEVEMENTS } = await import('@/lib/delvers-descent/achievement-types');
+      
+      const runQueueManager = getRunQueueManager();
+      const runStateManager = getRunStateManager();
+      const achievementManager = new AchievementManager(ALL_ACHIEVEMENTS);
+
+      // Try to bust the run (if there's an active state)
+      try {
+        const bustResult = await runStateManager.bustRun();
+        
+        // Process depth achievement even on bust
+        achievementManager.processEvent({
+          type: 'depth_reached',
+          data: {
+            depth: bustResult.deepestDepth,
+            cashOut: false,
+          },
+          timestamp: new Date(),
+        });
+
+        // Save achievements
+        const { saveAchievements } = await import('@/lib/delvers-descent/achievement-persistence');
+        await saveAchievements(achievementManager);
+      } catch (error) {
+        // If there's no active run state, that's okay - we still need to update the run queue
+        console.log('No active run state to bust:', error);
+      }
+
+      // Get the run ID from params if available
+      // Note: We need to get the active run ID from somewhere - for now, mark the most recent active run as busted
+      const activeRuns = runQueueManager.getRunsByStatus('active');
+      if (activeRuns.length > 0) {
+        // Mark the first active run as busted (should only be one)
+        runQueueManager.updateRunStatus(activeRuns[0].id, 'busted');
+      }
+
+      router.push('/(app)/run-queue');
+    } catch (error) {
+      console.error('Failed to process bust:', error);
+      router.push('/(app)/run-queue');
+    }
   };
 
   return (

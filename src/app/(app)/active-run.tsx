@@ -9,7 +9,12 @@ import { RiskWarningModal } from '@/components/delvers-descent/active-run/risk-w
 import { RunStatusPanel } from '@/components/delvers-descent/active-run/run-status-panel';
 import { EncounterScreen } from '@/components/delvers-descent/encounters/encounter-screen';
 import { useMapGenerator } from '@/components/delvers-descent/hooks/use-map-generator';
+import { AchievementManager } from '@/lib/delvers-descent/achievement-manager';
+import { ALL_ACHIEVEMENTS } from '@/lib/delvers-descent/achievement-types';
+import { CollectionManager } from '@/lib/delvers-descent/collection-manager';
+import { ALL_COLLECTION_SETS } from '@/lib/delvers-descent/collection-sets';
 import { getRunQueueManager } from '@/lib/delvers-descent/run-queue';
+import { getRunStateManager } from '@/lib/delvers-descent/run-state-manager';
 import type {
   DelvingRun,
   DungeonNode,
@@ -388,6 +393,8 @@ export default function ActiveRunRoute() {
         type: item.type || 'misc',
         value: item.value || 0,
         description: item.description || '',
+        // Preserve setId if it exists (required for collections)
+        ...(item.setId && { setId: item.setId }),
       });
     });
   };
@@ -423,11 +430,79 @@ export default function ActiveRunRoute() {
     });
   };
 
-  const handleCashOutConfirm = () => {
+  const handleCashOutConfirm = async () => {
+    if (!runState || !run) return;
+
     setShowCashOutModal(false);
-    // TODO: Implement actual cash out logic (bank items, update run status, etc.)
-    alert('Cash out completed! Your rewards have been banked.');
-    router.back();
+
+    try {
+      const runStateManager = getRunStateManager();
+      const runQueueManager = getRunQueueManager();
+      const collectionManager = new CollectionManager(ALL_COLLECTION_SETS);
+      const achievementManager = new AchievementManager(ALL_ACHIEVEMENTS);
+
+      // Complete the run and get final state
+      const completionResult = await runStateManager.completeRun();
+
+      // Add collected items to CollectionManager
+      // Map CollectedItem to CollectedItemTracking and add to collection
+      for (const item of completionResult.finalInventory) {
+        // Only add items that belong to a collection set
+        if (item.setId && (item.type === 'trade_good' || item.type === 'discovery' || item.type === 'legendary')) {
+          await collectionManager.addCollectedItem({
+            itemId: item.id,
+            setId: item.setId,
+            collectedDate: Date.now(),
+            runId: run.id,
+            source: 'encounter',
+          });
+        }
+      }
+
+      // Process achievement events
+      // Depth achievement (for milestones)
+      achievementManager.processEvent({
+        type: 'depth_reached',
+        data: {
+          depth: completionResult.deepestDepth,
+          cashOut: true,
+        },
+        timestamp: new Date(),
+      });
+
+      // Collection achievement (for each completed set)
+      const progress = await collectionManager.getCollectionProgress();
+      for (const setId of progress.completedSets) {
+        achievementManager.processEvent({
+          type: 'collection_completed',
+          data: {
+            collectionSetId: setId,
+          },
+          timestamp: new Date(),
+        });
+      }
+
+      // Save achievements
+      const { saveAchievements } = await import('@/lib/delvers-descent/achievement-persistence');
+      await saveAchievements(achievementManager);
+
+      // Update run status to completed
+      // Store completion metadata (depth, items count, total value) in run metadata
+      const totalValue = completionResult.finalInventory.reduce(
+        (sum, item) => sum + item.value,
+        0
+      );
+      runQueueManager.updateRunStatus(run.id, 'completed');
+
+      // Store completion data for history (we'll need to extend DelvingRun or store separately)
+      // For now, the completion data is stored in CollectionManager, so run history can show items collected
+      
+      // Navigate back to run queue
+      router.push('/(app)/run-queue');
+    } catch (error) {
+      console.error('Failed to complete cash out:', error);
+      alert('Failed to complete cash out. Please try again.');
+    }
   };
 
   const handleContinue = () => {
