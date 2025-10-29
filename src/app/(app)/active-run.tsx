@@ -436,13 +436,17 @@ export default function ActiveRunRoute() {
     setShowCashOutModal(false);
 
     try {
-      const runStateManager = getRunStateManager();
       const runQueueManager = getRunQueueManager();
       const collectionManager = new CollectionManager(ALL_COLLECTION_SETS);
       const achievementManager = new AchievementManager(ALL_ACHIEVEMENTS);
 
-      // Complete the run and get final state
-      const completionResult = await runStateManager.completeRun();
+      // Use the local runState directly (it's not stored in RunStateManager singleton)
+      const completionResult = {
+        finalInventory: runState.inventory,
+        totalEnergyUsed: run.totalEnergy - runState.energyRemaining,
+        deepestDepth: runState.currentDepth,
+        shortcutsDiscovered: runState.discoveredShortcuts,
+      };
 
       // Add collected items to CollectionManager
       // Map CollectedItem to CollectedItemTracking and add to collection
