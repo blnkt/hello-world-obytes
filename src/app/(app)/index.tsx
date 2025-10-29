@@ -384,7 +384,13 @@ const MotivationalSection = ({ stepCount }: { stepCount: number }) => {
 const DelversDescentCardWrapper: React.FC = () => {
   const router = useRouter();
   
-  return <DelversDescentCard onPress={() => router.push('/run-queue')} />;
+  return (
+    <DelversDescentCard 
+      onPress={() => {
+        router.push('/run-queue');
+      }} 
+    />
+  );
 };
 
 export default function Home() {
