@@ -28,6 +28,7 @@ const getCharacterTabScreen = () => ({
 const getStepsHistoryTabScreen = () => ({
   name: 'steps-history',
   options: {
+    href: null,
     title: 'Scenarios',
     headerShown: true,
     tabBarIcon: ({ color }: { color: string }) => (
@@ -75,6 +76,7 @@ const getScenarioTabScreen = () => ({
 const getDungeonGameTabScreen = () => ({
   name: 'dungeon-game',
   options: {
+    href: null,
     title: 'Dungeon',
     headerShown: true,
     tabBarIcon: ({ color }: { color: string }) => (
@@ -87,6 +89,7 @@ const getDungeonGameTabScreen = () => ({
 const getShopTabScreen = () => ({
   name: 'shop',
   options: {
+    href: null,
     title: 'Shop',
     headerShown: true,
     tabBarIcon: ({ color }: { color: string }) => (
@@ -122,6 +125,14 @@ export default function TabLayout() {
     <HealthModeProvider>
       <Tabs>
         {getTabScreens().map((screen) => (
+          <Tabs.Screen
+            key={screen.name}
+            name={screen.name}
+            options={screen.options}
+          />
+        ))}
+        {/* Hidden screens - accessible via navigation but not in tab bar */}
+        {getHiddenScreens().map((screen) => (
           <Tabs.Screen
             key={screen.name}
             name={screen.name}
