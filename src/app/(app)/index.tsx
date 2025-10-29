@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 
+import { DelversDescentCard } from '@/components/home/delvers-descent-card';
 import {
   useCurrencySystem,
   useExperienceData,
@@ -441,6 +442,8 @@ export default function Home() {
         />
 
         <CharacterPreview />
+
+        <DelversDescentCard />
 
         <QuickNavigation />
 
