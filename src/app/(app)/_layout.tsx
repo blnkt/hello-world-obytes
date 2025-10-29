@@ -187,14 +187,7 @@ export default function TabLayout() {
             options={screen.options}
           />
         ))}
-        {/* Hidden screens - accessible via navigation but not in tab bar */}
-        {getHiddenScreens().map((screen) => (
-          <Tabs.Screen
-            key={screen.name}
-            name={screen.name}
-            options={screen.options}
-          />
-        ))}
+        {/* Removed hidden screens from Tabs to enable Stack animations at root */}
       </Tabs>
     </HealthModeProvider>
   );

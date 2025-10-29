@@ -103,6 +103,35 @@ function getAppContent({
       }}
     >
       <Stack.Screen name="(app)" options={{ headerShown: false }} />
+      {/* Register progression and gameplay routes here for animated transitions */}
+      <Stack.Screen
+        name="(app)/collections"
+        options={{ headerShown: true, animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
+        name="(app)/achievements"
+        options={{ headerShown: true, animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
+        name="(app)/run-history"
+        options={{ headerShown: true, animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
+        name="(app)/run-queue"
+        options={{ headerShown: true, animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
+        name="(app)/active-run"
+        options={{ headerShown: true, animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
+        name="(app)/bust-screen"
+        options={{ headerShown: true, animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
+        name="(app)/scenario"
+        options={{ headerShown: true, animation: 'slide_from_right' }}
+      />
       <Stack.Screen
         name="character-creation"
         options={{ 
