@@ -86,7 +86,7 @@ Based on: `tasks/prd-delvers-descent-gameplay-integration.md`
   - [x] 4.6 Create bust screen component
   - [x] 4.7 Implement bust handling (XP preserved, items lost)
   - [x] 4.8 Add return to run queue from bust screen
-  - [ ] 4.9 Create tests for decision-making UI
+  - [x] 4.9 Create tests for decision-making UI
 
 - [ ] 5.0 Progression & Collections
   - [ ] 5.1 Create collections screen integrating CollectionOverview component
