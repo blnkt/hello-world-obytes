@@ -60,19 +60,6 @@ const getHomeTabScreen = () => ({
   },
 });
 
-const getScenarioTabScreen = () => ({
-  name: 'scenario',
-  options: {
-    href: null,
-    title: 'Scenario',
-    headerShown: true,
-    tabBarIcon: ({ color }: { color: string }) => (
-      <MerchantIcon color={color} />
-    ),
-    tabBarButtonTestID: 'scenario-tab',
-  },
-});
-
 const getDungeonGameTabScreen = () => ({
   name: 'dungeon-game',
   options: {
