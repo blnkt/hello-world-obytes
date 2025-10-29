@@ -14,7 +14,6 @@ import {
   useExperienceData,
   useStreakTracking,
 } from '@/lib/health';
-import { useRouter } from 'expo-router';
 import {
   useCharacter,
   useDailyStepsGoal,
