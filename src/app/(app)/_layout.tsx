@@ -1,4 +1,4 @@
-import { SplashScreen, Tabs } from 'expo-router';
+import { SplashScreen, Stack, Tabs } from 'expo-router';
 import React, { useCallback, useEffect } from 'react';
 
 import {
@@ -28,6 +28,7 @@ const getCharacterTabScreen = () => ({
 const getStepsHistoryTabScreen = () => ({
   name: 'steps-history',
   options: {
+    href: null,
     title: 'Scenarios',
     headerShown: true,
     tabBarIcon: ({ color }: { color: string }) => (
@@ -59,22 +60,10 @@ const getHomeTabScreen = () => ({
   },
 });
 
-const getScenarioTabScreen = () => ({
-  name: 'scenario',
-  options: {
-    href: null,
-    title: 'Scenario',
-    headerShown: true,
-    tabBarIcon: ({ color }: { color: string }) => (
-      <MerchantIcon color={color} />
-    ),
-    tabBarButtonTestID: 'scenario-tab',
-  },
-});
-
 const getDungeonGameTabScreen = () => ({
   name: 'dungeon-game',
   options: {
+    href: null,
     title: 'Dungeon',
     headerShown: true,
     tabBarIcon: ({ color }: { color: string }) => (
@@ -87,6 +76,7 @@ const getDungeonGameTabScreen = () => ({
 const getShopTabScreen = () => ({
   name: 'shop',
   options: {
+    href: null,
     title: 'Shop',
     headerShown: true,
     tabBarIcon: ({ color }: { color: string }) => (
@@ -96,17 +86,76 @@ const getShopTabScreen = () => ({
   },
 });
 
+const getHiddenScreens = () => [
+  {
+    name: 'scenario',
+    options: {
+      href: null,
+      title: 'Scenario',
+      headerShown: true,
+    },
+  },
+  {
+    name: 'achievements',
+    options: {
+      href: null,
+      title: 'Achievements',
+      headerShown: true,
+    },
+  },
+  {
+    name: 'active-run',
+    options: {
+      href: null,
+      title: 'Active Run',
+      headerShown: true,
+    },
+  },
+  {
+    name: 'bust-screen',
+    options: {
+      href: null,
+      title: 'Bust Screen',
+      headerShown: true,
+    },
+  },
+  {
+    name: 'collections',
+    options: {
+      href: null,
+      title: 'Collections',
+      headerShown: true,
+    },
+  },
+  {
+    name: 'run-history',
+    options: {
+      href: null,
+      title: 'Run History',
+      headerShown: true,
+    },
+  },
+  {
+    name: 'run-queue',
+    options: {
+      href: null,
+      title: 'Run Queue',
+      headerShown: true,
+    },
+  },
+];
+
 const getTabScreens = () => [
   getCharacterTabScreen(),
   getStepsHistoryTabScreen(),
   getSettingsTabScreen(),
   getHomeTabScreen(),
-  getScenarioTabScreen(),
+  // Note: scenario, dungeon-game, shop already have href: null in their individual configs
   getDungeonGameTabScreen(),
   getShopTabScreen(),
 ];
 
-export default function TabLayout() {
+export default function AppLayout() {
   const hideSplash = useCallback(async () => {
     await SplashScreen.hideAsync();
   }, []);
@@ -120,15 +169,24 @@ export default function TabLayout() {
 
   return (
     <HealthModeProvider>
-      <Tabs>
-        {getTabScreens().map((screen) => (
-          <Tabs.Screen
-            key={screen.name}
-            name={screen.name}
-            options={screen.options}
-          />
-        ))}
-      </Tabs>
+      <Stack
+        screenOptions={{
+          animation: 'slide_from_right',
+          animationDuration: 300,
+        }}
+      >
+        {/* Tabs wrapped in a Stack screen so pushes slide */}
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+
+        {/* Non-tab routes render above tabs with slide animation */}
+        <Stack.Screen name="collections" options={{ headerShown: true }} />
+        <Stack.Screen name="achievements" options={{ headerShown: true }} />
+        <Stack.Screen name="run-history" options={{ headerShown: true }} />
+        <Stack.Screen name="run-queue" options={{ headerShown: true }} />
+        <Stack.Screen name="active-run" options={{ headerShown: true }} />
+        <Stack.Screen name="bust-screen" options={{ headerShown: true }} />
+        <Stack.Screen name="scenario" options={{ headerShown: true }} />
+      </Stack>
     </HealthModeProvider>
   );
 }

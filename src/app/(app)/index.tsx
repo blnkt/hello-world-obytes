@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 
+import { DelversDescentCard } from '@/components/home/delvers-descent-card';
 import {
   useCurrencySystem,
   useExperienceData,
@@ -228,6 +229,20 @@ const QuickNavigation = () => {
 
   const navigationItems = [
     {
+      title: "Delver's Descent",
+      subtitle: 'Start a dungeon run',
+      icon: '🗡️',
+      color: 'bg-red-600',
+      onPress: () => router.push('/run-queue'),
+    },
+    {
+      title: 'Collections',
+      subtitle: 'View your collected items',
+      icon: '📦',
+      color: 'bg-indigo-500',
+      onPress: () => router.push('/collections'),
+    },
+    {
       title: 'Character',
       subtitle: 'View & Edit',
       icon: '⚔️',
@@ -366,6 +381,18 @@ const MotivationalSection = ({ stepCount }: { stepCount: number }) => {
   );
 };
 
+const DelversDescentCardWrapper: React.FC = () => {
+  const router = useRouter();
+  
+  return (
+    <DelversDescentCard 
+      onPress={() => {
+        router.push('/run-queue');
+      }} 
+    />
+  );
+};
+
 export default function Home() {
   // Use reactive hook for last checked date
   const [lastCheckedDate] = useLastCheckedDate();
@@ -427,6 +454,8 @@ export default function Home() {
         />
 
         <CharacterPreview />
+
+        <DelversDescentCardWrapper />
 
         <QuickNavigation />
 

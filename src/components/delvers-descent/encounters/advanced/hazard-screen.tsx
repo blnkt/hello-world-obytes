@@ -176,7 +176,11 @@ export const HazardScreen: React.FC<HazardScreenProps> = ({
   }
 
   return (
-    <ScrollView testID="hazard-screen" className="min-h-screen bg-gray-50 p-6">
+    <ScrollView
+      testID="hazard-screen"
+      className="min-h-screen bg-gray-50 p-6"
+      contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}
+    >
       <View className="mx-auto max-w-2xl">
         <HazardHeader
           obstacleType={state.config.obstacleType}

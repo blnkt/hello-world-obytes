@@ -44,7 +44,12 @@ function getAppContent({
   // Show onboarding if it's the first time
   if (isFirstTime) {
     return (
-      <Stack>
+      <Stack
+        screenOptions={{
+          animation: 'fade',
+          animationDuration: 300,
+        }}
+      >
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       </Stack>
     );
@@ -58,26 +63,89 @@ function getAppContent({
   // If not first time but no character, show character creation
   if (!hasCharacter) {
     return (
-      <Stack>
+      <Stack
+        screenOptions={{
+          animation: 'slide_from_right',
+          animationDuration: 300,
+        }}
+      >
         <Stack.Screen
           name="character-creation"
-          options={{ headerShown: false }}
+          options={{ 
+            headerShown: false,
+            animation: 'fade',
+          }}
         />
-        <Stack.Screen name="(app)" options={{ headerShown: false }} />
-        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+        <Stack.Screen 
+          name="(app)" 
+          options={{ 
+            headerShown: false,
+            animation: 'slide_from_right',
+          }} 
+        />
+        <Stack.Screen 
+          name="onboarding" 
+          options={{ 
+            headerShown: false,
+            animation: 'fade',
+          }} 
+        />
       </Stack>
     );
   }
 
   // If not first time and has character, show main app
   return (
-    <Stack>
+    <Stack
+      screenOptions={{
+        animation: 'slide_from_right',
+        animationDuration: 300,
+      }}
+    >
       <Stack.Screen name="(app)" options={{ headerShown: false }} />
+      {/* Register progression and gameplay routes here for animated transitions */}
+      <Stack.Screen
+        name="(app)/collections"
+        options={{ headerShown: true, animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
+        name="(app)/achievements"
+        options={{ headerShown: true, animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
+        name="(app)/run-history"
+        options={{ headerShown: true, animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
+        name="(app)/run-queue"
+        options={{ headerShown: true, animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
+        name="(app)/active-run"
+        options={{ headerShown: true, animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
+        name="(app)/bust-screen"
+        options={{ headerShown: true, animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
+        name="(app)/scenario"
+        options={{ headerShown: true, animation: 'slide_from_right' }}
+      />
       <Stack.Screen
         name="character-creation"
-        options={{ headerShown: false }}
+        options={{ 
+          headerShown: false,
+          animation: 'fade',
+        }}
       />
-      <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+      <Stack.Screen 
+        name="onboarding" 
+        options={{ 
+          headerShown: false,
+          animation: 'fade',
+        }} 
+      />
     </Stack>
   );
 }

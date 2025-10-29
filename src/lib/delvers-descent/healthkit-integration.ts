@@ -67,10 +67,12 @@ export function getDailyStepsForDate(
  * @returns Array of StreakBonusData
  */
 export function calculateStreakBonusData(
-  stepsByDay: { date: Date; steps: number }[]
+  stepsByDay: { date: Date | string; steps: number }[]
 ): StreakBonusData[] {
   return stepsByDay.map((day) => {
-    const dateStr = formatDateForDelving(day.date);
+    // Handle cases where date might be string or undefined
+    const date = day.date || new Date();
+    const dateStr = formatDateForDelving(date);
     return {
       date: dateStr,
       steps: day.steps,
@@ -81,11 +83,33 @@ export function calculateStreakBonusData(
 
 /**
  * Format a Date object to YYYY-MM-DD string for Delver's Descent
- * @param date Date object to format
+ * @param date Date object or string to format
  * @returns Date string in YYYY-MM-DD format
  */
-export function formatDateForDelving(date: Date): string {
-  // Use UTC methods to avoid timezone issues
+export function formatDateForDelving(date: Date | string | undefined): string {
+  // Handle undefined or null
+  if (!date) {
+    const today = new Date();
+    return formatDateForDelving(today);
+  }
+
+  // If it's already a string, return it if it's in the correct format
+  if (typeof date === 'string') {
+    // Check if it's already in YYYY-MM-DD format
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return date;
+    }
+    // Try to parse the string as a date
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate.getTime())) {
+      // Invalid date, return today's date
+      const today = new Date();
+      return formatDateForDelving(today);
+    }
+    date = parsedDate;
+  }
+
+  // Now date should be a Date object
   const year = date.getUTCFullYear();
   const month = String(date.getUTCMonth() + 1).padStart(2, '0');
   const day = String(date.getUTCDate()).padStart(2, '0');
@@ -98,13 +122,13 @@ export function formatDateForDelving(date: Date): string {
  * @returns Promise<void>
  */
 export async function generateDelvingRunsFromStepHistory(
-  stepsByDay: { date: Date; steps: number }[]
+  stepsByDay: { date: Date | string; steps: number }[]
 ): Promise<void> {
   const runQueueManager = getRunQueueManager();
 
   // Convert HealthKit data to the format expected by run queue manager
   const stepHistory = stepsByDay.map((day) => ({
-    date: formatDateForDelving(day.date),
+    date: formatDateForDelving(day.date || new Date()),
     steps: day.steps,
   }));
 

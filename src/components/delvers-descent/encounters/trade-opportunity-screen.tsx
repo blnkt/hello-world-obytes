@@ -32,7 +32,8 @@ const SuccessScreen: React.FC<{
 }> = ({ rewards, onReturn }) => (
   <ScrollView
     testID="encounter-success"
-    className="flex min-h-screen items-center justify-center bg-gray-50"
+    className="flex min-h-screen bg-gray-50"
+    contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', paddingBottom: 100 }}
   >
     <View className="mx-auto max-w-md p-6">
       <Text className="mb-4 text-center text-6xl">🎉</Text>
@@ -206,6 +207,7 @@ const TradeContent: React.FC<{
     <ScrollView
       testID="trade-opportunity-screen"
       className="min-h-screen bg-gray-50 p-6"
+      contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}
     >
       <View className="mx-auto max-w-6xl">
         <View className="mb-8">
