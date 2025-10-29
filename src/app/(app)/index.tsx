@@ -14,6 +14,7 @@ import {
   useExperienceData,
   useStreakTracking,
 } from '@/lib/health';
+import { useRouter } from 'expo-router';
 import {
   useCharacter,
   useDailyStepsGoal,
@@ -381,6 +382,12 @@ const MotivationalSection = ({ stepCount }: { stepCount: number }) => {
   );
 };
 
+const DelversDescentCardWrapper: React.FC = () => {
+  const router = useRouter();
+  
+  return <DelversDescentCard onPress={() => router.push('/run-queue')} />;
+};
+
 export default function Home() {
   // Use reactive hook for last checked date
   const [lastCheckedDate] = useLastCheckedDate();
@@ -443,7 +450,7 @@ export default function Home() {
 
         <CharacterPreview />
 
-        <DelversDescentCard />
+        <DelversDescentCardWrapper />
 
         <QuickNavigation />
 
