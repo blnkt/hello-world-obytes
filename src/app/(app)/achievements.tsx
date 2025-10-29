@@ -20,9 +20,11 @@ export default function AchievementsScreen() {
   );
 
   useEffect(() => {
-    const loadAchievements = async () => {
+    const loadAchievementData = async () => {
       setLoading(true);
       try {
+        // Get current achievement states from manager
+        // The manager should have been updated when runs complete
         const achievementStates = achievementManager.getAchievements();
         setAchievements(achievementStates);
       } catch (error) {
@@ -32,7 +34,7 @@ export default function AchievementsScreen() {
       }
     };
 
-    loadAchievements();
+    loadAchievementData();
   }, [achievementManager]);
 
   // Organize achievements by category
