@@ -99,12 +99,12 @@ Based on: `tasks/prd-delvers-descent-gameplay-integration.md`
   - [x] 5.8 Add navigation between progression screens
 
 - [ ] 6.0 App Integration & Navigation
-  - [ ] 6.1 Create Delver's Descent home card component
-  - [ ] 6.2 Add Delver's Descent card to home screen with quick stats
-  - [ ] 6.3 Update tab navigation to include Delver's Descent screens
-  - [ ] 6.4 Integrate HealthKit data for run queue generation
-  - [ ] 6.5 Add character display to dungeon screens (level, name, XP)
-  - [ ] 6.6 Implement smooth navigation transitions
+  - [x] 6.1 Create Delver's Descent home card component
+  - [x] 6.2 Add Delver's Descent card to home screen with quick stats
+  - [x] 6.3 Update tab navigation to include Delver's Descent screens
+  - [x] 6.4 Integrate HealthKit data for run queue generation
+  - [x] 6.5 Add character display to dungeon screens (level, name, XP)
+  - [x] 6.6 Implement smooth navigation transitions
   - [ ] 6.7 Add loading states for data fetching
   - [ ] 6.8 Ensure backward compatibility with existing functionality
   - [ ] 6.9 Create integration tests for full gameplay loop
