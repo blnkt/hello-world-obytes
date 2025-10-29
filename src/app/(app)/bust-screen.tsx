@@ -69,6 +69,9 @@ export default function BustScreen() {
       const runQueueManager = getRunQueueManager();
       const runStateManager = getRunStateManager();
       const achievementManager = new AchievementManager(ALL_ACHIEVEMENTS);
+      
+      // Load saved achievement state before processing new events
+      await achievementManager.loadSavedState();
 
       // Try to bust the run (if there's an active state)
       try {

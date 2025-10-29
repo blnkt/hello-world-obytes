@@ -23,8 +23,10 @@ export default function AchievementsScreen() {
     const loadAchievementData = async () => {
       setLoading(true);
       try {
+        // Load saved achievement state from previous runs
+        await achievementManager.loadSavedState();
+        
         // Get current achievement states from manager
-        // The manager should have been updated when runs complete
         const achievementStates = achievementManager.getAchievements();
         setAchievements(achievementStates);
       } catch (error) {

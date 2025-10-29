@@ -439,6 +439,9 @@ export default function ActiveRunRoute() {
       const runQueueManager = getRunQueueManager();
       const collectionManager = new CollectionManager(ALL_COLLECTION_SETS);
       const achievementManager = new AchievementManager(ALL_ACHIEVEMENTS);
+      
+      // Load saved achievement state before processing new events
+      await achievementManager.loadSavedState();
 
       // Use the local runState directly (it's not stored in RunStateManager singleton)
       const completionResult = {

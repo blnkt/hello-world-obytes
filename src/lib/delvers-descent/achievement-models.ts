@@ -173,6 +173,25 @@ export class AchievementDataModel {
     };
   }
 
+  /**
+   * Restore state from saved achievement data
+   */
+  restoreState(savedState: AchievementState): void {
+    if (savedState.progress) {
+      this.state.progress = {
+        current: savedState.progress.current,
+        target: savedState.progress.target,
+        percentage: savedState.progress.percentage,
+      };
+    }
+    if (savedState.unlocked !== undefined) {
+      this.state.unlocked = savedState.unlocked;
+      if (savedState.unlockedAt) {
+        this.state.unlockedAt = savedState.unlockedAt;
+      }
+    }
+  }
+
   checkRequirement(event: AchievementEvent): CheckAchievementResult {
     const { type, data } = event;
     const { requirements } = this.definition;
