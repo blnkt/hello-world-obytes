@@ -16,6 +16,8 @@ import { CollectionManager } from '@/lib/delvers-descent/collection-manager';
 import { ALL_COLLECTION_SETS } from '@/lib/delvers-descent/collection-sets';
 import { getRunQueueManager } from '@/lib/delvers-descent/run-queue';
 import { getRunStateManager } from '@/lib/delvers-descent/run-state-manager';
+import { useExperienceData } from '@/lib/health';
+import { useCharacter } from '@/lib/storage';
 import type {
   DelvingRun,
   DungeonNode,
@@ -47,6 +49,38 @@ const ErrorView: React.FC<{ error: string; router: any }> = ({
     </TouchableOpacity>
   </View>
 );
+
+const CharacterInfo: React.FC = () => {
+  const [character] = useCharacter();
+  const { experience } = useExperienceData();
+
+  if (!character || !character.name) {
+    return null;
+  }
+
+  return (
+    <View className="mb-4 flex-row items-center rounded-xl bg-blue-50 p-3 dark:bg-blue-900/20">
+      <View className="mr-3 size-12 items-center justify-center rounded-full bg-blue-500">
+        <Text className="text-lg font-bold text-white">
+          {character.name.charAt(0).toUpperCase()}
+        </Text>
+      </View>
+      <View className="flex-1">
+        <Text className="font-semibold text-gray-900 dark:text-white">
+          {character.name}
+        </Text>
+        <View className="flex-row items-center">
+          <Text className="text-xs text-gray-600 dark:text-gray-400">
+            Level {character.level}
+          </Text>
+          <Text className="ml-2 text-xs text-gray-600 dark:text-gray-400">
+            • {experience.toLocaleString()} XP
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+};
 
 const RunDetailsCard: React.FC<{ run: DelvingRun }> = ({ run }) => (
   <View className="mb-6 rounded-xl bg-white p-4 dark:bg-gray-800">
@@ -292,6 +326,7 @@ const MapView: React.FC<{
         <Text className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
           Delver's Descent
         </Text>
+        <CharacterInfo />
         <RunDetailsCard run={run} />
         <RunStatusPanel
           energyRemaining={runState?.energyRemaining || 0}
