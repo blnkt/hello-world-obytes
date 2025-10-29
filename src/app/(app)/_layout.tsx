@@ -99,12 +99,71 @@ const getShopTabScreen = () => ({
   },
 });
 
+const getHiddenScreens = () => [
+  {
+    name: 'scenario',
+    options: {
+      href: null,
+      title: 'Scenario',
+      headerShown: true,
+    },
+  },
+  {
+    name: 'achievements',
+    options: {
+      href: null,
+      title: 'Achievements',
+      headerShown: true,
+    },
+  },
+  {
+    name: 'active-run',
+    options: {
+      href: null,
+      title: 'Active Run',
+      headerShown: true,
+    },
+  },
+  {
+    name: 'bust-screen',
+    options: {
+      href: null,
+      title: 'Bust Screen',
+      headerShown: true,
+    },
+  },
+  {
+    name: 'collections',
+    options: {
+      href: null,
+      title: 'Collections',
+      headerShown: true,
+    },
+  },
+  {
+    name: 'run-history',
+    options: {
+      href: null,
+      title: 'Run History',
+      headerShown: true,
+    },
+  },
+  {
+    name: 'run-queue',
+    options: {
+      href: null,
+      title: 'Run Queue',
+      headerShown: true,
+    },
+  },
+];
+
 const getTabScreens = () => [
   getCharacterTabScreen(),
   getStepsHistoryTabScreen(),
   getSettingsTabScreen(),
   getHomeTabScreen(),
-  getScenarioTabScreen(),
+  // Note: scenario, dungeon-game, shop already have href: null in their individual configs
   getDungeonGameTabScreen(),
   getShopTabScreen(),
 ];
