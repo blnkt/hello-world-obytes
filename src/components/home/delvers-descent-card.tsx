@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Linking, Pressable, Text, View } from 'react-native';
 
 import { useDelvingRuns } from '@/components/delvers-descent/hooks/use-delving-runs';
 import { AchievementManager } from '@/lib/delvers-descent/achievement-manager';
@@ -26,7 +26,15 @@ const StatItem: React.FC<{ label: string; value: string | number }> = ({
 export const DelversDescentCard: React.FC<DelversDescentCardProps> = ({
   onPress,
 }) => {
-  const router = useRouter();
+  // Use useRouter hook only if navigation context is available
+  let router: any = null;
+  try {
+    router = useRouter();
+  } catch (error) {
+    // Navigation context not available, will use Linking as fallback
+    console.log('Router not available, using Linking fallback');
+  }
+
   const { getRunStatistics, getQueuedRuns } = useDelvingRuns();
   const [stats, setStats] = useState({
     queuedRuns: 0,
@@ -77,8 +85,13 @@ export const DelversDescentCard: React.FC<DelversDescentCardProps> = ({
   const handlePress = () => {
     if (onPress) {
       onPress();
-    } else {
+    } else if (router) {
       router.push('/run-queue');
+    } else {
+      // Fallback to Linking if router not available
+      Linking.openURL('/run-queue').catch((err) => {
+        console.error('Failed to navigate:', err);
+      });
     }
   };
 
