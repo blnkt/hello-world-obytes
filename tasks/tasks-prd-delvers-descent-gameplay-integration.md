@@ -88,15 +88,15 @@ Based on: `tasks/prd-delvers-descent-gameplay-integration.md`
   - [x] 4.8 Add return to run queue from bust screen
   - [x] 4.9 Create tests for decision-making UI
 
-- [ ] 5.0 Progression & Collections
-  - [ ] 5.1 Create collections screen integrating CollectionOverview component
-  - [ ] 5.2 Add completed sets and active bonuses display
-  - [ ] 5.3 Create achievements screen integrating AchievementList component
-  - [ ] 5.4 Display achievement progress and unlocked achievements
-  - [ ] 5.5 Create run history screen
-  - [ ] 5.6 Display completed runs with depth reached and rewards
-  - [ ] 5.7 Display busted runs with failure reasons
-  - [ ] 5.8 Add navigation between progression screens
+- [x] 5.0 Progression & Collections
+  - [x] 5.1 Create collections screen integrating CollectionOverview component
+  - [x] 5.2 Add completed sets and active bonuses display
+  - [x] 5.3 Create achievements screen integrating AchievementList component
+  - [x] 5.4 Display achievement progress and unlocked achievements
+  - [x] 5.5 Create run history screen
+  - [x] 5.6 Display completed runs with depth reached and rewards
+  - [x] 5.7 Display busted runs with failure reasons
+  - [x] 5.8 Add navigation between progression screens
 
 - [ ] 6.0 App Integration & Navigation
   - [ ] 6.1 Create Delver's Descent home card component

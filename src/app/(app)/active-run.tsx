@@ -11,6 +11,7 @@ import { EncounterScreen } from '@/components/delvers-descent/encounters/encount
 import { useMapGenerator } from '@/components/delvers-descent/hooks/use-map-generator';
 import { AchievementManager } from '@/lib/delvers-descent/achievement-manager';
 import { ALL_ACHIEVEMENTS } from '@/lib/delvers-descent/achievement-types';
+import { saveAchievements } from '@/lib/delvers-descent/achievement-persistence';
 import { CollectionManager } from '@/lib/delvers-descent/collection-manager';
 import { ALL_COLLECTION_SETS } from '@/lib/delvers-descent/collection-sets';
 import { getRunQueueManager } from '@/lib/delvers-descent/run-queue';
@@ -490,7 +491,6 @@ export default function ActiveRunRoute() {
       }
 
       // Save achievements
-      const { saveAchievements } = await import('@/lib/delvers-descent/achievement-persistence');
       await saveAchievements(achievementManager);
 
       // Update run status to completed

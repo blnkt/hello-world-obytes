@@ -10,6 +10,7 @@ import {
   type AchievementState,
   type AchievementStatistics,
 } from './achievement-models';
+import { loadAchievements } from './achievement-persistence';
 import type { AchievementDefinition } from './achievement-types';
 
 export class AchievementManager {
@@ -30,7 +31,6 @@ export class AchievementManager {
    */
   async loadSavedState(): Promise<void> {
     try {
-      const { loadAchievements } = await import('./achievement-persistence');
       const savedAchievements = await loadAchievements();
       
       if (savedAchievements && savedAchievements.length > 0) {

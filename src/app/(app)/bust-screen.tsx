@@ -2,6 +2,12 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
+import { AchievementManager } from '@/lib/delvers-descent/achievement-manager';
+import { ALL_ACHIEVEMENTS } from '@/lib/delvers-descent/achievement-types';
+import { saveAchievements } from '@/lib/delvers-descent/achievement-persistence';
+import { getRunQueueManager } from '@/lib/delvers-descent/run-queue';
+import { getRunStateManager } from '@/lib/delvers-descent/run-state-manager';
+
 export interface BustConsequence {
   itemsLost: number;
   energyLost: number;
@@ -61,11 +67,6 @@ export default function BustScreen() {
 
   const handleAcknowledge = async () => {
     try {
-      const { getRunQueueManager } = await import('@/lib/delvers-descent/run-queue');
-      const { getRunStateManager } = await import('@/lib/delvers-descent/run-state-manager');
-      const { AchievementManager } = await import('@/lib/delvers-descent/achievement-manager');
-      const { ALL_ACHIEVEMENTS } = await import('@/lib/delvers-descent/achievement-types');
-      
       const runQueueManager = getRunQueueManager();
       const runStateManager = getRunStateManager();
       const achievementManager = new AchievementManager(ALL_ACHIEVEMENTS);
@@ -88,7 +89,6 @@ export default function BustScreen() {
         });
 
         // Save achievements
-        const { saveAchievements } = await import('@/lib/delvers-descent/achievement-persistence');
         await saveAchievements(achievementManager);
       } catch (error) {
         // If there's no active run state, that's okay - we still need to update the run queue
