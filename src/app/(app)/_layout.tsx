@@ -187,7 +187,35 @@ export default function TabLayout() {
             options={screen.options}
           />
         ))}
-        {/* Removed hidden screens from Tabs to enable Stack animations at root */}
+        {/* Explicitly register hidden screens with href: null so they don't appear as tabs */}
+        <Tabs.Screen
+          name="collections"
+          options={{ href: null, title: 'Collections', headerShown: true }}
+        />
+        <Tabs.Screen
+          name="achievements"
+          options={{ href: null, title: 'Achievements', headerShown: true }}
+        />
+        <Tabs.Screen
+          name="run-history"
+          options={{ href: null, title: 'Run History', headerShown: true }}
+        />
+        <Tabs.Screen
+          name="run-queue"
+          options={{ href: null, title: 'Run Queue', headerShown: true }}
+        />
+        <Tabs.Screen
+          name="active-run"
+          options={{ href: null, title: 'Active Run', headerShown: true }}
+        />
+        <Tabs.Screen
+          name="bust-screen"
+          options={{ href: null, title: 'Bust Screen', headerShown: true }}
+        />
+        <Tabs.Screen
+          name="scenario"
+          options={{ href: null, title: 'Scenario', headerShown: true }}
+        />
       </Tabs>
     </HealthModeProvider>
   );
