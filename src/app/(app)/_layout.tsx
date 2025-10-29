@@ -169,7 +169,17 @@ export default function TabLayout() {
 
   return (
     <HealthModeProvider>
-      <Tabs>
+      <Tabs
+        screenOptions={{
+          tabBarStyle: {
+            borderTopWidth: 0,
+            elevation: 0,
+          },
+          headerStyle: {
+            elevation: 0,
+          },
+        }}
+      >
         {getTabScreens().map((screen) => (
           <Tabs.Screen
             key={screen.name}
@@ -182,7 +192,10 @@ export default function TabLayout() {
           <Tabs.Screen
             key={screen.name}
             name={screen.name}
-            options={screen.options}
+            options={{
+              ...screen.options,
+              animation: 'slide_from_right',
+            }}
           />
         ))}
       </Tabs>
