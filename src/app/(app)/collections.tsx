@@ -19,10 +19,6 @@ export default function CollectionsScreen() {
     [collectionManager]
   );
 
-  // Get total runs completed for statistics
-  const completedRuns = useMemo(() => getCompletedRuns(), [getCompletedRuns]);
-  const totalRunsCompleted = completedRuns.length;
-
   return (
     <>
       <Stack.Screen
