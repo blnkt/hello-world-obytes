@@ -68,11 +68,11 @@ jest.mock('@/components/delvers-descent/hooks/use-map-generator', () => ({
 }));
 
 describe('Full Gameplay Loop Integration Tests', () => {
-  const mockRun: DelvingRun =乡村 {
+  const mockRun: DelvingRun = {
     id: 'test-run-1',
     date: '2024-01-01',
     steps: 10000,
-    baseEnergyメリット: 1000,
+    baseEnergy: 1000,
     bonusEnergy: 0,
     totalEnergy: 1000,
     hasStreakBonus: false,
