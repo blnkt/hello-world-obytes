@@ -171,19 +171,21 @@ const PuzzleContent: React.FC<{
           </Text>
         </View>
 
-        <View testID="tile-grid" className="grid grid-cols-5 gap-2">
-          {tiles.map((row, rowIndex) =>
-            row.map((tile, colIndex) => (
-              <TileComponent
-                key={`${rowIndex}-${colIndex}`}
-                tile={tile}
-                rowIndex={rowIndex}
-                colIndex={colIndex}
-                disabled={remainingReveals <= 0 || tile.revealed}
-                onPress={() => onTileClick(rowIndex, colIndex)}
-              />
-            ))
-          )}
+        <View testID="tile-grid" className="gap-2">
+          {tiles.map((row, rowIndex) => (
+            <View key={rowIndex} className="flex-row justify-center gap-2">
+              {row.map((tile, colIndex) => (
+                <TileComponent
+                  key={`${rowIndex}-${colIndex}`}
+                  tile={tile}
+                  rowIndex={rowIndex}
+                  colIndex={colIndex}
+                  disabled={remainingReveals <= 0 || tile.revealed}
+                  onPress={() => onTileClick(rowIndex, colIndex)}
+                />
+              ))}
+            </View>
+          ))}
         </View>
       </View>
 
