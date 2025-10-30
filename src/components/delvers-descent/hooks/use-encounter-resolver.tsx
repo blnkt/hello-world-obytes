@@ -152,7 +152,7 @@ async function initializeEncounterResolver({
     const resolver = new EncounterResolver();
     switch (node.type) {
       case 'puzzle_chamber':
-        new PuzzleChamberEncounter(node.depth);
+        new PuzzleChamberEncounter(undefined, node.depth);
         break;
       case 'trade_opportunity':
         new TradeOpportunityEncounter(node.depth);
