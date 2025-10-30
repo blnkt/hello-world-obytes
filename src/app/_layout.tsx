@@ -32,69 +32,53 @@ SplashScreen.setOptions({
   fade: true,
 });
 
-function getAppContent({
-  isFirstTime,
-  _isAvailable,
-  _hasRequestedAuthorization,
-}: {
-  isFirstTime: boolean;
-  _isAvailable: boolean | null;
-  _hasRequestedAuthorization: boolean | null;
-}) {
-  // Show onboarding if it's the first time
-  if (isFirstTime) {
-    return (
-      <Stack
-        screenOptions={{
+function renderOnboardingStack() {
+  return (
+    <Stack
+      screenOptions={{
+        animation: 'fade',
+        animationDuration: 300,
+      }}
+    >
+      <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+    </Stack>
+  );
+}
+
+function renderCharacterCreationStack() {
+  return (
+    <Stack
+      screenOptions={{
+        animation: 'slide_from_right',
+        animationDuration: 300,
+      }}
+    >
+      <Stack.Screen
+        name="character-creation"
+        options={{
+          headerShown: false,
           animation: 'fade',
-          animationDuration: 300,
         }}
-      >
-        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-      </Stack>
-    );
-  }
-
-  // Check if character exists
-  const character = getCharacter();
-  const hasCharacter =
-    character && character.name && character.name.trim() !== '';
-
-  // If not first time but no character, show character creation
-  if (!hasCharacter) {
-    return (
-      <Stack
-        screenOptions={{
+      />
+      <Stack.Screen
+        name="(app)"
+        options={{
+          headerShown: false,
           animation: 'slide_from_right',
-          animationDuration: 300,
         }}
-      >
-        <Stack.Screen
-          name="character-creation"
-          options={{ 
-            headerShown: false,
-            animation: 'fade',
-          }}
-        />
-        <Stack.Screen 
-          name="(app)" 
-          options={{ 
-            headerShown: false,
-            animation: 'slide_from_right',
-          }} 
-        />
-        <Stack.Screen 
-          name="onboarding" 
-          options={{ 
-            headerShown: false,
-            animation: 'fade',
-          }} 
-        />
-      </Stack>
-    );
-  }
+      />
+      <Stack.Screen
+        name="onboarding"
+        options={{
+          headerShown: false,
+          animation: 'fade',
+        }}
+      />
+    </Stack>
+  );
+}
 
-  // If not first time and has character, show main app
+function renderMainAppStack() {
   return (
     <Stack
       screenOptions={{
@@ -134,20 +118,48 @@ function getAppContent({
       />
       <Stack.Screen
         name="character-creation"
-        options={{ 
+        options={{
           headerShown: false,
           animation: 'fade',
         }}
       />
-      <Stack.Screen 
-        name="onboarding" 
-        options={{ 
+      <Stack.Screen
+        name="onboarding"
+        options={{
           headerShown: false,
           animation: 'fade',
-        }} 
+        }}
       />
     </Stack>
   );
+}
+
+function getAppContent({
+  isFirstTime,
+  _isAvailable,
+  _hasRequestedAuthorization,
+}: {
+  isFirstTime: boolean;
+  _isAvailable: boolean | null;
+  _hasRequestedAuthorization: boolean | null;
+}) {
+  // Show onboarding if it's the first time
+  if (isFirstTime) {
+    return renderOnboardingStack();
+  }
+
+  // Check if character exists
+  const character = getCharacter();
+  const hasCharacter =
+    character && character.name && character.name.trim() !== '';
+
+  // If not first time but no character, show character creation
+  if (!hasCharacter) {
+    return renderCharacterCreationStack();
+  }
+
+  // If not first time and has character, show main app
+  return renderMainAppStack();
 }
 
 export default function RootLayout() {

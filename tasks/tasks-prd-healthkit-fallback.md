@@ -23,7 +23,6 @@
 ## Tasks
 
 - [x] 1.0 HealthKit Availability Detection and Fallback Logic (#132)
-
   - [x] 1.1 Enhance `useHealthKitAvailability` hook to detect permission denied scenarios
   - [x] 1.2 Create `useManualEntryMode` hook to track manual vs HealthKit mode
   - [x] 1.3 Implement fallback logic to automatically suggest manual entry when HealthKit unavailable
@@ -31,7 +30,6 @@
   - [x] 1.5 Create user choice interface to select between HealthKit and manual modes
 
 - [x] 2.0 Manual Step Entry Interface and Validation (#133)
-
   - [x] 2.1 Create `ManualStepEntry` component with number input field
   - [x] 2.2 Implement step count validation to ensure data structure compatibility
   - [x] 2.3 Add input constraints (positive numbers, reasonable daily limits)
@@ -40,7 +38,6 @@
   - [x] 2.6 Add loading states during step entry processing
 
 - [x] 3.0 Storage Integration for Manual Entries (#134)
-
   - [x] 3.1 Extend storage functions to handle manual step entries
   - [x] 3.2 Create `setManualStepEntry` function in storage.tsx
   - [x] 3.3 Implement `getManualStepEntry` function for retrieving manual data
@@ -49,7 +46,6 @@
   - [x] 3.6 Implement data structure validation before storage operations
 
 - [x] 4.0 Experience and Currency System Integration (#135)
-
   - [x] 4.1 Modify `useStepCountAsExperience` to handle manual step data
   - [x] 4.2 Update `mergeExperienceMMKV` to process manual entries identically to HealthKit
   - [x] 4.3 Integrate manual steps with streak detection system
@@ -58,7 +54,6 @@
   - [x] 4.6 Test experience/currency parity between HealthKit and manual entries
 
 - [x] 5.0 Settings Screen Integration and Developer Mode (#136)
-
   - [x] 5.1 Add manual entry section to settings screen
   - [x] 5.2 Implement developer mode toggle in settings
   - [x] 5.3 Create manual entry history display in settings

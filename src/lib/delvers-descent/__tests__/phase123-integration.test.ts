@@ -74,7 +74,9 @@ describe('Phase 1 + Phase 2 + Phase 3 Full System Integration (Task 6.1)', () =>
 
       // Simulate cash out
       if (encounterOutcome.reward) {
-        const summary = cashOutManager.getCashOutSummary(encounterOutcome.reward);
+        const summary = cashOutManager.getCashOutSummary(
+          encounterOutcome.reward
+        );
         expect(summary).toBeDefined();
         expect(summary.totalXP).toBeGreaterThanOrEqual(0);
       }
@@ -88,7 +90,11 @@ describe('Phase 1 + Phase 2 + Phase 3 Full System Integration (Task 6.1)', () =>
       expect(currentState).toBeDefined();
 
       // Create hazard encounter
-      const hazardConfig = HazardEncounter.createHazardConfig('collapsed_passage', 5, 5);
+      const hazardConfig = HazardEncounter.createHazardConfig(
+        'collapsed_passage',
+        5,
+        5
+      );
       const hazardEncounter = new HazardEncounter('hazard-1', hazardConfig);
 
       const paths = hazardEncounter.getState().availablePaths;
@@ -114,7 +120,11 @@ describe('Phase 1 + Phase 2 + Phase 3 Full System Integration (Task 6.1)', () =>
       expect(currentState).toBeDefined();
 
       // Create rest site encounter
-      const restConfig = RestSiteEncounter.createRestSiteConfig('energy_well', 5, 7);
+      const restConfig = RestSiteEncounter.createRestSiteConfig(
+        'energy_well',
+        5,
+        7
+      );
       const restEncounter = new RestSiteEncounter('rest-1', restConfig);
 
       const actions = restEncounter.getState().availableActions;
@@ -158,7 +168,9 @@ describe('Phase 1 + Phase 2 + Phase 3 Full System Integration (Task 6.1)', () =>
         state!.currentDepth
       );
       expect(returnCost).toBeGreaterThan(0);
-      expect(state!.energyRemaining - returnCost).toBeLessThan(state!.energyRemaining);
+      expect(state!.energyRemaining - returnCost).toBeLessThan(
+        state!.energyRemaining
+      );
     });
 
     it('should handle deep exploration with multiple encounters', async () => {
@@ -210,15 +222,18 @@ describe('Phase 1 + Phase 2 + Phase 3 Full System Integration (Task 6.1)', () =>
       for (const depth of depths) {
         await runStateManager.updateDepth(depth);
 
-        const returnCost = returnCostCalculator.calculateCumulativeReturnCost(depth);
+        const returnCost =
+          returnCostCalculator.calculateCumulativeReturnCost(depth);
 
         expect(returnCost).toBeGreaterThanOrEqual(previousCost);
         previousCost = returnCost;
       }
 
       // Cost should increase exponentially
-      const costAtDepth0 = returnCostCalculator.calculateCumulativeReturnCost(0);
-      const costAtDepth10 = returnCostCalculator.calculateCumulativeReturnCost(10);
+      const costAtDepth0 =
+        returnCostCalculator.calculateCumulativeReturnCost(0);
+      const costAtDepth10 =
+        returnCostCalculator.calculateCumulativeReturnCost(10);
       expect(costAtDepth10).toBeGreaterThan(costAtDepth0 * 5);
     });
 
@@ -226,7 +241,8 @@ describe('Phase 1 + Phase 2 + Phase 3 Full System Integration (Task 6.1)', () =>
       const runId = await runStateManager.initializeRun('test-run', 100);
       await runStateManager.updateDepth(5);
 
-      const baseReturnCost = returnCostCalculator.calculateCumulativeReturnCost(5);
+      const baseReturnCost =
+        returnCostCalculator.calculateCumulativeReturnCost(5);
       expect(baseReturnCost).toBeGreaterThan(0);
 
       // Shortcut integration is verified through ReturnCostCalculator
@@ -311,4 +327,3 @@ describe('Phase 1 + Phase 2 + Phase 3 Full System Integration (Task 6.1)', () =>
     });
   });
 });
-

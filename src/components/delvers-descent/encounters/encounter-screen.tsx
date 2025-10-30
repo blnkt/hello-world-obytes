@@ -296,9 +296,20 @@ const renderStandardEncounterScreen = (params: {
   onEncounterComplete: (result: 'success' | 'failure', rewards?: any[]) => void;
   encounterResolver: any;
   startEncounter: () => Promise<void>;
-  completeEncounter: (result: 'success' | 'failure', rewards?: any[]) => Promise<void>;
+  completeEncounter: (
+    result: 'success' | 'failure',
+    rewards?: any[]
+  ) => Promise<void>;
 }) => {
-  const { run, node, onReturnToMap, onEncounterComplete, encounterResolver, startEncounter, completeEncounter } = params;
+  const {
+    run,
+    node,
+    onReturnToMap,
+    onEncounterComplete,
+    encounterResolver,
+    startEncounter,
+    completeEncounter,
+  } = params;
 
   const handleStartEncounter = async () => {
     if (encounterResolver) {
@@ -357,7 +368,12 @@ export const EncounterScreen: React.FC<EncounterScreenProps> = ({
   }
 
   if (error && error.includes('Unsupported encounter type:')) {
-    return renderAdvancedEncounterScreen({ run, node, onReturnToMap, onEncounterComplete });
+    return renderAdvancedEncounterScreen({
+      run,
+      node,
+      onReturnToMap,
+      onEncounterComplete,
+    });
   }
 
   if (error) {
@@ -366,7 +382,12 @@ export const EncounterScreen: React.FC<EncounterScreenProps> = ({
 
   const advancedTypes = ['hazard', 'risk_event', 'rest_site'];
   if (advancedTypes.includes(node.type)) {
-    return renderAdvancedEncounterScreen({ run, node, onReturnToMap, onEncounterComplete });
+    return renderAdvancedEncounterScreen({
+      run,
+      node,
+      onReturnToMap,
+      onEncounterComplete,
+    });
   }
 
   return renderStandardEncounterScreen({

@@ -25,9 +25,9 @@ describe('PathConnections (Task 1.3)', () => {
       createMockNode('node-1', 1, ['node-2']),
       createMockNode('node-2', 2, []),
     ];
-    
+
     const { getByTestId } = render(<PathConnections nodes={nodes} />);
-    
+
     expect(getByTestId('path-connections')).toBeDefined();
   });
 
@@ -36,9 +36,9 @@ describe('PathConnections (Task 1.3)', () => {
       createMockNode('node-1', 1, ['node-2']),
       createMockNode('node-2', 2, []),
     ];
-    
+
     const { getByTestId } = render(<PathConnections nodes={nodes} />);
-    
+
     expect(getByTestId('path-connections')).toBeDefined();
   });
 
@@ -48,9 +48,9 @@ describe('PathConnections (Task 1.3)', () => {
       createMockNode('node-2', 2, []),
       createMockNode('node-3', 2, []),
     ];
-    
+
     const { getByTestId } = render(<PathConnections nodes={nodes} />);
-    
+
     expect(getByTestId('path-connections')).toBeDefined();
   });
 
@@ -62,9 +62,9 @@ describe('PathConnections (Task 1.3)', () => {
       createMockNode('node-4', 3, []),
       createMockNode('node-5', 3, []),
     ];
-    
+
     const { getByTestId } = render(<PathConnections nodes={nodes} />);
-    
+
     expect(getByTestId('path-connections')).toBeDefined();
   });
 
@@ -75,9 +75,9 @@ describe('PathConnections (Task 1.3)', () => {
       createMockNode('node-3', 3, []),
       createMockNode('node-4', 3, []),
     ];
-    
+
     const { getByTestId } = render(<PathConnections nodes={nodes} />);
-    
+
     expect(getByTestId('path-connections')).toBeDefined();
   });
 
@@ -86,10 +86,9 @@ describe('PathConnections (Task 1.3)', () => {
       createMockNode('node-1', 1, []),
       createMockNode('node-2', 1, []),
     ];
-    
+
     const { getByTestId } = render(<PathConnections nodes={nodes} />);
-    
+
     expect(getByTestId('path-connections')).toBeDefined();
   });
 });
-

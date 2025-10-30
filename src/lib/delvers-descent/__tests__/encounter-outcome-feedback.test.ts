@@ -62,7 +62,9 @@ describe('EncounterOutcomeFeedback', () => {
 
       expect(result.consequencesSummary).toBeDefined();
       expect(result.consequencesSummary.length).toBeGreaterThan(0);
-      expect(result.consequencesSummary.some(s => s.includes('energy'))).toBe(true);
+      expect(result.consequencesSummary.some((s) => s.includes('energy'))).toBe(
+        true
+      );
     });
   });
 
@@ -84,4 +86,3 @@ describe('EncounterOutcomeFeedback', () => {
     });
   });
 });
-

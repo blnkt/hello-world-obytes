@@ -48,7 +48,6 @@ This PRD outlines a comprehensive cleanup and refactoring initiative for the hel
 ### **Phase 1: Immediate Cleanup (Week 1)**
 
 1. **Remove Demo Components**: Delete all demo/development-only components and screens
-
    - Delete `src/components/buttons.tsx`
    - Delete `src/components/colors.tsx`
    - Delete `src/components/inputs.tsx`
@@ -57,7 +56,6 @@ This PRD outlines a comprehensive cleanup and refactoring initiative for the hel
    - Delete `src/app/(app)/style.tsx`
 
 2. **Remove Unused Dependencies**: Eliminate all unused npm packages
-
    - Remove `@hookform/resolvers`
    - Remove `expo-dev-client`
    - Remove `expo-font`
@@ -72,7 +70,6 @@ This PRD outlines a comprehensive cleanup and refactoring initiative for the hel
 ### **Phase 2: System Consolidation (Week 2)**
 
 4. **Consolidate Color Systems**: Merge duplicate color definitions into single system
-
    - Convert `src/components/ui/colors.js` to TypeScript
    - Remove duplicate color definitions
    - Update all imports to use single color system
@@ -86,7 +83,6 @@ This PRD outlines a comprehensive cleanup and refactoring initiative for the hel
 ### **Phase 3: Type Safety Improvements (Week 3-4)**
 
 6. **Replace `any` Types**: Convert all `any` types to proper TypeScript types
-
    - Create proper interfaces for all data structures in `src/lib/storage.tsx`
    - Replace `any[]` types in history components with proper interfaces
    - Replace `any` types in character components with proper interfaces
@@ -101,7 +97,6 @@ This PRD outlines a comprehensive cleanup and refactoring initiative for the hel
 ### **Phase 4: Error Handling & Logging (Week 5)**
 
 8. **Implement Structured Error Logging**: Replace console.log with proper error handling
-
    - Create centralized error logging system
    - Replace all `console.log` statements with proper logging
    - Replace all `console.error` statements with structured error handling
@@ -115,7 +110,6 @@ This PRD outlines a comprehensive cleanup and refactoring initiative for the hel
 ### **Phase 5: Quality Assurance & Documentation (Week 6)**
 
 10. **Update Documentation**: Document all changes and new patterns
-
     - Update README with new development guidelines
     - Document new error handling patterns
     - Create component usage guidelines
@@ -128,28 +122,24 @@ This PRD outlines a comprehensive cleanup and refactoring initiative for the hel
 12. **Centralize Frequently Used Mocks**: Consolidate duplicate mock implementations into reusable modules
 
     **Priority 1: Dungeon Game Persistence Mock** ⭐⭐⭐⭐⭐
-
     - **Impact**: Used in 7+ test files
     - **Current Duplication**: Identical mock implementation repeated across all dungeon game tests
     - **Location**: Create `__mocks__/dungeon-game-persistence.ts`
     - **Benefits**: Eliminate 7+ duplicate implementations, ensure consistent behavior
 
     **Priority 2: Health Hooks Mock** ⭐⭐⭐⭐
-
     - **Impact**: Used in 2+ test files
     - **Current Duplication**: Multiple health-related hooks mocked together inconsistently
     - **Location**: Create `__mocks__/health-hooks.ts`
     - **Benefits**: Standardize health hook mocking, improve type safety
 
     **Priority 3: Storage Functions Mock** ⭐⭐⭐
-
     - **Impact**: Used in 2+ test files
     - **Current Duplication**: Storage-related functions mocked together
     - **Location**: Create `__mocks__/storage-functions.ts`
     - **Benefits**: Centralize storage mocking, reduce duplication
 
     **Implementation Details**:
-
     - Create centralized mock files in `__mocks__/` directory
     - Provide helper functions for common mock scenarios
     - Include reset/cleanup functions for test isolation
@@ -157,7 +147,6 @@ This PRD outlines a comprehensive cleanup and refactoring initiative for the hel
     - Update all test files to import from centralized mocks
 
 13. **Standardize Mock Patterns**: Establish consistent mocking patterns across the codebase
-
     - Define standard mock structure and naming conventions
     - Create mock factory functions for complex objects
     - Implement mock validation to catch configuration errors

@@ -49,12 +49,12 @@ jest.mock('@kingstinct/react-native-healthkit', () => ({
 describe('Experience Data System Tests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Reset manual steps
     (clearManualStepsByDay as jest.Mock).mockResolvedValue(undefined);
     (getManualStepsByDay as jest.Mock).mockReturnValue([]);
     (setManualStepEntry as jest.Mock).mockResolvedValue(undefined);
-    
+
     // Reset storage mocks
     const storageMock = require('../storage');
     storageMock.getExperience.mockReturnValue(0);
@@ -75,7 +75,7 @@ describe('Experience Data System Tests', () => {
         { date: '2024-06-01', steps: 5000 },
         { date: '2024-06-02', steps: 3000 },
       ];
-      
+
       // Set up storage mocks for this test
       const storageMock = require('../storage');
       storageMock.getStepsByDay.mockReturnValue(mockManualSteps);
@@ -100,13 +100,13 @@ describe('Experience Data System Tests', () => {
 
     it('should update cumulative experience when manual steps are added', async () => {
       const lastCheckedDateTime = new Date('2024-06-01');
-      
+
       // Mock manual steps data
       const mockManualSteps = [
         { date: '2024-06-01', steps: 8000 },
         { date: '2024-06-02', steps: 6000 },
       ];
-      
+
       // Set up storage mocks for this test
       const storageMock = require('../storage');
       storageMock.getStepsByDay.mockReturnValue(mockManualSteps);
@@ -132,7 +132,7 @@ describe('Experience Data System Tests', () => {
         { date: '2024-06-01', steps: 8000 },
         { date: '2024-06-02', steps: 6000 },
       ];
-      
+
       // Set up storage mocks for this test
       const storageMock = require('../storage');
       storageMock.getStepsByDay.mockReturnValue(mockManualSteps);
@@ -159,10 +159,8 @@ describe('Experience Data System Tests', () => {
   describe('Currency Conversion and Experience Updates', () => {
     it('should convert new experience to currency when manual steps are added', async () => {
       // Mock manual steps data
-      const mockManualSteps = [
-        { date: '2024-06-01', steps: 10000 },
-      ];
-      
+      const mockManualSteps = [{ date: '2024-06-01', steps: 10000 }];
+
       // Set up storage mocks for this test
       const storageMock = require('../storage');
       storageMock.getStepsByDay.mockReturnValue(mockManualSteps);
@@ -190,7 +188,7 @@ describe('Experience Data System Tests', () => {
         { date: '2024-06-01', steps: 5000 },
         { date: '2024-06-02', steps: 3000 },
       ];
-      
+
       // Set up storage mocks for this test
       const storageMock = require('../storage');
       storageMock.getStepsByDay.mockReturnValue(mockManualSteps);
@@ -219,7 +217,7 @@ describe('Experience Data System Tests', () => {
         { date: '2024-06-01', steps: 5000 },
         { date: '2024-06-02', steps: 3000 },
       ];
-      
+
       // Set up storage mocks for this test
       const storageMock = require('../storage');
       storageMock.getStepsByDay.mockReturnValue(mockManualSteps);
@@ -245,18 +243,20 @@ describe('Experience Data System Tests', () => {
       expect(hook1.current.stepsByDay).toBeDefined();
       expect(hook2.current.stepsByDay).toBeDefined();
       expect(hook1.current.experience).toBe(hook2.current.experience);
-      expect(hook1.current.cumulativeExperience).toBe(hook2.current.cumulativeExperience);
+      expect(hook1.current.cumulativeExperience).toBe(
+        hook2.current.cumulativeExperience
+      );
     });
 
     it('should maintain consistency between multiple hooks after refresh', async () => {
       const lastCheckedDateTime = new Date('2024-06-01');
-      
+
       // Mock manual steps data
       const mockManualSteps = [
         { date: '2024-06-01', steps: 5000 },
         { date: '2024-06-02', steps: 3000 },
       ];
-      
+
       // Set up storage mocks for this test
       const storageMock = require('../storage');
       storageMock.getStepsByDay.mockReturnValue(mockManualSteps);
@@ -277,14 +277,16 @@ describe('Experience Data System Tests', () => {
       // Verify consistency
       expect(hook1.current.stepsByDay).toEqual(hook2.current.stepsByDay);
       expect(hook1.current.experience).toBe(hook2.current.experience);
-      expect(hook1.current.cumulativeExperience).toBe(hook2.current.cumulativeExperience);
+      expect(hook1.current.cumulativeExperience).toBe(
+        hook2.current.cumulativeExperience
+      );
     });
   });
 
   describe('Edge Cases and Error Handling', () => {
     it('should handle refresh when no manual steps exist', async () => {
       const lastCheckedDateTime = new Date('2024-06-01');
-      
+
       // Mock empty manual steps
       const storageMock = require('../storage');
       storageMock.getStepsByDay.mockReturnValue([]);
@@ -307,13 +309,13 @@ describe('Experience Data System Tests', () => {
 
     it('should handle refresh with invalid manual step data gracefully', async () => {
       const lastCheckedDateTime = new Date('2024-06-01');
-      
+
       // Mock invalid manual steps data
       const mockInvalidSteps = [
         { date: 'invalid-date', steps: 'not-a-number' },
         { date: '2024-06-01', steps: 5000 },
       ];
-      
+
       // Set up storage mocks for this test
       const storageMock = require('../storage');
       storageMock.getStepsByDay.mockReturnValue(mockInvalidSteps);

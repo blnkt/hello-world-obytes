@@ -3,10 +3,10 @@ import { render, screen, fireEvent, act } from '@testing-library/react-native';
 
 import { GameStateProvider } from '../providers/game-state-provider';
 import GameGrid from '../game-grid';
-import { 
-  mockUseCurrencySystem, 
+import {
+  mockUseCurrencySystem,
   resetUseCurrencySystem,
-  currencyScenarios 
+  currencyScenarios,
 } from '../../../../__mocks__/currency-system';
 
 // Mock the persistence hook to avoid storage dependencies
@@ -22,9 +22,7 @@ jest.mock('../hooks/use-dungeon-game-persistence', () => ({
 
 // Test wrapper component - now without hardcoded currency
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <GameStateProvider>
-    {children}
-  </GameStateProvider>
+  <GameStateProvider>{children}</GameStateProvider>
 );
 
 describe('Currency Integration and Validation', () => {
@@ -49,7 +47,7 @@ describe('Currency Integration and Validation', () => {
 
       // Verify the game shows the real currency, not hardcoded 1000
       expect(screen.getByTestId('game-grid')).toBeTruthy();
-      
+
       // The game should now use the real currency system
       // We can verify this by checking that the currency state is properly initialized
     });
@@ -66,7 +64,7 @@ describe('Currency Integration and Validation', () => {
 
       // Verify turns calculation uses real currency system
       expect(screen.getByTestId('game-grid')).toBeTruthy();
-      
+
       // The game should now calculate turns based on the real currency (750 = 7 turns)
     });
   });
@@ -237,7 +235,7 @@ describe('Currency Integration and Validation', () => {
       expect(screen.getByTestId('game-grid')).toBeTruthy();
     });
 
-    it('should handle currency values that don\'t divide evenly by 100', () => {
+    it("should handle currency values that don't divide evenly by 100", () => {
       render(
         <GameStateProvider _initialCurrency={350}>
           <GameGrid level={1} disabled={false} />

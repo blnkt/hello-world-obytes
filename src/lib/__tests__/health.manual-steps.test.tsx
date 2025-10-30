@@ -3,11 +3,7 @@ import { renderHook, waitFor } from '@testing-library/react-native';
 
 import { createHealthHooksMock } from '../../../__mocks__/health-hooks';
 import { createStorageFunctionsMock } from '../../../__mocks__/storage-functions';
-import {
-  useExperienceData,
-  useStreakTracking,
-  detectStreaks,
-} from '../health';
+import { useExperienceData, useStreakTracking, detectStreaks } from '../health';
 import {
   clearManualStepsByDay,
   getManualStepsByDay,
@@ -19,7 +15,8 @@ import {
 
 // Mock storage using centralized mock
 jest.mock('../storage', () => {
-  const storageMock = require('../../../__mocks__/storage-functions').createStorageFunctionsMock();
+  const storageMock =
+    require('../../../__mocks__/storage-functions').createStorageFunctionsMock();
   return {
     clearManualStepsByDay: storageMock.getManualStepsByDay, // Note: may need to be adjusted
     getManualStepsByDay: storageMock.getManualStepsByDay,
@@ -59,12 +56,12 @@ jest.mock('@kingstinct/react-native-healthkit', () => ({
 describe('useExperienceData with Manual Steps', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Reset manual steps
     (clearManualStepsByDay as jest.Mock).mockResolvedValue(undefined);
     (getManualStepsByDay as jest.Mock).mockReturnValue([]);
     (setManualStepEntry as jest.Mock).mockResolvedValue(undefined);
-    
+
     // Reset currency
     (getCurrency as jest.Mock).mockReturnValue(0);
     (setCurrency as jest.Mock).mockResolvedValue(undefined);
@@ -73,9 +70,7 @@ describe('useExperienceData with Manual Steps', () => {
   describe('Manual Step Entry Integration', () => {
     it('should include manual step entries in experience calculation', async () => {
       const lastCheckedDateTime = new Date('2024-06-01');
-      const { result } = renderHook(() =>
-        useExperienceData()
-      );
+      const { result } = renderHook(() => useExperienceData());
 
       await waitFor(() => {
         expect(result.current.stepsByDay).toBeDefined();
@@ -88,20 +83,18 @@ describe('useExperienceData with Manual Steps', () => {
 
     it('should prioritize manual entries over HealthKit entries for the same date', async () => {
       const lastCheckedDateTime = new Date('2024-06-01');
-      
+
       // Mock manual steps data
       const mockManualSteps = [
         { date: '2024-06-01', steps: 5000 },
         { date: '2024-06-02', steps: 3000 },
       ];
-      
+
       // Set up storage mocks for this test
       const storageMock = require('../storage');
       storageMock.getManualStepsByDay.mockReturnValue(mockManualSteps);
 
-      const { result } = renderHook(() =>
-        useExperienceData()
-      );
+      const { result } = renderHook(() => useExperienceData());
 
       await waitFor(() => {
         expect(result.current.stepsByDay).toBeDefined();
@@ -114,20 +107,18 @@ describe('useExperienceData with Manual Steps', () => {
 
     it('should merge manual and HealthKit entries correctly', async () => {
       const lastCheckedDateTime = new Date('2024-06-01');
-      
+
       // Mock manual steps data
       const mockManualSteps = [
         { date: '2024-06-01', steps: 8000 },
         { date: '2024-06-02', steps: 6000 },
       ];
-      
+
       // Set up storage mocks for this test
       const storageMock = require('../storage');
       storageMock.getManualStepsByDay.mockReturnValue(mockManualSteps);
 
-      const { result } = renderHook(() =>
-        useExperienceData()
-      );
+      const { result } = renderHook(() => useExperienceData());
 
       await waitFor(() => {
         expect(result.current.stepsByDay).toBeDefined();
@@ -140,14 +131,12 @@ describe('useExperienceData with Manual Steps', () => {
 
     it('should handle empty manual entries gracefully', async () => {
       const lastCheckedDateTime = new Date('2024-06-01');
-      
+
       // Mock empty manual steps
       const storageMock = require('../storage');
       storageMock.getManualStepsByDay.mockReturnValue([]);
 
-      const { result } = renderHook(() =>
-        useExperienceData()
-      );
+      const { result } = renderHook(() => useExperienceData());
 
       await waitFor(() => {
         expect(result.current.stepsByDay).toBeDefined();
@@ -160,14 +149,12 @@ describe('useExperienceData with Manual Steps', () => {
 
     it('should handle empty HealthKit entries gracefully', async () => {
       const lastCheckedDateTime = new Date('2024-06-01');
-      
+
       // Mock empty manual steps
       const storageMock = require('../storage');
       storageMock.getManualStepsByDay.mockReturnValue([]);
 
-      const { result } = renderHook(() =>
-        useExperienceData()
-      );
+      const { result } = renderHook(() => useExperienceData());
 
       await waitFor(() => {
         expect(result.current.stepsByDay).toBeDefined();
@@ -180,20 +167,18 @@ describe('useExperienceData with Manual Steps', () => {
 
     it('should process manual entries identically to HealthKit entries in mergeExperienceMMKV', async () => {
       const lastCheckedDateTime = new Date('2024-06-01');
-      
+
       // Mock manual steps data
       const mockManualSteps = [
         { date: '2024-06-01', steps: 5000 },
         { date: '2024-06-02', steps: 3000 },
       ];
-      
+
       // Set up storage mocks for this test
       const storageMock = require('../storage');
       storageMock.getManualStepsByDay.mockReturnValue(mockManualSteps);
 
-      const { result: resultHealthKit } = renderHook(() =>
-        useExperienceData()
-      );
+      const { result: resultHealthKit } = renderHook(() => useExperienceData());
 
       await waitFor(() => {
         expect(resultHealthKit.current.stepsByDay).toBeDefined();
@@ -201,26 +186,24 @@ describe('useExperienceData with Manual Steps', () => {
 
       // Verify both approaches produce the same result
       expect(resultHealthKit.current.experience).toBeGreaterThanOrEqual(0);
-      expect(resultHealthKit.current.cumulativeExperience).toBeGreaterThanOrEqual(0);
+      expect(
+        resultHealthKit.current.cumulativeExperience
+      ).toBeGreaterThanOrEqual(0);
     });
   });
 
   describe('Currency Conversion with Manual Steps', () => {
     it('should ensure manual entries trigger currency conversion correctly', async () => {
       const lastCheckedDateTime = new Date('2024-06-01');
-      
+
       // Mock manual steps data
-      const mockManualSteps = [
-        { date: '2024-06-01', steps: 10000 },
-      ];
-      
+      const mockManualSteps = [{ date: '2024-06-01', steps: 10000 }];
+
       // Set up storage mocks for this test
       const storageMock = require('../storage');
       storageMock.getManualStepsByDay.mockReturnValue(mockManualSteps);
 
-      const { result } = renderHook(() =>
-        useExperienceData()
-      );
+      const { result } = renderHook(() => useExperienceData());
 
       await waitFor(() => {
         expect(result.current.stepsByDay).toBeDefined();
@@ -233,19 +216,15 @@ describe('useExperienceData with Manual Steps', () => {
 
     it('should verify manual entries trigger currency conversion with correct rate', async () => {
       const lastCheckedDateTime = new Date('2024-06-01');
-      
+
       // Mock manual steps data
-      const mockManualSteps = [
-        { date: '2024-06-01', steps: 10000 },
-      ];
-      
+      const mockManualSteps = [{ date: '2024-06-01', steps: 10000 }];
+
       // Set up storage mocks for this test
       const storageMock = require('../storage');
       storageMock.getManualStepsByDay.mockReturnValue(mockManualSteps);
 
-      const { result } = renderHook(() =>
-        useExperienceData()
-      );
+      const { result } = renderHook(() => useExperienceData());
 
       await waitFor(() => {
         expect(result.current.stepsByDay).toBeDefined();
@@ -258,19 +237,15 @@ describe('useExperienceData with Manual Steps', () => {
 
     it('should verify manual entries trigger currency conversion identically to HealthKit', async () => {
       const lastCheckedDateTime = new Date('2024-06-01');
-      
+
       // Mock manual steps data
-      const mockManualSteps = [
-        { date: '2024-06-01', steps: 10000 },
-      ];
-      
+      const mockManualSteps = [{ date: '2024-06-01', steps: 10000 }];
+
       // Set up storage mocks for this test
       const storageMock = require('../storage');
       storageMock.getManualStepsByDay.mockReturnValue(mockManualSteps);
 
-      const { result: healthKitResult } = renderHook(() =>
-        useExperienceData()
-      );
+      const { result: healthKitResult } = renderHook(() => useExperienceData());
 
       await waitFor(() => {
         expect(healthKitResult.current.stepsByDay).toBeDefined();
@@ -278,24 +253,22 @@ describe('useExperienceData with Manual Steps', () => {
 
       // Verify both approaches produce the same result
       expect(healthKitResult.current.experience).toBeGreaterThanOrEqual(0);
-      expect(healthKitResult.current.cumulativeExperience).toBeGreaterThanOrEqual(0);
+      expect(
+        healthKitResult.current.cumulativeExperience
+      ).toBeGreaterThanOrEqual(0);
     });
 
     it('should verify manual entries trigger incremental currency conversion', async () => {
       const lastCheckedDateTime = new Date('2024-06-01');
-      
+
       // Mock manual steps data
-      const mockManualSteps = [
-        { date: '2024-06-01', steps: 5000 },
-      ];
-      
+      const mockManualSteps = [{ date: '2024-06-01', steps: 5000 }];
+
       // Set up storage mocks for this test
       const storageMock = require('../storage');
       storageMock.getManualStepsByDay.mockReturnValue(mockManualSteps);
 
-      const { result: initialResult } = renderHook(() =>
-        useExperienceData()
-      );
+      const { result: initialResult } = renderHook(() => useExperienceData());
 
       await waitFor(() => {
         expect(initialResult.current.stepsByDay).toBeDefined();
@@ -306,10 +279,8 @@ describe('useExperienceData with Manual Steps', () => {
       expect(initialExperience).toBeGreaterThanOrEqual(0);
 
       // Add more steps
-      const additionalSteps = [
-        { date: '2024-06-02', steps: 3000 },
-      ];
-      
+      const additionalSteps = [{ date: '2024-06-02', steps: 3000 }];
+
       storageMock.getManualStepsByDay.mockReturnValue([
         ...mockManualSteps,
         ...additionalSteps,
@@ -323,21 +294,19 @@ describe('useExperienceData with Manual Steps', () => {
   describe('Streak Detection with Manual Steps', () => {
     it('should integrate manual steps with streak detection system', async () => {
       const lastCheckedDateTime = new Date('2024-06-01');
-      
+
       // Mock manual steps data
       const mockManualSteps = [
         { date: '2024-06-01', steps: 10000 },
         { date: '2024-06-02', steps: 10000 },
       ];
-      
+
       // Set up storage mocks for this test
       const storageMock = require('../storage');
       storageMock.getManualStepsByDay.mockReturnValue(mockManualSteps);
 
       // First, let's check what the merged data looks like
-      const { result: stepResult } = renderHook(() =>
-        useExperienceData()
-      );
+      const { result: stepResult } = renderHook(() => useExperienceData());
 
       // Wait for merged stepsByDay to contain all three days
       await waitFor(() => {
@@ -356,22 +325,20 @@ describe('useExperienceData with Manual Steps', () => {
 
     it('should detect streaks with mixed HealthKit and manual data', async () => {
       const lastCheckedDateTime = new Date('2024-06-01');
-      
+
       // Mock manual steps data
       const mockManualSteps = [
         { date: '2024-06-01', steps: 10000 },
         { date: '2024-06-02', steps: 10000 },
         { date: '2024-06-03', steps: 10000 },
       ];
-      
+
       // Set up storage mocks for this test
       const storageMock = require('../storage');
       storageMock.getManualStepsByDay.mockReturnValue(mockManualSteps);
 
       // First, let's check what the merged data looks like
-      const { result: stepResult } = renderHook(() =>
-        useExperienceData()
-      );
+      const { result: stepResult } = renderHook(() => useExperienceData());
 
       // Wait for merged stepsByDay to contain all three days
       await waitFor(() => {
@@ -390,20 +357,18 @@ describe('useExperienceData with Manual Steps', () => {
 
     it('should handle manual entries in detectStreaks function directly', async () => {
       const lastCheckedDateTime = new Date('2024-06-01');
-      
+
       // Mock manual steps data
       const mockManualSteps = [
         { date: '2024-06-01', steps: 10000 },
         { date: '2024-06-02', steps: 10000 },
       ];
-      
+
       // Set up storage mocks for this test
       const storageMock = require('../storage');
       storageMock.getManualStepsByDay.mockReturnValue(mockManualSteps);
 
-      const { result } = renderHook(() =>
-        useExperienceData()
-      );
+      const { result } = renderHook(() => useExperienceData());
 
       await waitFor(() => {
         expect(result.current.stepsByDay).toBeDefined();
@@ -412,7 +377,7 @@ describe('useExperienceData with Manual Steps', () => {
       // Test direct streak detection
       const dailyGoal = 10000;
       const streaks = detectStreaks(result.current.stepsByDay, dailyGoal);
-      
+
       // Since we're using mock data, just verify the function works
       expect(streaks).toBeDefined();
       expect(Array.isArray(streaks)).toBe(true);
@@ -422,20 +387,18 @@ describe('useExperienceData with Manual Steps', () => {
   describe('Cumulative Experience with Manual Steps', () => {
     it('should update cumulative experience calculation to include manual entries', async () => {
       const lastCheckedDateTime = new Date('2024-06-01');
-      
+
       // Mock manual steps data
       const mockManualSteps = [
         { date: '2024-06-01', steps: 10000 },
         { date: '2024-06-02', steps: 8000 },
       ];
-      
+
       // Set up storage mocks for this test
       const storageMock = require('../storage');
       storageMock.getManualStepsByDay.mockReturnValue(mockManualSteps);
 
-      const { result } = renderHook(() =>
-        useExperienceData()
-      );
+      const { result } = renderHook(() => useExperienceData());
 
       await waitFor(() => {
         expect(result.current.stepsByDay).toBeDefined();
@@ -448,21 +411,19 @@ describe('useExperienceData with Manual Steps', () => {
 
     it('should handle cumulative experience calculation with mixed HealthKit and manual entries', async () => {
       const lastCheckedDateTime = new Date('2024-06-01');
-      
+
       // Mock manual steps data
       const mockManualSteps = [
         { date: '2024-06-01', steps: 10000 },
         { date: '2024-06-02', steps: 8000 },
         { date: '2024-06-03', steps: 12000 },
       ];
-      
+
       // Set up storage mocks for this test
       const storageMock = require('../storage');
       storageMock.getManualStepsByDay.mockReturnValue(mockManualSteps);
 
-      const { result } = renderHook(() =>
-        useExperienceData()
-      );
+      const { result } = renderHook(() => useExperienceData());
 
       await waitFor(() => {
         expect(result.current.stepsByDay).toBeDefined();
@@ -475,27 +436,27 @@ describe('useExperienceData with Manual Steps', () => {
 
     it('should maintain cumulative experience consistency between manual and HealthKit entries', async () => {
       const lastCheckedDateTime = new Date('2024-06-01');
-      
+
       // Mock manual steps data
       const mockManualSteps = [
         { date: '2024-06-01', steps: 10000 },
         { date: '2024-06-02', steps: 8000 },
       ];
-      
+
       // Set up storage mocks for this test
       const storageMock = require('../storage');
       storageMock.getManualStepsByDay.mockReturnValue(mockManualSteps);
 
-      const { result: healthKitResult } = renderHook(() =>
-        useExperienceData()
-      );
+      const { result: healthKitResult } = renderHook(() => useExperienceData());
 
       await waitFor(() => {
         expect(healthKitResult.current.stepsByDay).toBeDefined();
       });
 
       // Verify cumulative experience consistency
-      expect(healthKitResult.current.cumulativeExperience).toBeGreaterThanOrEqual(0);
+      expect(
+        healthKitResult.current.cumulativeExperience
+      ).toBeGreaterThanOrEqual(0);
       expect(healthKitResult.current.firstExperienceDate).toBeDefined();
     });
   });
@@ -503,20 +464,18 @@ describe('useExperienceData with Manual Steps', () => {
   describe('Experience/Currency Parity Tests (Subtask 4.6)', () => {
     it('should calculate identical experience for identical step counts regardless of source', async () => {
       const lastCheckedDateTime = new Date('2024-06-01');
-      
+
       // Mock manual steps data
       const mockManualSteps = [
         { date: '2024-06-01', steps: 10000 },
         { date: '2024-06-02', steps: 8000 },
       ];
-      
+
       // Set up storage mocks for this test
       const storageMock = require('../storage');
       storageMock.getManualStepsByDay.mockReturnValue(mockManualSteps);
 
-      const { result: healthKitResult } = renderHook(() =>
-        useExperienceData()
-      );
+      const { result: healthKitResult } = renderHook(() => useExperienceData());
 
       await waitFor(() => {
         expect(healthKitResult.current.stepsByDay).toBeDefined();
@@ -524,25 +483,25 @@ describe('useExperienceData with Manual Steps', () => {
 
       // Verify experience calculation parity
       expect(healthKitResult.current.experience).toBeGreaterThanOrEqual(0);
-      expect(healthKitResult.current.cumulativeExperience).toBeGreaterThanOrEqual(0);
+      expect(
+        healthKitResult.current.cumulativeExperience
+      ).toBeGreaterThanOrEqual(0);
     });
 
     it('should convert experience to currency identically regardless of source', async () => {
       const lastCheckedDateTime = new Date('2024-06-01');
-      
+
       // Mock manual steps data
       const mockManualSteps = [
         { date: '2024-06-01', steps: 10000 },
         { date: '2024-06-02', steps: 8000 },
       ];
-      
+
       // Set up storage mocks for this test
       const storageMock = require('../storage');
       storageMock.getManualStepsByDay.mockReturnValue(mockManualSteps);
 
-      const { result: healthKitResult } = renderHook(() =>
-        useExperienceData()
-      );
+      const { result: healthKitResult } = renderHook(() => useExperienceData());
 
       await waitFor(() => {
         expect(healthKitResult.current.stepsByDay).toBeDefined();
@@ -550,76 +509,74 @@ describe('useExperienceData with Manual Steps', () => {
 
       // Verify currency conversion parity
       expect(healthKitResult.current.experience).toBeGreaterThanOrEqual(0);
-      expect(healthKitResult.current.cumulativeExperience).toBeGreaterThanOrEqual(0);
+      expect(
+        healthKitResult.current.cumulativeExperience
+      ).toBeGreaterThanOrEqual(0);
     });
 
     it('should calculate cumulative experience identically regardless of source', async () => {
       const lastCheckedDateTime = new Date('2024-06-01');
-      
+
       // Mock manual steps data
       const mockManualSteps = [
         { date: '2024-06-01', steps: 10000 },
         { date: '2024-06-02', steps: 8000 },
       ];
-      
+
       // Set up storage mocks for this test
       const storageMock = require('../storage');
       storageMock.getManualStepsByDay.mockReturnValue(mockManualSteps);
 
-      const { result: healthKitResult } = renderHook(() =>
-        useExperienceData()
-      );
+      const { result: healthKitResult } = renderHook(() => useExperienceData());
 
       await waitFor(() => {
         expect(healthKitResult.current.stepsByDay).toBeDefined();
       });
 
       // Verify cumulative experience parity
-      expect(healthKitResult.current.cumulativeExperience).toBeGreaterThanOrEqual(0);
+      expect(
+        healthKitResult.current.cumulativeExperience
+      ).toBeGreaterThanOrEqual(0);
       expect(healthKitResult.current.firstExperienceDate).toBeDefined();
     });
 
     it('should detect streaks identically regardless of source', async () => {
       const lastCheckedDateTime = new Date('2024-06-01');
-      
+
       // Mock manual steps data
       const mockManualSteps = [
         { date: '2024-06-01', steps: 10000 },
         { date: '2024-06-02', steps: 10000 },
       ];
-      
+
       // Set up storage mocks for this test
       const storageMock = require('../storage');
       storageMock.getManualStepsByDay.mockReturnValue(mockManualSteps);
 
-      const { result: healthKitResult } = renderHook(() =>
-        useExperienceData()
-      );
+      const { result: healthKitResult } = renderHook(() => useExperienceData());
 
       await waitFor(() => {
         expect(healthKitResult.current.stepsByDay).toBeDefined();
       });
 
-             // Verify streak detection parity
-       expect(healthKitResult.current.experience).toBeGreaterThanOrEqual(0);
+      // Verify streak detection parity
+      expect(healthKitResult.current.experience).toBeGreaterThanOrEqual(0);
     });
 
     it('should handle edge cases identically regardless of source', async () => {
       const lastCheckedDateTime = new Date('2024-06-01');
-      
+
       // Mock manual steps data
       const mockManualSteps = [
         { date: '2024-06-01', steps: 0 },
         { date: '2024-06-02', steps: 1 },
       ];
-      
+
       // Set up storage mocks for this test
       const storageMock = require('../storage');
       storageMock.getManualStepsByDay.mockReturnValue(mockManualSteps);
 
-      const { result: healthKitResult } = renderHook(() =>
-        useExperienceData()
-      );
+      const { result: healthKitResult } = renderHook(() => useExperienceData());
 
       await waitFor(() => {
         expect(healthKitResult.current.stepsByDay).toBeDefined();
@@ -627,25 +584,25 @@ describe('useExperienceData with Manual Steps', () => {
 
       // Verify edge case handling parity
       expect(healthKitResult.current.experience).toBeGreaterThanOrEqual(0);
-      expect(healthKitResult.current.cumulativeExperience).toBeGreaterThanOrEqual(0);
+      expect(
+        healthKitResult.current.cumulativeExperience
+      ).toBeGreaterThanOrEqual(0);
     });
 
     it('should maintain parity when switching between HealthKit and manual modes', async () => {
       const lastCheckedDateTime = new Date('2024-06-01');
-      
+
       // Mock manual steps data
       const mockManualSteps = [
         { date: '2024-06-01', steps: 10000 },
         { date: '2024-06-02', steps: 8000 },
       ];
-      
+
       // Set up storage mocks for this test
       const storageMock = require('../storage');
       storageMock.getManualStepsByDay.mockReturnValue(mockManualSteps);
 
-      const { result: healthKitResult } = renderHook(() =>
-        useExperienceData()
-      );
+      const { result: healthKitResult } = renderHook(() => useExperienceData());
 
       await waitFor(() => {
         expect(healthKitResult.current.stepsByDay).toBeDefined();
@@ -653,25 +610,25 @@ describe('useExperienceData with Manual Steps', () => {
 
       // Verify mode switching parity
       expect(healthKitResult.current.experience).toBeGreaterThanOrEqual(0);
-      expect(healthKitResult.current.cumulativeExperience).toBeGreaterThanOrEqual(0);
+      expect(
+        healthKitResult.current.cumulativeExperience
+      ).toBeGreaterThanOrEqual(0);
     });
 
     it('should handle mixed data sources with parity', async () => {
       const lastCheckedDateTime = new Date('2024-06-01');
-      
+
       // Mock manual steps data
       const mockManualSteps = [
         { date: '2024-06-01', steps: 10000 },
         { date: '2024-06-02', steps: 8000 },
       ];
-      
+
       // Set up storage mocks for this test
       const storageMock = require('../storage');
       storageMock.getManualStepsByDay.mockReturnValue(mockManualSteps);
 
-      const { result } = renderHook(() =>
-        useExperienceData()
-      );
+      const { result } = renderHook(() => useExperienceData());
 
       await waitFor(() => {
         expect(result.current.stepsByDay).toBeDefined();
@@ -686,21 +643,19 @@ describe('useExperienceData with Manual Steps', () => {
   describe('Data Source Conflict Resolution', () => {
     it('should demonstrate HealthKit vs local storage conflict behavior', async () => {
       const lastCheckedDateTime = new Date('2024-06-01');
-      
+
       // Mock manual steps data
       const mockManualSteps = [
         { date: '2024-06-01', steps: 10000 },
         { date: '2024-06-02', steps: 8000 },
       ];
-      
+
       // Set up storage mocks for this test
       const storageMock = require('../storage');
       storageMock.getManualStepsByDay.mockReturnValue(mockManualSteps);
-    
-      const { result } = renderHook(() =>
-        useExperienceData()
-      );
-      
+
+      const { result } = renderHook(() => useExperienceData());
+
       await waitFor(() => {
         expect(result.current.stepsByDay).toBeDefined();
       });
@@ -712,22 +667,20 @@ describe('useExperienceData with Manual Steps', () => {
 
     it('should use fresh HealthKit data when local data is stale', async () => {
       const lastCheckedDateTime = new Date('2024-06-01');
-      
+
       // Mock manual steps data
       const mockManualSteps = [
         { date: '2024-06-01', steps: 10000 },
         { date: '2024-06-02', steps: 8000 },
       ];
-      
+
       // Set up storage mocks for this test
       const storageMock = require('../storage');
       storageMock.getManualStepsByDay.mockReturnValue(mockManualSteps);
 
       // Step 4: Use the hook that should detect stale data and refresh
-      const { result } = renderHook(() =>
-        useExperienceData()
-      );
-      
+      const { result } = renderHook(() => useExperienceData());
+
       await waitFor(() => {
         expect(result.current.stepsByDay).toBeDefined();
       });
@@ -737,4 +690,4 @@ describe('useExperienceData with Manual Steps', () => {
       expect(result.current.cumulativeExperience).toBeGreaterThanOrEqual(0);
     });
   });
-}); 
+});

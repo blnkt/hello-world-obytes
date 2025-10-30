@@ -34,18 +34,15 @@ type ScenarioHistory = {
 ### Key Files
 
 1. **Storage Utilities** (`src/lib/storage.tsx`)
-
    - `getScenarioHistory()`: Retrieves all stored scenario history
    - `addScenarioToHistory()`: Adds a new scenario to history
    - `clearScenarioHistory()`: Clears all scenario history
 
 2. **React Hook** (`src/lib/hooks/use-scenario-history.tsx`)
-
    - `useScenarioHistory()`: Main hook for managing scenario history
    - Provides methods for filtering and querying history
 
 3. **History Screen** (`src/app/(app)/steps-history.tsx`)
-
    - Displays scenario history with filtering options
    - Shows scenario details, timestamps, and outcomes
 

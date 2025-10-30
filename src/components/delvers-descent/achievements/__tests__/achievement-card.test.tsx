@@ -21,9 +21,7 @@ describe('AchievementCard', () => {
       rewards: [{ type: 'energy', amount: 100, description: '100 energy' }],
     };
 
-    const { getByText } = render(
-      <AchievementCard achievement={achievement} />
-    );
+    const { getByText } = render(<AchievementCard achievement={achievement} />);
 
     expect(getByText('Test Achievement')).toBeTruthy();
     expect(getByText('Test description')).toBeTruthy();
@@ -46,9 +44,7 @@ describe('AchievementCard', () => {
       progress: { current: 3, target: 5, percentage: 60 },
     };
 
-    const { getByText } = render(
-      <AchievementCard achievement={achievement} />
-    );
+    const { getByText } = render(<AchievementCard achievement={achievement} />);
 
     expect(getByText(/3 \/ 5/)).toBeTruthy();
   });
@@ -74,13 +70,10 @@ describe('AchievementCard', () => {
       ],
     };
 
-    const { getByText } = render(
-      <AchievementCard achievement={achievement} />
-    );
+    const { getByText } = render(<AchievementCard achievement={achievement} />);
 
     expect(getByText(/100 energy/)).toBeTruthy();
     expect(getByText(/Rare Item/)).toBeTruthy();
     expect(getByText(/Champion/)).toBeTruthy();
   });
 });
-

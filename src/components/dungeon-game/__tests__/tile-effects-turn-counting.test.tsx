@@ -17,9 +17,7 @@ jest.mock('../hooks/use-dungeon-game-persistence', () => ({
 
 // Test wrapper component
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <GameStateProvider _initialCurrency={1000}>
-    {children}
-  </GameStateProvider>
+  <GameStateProvider _initialCurrency={1000}>{children}</GameStateProvider>
 );
 
 describe('Tile Effects with Turn Counting', () => {
@@ -165,7 +163,10 @@ describe('Tile Effects with Turn Counting', () => {
 
       // Verify tile cannot be revealed due to insufficient currency
       // Check that tile shows insufficient currency message
-      expect(firstTile).toHaveProp('accessibilityHint', 'Need at least 100 steps to reveal this tile');
+      expect(firstTile).toHaveProp(
+        'accessibilityHint',
+        'Need at least 100 steps to reveal this tile'
+      );
     });
   });
 

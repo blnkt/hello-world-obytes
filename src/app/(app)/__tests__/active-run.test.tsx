@@ -1,9 +1,18 @@
 import '@testing-library/jest-dom';
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react-native';
 import React from 'react';
 
-import type { DelvingRun, DungeonNode, RunState } from '@/types/delvers-descent';
+import type {
+  DelvingRun,
+  DungeonNode,
+  RunState,
+} from '@/types/delvers-descent';
 
 import ActiveRunRoute from '../active-run';
 
@@ -343,7 +352,9 @@ describe('ActiveRunRoute Integration Tests', () => {
 
       // Should return to map
       await waitFor(() => {
-        expect(screen.queryByTestId('encounter-screen')).not.toBeInTheDocument();
+        expect(
+          screen.queryByTestId('encounter-screen')
+        ).not.toBeInTheDocument();
         expect(screen.getByText(/delver's descent/i)).toBeInTheDocument();
       });
     });
@@ -377,4 +388,3 @@ describe('ActiveRunRoute Integration Tests', () => {
     });
   });
 });
-

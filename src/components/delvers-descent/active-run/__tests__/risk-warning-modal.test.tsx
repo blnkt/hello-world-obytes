@@ -140,8 +140,9 @@ describe('RiskWarningModal', () => {
       const { getByText } = render(
         <RiskWarningModal {...defaultProps} warning={warning} />
       );
-      expect(getByText(new RegExp(`${type.toUpperCase()} WARNING`))).toBeDefined();
+      expect(
+        getByText(new RegExp(`${type.toUpperCase()} WARNING`))
+      ).toBeDefined();
     });
   });
 });
-

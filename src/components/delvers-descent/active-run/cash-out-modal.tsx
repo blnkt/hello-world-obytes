@@ -55,9 +55,7 @@ const RewardSummary: React.FC<{
         <Text className="text-lg font-semibold text-gray-900 dark:text-white">
           Total Value:
         </Text>
-        <Text className="text-lg font-bold text-green-600">
-          {totalValue}
-        </Text>
+        <Text className="text-lg font-bold text-green-600">{totalValue}</Text>
       </View>
     </View>
   );
@@ -109,11 +107,6 @@ export const CashOutModal: React.FC<CashOutModalProps> = ({
   onCancel,
 }) => {
   const canReturn = runState.energyRemaining >= returnCost;
-  const totalValue = runState.inventory.reduce(
-    (sum, item) => sum + item.value,
-    0
-  );
-
   return (
     <Modal
       visible={visible}
@@ -123,60 +116,83 @@ export const CashOutModal: React.FC<CashOutModalProps> = ({
     >
       <View className="flex-1 items-center justify-center bg-black/50 p-4">
         <View className="w-full max-w-md rounded-2xl bg-white dark:bg-gray-800">
-          <ScrollView
-            className="max-h-96"
-            contentContainerStyle={{
-              flexGrow: 1,
-              padding: 20,
-              paddingBottom: 20,
-            }}
-          >
-            <Text className="mb-4 text-center text-3xl">💰</Text>
-            <Text className="mb-2 text-center text-2xl font-bold text-gray-900 dark:text-white">
-              Cash Out?
-            </Text>
-            <Text className="mb-6 text-center text-gray-600 dark:text-gray-400">
-              Bank your rewards and return to the surface safely.
-            </Text>
-
-            <RewardSummary inventory={runState.inventory} />
-            <SafetySummary
-              energyRemaining={runState.energyRemaining}
-              returnCost={returnCost}
-            />
-
-            {!canReturn && (
-              <View className="mt-4 rounded-lg bg-red-50 p-3 dark:bg-red-900">
-                <Text className="text-center text-sm font-semibold text-red-800 dark:text-red-200">
-                  ⚠️ Warning: Cannot return safely! You may lose progress.
-                </Text>
-              </View>
-            )}
-          </ScrollView>
-
-          <View className="flex-row gap-3 border-t border-gray-200 p-4 dark:border-gray-700">
-            <Pressable
-              onPress={onCancel}
-              className="flex-1 rounded-lg border-2 border-gray-300 bg-white py-3 dark:border-gray-600 dark:bg-gray-700"
-              testID="cancel-cash-out"
-            >
-              <Text className="text-center font-semibold text-gray-700 dark:text-gray-200">
-                Cancel
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={onConfirm}
-              className="flex-1 rounded-lg bg-green-500 py-3"
-              testID="confirm-cash-out"
-            >
-              <Text className="text-center font-semibold text-white">
-                Cash Out
-              </Text>
-            </Pressable>
-          </View>
+          <ModalBody
+            canReturn={canReturn}
+            inventory={runState.inventory}
+            energyRemaining={runState.energyRemaining}
+            returnCost={returnCost}
+          />
+          <ModalFooter onCancel={onCancel} onConfirm={onConfirm} />
         </View>
       </View>
     </Modal>
   );
 };
 
+function ModalBody({
+  canReturn,
+  inventory,
+  energyRemaining,
+  returnCost,
+}: {
+  canReturn: boolean;
+  inventory: CollectedItem[];
+  energyRemaining: number;
+  returnCost: number;
+}) {
+  return (
+    <ScrollView
+      className="max-h-96"
+      contentContainerStyle={{ flexGrow: 1, padding: 20, paddingBottom: 20 }}
+    >
+      <Text className="mb-4 text-center text-3xl">💰</Text>
+      <Text className="mb-2 text-center text-2xl font-bold text-gray-900 dark:text-white">
+        Cash Out?
+      </Text>
+      <Text className="mb-6 text-center text-gray-600 dark:text-gray-400">
+        Bank your rewards and return to the surface safely.
+      </Text>
+      <RewardSummary inventory={inventory} />
+      <SafetySummary
+        energyRemaining={energyRemaining}
+        returnCost={returnCost}
+      />
+      {!canReturn && (
+        <View className="mt-4 rounded-lg bg-red-50 p-3 dark:bg-red-900">
+          <Text className="text-center text-sm font-semibold text-red-800 dark:text-red-200">
+            ⚠️ Warning: Cannot return safely! You may lose progress.
+          </Text>
+        </View>
+      )}
+    </ScrollView>
+  );
+}
+
+function ModalFooter({
+  onCancel,
+  onConfirm,
+}: {
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <View className="flex-row gap-3 border-t border-gray-200 p-4 dark:border-gray-700">
+      <Pressable
+        onPress={onCancel}
+        className="flex-1 rounded-lg border-2 border-gray-300 bg-white py-3 dark:border-gray-600 dark:bg-gray-700"
+        testID="cancel-cash-out"
+      >
+        <Text className="text-center font-semibold text-gray-700 dark:text-gray-200">
+          Cancel
+        </Text>
+      </Pressable>
+      <Pressable
+        onPress={onConfirm}
+        className="flex-1 rounded-lg bg-green-500 py-3"
+        testID="confirm-cash-out"
+      >
+        <Text className="text-center font-semibold text-white">Cash Out</Text>
+      </Pressable>
+    </View>
+  );
+}

@@ -30,7 +30,10 @@ describe('Balance Testing Framework', () => {
 
       // Validate encounter config
       const distribution = config.encounter.encounterDistribution;
-      const total = Object.values(distribution).reduce((sum, val) => sum + val, 0);
+      const total = Object.values(distribution).reduce(
+        (sum, val) => sum + val,
+        0
+      );
       expect(total).toBeCloseTo(1.0, 5);
     });
 
@@ -41,8 +44,16 @@ describe('Balance Testing Framework', () => {
       expect(nodeCost).toBeLessThan(30);
 
       // Rewards should scale with depth
-      const reward1 = balanceManager.calculateRewardValue(10, 'puzzle_chamber', 1);
-      const reward3 = balanceManager.calculateRewardValue(10, 'puzzle_chamber', 3);
+      const reward1 = balanceManager.calculateRewardValue(
+        10,
+        'puzzle_chamber',
+        1
+      );
+      const reward3 = balanceManager.calculateRewardValue(
+        10,
+        'puzzle_chamber',
+        3
+      );
       expect(reward3).toBeGreaterThan(reward1);
 
       // Return costs should scale exponentially
@@ -86,8 +97,15 @@ describe('Balance Testing Framework', () => {
   describe('Framework: Cross-System Balance Checks', () => {
     it('should maintain energy vs reward balance', () => {
       for (let depth = 1; depth <= 5; depth++) {
-        const nodeCost = balanceManager.calculateNodeCost(depth, 'puzzle_chamber');
-        const reward = balanceManager.calculateRewardValue(10, 'puzzle_chamber', depth);
+        const nodeCost = balanceManager.calculateNodeCost(
+          depth,
+          'puzzle_chamber'
+        );
+        const reward = balanceManager.calculateRewardValue(
+          10,
+          'puzzle_chamber',
+          depth
+        );
 
         // Rewards should be meaningful relative to costs
         expect(reward).toBeGreaterThan(nodeCost * 0.5);
@@ -97,7 +115,8 @@ describe('Balance Testing Framework', () => {
     it('should maintain return cost vs total energy balance', () => {
       for (let depth = 1; depth <= 7; depth++) {
         const returnCost = balanceManager.calculateReturnCost(depth);
-        const expectedEnergy = balanceManager.calculateExpectedEnergyCost(depth);
+        const expectedEnergy =
+          balanceManager.calculateExpectedEnergyCost(depth);
 
         // Return cost should not dominate total energy
         const ratio = returnCost / expectedEnergy;
@@ -110,12 +129,12 @@ describe('Balance Testing Framework', () => {
       const regionDifficulties = REGIONS.map((region) =>
         calculateRegionDifficulty(region)
       );
-      
+
       // All regions should offer similar challenge
       const avgDifficulty =
         regionDifficulties.reduce((sum, d) => sum + d, 0) /
         regionDifficulties.length;
-      
+
       regionDifficulties.forEach((difficulty) => {
         const difference = Math.abs(difficulty - avgDifficulty);
         expect(difference).toBeLessThan(avgDifficulty * 0.5); // Within 50% of average
@@ -126,25 +145,32 @@ describe('Balance Testing Framework', () => {
   describe('Framework: Performance Requirements', () => {
     it('should calculate return costs quickly', () => {
       const start = Date.now();
-      
+
       for (let i = 0; i < 1000; i++) {
         balanceManager.calculateReturnCost(Math.random() * 10);
       }
-      
+
       const elapsed = Date.now() - start;
       expect(elapsed).toBeLessThan(100); // Should be fast
     });
 
     it('should calculate node costs quickly', () => {
       const start = Date.now();
-      const types = ['puzzle_chamber', 'trade_opportunity', 'discovery_site', 'risk_event', 'hazard', 'rest_site'];
-      
+      const types = [
+        'puzzle_chamber',
+        'trade_opportunity',
+        'discovery_site',
+        'risk_event',
+        'hazard',
+        'rest_site',
+      ];
+
       for (let i = 0; i < 1000; i++) {
         const depth = Math.floor(Math.random() * 10) + 1;
         const type = types[Math.floor(Math.random() * types.length)];
         balanceManager.calculateNodeCost(depth, type as any);
       }
-      
+
       const elapsed = Date.now() - start;
       expect(elapsed).toBeLessThan(200);
     });
@@ -182,7 +208,7 @@ describe('Balance Testing Framework', () => {
  */
 function calculateRegionDifficulty(region: any): number {
   const distribution = region.encounterDistribution;
-  
+
   const difficultyWeights: Record<string, number> = {
     puzzle_chamber: 1.0,
     trade_opportunity: 1.2,
@@ -191,13 +217,12 @@ function calculateRegionDifficulty(region: any): number {
     hazard: 2.5,
     rest_site: 0.5,
   };
-  
+
   let totalDifficulty = 0;
   for (const [encounterType, percentage] of Object.entries(distribution)) {
     const weight = difficultyWeights[encounterType] || 1.0;
     totalDifficulty += ((percentage as number) / 100) * weight;
   }
-  
+
   return totalDifficulty;
 }
-

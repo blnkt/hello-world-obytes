@@ -24,9 +24,7 @@ const SetCard: React.FC<{
     onPress={onSelect}
     testID={`set-card-${set.id}`}
     className={`mb-3 rounded-lg border-2 p-4 ${
-      isCompleted
-        ? 'border-green-500 bg-green-50'
-        : 'border-gray-300 bg-white'
+      isCompleted ? 'border-green-500 bg-green-50' : 'border-gray-300 bg-white'
     }`}
   >
     <View className="flex-row items-center justify-between">
@@ -246,4 +244,3 @@ export const CollectionOverviewRN: React.FC<CollectionOverviewRNProps> = ({
     </View>
   );
 };
-

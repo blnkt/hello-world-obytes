@@ -18,9 +18,7 @@ jest.mock('../hooks/use-dungeon-game-persistence', () => ({
 
 // Test wrapper component
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <GameStateProvider _initialCurrency={1000}>
-    {children}
-  </GameStateProvider>
+  <GameStateProvider _initialCurrency={1000}>{children}</GameStateProvider>
 );
 
 describe('Game State Transitions', () => {
@@ -83,7 +81,10 @@ describe('Game State Transitions', () => {
 
       // Verify game remains in "Not Started" state
       // Check that tile shows insufficient currency message
-      expect(firstTile).toHaveProp('accessibilityHint', 'Need at least 100 steps to reveal this tile');
+      expect(firstTile).toHaveProp(
+        'accessibilityHint',
+        'Need at least 100 steps to reveal this tile'
+      );
     });
   });
 

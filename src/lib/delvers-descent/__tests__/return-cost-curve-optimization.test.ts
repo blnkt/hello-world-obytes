@@ -29,12 +29,12 @@ describe('Exponential Return Cost Curve Optimization', () => {
     it('should use configured base multiplier and exponent', () => {
       const config = balanceManager.getConfig();
       const cost = balanceManager.calculateReturnCost(3);
-      
+
       const expectedCost = Math.round(
         config.returnCost.baseMultiplier *
           Math.pow(3, config.returnCost.exponent)
       );
-      
+
       expect(cost).toBe(expectedCost);
     });
 
@@ -113,9 +113,9 @@ describe('Exponential Return Cost Curve Optimization', () => {
 
     it('should allow setting curve type', () => {
       const config = balanceManager.getConfig();
-      
+
       expect(config.returnCost.curveType).toBe('exponential');
-      
+
       balanceManager.updateConfig({
         returnCost: {
           ...config.returnCost,
@@ -131,14 +131,17 @@ describe('Exponential Return Cost Curve Optimization', () => {
   describe('Return Cost vs Node Cost Balance', () => {
     it('should have return costs appropriate relative to node costs', () => {
       const depths = [1, 2, 3, 5];
-      
+
       depths.forEach((depth) => {
-        const nodeCost = balanceManager.calculateNodeCost(depth, 'puzzle_chamber');
+        const nodeCost = balanceManager.calculateNodeCost(
+          depth,
+          'puzzle_chamber'
+        );
         const returnCost = balanceManager.calculateReturnCost(depth);
-        
+
         // Return cost should be greater than or equal to single node cost
         expect(returnCost).toBeGreaterThanOrEqual(nodeCost);
-        
+
         // But not absurdly high at reasonable depths
         expect(returnCost).toBeLessThan(nodeCost * 20);
       });
@@ -162,7 +165,7 @@ describe('Exponential Return Cost Curve Optimization', () => {
     it('should prevent too-easy early returns', () => {
       const returnCost2 = balanceManager.calculateReturnCost(2);
       const returnCost3 = balanceManager.calculateReturnCost(3);
-      
+
       // Depth 3 return should be meaningfully more expensive
       const increase = returnCost3 - returnCost2;
       expect(increase).toBeGreaterThan(5); // Significant increase
@@ -170,7 +173,7 @@ describe('Exponential Return Cost Curve Optimization', () => {
 
     it('should prevent impossible late returns', () => {
       const returnCost10 = balanceManager.calculateReturnCost(10);
-      
+
       // Even at depth 10, return should be feasible
       // A reasonable player should have ~1000 energy
       expect(returnCost10).toBeLessThan(500);
@@ -193,4 +196,3 @@ describe('Exponential Return Cost Curve Optimization', () => {
     });
   });
 });
-

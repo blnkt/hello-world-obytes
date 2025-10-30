@@ -56,7 +56,9 @@ describe('ErrorFeedback', () => {
       });
 
       expect(result.recoverySteps).toBeDefined();
-      expect(result.recoverySteps?.some(step => step.includes('Check'))).toBe(true);
+      expect(result.recoverySteps?.some((step) => step.includes('Check'))).toBe(
+        true
+      );
     });
 
     it('should provide recovery steps for validation errors', () => {
@@ -66,7 +68,13 @@ describe('ErrorFeedback', () => {
       });
 
       expect(result.recoverySteps).toBeDefined();
-      expect(result.recoverySteps?.some(step => step.toLowerCase().includes('check') || step.toLowerCase().includes('verify'))).toBe(true);
+      expect(
+        result.recoverySteps?.some(
+          (step) =>
+            step.toLowerCase().includes('check') ||
+            step.toLowerCase().includes('verify')
+        )
+      ).toBe(true);
     });
 
     it('should provide fallback options for critical errors', () => {
@@ -94,4 +102,3 @@ describe('ErrorFeedback', () => {
     });
   });
 });
-

@@ -35,7 +35,9 @@ describe('AchievementList', () => {
   ];
 
   it('should render achievement list with header', () => {
-    const { getByText } = render(<AchievementList achievements={mockAchievements} />);
+    const { getByText } = render(
+      <AchievementList achievements={mockAchievements} />
+    );
 
     expect(getByText('Achievements')).toBeTruthy();
     expect(getByText('2 of 3 unlocked')).toBeTruthy();
@@ -51,7 +53,9 @@ describe('AchievementList', () => {
   });
 
   it('should render all achievements', () => {
-    const { getByText } = render(<AchievementList achievements={mockAchievements} />);
+    const { getByText } = render(
+      <AchievementList achievements={mockAchievements} />
+    );
 
     expect(getByText('First Step')).toBeTruthy();
     expect(getByText('Deep Explorer')).toBeTruthy();
@@ -59,10 +63,11 @@ describe('AchievementList', () => {
   });
 
   it('should calculate progress correctly', () => {
-    const { getByText } = render(<AchievementList achievements={mockAchievements} />);
+    const { getByText } = render(
+      <AchievementList achievements={mockAchievements} />
+    );
 
     expect(getByText('2 of 3 unlocked')).toBeTruthy();
     expect(getByText(/67%/)).toBeTruthy();
   });
 });
-

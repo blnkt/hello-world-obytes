@@ -34,7 +34,6 @@
 ## Tasks
 
 - [ ] 1.0 Remove Demo Components and Unused Dependencies
-
   - [x] 1.1 Delete demo component files: buttons.tsx, colors.tsx, inputs.tsx, typography.tsx, title.tsx
   - [x] 1.2 Delete demo screen file: src/app/(app)/style.tsx
   - [x] 1.3 Remove unused utility file: src/components/character/utils.ts (actually used - kept)
@@ -44,7 +43,6 @@
   - [x] 1.7 Verify no broken imports after demo component removal
 
 - [x] 2.0 Consolidate Color Systems and Utility Functions
-
   - [x] 2.1 Convert src/components/ui/colors.js to TypeScript (.tsx)
   - [x] 2.2 Audit all color definitions across the codebase for duplicates
   - [x] 2.3 Remove duplicate color definitions and consolidate into single system
@@ -55,7 +53,6 @@
   - [x] 2.8 Verify color consistency and accessibility compliance
 
 - [x] 3.0 Improve Type Safety Across Codebase
-
   - [x] 3.1 Create proper interfaces for data structures in src/lib/storage.tsx
   - [x] 3.2 Replace any[] types in history components with proper interfaces
   - [x] 3.3 Replace any types in character components with proper interfaces
@@ -66,7 +63,6 @@
   - [x] 3.8 Run TypeScript compiler to verify no type errors
 
 - [x] 4.0 Consolidate Test Mocks and Standardize Patterns
-
   - [x] 4.1 Create **mocks**/dungeon-game-persistence.ts with centralized mock implementation
   - [x] 4.2 Create **mocks**/health-hooks.ts with standardized health hook mocks
   - [x] 4.3 Create **mocks**/storage-functions.ts with centralized storage mocks

@@ -7,31 +7,26 @@ This document consolidates all TODOs from the codebase, organized by development
 ### Health System
 
 - [ ] **Fix unused merge functions** - Implement `mergeStepsByDayMMKV` in the main hook (`mergeExperienceMMKV` implemented)
-
   - **File**: `src/lib/health/index.tsx:27`
   - **Priority**: High
   - **Description**: Complete the step data management system
 
 - [ ] **Add data validation** - Validate step data before saving to prevent corrupted data
-
   - **File**: `src/lib/health/index.tsx:32`
   - **Priority**: High
   - **Description**: Implement validation for HealthKit data before storage
 
 - [ ] **Implement data recovery** - Add fallback mechanisms when HealthKit data is unavailable
-
   - **File**: `src/lib/health/index.tsx:33`
   - **Priority**: High
   - **Description**: Handle cases where HealthKit is not accessible
 
 - [ ] **Optimize data storage** - Improve MMKV usage and data structure
-
   - **File**: `src/lib/health/index.tsx:34`
   - **Priority**: Medium
   - **Description**: Review and optimize current storage implementation
 
 - [ ] **Add offline support** - Cache step data locally when HealthKit is not available
-
   - **File**: `src/lib/health/index.tsx:35`
   - **Priority**: Medium
   - **Description**: Implement local caching for offline functionality
@@ -44,55 +39,46 @@ This document consolidates all TODOs from the codebase, organized by development
 ### Testing
 
 - [ ] **Add comprehensive tests** - Unit and integration tests for all features
-
   - **File**: `src/lib/health/index.tsx:173`
   - **Priority**: High
   - **Description**: Expand test coverage for health system and other core features
 
 - [ ] **Add unit tests for storage functions** - Test all storage functions in src/lib/storage.tsx
-
   - **File**: `src/lib/storage.tsx`
   - **Priority**: High
   - **Description**: Ensure data persistence and retrieval work correctly
 
 - [ ] **Add unit tests for hooks** - Test all hooks in src/lib/hooks/
-
   - **File**: `src/lib/hooks/`
   - **Priority**: High
   - **Description**: Verify hook behavior and state management
 
 - [ ] **Add tests for scenario logic** - Test scenario generation and outcomes
-
   - **File**: `src/lib/scenario.ts`
   - **Priority**: Medium
   - **Description**: Ensure scenario system works correctly
 
 - [ ] **Add tests for streak detection and currency conversion** - Test health system business logic
-
   - **File**: `src/lib/health/index.tsx`
   - **Priority**: High
   - **Description**: Verify streak detection and currency conversion accuracy
 
 - [ ] **Add/expand tests for UI components** - Test all components in src/components/ui/
-
   - **File**: `src/components/ui/`
   - **Priority**: Medium
   - **Description**: Ensure UI components render and behave correctly
 
 - [ ] **Add integration tests for flows** - Test onboarding and dashboard flows
-
   - **File**: `src/app/`
   - **Priority**: Medium
   - **Description**: Verify complete user journeys work end-to-end
 
 - [ ] **Add E2E tests for shop purchase flow** - Test complete purchase journey
-
   - **File**: `src/app/(app)/shop.tsx`
   - **Priority**: Medium
   - **Description**: Ensure shop functionality works in real scenarios
 
 - [ ] **Set up CI coverage threshold** - Fail builds on coverage drop below 80%
-
   - **File**: `.github/workflows/`
   - **Priority**: High
   - **Description**: Maintain high test coverage standards
@@ -105,7 +91,6 @@ This document consolidates all TODOs from the codebase, organized by development
 ### UI/UX
 
 - [ ] **Update cover images** - Should be updated to simple images
-
   - **File**: `src/components/cover.tsx:4`
   - **Priority**: Low
   - **Description**: Replace current cover implementation with simpler image approach
@@ -120,7 +105,6 @@ This document consolidates all TODOs from the codebase, organized by development
 ### Scenario System
 
 - [ ] **Expand scenario variety** - Add more merchant and monster encounters
-
   - **File**: `src/lib/scenario.ts:2`
   - **Priority**: Medium
   - **Description**: Increase variety of encounters and scenarios
@@ -135,7 +119,6 @@ This document consolidates all TODOs from the codebase, organized by development
 ### Inventory & Quest Systems
 
 - [ ] **Add inventory system** - Let players collect and use items from scenarios
-
   - **File**: `src/types/character.ts:16`
   - **Priority**: Medium
   - **Description**: Implement item collection and management system
@@ -157,13 +140,11 @@ This document consolidates all TODOs from the codebase, organized by development
 ### UI/UX Improvements
 
 - [ ] **Add animations** - Smooth transitions between screens and interactions
-
   - **File**: `src/app/(app)/_layout.tsx:10`
   - **Priority**: Low
   - **Description**: Implement smooth animations for better user experience
 
 - [ ] **Add character portraits** - Visual representation of characters
-
   - **File**: `src/app/(app)/_layout.tsx:11`
   - **Priority**: Low
   - **Description**: Add visual character representation

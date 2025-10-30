@@ -383,30 +383,17 @@ const MotivationalSection = ({ stepCount }: { stepCount: number }) => {
 
 const DelversDescentCardWrapper: React.FC = () => {
   const router = useRouter();
-  
+
   return (
-    <DelversDescentCard 
+    <DelversDescentCard
       onPress={() => {
         router.push('/run-queue');
-      }} 
+      }}
     />
   );
 };
 
 export default function Home() {
-  // Use reactive hook for last checked date
-  const [lastCheckedDate] = useLastCheckedDate();
-
-  // Default to start of today if not set - memoized to prevent infinite re-renders
-  const _lastCheckedDateTime = React.useMemo(() => {
-    if (lastCheckedDate) {
-      return new Date(lastCheckedDate);
-    }
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }, [lastCheckedDate]);
-
   const { stepsByDay, experience, cumulativeExperience } = useExperienceData();
 
   // Calculate today's step count - memoized to prevent infinite re-renders

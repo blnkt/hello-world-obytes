@@ -18,7 +18,7 @@ describe('Energy Management & Push-Your-Luck Integration (Task 4.3)', () => {
 
   describe('energy tracking with return costs', () => {
     it('should calculate return cost based on current depth', async () => {
-      const runId = await runStateManager.initializeRun('test-run', 100);
+      await runStateManager.initializeRun('test-run', 100);
 
       const state = runStateManager.getCurrentState();
       if (!state) {
@@ -40,7 +40,7 @@ describe('Energy Management & Push-Your-Luck Integration (Task 4.3)', () => {
     });
 
     it('should update energy when consuming energy for movement', async () => {
-      const runId = await runStateManager.initializeRun('test-run', 100);
+      await runStateManager.initializeRun('test-run', 100);
 
       await runStateManager.updateEnergy(-15); // Move to depth 2
 
@@ -53,7 +53,7 @@ describe('Energy Management & Push-Your-Luck Integration (Task 4.3)', () => {
     });
 
     it('should track safety margin as energy changes', async () => {
-      const runId = await runStateManager.initializeRun('test-run', 100);
+      await runStateManager.initializeRun('test-run', 100);
       let state = runStateManager.getCurrentState();
 
       if (!state) {
@@ -85,7 +85,7 @@ describe('Energy Management & Push-Your-Luck Integration (Task 4.3)', () => {
 
   describe('push-your-luck decision making', () => {
     it('should allow player to choose cash out when energy is sufficient', async () => {
-      const runId = await runStateManager.initializeRun('test-run', 200);
+      await runStateManager.initializeRun('test-run', 200);
       await runStateManager.updateEnergy(-15); // Consume some energy
       await runStateManager.updateDepth(2);
 
@@ -107,7 +107,7 @@ describe('Energy Management & Push-Your-Luck Integration (Task 4.3)', () => {
     });
 
     it('should warn player when approaching point of no return', async () => {
-      const runId = await runStateManager.initializeRun('test-run', 50);
+      await runStateManager.initializeRun('test-run', 50);
       await runStateManager.updateDepth(3);
 
       const state = runStateManager.getCurrentState();
@@ -135,7 +135,7 @@ describe('Energy Management & Push-Your-Luck Integration (Task 4.3)', () => {
     });
 
     it('should prevent cash out when energy is insufficient', async () => {
-      const runId = await runStateManager.initializeRun('test-run', 50);
+      await runStateManager.initializeRun('test-run', 50);
       await runStateManager.updateDepth(5);
 
       const state = runStateManager.getCurrentState();
@@ -165,7 +165,7 @@ describe('Energy Management & Push-Your-Luck Integration (Task 4.3)', () => {
 
   describe('energy consumption tracking', () => {
     it('should track total energy consumed across depth levels', async () => {
-      const runId = await runStateManager.initializeRun('test-run', 100);
+      await runStateManager.initializeRun('test-run', 100);
       const initialState = runStateManager.getCurrentState();
 
       if (!initialState) {
@@ -193,7 +193,7 @@ describe('Energy Management & Push-Your-Luck Integration (Task 4.3)', () => {
     });
 
     it('should handle energy reaching zero', async () => {
-      const runId = await runStateManager.initializeRun('test-run', 100);
+      await runStateManager.initializeRun('test-run', 100);
 
       // Consume all energy
       await runStateManager.updateEnergy(-100);
@@ -219,7 +219,7 @@ describe('Energy Management & Push-Your-Luck Integration (Task 4.3)', () => {
 
   describe('shortcut impact on energy calculations', () => {
     it('should reduce return cost when shortcuts are discovered', async () => {
-      const runId = await runStateManager.initializeRun('test-run', 100);
+      await runStateManager.initializeRun('test-run', 100);
       await runStateManager.updateDepth(3);
       await runStateManager.updateEnergy(-15); // Simulate movement
 

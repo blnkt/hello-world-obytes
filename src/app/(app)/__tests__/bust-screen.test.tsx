@@ -107,7 +107,9 @@ describe('BustScreen', () => {
     const { getByText } = render(<BustScreen />);
 
     expect(getByText('You Busted!')).toBeDefined();
-    expect(getByText(/You pushed too deep and could not afford to return./)).toBeDefined();
+    expect(
+      getByText(/You pushed too deep and could not afford to return./)
+    ).toBeDefined();
   });
 
   it('should handle invalid JSON in consequence parameter', () => {
@@ -118,7 +120,9 @@ describe('BustScreen', () => {
     const { getByText } = render(<BustScreen />);
 
     expect(getByText('You Busted!')).toBeDefined();
-    expect(getByText(/You pushed too deep and could not afford to return./)).toBeDefined();
+    expect(
+      getByText(/You pushed too deep and could not afford to return./)
+    ).toBeDefined();
   });
 
   it('should format large numbers correctly', () => {
@@ -170,9 +174,8 @@ describe('BustScreen', () => {
     // Items and energy should show as losses (negative indicator)
     const itemsSection = getByText('Items Lost');
     expect(itemsSection).toBeDefined();
-    
+
     const energySection = getByText('Energy Lost');
     expect(energySection).toBeDefined();
   });
 });
-

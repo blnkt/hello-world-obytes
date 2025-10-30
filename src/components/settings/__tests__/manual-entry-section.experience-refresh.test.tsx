@@ -1,5 +1,10 @@
 import React from 'react';
-import { render, fireEvent, waitFor, screen } from '@testing-library/react-native';
+import {
+  render,
+  fireEvent,
+  waitFor,
+  screen,
+} from '@testing-library/react-native';
 
 // Mock the health module to test the refresh system
 jest.mock('@/lib/health', () => ({
@@ -21,7 +26,11 @@ import {
   getManualStepsByDay,
   setManualStepEntry,
 } from '@/lib/storage';
-import { useDeveloperMode, useManualEntryMode, useExperienceData } from '@/lib/health';
+import {
+  useDeveloperMode,
+  useManualEntryMode,
+  useExperienceData,
+} from '@/lib/health';
 
 // Mock the hooks
 const mockUseManualEntryMode = jest.mocked(useManualEntryMode);
@@ -37,17 +46,17 @@ describe('Manual Entry Section Component Behavior', () => {
   beforeEach(async () => {
     // Clear all storage before each test
     await clearManualStepsByDay();
-    
+
     // Reset mocks
     jest.clearAllMocks();
-    
+
     // Default mock implementations
     mockUseManualEntryMode.mockReturnValue({
       isManualMode: true,
       setManualMode: jest.fn(),
       isLoading: false,
     });
-    
+
     mockUseDeveloperMode.mockReturnValue({
       isDeveloperMode: false,
       setDevMode: jest.fn(),
@@ -61,7 +70,7 @@ describe('Manual Entry Section Component Behavior', () => {
       stepsByDay: [],
       refreshExperience: mockRefreshExperience,
     });
-    
+
     mockUseManualStepsByDay.mockReturnValue([[], jest.fn()]);
   });
 
@@ -73,24 +82,24 @@ describe('Manual Entry Section Component Behavior', () => {
   describe('Form Submission and Experience Refresh', () => {
     it('should call refreshExperience when adding manual step entry', async () => {
       render(<ManualEntrySection />);
-      
+
       // Find the form inputs
       const dateInput = screen.getByPlaceholderText('YYYY-MM-DD');
       const stepCountInput = screen.getByPlaceholderText('Enter step count');
       const addButton = screen.getByText('Add Step Entry');
-      
+
       // Fill in the form
       fireEvent.changeText(dateInput, '2024-06-01');
       fireEvent.changeText(stepCountInput, '5000');
-      
+
       // Submit the form
       fireEvent.press(addButton);
-      
+
       // Wait for the form submission to complete
       await waitFor(() => {
         expect(mockRefreshExperience).toHaveBeenCalledTimes(1);
       });
-      
+
       // Verify the manual step was added
       const manualSteps = await getManualStepsByDay();
       expect(manualSteps).toHaveLength(1);
@@ -103,31 +112,31 @@ describe('Manual Entry Section Component Behavior', () => {
 
     it('should call refreshExperience for each manual step entry', async () => {
       render(<ManualEntrySection />);
-      
+
       const dateInput = screen.getByPlaceholderText('YYYY-MM-DD');
       const stepCountInput = screen.getByPlaceholderText('Enter step count');
       const addButton = screen.getByText('Add Step Entry');
-      
+
       // Add first entry
       fireEvent.changeText(dateInput, '2024-06-01');
       fireEvent.changeText(stepCountInput, '3000');
       fireEvent.press(addButton);
-      
+
       // Wait for first submission
       await waitFor(() => {
         expect(mockRefreshExperience).toHaveBeenCalledTimes(1);
       });
-      
+
       // Add second entry
       fireEvent.changeText(dateInput, '2024-06-02');
       fireEvent.changeText(stepCountInput, '4000');
       fireEvent.press(addButton);
-      
+
       // Wait for second submission
       await waitFor(() => {
         expect(mockRefreshExperience).toHaveBeenCalledTimes(2);
       });
-      
+
       // Verify both entries were added
       const manualSteps = await getManualStepsByDay();
       expect(manualSteps).toHaveLength(2);
@@ -135,41 +144,41 @@ describe('Manual Entry Section Component Behavior', () => {
 
     it('should not call refreshExperience when form validation fails', async () => {
       render(<ManualEntrySection />);
-      
+
       const stepCountInput = screen.getByPlaceholderText('Enter step count');
       const addButton = screen.getByText('Add Step Entry');
-      
+
       // Try to submit with invalid data (no date, invalid step count)
       fireEvent.changeText(stepCountInput, 'abc');
       fireEvent.press(addButton);
-      
+
       // Wait a bit to ensure no refresh is triggered
       await waitFor(() => {
         // The button should be disabled or show validation error
         expect(screen.getByText('Add Step Entry')).toBeTruthy();
       });
-      
+
       // Verify no experience refresh was triggered
       expect(mockRefreshExperience).not.toHaveBeenCalled();
     });
 
     it('should call refreshExperience even when adding steps for past dates', async () => {
       render(<ManualEntrySection />);
-      
+
       const dateInput = screen.getByPlaceholderText('YYYY-MM-DD');
       const stepCountInput = screen.getByPlaceholderText('Enter step count');
       const addButton = screen.getByText('Add Step Entry');
-      
+
       // Add entry for a past date
       fireEvent.changeText(dateInput, '2024-01-15');
       fireEvent.changeText(stepCountInput, '2500');
       fireEvent.press(addButton);
-      
+
       // Wait for submission
       await waitFor(() => {
         expect(mockRefreshExperience).toHaveBeenCalledTimes(1);
       });
-      
+
       // Verify the entry was added
       const manualSteps = await getManualStepsByDay();
       expect(manualSteps).toHaveLength(1);
@@ -181,7 +190,7 @@ describe('Manual Entry Section Component Behavior', () => {
     beforeAll(() => {
       // Create a fixed date for testing
       const fixedDate = new Date('2025-08-21T12:00:00Z');
-      
+
       // Mock the Date constructor
       const spy = jest.spyOn(global, 'Date');
       spy.mockImplementation((value?: string | number | Date) => {
@@ -201,21 +210,21 @@ describe('Manual Entry Section Component Behavior', () => {
 
     it('should maintain form state consistency after triggering refresh', async () => {
       render(<ManualEntrySection />);
-      
+
       const dateInput = screen.getByPlaceholderText('YYYY-MM-DD');
       const stepCountInput = screen.getByPlaceholderText('Enter step count');
       const addButton = screen.getByText('Add Step Entry');
-      
+
       // Fill and submit form
       fireEvent.changeText(dateInput, '2024-06-01');
       fireEvent.changeText(stepCountInput, '3500');
       fireEvent.press(addButton);
-      
+
       // Wait for submission and refresh
       await waitFor(() => {
         expect(mockRefreshExperience).toHaveBeenCalledTimes(1);
       });
-      
+
       // Verify form is reset and ready for next entry
       await waitFor(() => {
         expect(dateInput.props.value).toBe('2025-08-21'); // Fixed mock date
@@ -228,50 +237,50 @@ describe('Manual Entry Section Component Behavior', () => {
     it('should not call refreshExperience when step entry fails', async () => {
       // Mock a failure in setManualStepEntry
       const originalSetManualStepEntry = setManualStepEntry;
-      jest.spyOn(require('@/lib/storage'), 'setManualStepEntry').mockRejectedValueOnce(
-        new Error('Storage error')
-      );
-      
+      jest
+        .spyOn(require('@/lib/storage'), 'setManualStepEntry')
+        .mockRejectedValueOnce(new Error('Storage error'));
+
       render(<ManualEntrySection />);
-      
+
       const dateInput = screen.getByPlaceholderText('YYYY-MM-DD');
       const stepCountInput = screen.getByPlaceholderText('Enter step count');
       const addButton = screen.getByText('Add Step Entry');
-      
+
       // Fill and submit form
       fireEvent.changeText(dateInput, '2024-06-01');
       fireEvent.changeText(stepCountInput, '1000');
       fireEvent.press(addButton);
-      
+
       // Wait for error to appear
       await waitFor(() => {
         expect(screen.getByText(/Failed to add step entry/)).toBeTruthy();
       });
-      
+
       // Verify no refresh was triggered due to failure
       expect(mockRefreshExperience).not.toHaveBeenCalled();
-      
+
       // Restore original function
       jest.restoreAllMocks();
     });
 
     it('should handle very large step counts correctly', async () => {
       render(<ManualEntrySection />);
-      
+
       const dateInput = screen.getByPlaceholderText('YYYY-MM-DD');
       const stepCountInput = screen.getByPlaceholderText('Enter step count');
       const addButton = screen.getByText('Add Step Entry');
-      
+
       // Add a large but valid step count
       fireEvent.changeText(dateInput, '2024-06-01');
       fireEvent.changeText(stepCountInput, '99999');
       fireEvent.press(addButton);
-      
+
       // Wait for submission
       await waitFor(() => {
         expect(mockRefreshExperience).toHaveBeenCalledTimes(1);
       });
-      
+
       // Verify the entry was added
       const manualSteps = await getManualStepsByDay();
       expect(manualSteps).toHaveLength(1);

@@ -259,4 +259,3 @@ describe('Balance Preset Testing', () => {
     expect(hardCost).toBeGreaterThan(normalCost);
   });
 });
-

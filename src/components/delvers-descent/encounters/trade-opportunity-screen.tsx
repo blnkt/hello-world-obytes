@@ -33,7 +33,12 @@ const SuccessScreen: React.FC<{
   <ScrollView
     testID="encounter-success"
     className="flex min-h-screen bg-gray-50"
-    contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', paddingBottom: 100 }}
+    contentContainerStyle={{
+      flexGrow: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingBottom: 100,
+    }}
   >
     <View className="mx-auto max-w-md p-6">
       <Text className="mb-4 text-center text-6xl">🎉</Text>

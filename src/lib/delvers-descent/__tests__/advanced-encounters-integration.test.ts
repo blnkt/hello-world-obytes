@@ -40,7 +40,10 @@ describe('Advanced Encounters Integration with Existing System (Task 6.4)', () =
     });
 
     it('should work with RewardCalculator for depth scaling', () => {
-      const riskConfig = RiskEventEncounter.createRiskLevelConfig('extreme', 10);
+      const riskConfig = RiskEventEncounter.createRiskLevelConfig(
+        'extreme',
+        10
+      );
       const riskEncounter = new RiskEventEncounter('risk-2', riskConfig);
 
       // Verify config has depth-based difficulty
@@ -119,7 +122,11 @@ describe('Advanced Encounters Integration with Existing System (Task 6.4)', () =
     });
 
     it('should handle hazard-specific logic for ancient guardians', () => {
-      const hazardConfig = HazardEncounter.createHazardConfig('ancient_guardian', 8, 8);
+      const hazardConfig = HazardEncounter.createHazardConfig(
+        'ancient_guardian',
+        8,
+        8
+      );
       const hazardEncounter = new HazardEncounter('hazard-3', hazardConfig);
 
       const state = hazardEncounter.getState();
@@ -161,7 +168,11 @@ describe('Advanced Encounters Integration with Existing System (Task 6.4)', () =
     });
 
     it('should provide energy recovery benefits', () => {
-      const restConfig = RestSiteEncounter.createRestSiteConfig('energy_well', 8, 8);
+      const restConfig = RestSiteEncounter.createRestSiteConfig(
+        'energy_well',
+        8,
+        8
+      );
       const restEncounter = new RestSiteEncounter('rest-2', restConfig);
 
       const state = restEncounter.getState();
@@ -170,7 +181,9 @@ describe('Advanced Encounters Integration with Existing System (Task 6.4)', () =
       expect(state.availableActions.length).toBeGreaterThan(1);
 
       // Quick rest should be available
-      const quickRest = state.availableActions.find((a) => a.id === 'quick_rest');
+      const quickRest = state.availableActions.find(
+        (a) => a.id === 'quick_rest'
+      );
       expect(quickRest).toBeDefined();
       expect(quickRest?.energyGain).toBeGreaterThan(0);
 
@@ -185,13 +198,19 @@ describe('Advanced Encounters Integration with Existing System (Task 6.4)', () =
     });
 
     it('should provide strategic intel rewards', () => {
-      const restConfig = RestSiteEncounter.createRestSiteConfig('mystic_grove', 7, 7);
+      const restConfig = RestSiteEncounter.createRestSiteConfig(
+        'mystic_grove',
+        7,
+        7
+      );
       const restEncounter = new RestSiteEncounter('rest-3', restConfig);
 
       const state = restEncounter.getState();
 
       // Should have meditation action with intel
-      const meditation = state.availableActions.find((a) => a.id === 'meditation');
+      const meditation = state.availableActions.find(
+        (a) => a.id === 'meditation'
+      );
       expect(meditation).toBeDefined();
 
       if (meditation) {
@@ -242,7 +261,11 @@ describe('Advanced Encounters Integration with Existing System (Task 6.4)', () =
     });
 
     it('should handle item loss risk from failures', () => {
-      const hazardConfig = HazardEncounter.createHazardConfig('energy_drain', 9, 9);
+      const hazardConfig = HazardEncounter.createHazardConfig(
+        'energy_drain',
+        9,
+        9
+      );
       const hazardEncounter = new HazardEncounter('hazard-4', hazardConfig);
 
       const state = hazardEncounter.getState();
@@ -256,7 +279,10 @@ describe('Advanced Encounters Integration with Existing System (Task 6.4)', () =
     });
 
     it('should handle encounter lockout from failures', () => {
-      const riskConfig = RiskEventEncounter.createRiskLevelConfig('extreme', 10);
+      const riskConfig = RiskEventEncounter.createRiskLevelConfig(
+        'extreme',
+        10
+      );
       const riskEncounter = new RiskEventEncounter('risk-5', riskConfig);
 
       const state = riskEncounter.getState();
@@ -308,7 +334,9 @@ describe('Advanced Encounters Integration with Existing System (Task 6.4)', () =
       ];
 
       for (const encounterType of encounterTypes) {
-        expect(encounterResolver.isValidEncounterType(encounterType)).toBe(true);
+        expect(encounterResolver.isValidEncounterType(encounterType)).toBe(
+          true
+        );
       }
     });
   });
@@ -317,19 +345,30 @@ describe('Advanced Encounters Integration with Existing System (Task 6.4)', () =
     it('should provide varied outcomes based on encounter type', () => {
       // Risk Events should have binary success/failure
       const riskConfig = RiskEventEncounter.createRiskLevelConfig('medium', 5);
-      const riskEncounter = new RiskEventEncounter('risk-diversity', riskConfig);
+      const riskEncounter = new RiskEventEncounter(
+        'risk-diversity',
+        riskConfig
+      );
 
-      riskEncounter.selectChoice(riskEncounter.getState().availableChoices[0].id);
+      riskEncounter.selectChoice(
+        riskEncounter.getState().availableChoices[0].id
+      );
       const riskOutcome = riskEncounter.resolve();
 
       expect(['success', 'failure']).toContain(riskOutcome.type);
       expect(riskOutcome.reward || riskOutcome.consequence).toBeDefined();
 
       // Rest Sites should always succeed
-      const restConfig = RestSiteEncounter.createRestSiteConfig('crystal_cave', 5, 5);
+      const restConfig = RestSiteEncounter.createRestSiteConfig(
+        'crystal_cave',
+        5,
+        5
+      );
       const restEncounter = new RestSiteEncounter('rest-diversity', restConfig);
 
-      restEncounter.selectAction(restEncounter.getState().availableActions[0].id);
+      restEncounter.selectAction(
+        restEncounter.getState().availableActions[0].id
+      );
       const restOutcome = restEncounter.resolve();
 
       expect(restOutcome.type).toBe('success');
@@ -348,7 +387,10 @@ describe('Advanced Encounters Integration with Existing System (Task 6.4)', () =
         const outcome1 = riskEncounter.resolve();
 
         // Reset and test second choice
-        const riskEncounter2 = new RiskEventEncounter('risk-choices-2', riskConfig);
+        const riskEncounter2 = new RiskEventEncounter(
+          'risk-choices-2',
+          riskConfig
+        );
         riskEncounter2.selectChoice(state.availableChoices[1].id);
         const outcome2 = riskEncounter2.resolve();
 
@@ -359,4 +401,3 @@ describe('Advanced Encounters Integration with Existing System (Task 6.4)', () =
     });
   });
 });
-

@@ -304,6 +304,8 @@ describe('Encounter UI Integration', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('encounter-success')).toBeInTheDocument();
+      });
+      await waitFor(() => {
         expect(onEncounterComplete).toHaveBeenCalled();
       });
     });

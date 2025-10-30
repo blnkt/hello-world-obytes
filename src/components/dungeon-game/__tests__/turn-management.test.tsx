@@ -17,9 +17,7 @@ jest.mock('../hooks/use-dungeon-game-persistence', () => ({
 
 // Test wrapper component
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <GameStateProvider _initialCurrency={1000}>
-    {children}
-  </GameStateProvider>
+  <GameStateProvider _initialCurrency={1000}>{children}</GameStateProvider>
 );
 
 describe('Turn Management System', () => {
@@ -82,7 +80,10 @@ describe('Turn Management System', () => {
 
       // Verify that tile was not revealed due to insufficient turns
       // Check that the tile still shows insufficient currency message
-      expect(firstTile).toHaveProp('accessibilityHint', 'Need at least 100 steps to reveal this tile');
+      expect(firstTile).toHaveProp(
+        'accessibilityHint',
+        'Need at least 100 steps to reveal this tile'
+      );
     });
 
     it('should allow tile reveal when turns are available', () => {
@@ -98,7 +99,10 @@ describe('Turn Management System', () => {
 
       // Verify tile is in hidden state initially
       // Note: With 0 currency, tiles show "Need at least 100 steps to reveal this tile"
-      expect(firstTile).toHaveProp('accessibilityHint', 'Need at least 100 steps to reveal this tile');
+      expect(firstTile).toHaveProp(
+        'accessibilityHint',
+        'Need at least 100 steps to reveal this tile'
+      );
 
       fireEvent.press(firstTile);
 

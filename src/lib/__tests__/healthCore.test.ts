@@ -75,4 +75,4 @@ describe('HealthCore batch storage', () => {
     expect(result.dailyStepsGoal).toBe(12345);
     expect(result.lastMilestone).toBe('20000');
   });
-}); 
+});

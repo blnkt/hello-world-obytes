@@ -92,7 +92,7 @@ describe('Map Generator Performance', () => {
       // Both implementations should generate valid maps
       expect(originalAvg).toBeGreaterThanOrEqual(0);
       expect(optimizedAvg).toBeGreaterThanOrEqual(0);
-      
+
       // Optimized should perform at least as well
       // When times are very fast (< 0.1ms), both are acceptable
       if (originalAvg > 0.1 || optimizedAvg > 0.1) {
@@ -119,4 +119,3 @@ describe('Map Generator Performance', () => {
     });
   });
 });
-

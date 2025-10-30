@@ -10,7 +10,7 @@ describe('Bust Rate Balancing', () => {
   describe('Target Bust Rate (20-30%)', () => {
     it('should have target bust rate range configured', () => {
       const config = balanceManager.getConfig();
-      
+
       expect(config.difficulty.targetBustRateMin).toBe(0.2);
       expect(config.difficulty.targetBustRateMax).toBe(0.3);
     });
@@ -47,11 +47,11 @@ describe('Bust Rate Balancing', () => {
   describe('Bust Rate Balancing Factors', () => {
     it('should provide safety margin configuration for risk assessment', () => {
       const safetyMargin = balanceManager.getSafetyMarginConfig();
-      
+
       expect(safetyMargin.low).toBeDefined();
       expect(safetyMargin.medium).toBeDefined();
       expect(safetyMargin.high).toBeDefined();
-      
+
       expect(safetyMargin.medium).toBeGreaterThan(safetyMargin.low);
       expect(safetyMargin.high).toBeGreaterThan(safetyMargin.medium);
     });
@@ -79,7 +79,7 @@ describe('Bust Rate Balancing', () => {
     it('should provide recommended starting energy for target depth', () => {
       const recommended = balanceManager.getRecommendedStartingEnergy(3);
       expect(recommended).toBeGreaterThan(0);
-      
+
       const returnCost3 = balanceManager.calculateReturnCost(3);
       expect(recommended).toBeGreaterThan(returnCost3);
     });
@@ -89,7 +89,7 @@ describe('Bust Rate Balancing', () => {
         const recommended = balanceManager.getRecommendedStartingEnergy(depth);
         const expectedCost = balanceManager.calculateExpectedEnergyCost(depth);
         const returnCost = balanceManager.calculateReturnCost(depth);
-        
+
         expect(recommended).toBeGreaterThan(expectedCost + returnCost);
       }
     });
@@ -98,18 +98,22 @@ describe('Bust Rate Balancing', () => {
   describe('Difficulty Curve Impact on Bust Rate', () => {
     it('should maintain difficulty curve that supports 20-30% bust rate', () => {
       const depths = [1, 2, 3, 5];
-      
+
       depths.forEach((depth) => {
-        const difficultyMultiplier = balanceManager.calculateDifficultyMultiplier(depth);
-        const nodeCost = balanceManager.calculateNodeCost(depth, 'puzzle_chamber');
+        const difficultyMultiplier =
+          balanceManager.calculateDifficultyMultiplier(depth);
+        const nodeCost = balanceManager.calculateNodeCost(
+          depth,
+          'puzzle_chamber'
+        );
         const returnCost = balanceManager.calculateReturnCost(depth);
-        
+
         // Difficulty should scale meaningfully
         expect(difficultyMultiplier).toBeGreaterThan(1);
-        
+
         // Return cost should grow with depth
         expect(returnCost).toBeGreaterThan(0);
-        
+
         // Node costs should be reasonable proportion of return cost
         const costProportion = nodeCost / returnCost;
         expect(costProportion).toBeGreaterThan(0.05);
@@ -125,15 +129,14 @@ describe('Bust Rate Balancing', () => {
       const returnCosts = depths.map((depth) =>
         balanceManager.calculateReturnCost(depth)
       );
-      
+
       for (let i = 1; i < nodeCosts.length; i++) {
         expect(nodeCosts[i]).toBeGreaterThan(nodeCosts[i - 1]);
       }
-      
+
       for (let i = 1; i < returnCosts.length; i++) {
         expect(returnCosts[i]).toBeGreaterThan(returnCosts[i - 1]);
       }
     });
   });
 });
-

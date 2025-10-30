@@ -13,7 +13,7 @@ export default function CollectionsScreen() {
     () => new CollectionManager(ALL_COLLECTION_SETS),
     []
   );
-  
+
   const bonusManager = useMemo(
     () => new BonusManager(collectionManager),
     [collectionManager]
@@ -86,4 +86,3 @@ const ActiveBonusesSection: React.FC<{
     </View>
   );
 };
-

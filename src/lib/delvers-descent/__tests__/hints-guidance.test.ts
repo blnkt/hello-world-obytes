@@ -80,7 +80,12 @@ describe('HintsGuidance', () => {
 
       expect(result.message).toBeDefined();
       const message = result.message.toLowerCase();
-      expect(message.includes('risk') || message.includes('energy') || message.includes('return') || message.includes('safety')).toBe(true);
+      expect(
+        message.includes('risk') ||
+          message.includes('energy') ||
+          message.includes('return') ||
+          message.includes('safety')
+      ).toBe(true);
     });
   });
 
@@ -104,4 +109,3 @@ describe('HintsGuidance', () => {
     });
   });
 });
-

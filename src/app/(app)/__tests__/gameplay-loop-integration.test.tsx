@@ -1,6 +1,11 @@
 import '@testing-library/jest-dom';
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react-native';
 import React from 'react';
 
 import type {
@@ -10,7 +15,7 @@ import type {
 } from '@/types/delvers-descent';
 
 import ActiveRunRoute from '../active-run';
-import RunQueueScreen from '@/components/delvers-descent/run-queue/run-queue-screen';
+import { RunQueueScreen } from '@/components/delvers-descent/run-queue/run-queue-screen';
 import { useDelvingRuns } from '@/components/delvers-descent/hooks/use-delving-runs';
 
 // Mock dependencies
@@ -89,7 +94,12 @@ describe('Full Gameplay Loop Integration Tests', () => {
           id: `node-${nodeId++}`,
           depth,
           position: i + 1,
-          type: i === 0 ? 'puzzle_chamber' : i === 1 ? 'trade_opportunity' : 'discovery_site',
+          type:
+            i === 0
+              ? 'puzzle_chamber'
+              : i === 1
+                ? 'trade_opportunity'
+                : 'discovery_site',
           energyCost: 50 * depth,
           returnCost: 100 * depth,
           isRevealed: depth === 1,
@@ -149,7 +159,7 @@ describe('Full Gameplay Loop Integration Tests', () => {
       // Step 2: Start a run
       mockUpdateRunStatus.mockResolvedValue(undefined);
       useLocalSearchParams.mockReturnValue({ id: mockRun.id });
-      
+
       rerender(<ActiveRunRoute />);
 
       await waitFor(() => {
@@ -352,4 +362,3 @@ describe('Full Gameplay Loop Integration Tests', () => {
     });
   });
 });
-

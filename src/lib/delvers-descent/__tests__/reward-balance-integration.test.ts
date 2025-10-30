@@ -132,7 +132,10 @@ describe('RewardCalculator with Balance Integration', () => {
       const depths = [1, 2, 3, 5];
 
       depths.forEach((depth) => {
-        const nodeCost = balanceManager.calculateNodeCost(depth, 'puzzle_chamber');
+        const nodeCost = balanceManager.calculateNodeCost(
+          depth,
+          'puzzle_chamber'
+        );
         const reward = rewardCalculator.calculateFinalReward(
           10,
           'puzzle_chamber',
@@ -172,4 +175,3 @@ describe('RewardCalculator with Balance Integration', () => {
     });
   });
 });
-

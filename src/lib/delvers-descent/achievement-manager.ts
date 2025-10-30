@@ -32,7 +32,7 @@ export class AchievementManager {
   async loadSavedState(): Promise<void> {
     try {
       const savedAchievements = await loadAchievements();
-      
+
       if (savedAchievements && savedAchievements.length > 0) {
         // Restore each achievement model with saved state
         savedAchievements.forEach((saved) => {
@@ -68,13 +68,16 @@ export class AchievementManager {
         // So we'll process events to restore progress instead
         if (saved.unlocked && saved.progress) {
           const requirements = saved.requirements;
-          if (requirements.type === 'depth' && saved.progress.current >= requirements.threshold) {
+          if (
+            requirements.type === 'depth' &&
+            saved.progress.current >= requirements.threshold
+          ) {
             // Process the depth event
             this.processEvent({
               type: 'depth_reached',
-              data: { 
+              data: {
                 depth: saved.progress.current,
-                cashOut: requirements.additionalCriteria?.cashOut === true 
+                cashOut: requirements.additionalCriteria?.cashOut === true,
               },
               timestamp: new Date(),
             });

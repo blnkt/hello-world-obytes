@@ -4,7 +4,6 @@ import React, { useCallback, useEffect } from 'react';
 import {
   Character as CharacterIcon,
   Home as HomeIcon,
-  MerchantIcon,
   Settings as SettingsIcon,
 } from '@/components/ui/icons';
 
@@ -81,5 +80,3 @@ export default function TabsLayout() {
     </Tabs>
   );
 }
-
-

@@ -20,7 +20,7 @@ describe('Collection Bonus Balancing', () => {
 
     it('should allow configuration of bonus energy amount', () => {
       const config = balanceManager.getConfig();
-      
+
       const originalBonus = balanceManager.calculateCollectionBonusEnergy(1);
 
       balanceManager.updateConfig({
@@ -45,7 +45,7 @@ describe('Collection Bonus Balancing', () => {
         const increase = bonuses[i] - bonuses[i - 1];
         expect(increase).toBeGreaterThan(0); // Should always increase
       }
-      
+
       // Verify linear scaling
       expect(bonuses[1] - bonuses[0]).toBe(bonuses[2] - bonuses[1]); // First two increases should be equal
     });
@@ -83,7 +83,7 @@ describe('Collection Bonus Balancing', () => {
   describe('Legendary Bonus Multiplier', () => {
     it('should have legendary bonus multiplier configured', () => {
       const config = balanceManager.getConfig();
-      
+
       expect(config.collection.legendaryBonusEnergyMultiplier).toBe(1.5);
     });
 
@@ -152,18 +152,20 @@ describe('Collection Bonus Balancing', () => {
 
     it('should scale bonuses appropriately with multiple completions', () => {
       const config = balanceManager.getConfig();
-      
+
       // Test with increasing set completions
       for (let count = 1; count <= 5; count++) {
-        const energyBonus = balanceManager.calculateCollectionBonusEnergy(count);
+        const energyBonus =
+          balanceManager.calculateCollectionBonusEnergy(count);
         const itemsBonus = balanceManager.calculateCollectionBonusItems(count);
-        
+
         expect(energyBonus).toBe(
           config.collection.setCompletionBonusEnergy * count
         );
-        expect(itemsBonus).toBe(config.collection.setCompletionBonusItems * count);
+        expect(itemsBonus).toBe(
+          config.collection.setCompletionBonusItems * count
+        );
       }
     });
   });
 });
-

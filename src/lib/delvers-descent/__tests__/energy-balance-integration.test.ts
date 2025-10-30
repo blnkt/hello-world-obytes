@@ -14,22 +14,36 @@ describe('EnergyCalculator with Balance Integration', () => {
   describe('calculateNodeCost with balance configuration', () => {
     it('should use balance manager configuration for node costs', () => {
       const cost1 = energyCalculator.calculateNodeCost(1, 'puzzle_chamber');
-      const balanceCost1 = balanceManager.calculateNodeCost(1, 'puzzle_chamber');
+      const balanceCost1 = balanceManager.calculateNodeCost(
+        1,
+        'puzzle_chamber'
+      );
 
       expect(cost1).toBe(balanceCost1);
     });
 
     it('should scale costs with depth using balance configuration', () => {
       const cost2 = energyCalculator.calculateNodeCost(2, 'puzzle_chamber');
-      const balanceCost2 = balanceManager.calculateNodeCost(2, 'puzzle_chamber');
+      const balanceCost2 = balanceManager.calculateNodeCost(
+        2,
+        'puzzle_chamber'
+      );
 
       expect(cost2).toBe(balanceCost2);
-      expect(cost2).toBeGreaterThan(energyCalculator.calculateNodeCost(1, 'puzzle_chamber'));
+      expect(cost2).toBeGreaterThan(
+        energyCalculator.calculateNodeCost(1, 'puzzle_chamber')
+      );
     });
 
     it('should apply type-specific modifiers from balance configuration', () => {
-      const puzzleCost = energyCalculator.calculateNodeCost(2, 'puzzle_chamber');
-      const tradeCost = energyCalculator.calculateNodeCost(2, 'trade_opportunity');
+      const puzzleCost = energyCalculator.calculateNodeCost(
+        2,
+        'puzzle_chamber'
+      );
+      const tradeCost = energyCalculator.calculateNodeCost(
+        2,
+        'trade_opportunity'
+      );
       const hazardCost = energyCalculator.calculateNodeCost(2, 'hazard');
 
       expect(tradeCost).toBe(puzzleCost - 2); // -2 modifier
@@ -59,7 +73,10 @@ describe('EnergyCalculator with Balance Integration', () => {
 
   describe('balance configuration integration', () => {
     it('should allow updating balance configuration', () => {
-      const originalCost = energyCalculator.calculateNodeCost(2, 'puzzle_chamber');
+      const originalCost = energyCalculator.calculateNodeCost(
+        2,
+        'puzzle_chamber'
+      );
       const config = balanceManager.getConfig();
 
       balanceManager.updateConfig({
@@ -116,4 +133,3 @@ describe('EnergyCalculator with Balance Integration', () => {
     });
   });
 });
-

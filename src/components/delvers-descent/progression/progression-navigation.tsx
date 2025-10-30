@@ -61,4 +61,3 @@ export const ProgressionNavigation: React.FC<ProgressionNavigationProps> = ({
     </View>
   );
 };
-

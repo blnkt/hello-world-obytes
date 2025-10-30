@@ -37,7 +37,7 @@ describe('DungeonMapVisualization (Task 1.1)', () => {
     const { getByTestId } = render(
       <DungeonMapVisualization nodes={mockNodes} runState={mockRunState} />
     );
-    
+
     expect(getByTestId('dungeon-map')).toBeDefined();
   });
 
@@ -45,7 +45,7 @@ describe('DungeonMapVisualization (Task 1.1)', () => {
     const { getByTestId } = render(
       <DungeonMapVisualization nodes={mockNodes} runState={mockRunState} />
     );
-    
+
     expect(getByTestId('depth-level-1')).toBeDefined();
     expect(getByTestId('depth-level-2')).toBeDefined();
   });
@@ -53,7 +53,7 @@ describe('DungeonMapVisualization (Task 1.1)', () => {
   it('should show all nodes at each depth level', () => {
     const depth1Nodes = mockNodes.filter((n: DungeonNode) => n.depth === 1);
     const depth2Nodes = mockNodes.filter((n: DungeonNode) => n.depth === 2);
-    
+
     expect(depth1Nodes.length).toBeGreaterThan(0);
     expect(depth2Nodes.length).toBeGreaterThan(0);
   });
@@ -62,7 +62,7 @@ describe('DungeonMapVisualization (Task 1.1)', () => {
     const { getByTestId } = render(
       <DungeonMapVisualization nodes={mockNodes} runState={mockRunState} />
     );
-    
+
     expect(getByTestId('energy-display')).toBeDefined();
   });
 
@@ -70,8 +70,7 @@ describe('DungeonMapVisualization (Task 1.1)', () => {
     const { getByTestId } = render(
       <DungeonMapVisualization nodes={mockNodes} runState={mockRunState} />
     );
-    
+
     expect(getByTestId('current-depth')).toBeDefined();
   });
 });
-

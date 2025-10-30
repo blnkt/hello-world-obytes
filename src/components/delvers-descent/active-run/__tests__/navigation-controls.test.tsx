@@ -169,7 +169,11 @@ describe('NavigationControls', () => {
 
   it('should handle zero energy', () => {
     const { getByText, queryByText } = render(
-      <NavigationControls {...defaultProps} energyRemaining={0} returnCost={50} />
+      <NavigationControls
+        {...defaultProps}
+        energyRemaining={0}
+        returnCost={50}
+      />
     );
 
     expect(
@@ -178,4 +182,3 @@ describe('NavigationControls', () => {
     expect(queryByText(/Continue/)).toBeNull();
   });
 });
-

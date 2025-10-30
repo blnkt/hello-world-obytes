@@ -14,10 +14,22 @@ describe('Difficulty Curve Optimization', () => {
     it('should scale difficulty appropriately with depth', () => {
       const baseDifficulty = 5;
 
-      const depth1Difficulty = riskManager.scaleEncounterDifficulty(baseDifficulty, 1);
-      const depth2Difficulty = riskManager.scaleEncounterDifficulty(baseDifficulty, 2);
-      const depth3Difficulty = riskManager.scaleEncounterDifficulty(baseDifficulty, 3);
-      const depth5Difficulty = riskManager.scaleEncounterDifficulty(baseDifficulty, 5);
+      const depth1Difficulty = riskManager.scaleEncounterDifficulty(
+        baseDifficulty,
+        1
+      );
+      const depth2Difficulty = riskManager.scaleEncounterDifficulty(
+        baseDifficulty,
+        2
+      );
+      const depth3Difficulty = riskManager.scaleEncounterDifficulty(
+        baseDifficulty,
+        3
+      );
+      const depth5Difficulty = riskManager.scaleEncounterDifficulty(
+        baseDifficulty,
+        5
+      );
 
       expect(depth2Difficulty).toBeGreaterThan(depth1Difficulty);
       expect(depth3Difficulty).toBeGreaterThan(depth2Difficulty);
@@ -48,7 +60,9 @@ describe('Difficulty Curve Optimization', () => {
       });
 
       // Should still increase meaningfully with depth
-      expect(difficulties[difficulties.length - 1]).toBeGreaterThan(difficulties[0]);
+      expect(difficulties[difficulties.length - 1]).toBeGreaterThan(
+        difficulties[0]
+      );
     });
   });
 
@@ -79,7 +93,10 @@ describe('Difficulty Curve Optimization', () => {
       const baseReward = 10;
 
       for (let depth = 1; depth <= 5; depth++) {
-        const scaledDifficulty = riskManager.scaleEncounterDifficulty(baseDifficulty, depth);
+        const scaledDifficulty = riskManager.scaleEncounterDifficulty(
+          baseDifficulty,
+          depth
+        );
         const scaledReward = riskManager.scaleReward(baseReward, depth);
 
         // Rewards should scale proportionally to difficulty
@@ -100,9 +117,10 @@ describe('Difficulty Curve Optimization', () => {
 
       // Rewards should increase at least as fast as difficulty
       for (let i = 1; i < difficulties.length; i++) {
-        const difficultyIncrease = (difficulties[i] - difficulties[i - 1]) / difficulties[i - 1];
+        const difficultyIncrease =
+          (difficulties[i] - difficulties[i - 1]) / difficulties[i - 1];
         const rewardIncrease = (rewards[i] - rewards[i - 1]) / rewards[i - 1];
-        
+
         expect(rewardIncrease).toBeGreaterThanOrEqual(difficultyIncrease * 0.5);
       }
     });
@@ -111,8 +129,9 @@ describe('Difficulty Curve Optimization', () => {
   describe('Configuration Integration', () => {
     it('should allow updating difficulty scaling configuration', () => {
       const config = balanceManager.getConfig();
-      
-      const originalMultiplier = balanceManager.calculateDifficultyMultiplier(3);
+
+      const originalMultiplier =
+        balanceManager.calculateDifficultyMultiplier(3);
 
       balanceManager.updateConfig({
         difficulty: {
@@ -132,11 +151,16 @@ describe('Difficulty Curve Optimization', () => {
       });
 
       const baseDifficulty = 10;
-      const difficulty1 = customManager.scaleEncounterDifficulty(baseDifficulty, 1);
-      const normalDifficulty1 = riskManager.scaleEncounterDifficulty(baseDifficulty, 1);
+      const difficulty1 = customManager.scaleEncounterDifficulty(
+        baseDifficulty,
+        1
+      );
+      const normalDifficulty1 = riskManager.scaleEncounterDifficulty(
+        baseDifficulty,
+        1
+      );
 
       expect(difficulty1).not.toBe(normalDifficulty1);
     });
   });
 });
-

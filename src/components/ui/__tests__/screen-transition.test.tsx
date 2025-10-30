@@ -15,9 +15,11 @@ describe('ScreenTransition', () => {
   });
 
   it('applies fade animation by default', () => {
-    const { UNSAFE_getByType } = render(<ScreenTransition>Content</ScreenTransition>);
+    const { UNSAFE_getByType } = render(
+      <ScreenTransition>Content</ScreenTransition>
+    );
     const view = UNSAFE_getByType(View);
-    
+
     expect(view.props.className).toContain('animate-fade-in');
   });
 
@@ -26,7 +28,7 @@ describe('ScreenTransition', () => {
       <ScreenTransition type="slide">Content</ScreenTransition>
     );
     const view = UNSAFE_getByType(View);
-    
+
     expect(view.props.className).toContain('animate-slide-up');
   });
 
@@ -35,7 +37,7 @@ describe('ScreenTransition', () => {
       <ScreenTransition type="bounce">Content</ScreenTransition>
     );
     const view = UNSAFE_getByType(View);
-    
+
     expect(view.props.className).toContain('animate-bounce-in');
   });
 });

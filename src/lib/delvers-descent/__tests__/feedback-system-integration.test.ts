@@ -53,7 +53,11 @@ describe('Feedback System Integration', () => {
     });
 
     it('should use decision feedback to drive risk warnings', () => {
-      const riskyScenario = { currentEnergy: 30, returnCost: 25, totalEnergy: 100 };
+      const riskyScenario = {
+        currentEnergy: 30,
+        returnCost: 25,
+        totalEnergy: 100,
+      };
 
       const warning = riskWarning.getRiskWarning(riskyScenario);
 
@@ -128,7 +132,9 @@ describe('Feedback System Integration', () => {
 
       expect(progressSummary.completionPercentage).toBe(45);
       expect(progressSummary.message).toContain('45');
-      expect(progressSummary.isNearComplete).toBe(progressSummary.completionPercentage >= 90);
+      expect(progressSummary.isNearComplete).toBe(
+        progressSummary.completionPercentage >= 90
+      );
     });
   });
 
@@ -200,4 +206,3 @@ describe('Feedback System Integration', () => {
     });
   });
 });
-

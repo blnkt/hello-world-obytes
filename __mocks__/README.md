@@ -393,17 +393,14 @@ mock.setupErrorScenario('Test error');
 ### Common Issues and Solutions
 
 1. **Mock not found in jest.mock()**
-
    - Ensure the path to the mock file is correct
    - Use `require()` inside jest.mock() for dynamic imports
 
 2. **TypeScript errors with mock types**
-
    - Import types from `__mocks__/types.ts`
    - Use `jest.MockedFunction<T>` for function types
 
 3. **Mock functions not being called**
-
    - Check that you're using the correct mock instance
    - Ensure mock is properly set up in jest.mock()
 

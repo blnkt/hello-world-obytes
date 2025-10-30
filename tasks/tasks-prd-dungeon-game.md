@@ -27,7 +27,6 @@
 ## Tasks
 
 - [x] 1.0 Core Game Infrastructure
-
   - [x] 1.1 Create main dungeon game screen component with basic navigation
   - [x] 1.2 Set up game state management (level, turns, revealed tiles, game state)
   - [x] 1.3 Implement basic routing and navigation integration
@@ -35,7 +34,6 @@
   - [x] 1.5 Set up basic game state transitions (active, win, game over)
 
 - [ ] 2.0 Grid System and Tile Components
-
   - [x] 2.1 Create GameGrid component with 6x5 grid layout
   - [x] 2.2 Implement GridTile component with face-down and face-up states
   - [x] 2.3 Add tile click handling and reveal functionality
@@ -44,7 +42,6 @@
   - [x] 2.6 Implement random tile distribution algorithm for level generation
 
 - [ ] 3.0 Game Logic and Mechanics
-
   - [x] 3.1 Implement turn management system (deduct turns on tile reveal)
   - [x] 3.2 Add trap tile effect (lose 1 additional turn)
   - [x] 3.3 Add treasure tile effect (gain 1 free turn)
@@ -54,7 +51,6 @@
   - [x] 3.7 Add level progression system and difficulty scaling
 
 - [x] 4.0 Currency Integration
-
   - [x] 4.1 Integrate with useCurrencySystem() hook for real-time currency data
   - [x] 4.2 Implement turn calculation: Math.floor(currentCurrency / 100)
   - [x] 4.3 Add real-time currency updates as turns are spent
@@ -63,7 +59,6 @@
   - [x] 4.6 Implement economic feedback and turn cost indicators
 
 - [x] 5.0 User Interface and Experience
-
   - [x] 5.1 Create StatusBar component for game information display
   - [x] 5.2 Implement CurrencyDisplay component with turn count and currency
   - [x] 5.3 Add win modal with next level and main menu options

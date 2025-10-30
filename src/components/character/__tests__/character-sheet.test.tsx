@@ -36,12 +36,16 @@ describe('CharacterSheet', () => {
 
   it('should render character sheet without errors', () => {
     // This test verifies that the component renders without throwing errors
-    const { root } = render(<CharacterSheet character={mockCharacter} onChange={mockOnChange} />);
+    const { root } = render(
+      <CharacterSheet character={mockCharacter} onChange={mockOnChange} />
+    );
     expect(root).toBeTruthy();
   });
 
   it('should not contain class-related components', () => {
-    render(<CharacterSheet character={mockCharacter} onChange={mockOnChange} />);
+    render(
+      <CharacterSheet character={mockCharacter} onChange={mockOnChange} />
+    );
 
     // Should not contain any class-related elements
     expect(screen.queryByText('Class Attributes')).toBeFalsy();

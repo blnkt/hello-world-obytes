@@ -17,9 +17,7 @@ jest.mock('../hooks/use-dungeon-game-persistence', () => ({
 
 // Test wrapper component
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <GameStateProvider _initialCurrency={1000}>
-    {children}
-  </GameStateProvider>
+  <GameStateProvider _initialCurrency={1000}>{children}</GameStateProvider>
 );
 
 describe('Level Progression and Difficulty Scaling', () => {

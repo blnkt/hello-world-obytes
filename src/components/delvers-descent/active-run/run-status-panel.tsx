@@ -12,8 +12,6 @@ const SafetyMarginIndicator: React.FC<{
   returnCost: number;
 }> = ({ energyRemaining, returnCost }) => {
   const safetyMargin = energyRemaining - returnCost;
-  const safetyPercentage =
-    returnCost > 0 ? (safetyMargin / returnCost) * 100 : 0;
 
   let color = 'bg-gray-500';
   let status = 'Unknown';

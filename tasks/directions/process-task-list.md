@@ -43,13 +43,11 @@ This workflow is part of a larger development process:
 ### Branch Workflow
 
 1. **Before starting any task:**
-
    - Ensure you're on the correct feature branch
    - If not, switch: `git checkout feature/[prd-filename]`
    - If branch doesn't exist, create it: `git checkout -b feature/[prd-filename]`
 
 2. **During development:**
-
    - All commits must be on the feature branch
    - Never commit directly to main/master
    - Use descriptive commit messages with issue references
@@ -63,16 +61,13 @@ This workflow is part of a larger development process:
 
 - **One sub-task at a time:** Do **NOT** start the next sub‑task until you ask the user for permission and they say "yes" or "y"
 - **TDD Workflow for each sub-task:**
-
   1. **Start with a failing test:**
-
      - Write a test that describes the expected behavior for the sub-task
      - The test should initially fail (red phase)
      - Run `pnpm test` to confirm the test fails as expected
      - Document what the test is verifying
 
   2. **Implement the minimal code to make the test pass:**
-
      - Write the minimal implementation needed to make the test pass (green phase)
      - Focus on the specific sub-task requirements
      - Run `pnpm test` to verify the test now passes
@@ -83,9 +78,7 @@ This workflow is part of a larger development process:
      - Run `pnpm test` again to confirm tests still pass
 
 - **Completion protocol:**
-
   1. When you finish a **sub-task**, follow this sequence:
-
   - **Verify branch:** Ensure you're on the correct feature branch
   - Immediately mark it as completed by changing `[ ]` to `[x]`.
   - Run `pnpm lint --fix` on any files that have changed and try to fix any errors that are not auto-fixed
@@ -95,7 +88,6 @@ This workflow is part of a larger development process:
   - **Only if all tests pass**: Stage changes (`git add .`)
   - **Clean up**: Remove any temporary files and temporary code before committing
   - **Commit**: Use a descriptive commit message that:
-
     - Uses conventional commit format (`feat:`, `fix:`, `refactor:`, etc.)
     - Summarizes what was accomplished in the parent task
     - Lists key changes and additions
@@ -108,34 +100,27 @@ This workflow is part of a larger development process:
       ```
 
       **Note:** The issue number `#123` should be taken from the parent task where it appears as `(#123)` after the task description.
-
   2. **Self-verification checklist before proceeding:**
 
   Before asking to proceed to the next sub-task, the AI must self-verify:
-
   - [ ] Subtask is marked `[x]` in the task list
   - [ ] All linter errors are fixed or user has approved proceeding
   - [ ] All tests pass
   - [ ] Changes are committed with a descriptive, conventional commit message referencing the parent issue
   - [ ] User has given explicit go-ahead
-
   3. **Explicit pause and confirm:**
 
-  After completing the above steps for a sub-task, the AI must explicitly pause and request user confirmation before proceeding to the next sub-task. Do not suggest or start the next subtask until the user has confirmed.
-
-  4. Once all the subtasks are marked completed and changes have been committed, mark the **parent task** as completed.
+  After completing the above steps for a sub-task, the AI must explicitly pause and request user confirmation before proceeding to the next sub-task. Do not suggest or start the next subtask until the user has confirmed. 4. Once all the subtasks are marked completed and changes have been committed, mark the **parent task** as completed.
 
 - **No skipping steps:** The AI must not skip or reorder any steps in the completion protocol, even if the user prompt is ambiguous or suggests moving ahead.
 
 ## Task List Maintenance
 
 1. **Update the task list as you work:**
-
    - Mark tasks and subtasks as completed (`[x]`) per the protocol above.
    - Add new tasks as they emerge.
 
 2. **Maintain the "Relevant Files" section:**
-
    - List every file created or modified.
    - Give each file a one‑line description of its purpose.
 
@@ -151,13 +136,11 @@ This workflow is part of a larger development process:
 When working with task lists, the AI must:
 
 1. **Verify branch before starting work:**
-
    - Check if user is on the correct feature branch
    - Ensure branch name matches PRD filename: `feature/[prd-filename]`
    - If not on correct branch, instruct user to switch before proceeding
 
 2. **Follow TDD workflow for each sub-task:**
-
    - **Red phase:** Start by writing a failing test that describes the expected behavior
    - **Green phase:** Implement minimal code to make the test pass
    - **Refactor phase:** Clean up code while keeping tests passing
@@ -166,7 +149,6 @@ When working with task lists, the AI must:
 3. Regularly update the task list file after finishing any significant work.
 
 4. Follow the completion protocol:
-
    - Mark each finished **sub‑task** `[x]`.
    - Mark the **parent task** `[x]` once **all** its subtasks are `[x]`.
 

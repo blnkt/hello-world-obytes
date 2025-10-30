@@ -2,10 +2,10 @@ import { Stack } from 'expo-router';
 import React, { useMemo } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
-import { ProgressionNavigation } from '@/components/delvers-descent/progression/progression-navigation';
 import { useDelvingRuns } from '@/components/delvers-descent/hooks/use-delving-runs';
-import type { DelvingRun } from '@/types/delvers-descent';
+import { ProgressionNavigation } from '@/components/delvers-descent/progression/progression-navigation';
 import { getRunStateManager } from '@/lib/delvers-descent/run-state-manager';
+import type { DelvingRun } from '@/types/delvers-descent';
 
 interface RunHistoryData {
   run: DelvingRun;
@@ -17,7 +17,7 @@ interface RunHistoryData {
 
 export default function RunHistoryScreen() {
   const { getCompletedRuns, getBustedRuns } = useDelvingRuns();
-  const runStateManager = getRunStateManager();
+  const _runStateManager = getRunStateManager();
 
   const completedRuns = useMemo(() => getCompletedRuns(), [getCompletedRuns]);
   const bustedRuns = useMemo(() => getBustedRuns(), [getBustedRuns]);
@@ -39,8 +39,7 @@ export default function RunHistoryScreen() {
     ];
 
     return runs.sort(
-      (a, b) =>
-        new Date(b.run.date).getTime() - new Date(a.run.date).getTime()
+      (a, b) => new Date(b.run.date).getTime() - new Date(a.run.date).getTime()
     );
   }, [completedRuns, bustedRuns]);
 
@@ -86,9 +85,84 @@ export default function RunHistoryScreen() {
   );
 }
 
-const RunHistoryCard: React.FC<{ runData: RunHistoryData }> = ({
-  runData,
-}) => {
+const RunStatusBadges: React.FC<{
+  isCompleted: boolean;
+  isBusted: boolean;
+}> = ({ isCompleted, isBusted }) => (
+  <>
+    {isCompleted && (
+      <Text className="ml-2 rounded-full bg-green-500 px-2 py-1 text-xs font-semibold text-white">
+        ✓ Completed
+      </Text>
+    )}
+    {isBusted && (
+      <Text className="ml-2 rounded-full bg-red-500 px-2 py-1 text-xs font-semibold text-white">
+        ⚠ Busted
+      </Text>
+    )}
+  </>
+);
+
+const RunDetails: React.FC<{
+  run: DelvingRun;
+  depth?: number;
+  itemsCollected?: number;
+  totalValue?: number;
+  isCompleted: boolean;
+  isBusted: boolean;
+  failureReason?: string;
+}> = ({
+  run,
+  depth,
+  itemsCollected,
+  totalValue,
+  isCompleted,
+  isBusted,
+  failureReason,
+}) => (
+  <>
+    <View className="flex-row items-center">
+      <Text className="text-lg font-semibold text-gray-800">
+        {new Date(run.date).toLocaleDateString()}
+      </Text>
+      <RunStatusBadges isCompleted={isCompleted} isBusted={isBusted} />
+    </View>
+
+    <View className="mt-2">
+      <Text className="text-sm text-gray-600">
+        Steps: {run.steps.toLocaleString()} | Energy: {run.totalEnergy}
+      </Text>
+      {depth !== undefined && (
+        <Text className="text-sm text-gray-600">Deepest Depth: {depth}</Text>
+      )}
+    </View>
+
+    {isCompleted && (
+      <View className="mt-2">
+        {itemsCollected !== undefined && (
+          <Text className="text-sm font-semibold text-green-700">
+            Items Collected: {itemsCollected}
+          </Text>
+        )}
+        {totalValue !== undefined && totalValue > 0 && (
+          <Text className="text-sm font-semibold text-green-700">
+            Total Value: {totalValue.toLocaleString()}
+          </Text>
+        )}
+      </View>
+    )}
+
+    {isBusted && failureReason && (
+      <View className="mt-2">
+        <Text className="text-sm font-semibold text-red-700">
+          Failure: {failureReason}
+        </Text>
+      </View>
+    )}
+  </>
+);
+
+const RunHistoryCard: React.FC<{ runData: RunHistoryData }> = ({ runData }) => {
   const { run, depth, itemsCollected, totalValue, failureReason } = runData;
   const isCompleted = run.status === 'completed';
   const isBusted = run.status === 'busted';
@@ -99,64 +173,23 @@ const RunHistoryCard: React.FC<{ runData: RunHistoryData }> = ({
         isCompleted
           ? 'border-green-300 bg-green-50'
           : isBusted
-          ? 'border-red-300 bg-red-50'
-          : 'border-gray-300 bg-white'
+            ? 'border-red-300 bg-red-50'
+            : 'border-gray-300 bg-white'
       }`}
     >
       <View className="flex-row items-start justify-between">
         <View className="flex-1">
-          <View className="flex-row items-center">
-            <Text className="text-lg font-semibold text-gray-800">
-              {new Date(run.date).toLocaleDateString()}
-            </Text>
-            {isCompleted && (
-              <Text className="ml-2 rounded-full bg-green-500 px-2 py-1 text-xs font-semibold text-white">
-                ✓ Completed
-              </Text>
-            )}
-            {isBusted && (
-              <Text className="ml-2 rounded-full bg-red-500 px-2 py-1 text-xs font-semibold text-white">
-                ⚠ Busted
-              </Text>
-            )}
-          </View>
-
-          <View className="mt-2">
-            <Text className="text-sm text-gray-600">
-              Steps: {run.steps.toLocaleString()} | Energy: {run.totalEnergy}
-            </Text>
-            {depth !== undefined && (
-              <Text className="text-sm text-gray-600">
-                Deepest Depth: {depth}
-              </Text>
-            )}
-          </View>
-
-          {isCompleted && (
-            <View className="mt-2">
-              {itemsCollected !== undefined && (
-                <Text className="text-sm font-semibold text-green-700">
-                  Items Collected: {itemsCollected}
-                </Text>
-              )}
-              {totalValue !== undefined && totalValue > 0 && (
-                <Text className="text-sm font-semibold text-green-700">
-                  Total Value: {totalValue.toLocaleString()}
-                </Text>
-              )}
-            </View>
-          )}
-
-          {isBusted && failureReason && (
-            <View className="mt-2">
-              <Text className="text-sm font-semibold text-red-700">
-                Failure: {failureReason}
-              </Text>
-            </View>
-          )}
+          <RunDetails
+            run={run}
+            depth={depth}
+            itemsCollected={itemsCollected}
+            totalValue={totalValue}
+            isCompleted={isCompleted}
+            isBusted={isBusted}
+            failureReason={failureReason}
+          />
         </View>
       </View>
     </Pressable>
   );
 };
-

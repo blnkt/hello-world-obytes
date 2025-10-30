@@ -48,9 +48,7 @@ describe('Phase 4 - Collection & Progression Integration (Task 7.0)', () => {
       }
 
       const progress = await collectionManager.getCollectionProgress();
-      const setProgress = progress.partialSets.find(
-        (p) => p.setId === set.id
-      );
+      const setProgress = progress.partialSets.find((p) => p.setId === set.id);
 
       expect(setProgress).toBeDefined();
       expect(setProgress?.collected).toBe(3);
@@ -259,4 +257,3 @@ describe('Phase 4 - Collection & Progression Integration (Task 7.0)', () => {
     });
   });
 });
-

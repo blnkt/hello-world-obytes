@@ -92,9 +92,7 @@ export const RiskWarningModal: React.FC<RiskWarningModalProps> = ({
               >
                 {warning.type.toUpperCase()} WARNING
               </Text>
-              <Text
-                className={`text-center ${warningStyles.textColor}`}
-              >
+              <Text className={`text-center ${warningStyles.textColor}`}>
                 {warning.message}
               </Text>
               {warning.severity > 0 && (
@@ -132,4 +130,3 @@ export const RiskWarningModal: React.FC<RiskWarningModalProps> = ({
     </Modal>
   );
 };
-

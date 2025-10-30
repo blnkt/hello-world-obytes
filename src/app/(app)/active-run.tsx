@@ -10,12 +10,11 @@ import { RunStatusPanel } from '@/components/delvers-descent/active-run/run-stat
 import { EncounterScreen } from '@/components/delvers-descent/encounters/encounter-screen';
 import { useMapGenerator } from '@/components/delvers-descent/hooks/use-map-generator';
 import { AchievementManager } from '@/lib/delvers-descent/achievement-manager';
-import { ALL_ACHIEVEMENTS } from '@/lib/delvers-descent/achievement-types';
 import { saveAchievements } from '@/lib/delvers-descent/achievement-persistence';
+import { ALL_ACHIEVEMENTS } from '@/lib/delvers-descent/achievement-types';
 import { CollectionManager } from '@/lib/delvers-descent/collection-manager';
 import { ALL_COLLECTION_SETS } from '@/lib/delvers-descent/collection-sets';
 import { getRunQueueManager } from '@/lib/delvers-descent/run-queue';
-import { getRunStateManager } from '@/lib/delvers-descent/run-state-manager';
 import { useExperienceData } from '@/lib/health';
 import { useCharacter } from '@/lib/storage';
 import type {
@@ -109,103 +108,47 @@ const useActiveRunData = (runId: string) => {
   const { generateFullMap, generateDepthLevel } = useMapGenerator();
 
   useEffect(() => {
-    const loadRun = async () => {
-      try {
-        const manager = getRunQueueManager();
-        const foundRun = manager.getRunById(runId);
-        if (foundRun) {
-          setRun(foundRun);
-          const mapNodes = generateFullMap(5);
-          setNodes(mapNodes);
-          setRunState({
-            runId: foundRun.id,
-            currentDepth: 0,
-            currentNode: '',
-            energyRemaining: foundRun.totalEnergy,
-            inventory: [],
-            visitedNodes: [],
-            discoveredShortcuts: [],
-          });
-        } else {
-          setError('Run not found');
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load run');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     if (runId) {
-      loadRun();
+      loadRunImpl({
+        runId,
+        generateFullMap,
+        setRun,
+        setNodes,
+        setRunState,
+        setError,
+        setIsLoading,
+      });
     }
   }, [runId, generateFullMap]);
 
-  const updateEnergy = (newEnergy: number | ((current: number) => number)) => {
-    setRunState((prevState) => {
-      if (!prevState) return prevState;
-      const energyValue =
-        typeof newEnergy === 'function' ? newEnergy(prevState.energyRemaining) : newEnergy;
-      return {
-        ...prevState,
-        energyRemaining: energyValue,
-      };
-    });
-  };
-
-  const addToInventory = (item: any) => {
-    setRunState((prevState) => {
-      if (!prevState) return prevState;
-      return {
-        ...prevState,
-        inventory: [...prevState.inventory, item],
-      };
-    });
-  };
-
-  const markNodeVisited = (nodeId: string) => {
-    setRunState((prevState) => {
-      if (!prevState || prevState.visitedNodes.includes(nodeId)) return prevState;
-      return {
-        ...prevState,
-        visitedNodes: [...prevState.visitedNodes, nodeId],
-        currentNode: nodeId,
-      };
-    });
-  };
-
-  const updateDepth = (newDepth: number) => {
-    setRunState((prevState) => {
-      if (!prevState) return prevState;
-      
-      // Update depth to the new depth
-      const updatedDepth = Math.max(prevState.currentDepth, newDepth);
-      
-      console.log('updateDepth called:', { 
-        currentDepth: prevState.currentDepth, 
-        newDepth, 
-        updatedDepth,
-        maxDepth,
-        willGenerate: updatedDepth >= maxDepth
-      });
-      
-      // If we're going deeper than current max depth, generate new level
-      if (updatedDepth >= maxDepth) {
-        console.log('Generating new level:', maxDepth + 1);
-        const newNodes = generateDepthLevel(maxDepth + 1);
-        setNodes((prevNodes) => {
-          console.log('Adding nodes:', newNodes.length, 'Total nodes:', prevNodes.length + newNodes.length);
-          return [...prevNodes, ...newNodes];
-        });
-        setMaxDepth(maxDepth + 1);
-      }
-      
-      return {
-        ...prevState,
-        currentDepth: updatedDepth,
-      };
-    });
-  };
+  const updateEnergy = React.useCallback(
+    (newEnergy: number | ((current: number) => number)) =>
+      setRunState((prev) => updateEnergyImpl(prev, newEnergy)),
+    []
+  );
+  const addToInventory = React.useCallback(
+    (item: any) => setRunState((prev) => addToInventoryImpl(prev, item)),
+    []
+  );
+  const markNodeVisited = React.useCallback(
+    (nodeId: string) =>
+      setRunState((prev) => markNodeVisitedImpl(prev, nodeId)),
+    []
+  );
+  const updateDepth = React.useCallback(
+    (newDepth: number) =>
+      setRunState((prev) =>
+        updateDepthImpl({
+          prevState: prev,
+          newDepth,
+          maxDepth,
+          generateDepthLevel,
+          setNodes,
+          setMaxDepth,
+        })
+      ),
+    [maxDepth, generateDepthLevel]
+  );
 
   return {
     run,
@@ -227,12 +170,17 @@ const useEncounterHandlers = (params: {
   onNodeVisited: (nodeId: string) => void;
   onDepthUpdate: (depth: number) => void;
 }) => {
-  const { onEnergyUpdate, onInventoryUpdate, onNodeVisited, onDepthUpdate } = params;
+  const { onEnergyUpdate, onInventoryUpdate, onNodeVisited, onDepthUpdate } =
+    params;
   const [selectedNode, setSelectedNode] = useState<DungeonNode | null>(null);
   const [showEncounter, setShowEncounter] = useState(false);
 
   const handleNodePress = useCallback(
-    (node: DungeonNode, currentRunState: RunState | null, onBust?: () => void) => {
+    (
+      node: DungeonNode,
+      currentRunState: RunState | null,
+      onBust?: () => void
+    ) => {
       if (!currentRunState) return false;
       if (currentRunState.energyRemaining < node.energyCost) {
         // Check if we can't afford this node - might be bust
@@ -251,33 +199,24 @@ const useEncounterHandlers = (params: {
   );
 
   const handleEncounterComplete = useCallback(
-    (
-      result: 'success' | 'failure',
-      rewards?: any[]
-    ) => {
-      if (!selectedNode) {
-        setShowEncounter(false);
-        return;
-      }
-
-      // Consume energy for visiting the node
-      onEnergyUpdate(-selectedNode.energyCost);
-
-      // Add rewards to inventory if successful
-      if (result === 'success' && rewards) {
-        onInventoryUpdate(rewards);
-      }
-
-      // Mark node as visited
-      onNodeVisited(selectedNode.id);
-
-      // Update depth if we went deeper
-      // This allows access to next level nodes
-      onDepthUpdate(selectedNode.depth);
-
-      setShowEncounter(false);
-    },
-    [selectedNode, onEnergyUpdate, onInventoryUpdate, onNodeVisited, onDepthUpdate]
+    (result: 'success' | 'failure', rewards?: any[]) =>
+      handleEncounterCompleteImpl({
+        selectedNode,
+        setShowEncounter,
+        onEnergyUpdate,
+        onInventoryUpdate,
+        onNodeVisited,
+        onDepthUpdate,
+        result,
+        rewards,
+      }),
+    [
+      selectedNode,
+      onEnergyUpdate,
+      onInventoryUpdate,
+      onNodeVisited,
+      onDepthUpdate,
+    ]
   );
 
   return {
@@ -289,18 +228,276 @@ const useEncounterHandlers = (params: {
   };
 };
 
+function updateEnergyImpl(
+  prevState: RunState | null,
+  newEnergy: number | ((current: number) => number)
+): RunState | null {
+  if (!prevState) return prevState;
+  const energyValue =
+    typeof newEnergy === 'function'
+      ? (newEnergy as (c: number) => number)(prevState.energyRemaining)
+      : newEnergy;
+  return { ...prevState, energyRemaining: energyValue };
+}
+
+function addToInventoryImpl(
+  prevState: RunState | null,
+  item: any
+): RunState | null {
+  if (!prevState) return prevState;
+  return { ...prevState, inventory: [...prevState.inventory, item] };
+}
+
+function markNodeVisitedImpl(
+  prevState: RunState | null,
+  nodeId: string
+): RunState | null {
+  if (!prevState || prevState.visitedNodes.includes(nodeId)) return prevState;
+  return {
+    ...prevState,
+    visitedNodes: [...prevState.visitedNodes, nodeId],
+    currentNode: nodeId,
+  };
+}
+
+function updateDepthImpl({
+  prevState,
+  newDepth,
+  maxDepth,
+  generateDepthLevel,
+  setNodes,
+  setMaxDepth,
+}: {
+  prevState: RunState | null;
+  newDepth: number;
+  maxDepth: number;
+  generateDepthLevel: (depth: number) => DungeonNode[];
+  setNodes: React.Dispatch<React.SetStateAction<DungeonNode[]>>;
+  setMaxDepth: React.Dispatch<React.SetStateAction<number>>;
+}): RunState | null {
+  if (!prevState) return prevState;
+  const updatedDepth = Math.max(prevState.currentDepth, newDepth);
+  if (updatedDepth >= maxDepth) {
+    const newNodes = generateDepthLevel(maxDepth + 1);
+    setNodes((prevNodes) => [...prevNodes, ...newNodes]);
+    setMaxDepth(maxDepth + 1);
+  }
+  return { ...prevState, currentDepth: updatedDepth };
+}
+
+function handleEncounterCompleteImpl({
+  selectedNode,
+  setShowEncounter,
+  onEnergyUpdate,
+  onInventoryUpdate,
+  onNodeVisited,
+  onDepthUpdate,
+  result,
+  rewards,
+}: {
+  selectedNode: DungeonNode | null;
+  setShowEncounter: (v: boolean) => void;
+  onEnergyUpdate: (delta: number) => void;
+  onInventoryUpdate: (items: any[]) => void;
+  onNodeVisited: (id: string) => void;
+  onDepthUpdate: (depth: number) => void;
+  result: 'success' | 'failure';
+  rewards?: any[];
+}) {
+  if (!selectedNode) {
+    setShowEncounter(false);
+    return;
+  }
+  onEnergyUpdate(-selectedNode.energyCost);
+  if (result === 'success' && rewards) {
+    onInventoryUpdate(rewards);
+  }
+  onNodeVisited(selectedNode.id);
+  onDepthUpdate(selectedNode.depth);
+  setShowEncounter(false);
+}
+
+function useRiskFlow({
+  runState,
+  updateDepth,
+}: {
+  runState: RunState | null;
+  updateDepth: (d: number) => void;
+}) {
+  const [showRiskWarning, setShowRiskWarning] = useState(false);
+  const [riskWarning, setRiskWarning] = useState<{
+    type: 'safe' | 'caution' | 'danger' | 'critical';
+    message: string;
+    severity: number;
+  } | null>(null);
+
+  const handleContinue = () => {
+    if (!runState) return;
+    const safetyMargin = runState.energyRemaining - 100;
+    let warningType: 'safe' | 'caution' | 'danger' | 'critical';
+    let message: string;
+    let severity: number;
+    if (safetyMargin < 0) {
+      warningType = 'critical';
+      message =
+        'You cannot return safely! Going deeper risks losing all progress.';
+      severity = 10;
+    } else if (safetyMargin < 50) {
+      warningType = 'danger';
+      message =
+        'Dangerous energy levels! You may not be able to return if you continue.';
+      severity = 8;
+    } else if (safetyMargin < 150) {
+      warningType = 'caution';
+      message =
+        'Low energy remaining. Consider cashing out to secure your rewards.';
+      severity = 5;
+    } else {
+      return;
+    }
+    setRiskWarning({ type: warningType, message, severity });
+    setShowRiskWarning(true);
+  };
+
+  const handleConfirmRisk = () => {
+    setShowRiskWarning(false);
+    setRiskWarning(null);
+    updateDepth((runState?.currentDepth || 0) + 1);
+  };
+
+  return {
+    riskWarning,
+    showRiskWarning,
+    handleContinue,
+    handleConfirmRisk,
+    setShowRiskWarning,
+  };
+}
+
+function useCashOutFlow({
+  run,
+  runState,
+  router,
+  setShowCashOutModal,
+}: {
+  run: DelvingRun | null;
+  runState: RunState | null;
+  router: any;
+  setShowCashOutModal: (v: boolean) => void;
+}) {
+  const handleCashOutConfirm = useCallback(async () => {
+    if (!runState || !run) return;
+    setShowCashOutModal(false);
+    try {
+      const runQueueManager = getRunQueueManager();
+      const collectionManager = new CollectionManager(ALL_COLLECTION_SETS);
+      const achievementManager = new AchievementManager(ALL_ACHIEVEMENTS);
+      await achievementManager.loadSavedState();
+      const completionResult = {
+        finalInventory: runState.inventory,
+        totalEnergyUsed: run.totalEnergy - runState.energyRemaining,
+        deepestDepth: runState.currentDepth,
+        shortcutsDiscovered: runState.discoveredShortcuts,
+      };
+      for (const item of completionResult.finalInventory) {
+        if (
+          item.setId &&
+          (item.type === 'trade_good' ||
+            item.type === 'discovery' ||
+            item.type === 'legendary')
+        ) {
+          await collectionManager.addCollectedItem({
+            itemId: item.id,
+            setId: item.setId,
+            collectedDate: Date.now(),
+            runId: run.id,
+            source: 'encounter',
+          });
+        }
+      }
+      achievementManager.processEvent({
+        type: 'depth_reached',
+        data: { depth: completionResult.deepestDepth, cashOut: true },
+        timestamp: new Date(),
+      });
+      const progress = await collectionManager.getCollectionProgress();
+      for (const setId of progress.completedSets) {
+        achievementManager.processEvent({
+          type: 'collection_completed',
+          data: { collectionSetId: setId },
+          timestamp: new Date(),
+        });
+      }
+      await saveAchievements(achievementManager);
+      runQueueManager.updateRunStatus(run.id, 'completed');
+      router.push('/(app)/run-queue');
+    } catch (error) {
+      console.error('Failed to complete cash out:', error);
+      alert('Failed to complete cash out. Please try again.');
+    }
+  }, [run, runState, router, setShowCashOutModal]);
+
+  return { handleCashOutConfirm } as const;
+}
+
+async function loadRunImpl({
+  runId,
+  generateFullMap,
+  setRun,
+  setNodes,
+  setRunState,
+  setError,
+  setIsLoading,
+}: {
+  runId: string;
+  generateFullMap: (depth: number) => DungeonNode[];
+  setRun: React.Dispatch<React.SetStateAction<DelvingRun | null>>;
+  setNodes: React.Dispatch<React.SetStateAction<DungeonNode[]>>;
+  setRunState: React.Dispatch<React.SetStateAction<RunState | null>>;
+  setError: React.Dispatch<React.SetStateAction<string | null>>;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
+  try {
+    const manager = getRunQueueManager();
+    const foundRun = manager.getRunById(runId);
+    if (foundRun) {
+      setRun(foundRun);
+      const mapNodes = generateFullMap(5);
+      setNodes(mapNodes);
+      setRunState({
+        runId: foundRun.id,
+        currentDepth: 0,
+        currentNode: '',
+        energyRemaining: foundRun.totalEnergy,
+        inventory: [],
+        visitedNodes: [],
+        discoveredShortcuts: [],
+      });
+    } else {
+      setError('Run not found');
+    }
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'Failed to load run');
+  } finally {
+    setIsLoading(false);
+  }
+}
+
 const MapView: React.FC<{
   run: DelvingRun;
   nodes: DungeonNode[];
   runState: RunState | null;
   onNodePress: (node: DungeonNode) => void;
-  router: any;
   showCashOutModal: boolean;
   onShowCashOut: () => void;
   onHideCashOut: () => void;
   onCashOutConfirm: () => void;
   showRiskWarning: boolean;
-  riskWarning: { type: 'safe' | 'caution' | 'danger' | 'critical'; message: string; severity: number } | null;
+  riskWarning: {
+    type: 'safe' | 'caution' | 'danger' | 'critical';
+    message: string;
+    severity: number;
+  } | null;
   onShowRiskWarning: () => void;
   onHideRiskWarning: () => void;
   onConfirmRisk: () => void;
@@ -309,7 +506,6 @@ const MapView: React.FC<{
   nodes,
   runState,
   onNodePress,
-  router,
   showCashOutModal,
   onShowCashOut,
   onHideCashOut,
@@ -334,38 +530,38 @@ const MapView: React.FC<{
           currentDepth={runState?.currentDepth || 0}
         />
       </View>
-    {nodes.length > 0 && runState && (
-      <InteractiveMap
-        nodes={nodes}
-        runState={runState}
-        onNodePress={onNodePress}
-      />
-    )}
-    <NavigationControls
-      onCashOut={onShowCashOut}
-      onContinue={onShowRiskWarning}
-      energyRemaining={runState?.energyRemaining || 0}
-      returnCost={100}
-    />
-    {runState && (
-      <>
-        <CashOutModal
-          visible={showCashOutModal}
+      {nodes.length > 0 && runState && (
+        <InteractiveMap
+          nodes={nodes}
           runState={runState}
-          returnCost={100}
-          onConfirm={onCashOutConfirm}
-          onCancel={onHideCashOut}
+          onNodePress={onNodePress}
         />
-        {riskWarning && (
-          <RiskWarningModal
-            visible={showRiskWarning}
-            warning={riskWarning}
-            onConfirm={onConfirmRisk}
-            onCancel={onHideRiskWarning}
+      )}
+      <NavigationControls
+        onCashOut={onShowCashOut}
+        onContinue={onShowRiskWarning}
+        energyRemaining={runState?.energyRemaining || 0}
+        returnCost={100}
+      />
+      {runState && (
+        <>
+          <CashOutModal
+            visible={showCashOutModal}
+            runState={runState}
+            returnCost={100}
+            onConfirm={onCashOutConfirm}
+            onCancel={onHideCashOut}
           />
-        )}
-      </>
-    )}
+          {riskWarning && (
+            <RiskWarningModal
+              visible={showRiskWarning}
+              warning={riskWarning}
+              onConfirm={onConfirmRisk}
+              onCancel={onHideRiskWarning}
+            />
+          )}
+        </>
+      )}
     </View>
   );
 };
@@ -374,67 +570,139 @@ export default function ActiveRunRoute() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const runId = params.id as string;
-  const [showCashOutModal, setShowCashOutModal] = useState(false);
-  const [showRiskWarning, setShowRiskWarning] = useState(false);
-  const [riskWarning, setRiskWarning] = useState<{ type: 'safe' | 'caution' | 'danger' | 'critical'; message: string; severity: number } | null>(null);
-  const {
-    run,
-    nodes,
-    runState,
-    isLoading,
-    error,
-    updateEnergy,
-    addToInventory,
-    markNodeVisited,
-    updateDepth,
-  } = useActiveRunData(runId);
+  return <ActiveRunScreen router={router} runId={runId} />;
+}
 
-  const handleEnergyUpdate = useCallback(
-    (energyDelta: number) => {
-      updateEnergy((currentEnergy: number) => {
-        const newEnergy = currentEnergy + energyDelta;
-        
-        // Check if energy has been exhausted
-        if (newEnergy <= 0 && runState && run) {
-          // Trigger bust
-          const itemsLost = runState.inventory.length;
-          const energyLost = currentEnergy; // All energy was lost
-          
-          // Navigate to bust screen
-          router.push({
-            pathname: '/(app)/bust-screen',
-            params: {
-              consequence: JSON.stringify({
-                itemsLost,
-                energyLost,
-                xpPreserved: true,
-                xpAmount: run.steps, // Preserve XP from steps
-                message: 'You ran out of energy and could not afford to return safely.',
-              }),
-            },
-          });
-        }
-        
-        return newEnergy;
-      });
-    },
-    [updateEnergy, runState, run, router]
+function ActiveRunScreen({ router, runId }: { router: any; runId: string }) {
+  const controllers = useActiveRunControllers({ router, runId });
+  if (controllers.isLoading) return <LoadingView />;
+  if (controllers.error || !controllers.run)
+    return (
+      <ErrorView error={controllers.error || 'Run not found'} router={router} />
+    );
+  if (
+    controllers.handlers.showEncounter &&
+    controllers.handlers.selectedNode &&
+    controllers.run
+  ) {
+    return (
+      <EncounterView
+        run={controllers.run}
+        node={controllers.handlers.selectedNode}
+        onReturnToMap={controllers.handlers.handleReturnToMap}
+        onEncounterComplete={controllers.handlers.handleEncounterComplete}
+      />
+    );
+  }
+  return (
+    <MapView
+      run={controllers.run}
+      nodes={controllers.nodes}
+      runState={controllers.runState}
+      onNodePress={controllers.handleNodePress}
+      showCashOutModal={controllers.showCashOutModal}
+      onShowCashOut={controllers.showCashOut}
+      onHideCashOut={controllers.hideCashOut}
+      onCashOutConfirm={controllers.handleCashOutConfirm}
+      showRiskWarning={controllers.showRiskWarning}
+      riskWarning={controllers.riskWarning}
+      onShowRiskWarning={controllers.handleContinue}
+      onHideRiskWarning={controllers.hideRiskWarning}
+      onConfirmRisk={controllers.handleConfirmRisk}
+    />
   );
+}
 
-  const handleInventoryUpdate = (items: any[]) => {
-    items.forEach((item) => {
+function useActiveRunControllers({
+  router,
+  runId,
+}: {
+  router: any;
+  runId: string;
+}) {
+  const [showCashOutModal, setShowCashOutModal] = useState(false);
+  const data = useActiveRunData(runId);
+  const handleEnergyUpdate = useEnergyUpdateHandler({
+    updateEnergy: data.updateEnergy,
+    runState: data.runState,
+    run: data.run,
+    router,
+  });
+  const handleInventoryUpdate = buildInventoryUpdater(data.addToInventory);
+  const { handlers, handleNodePress } = useHandlersWiring({
+    runState: data.runState,
+    handleEnergyUpdate,
+    handleInventoryUpdate,
+    markNodeVisited: data.markNodeVisited,
+    updateDepth: data.updateDepth,
+    run: data.run,
+    router,
+  });
+  const { handleCashOutConfirm } = useCashOutFlow({
+    run: data.run,
+    runState: data.runState,
+    router,
+    setShowCashOutModal,
+  });
+  const {
+    riskWarning,
+    showRiskWarning,
+    handleContinue,
+    handleConfirmRisk,
+    setShowRiskWarning,
+  } = useRiskFlow({ runState: data.runState, updateDepth: data.updateDepth });
+  return {
+    run: data.run,
+    nodes: data.nodes,
+    runState: data.runState,
+    isLoading: data.isLoading,
+    error: data.error,
+    handlers,
+    handleNodePress,
+    handleCashOutConfirm,
+    riskWarning,
+    showRiskWarning,
+    handleContinue,
+    handleConfirmRisk,
+    hideRiskWarning: () => setShowRiskWarning(false),
+    showCashOutModal,
+    showCashOut: () => setShowCashOutModal(true),
+    hideCashOut: () => setShowCashOutModal(false),
+  } as const;
+}
+
+function buildInventoryUpdater(addToInventory: (item: any) => void) {
+  return (items: any[]) => {
+    items.forEach((item) =>
       addToInventory({
         id: item.id || `item-${Date.now()}`,
         name: item.name || 'Unknown Item',
         type: item.type || 'misc',
         value: item.value || 0,
         description: item.description || '',
-        // Preserve setId if it exists (required for collections)
         ...(item.setId && { setId: item.setId }),
-      });
-    });
+      })
+    );
   };
+}
 
+function useHandlersWiring({
+  runState,
+  handleEnergyUpdate,
+  handleInventoryUpdate,
+  markNodeVisited,
+  updateDepth,
+  run,
+  router,
+}: {
+  runState: RunState | null;
+  handleEnergyUpdate: (delta: number) => void;
+  handleInventoryUpdate: (items: any[]) => void;
+  markNodeVisited: (id: string) => void;
+  updateDepth: (d: number) => void;
+  run: DelvingRun | null;
+  router: any;
+}) {
   const handlers = useEncounterHandlers({
     runState,
     onEnergyUpdate: handleEnergyUpdate,
@@ -442,183 +710,108 @@ export default function ActiveRunRoute() {
     onNodeVisited: markNodeVisited,
     onDepthUpdate: updateDepth,
   });
+  const handleNodePress = useNodePressHandler({
+    handlers,
+    runState,
+    run,
+    router,
+  });
+  return { handlers, handleNodePress } as const;
+}
 
-  const handleNodePress = (node: DungeonNode) => {
-    handlers.handleNodePress(node, runState, () => {
-      // Trigger bust if can't afford node
-      if (runState && run) {
-        const itemsLost = runState.inventory.length;
-        const energyLost = runState.energyRemaining;
-        
-        router.push({
-          pathname: '/(app)/bust-screen',
-          params: {
-            consequence: JSON.stringify({
-              itemsLost,
-              energyLost,
-              xpPreserved: true,
-              xpAmount: run.steps,
-              message: 'You ran out of energy and could not afford to continue.',
-            }),
-          },
-        });
-      }
-    });
-  };
-
-  const handleCashOutConfirm = async () => {
-    if (!runState || !run) return;
-
-    setShowCashOutModal(false);
-
-    try {
-      const runQueueManager = getRunQueueManager();
-      const collectionManager = new CollectionManager(ALL_COLLECTION_SETS);
-      const achievementManager = new AchievementManager(ALL_ACHIEVEMENTS);
-      
-      // Load saved achievement state before processing new events
-      await achievementManager.loadSavedState();
-
-      // Use the local runState directly (it's not stored in RunStateManager singleton)
-      const completionResult = {
-        finalInventory: runState.inventory,
-        totalEnergyUsed: run.totalEnergy - runState.energyRemaining,
-        deepestDepth: runState.currentDepth,
-        shortcutsDiscovered: runState.discoveredShortcuts,
-      };
-
-      // Add collected items to CollectionManager
-      // Map CollectedItem to CollectedItemTracking and add to collection
-      for (const item of completionResult.finalInventory) {
-        // Only add items that belong to a collection set
-        if (item.setId && (item.type === 'trade_good' || item.type === 'discovery' || item.type === 'legendary')) {
-          await collectionManager.addCollectedItem({
-            itemId: item.id,
-            setId: item.setId,
-            collectedDate: Date.now(),
-            runId: run.id,
-            source: 'encounter',
+function useEnergyUpdateHandler({
+  updateEnergy,
+  runState,
+  run,
+  router,
+}: {
+  updateEnergy: (updater: (current: number) => number) => void;
+  runState: RunState | null;
+  run: DelvingRun | null;
+  router: any;
+}) {
+  return useCallback(
+    (energyDelta: number) => {
+      updateEnergy((currentEnergy: number) => {
+        const newEnergy = currentEnergy + energyDelta;
+        if (newEnergy <= 0 && runState && run) {
+          const itemsLost = runState.inventory.length;
+          const energyLost = currentEnergy;
+          router.push({
+            pathname: '/(app)/bust-screen',
+            params: {
+              consequence: JSON.stringify({
+                itemsLost,
+                energyLost,
+                xpPreserved: true,
+                xpAmount: run.steps,
+                message:
+                  'You ran out of energy and could not afford to return safely.',
+              }),
+            },
           });
         }
-      }
-
-      // Process achievement events
-      // Depth achievement (for milestones)
-      achievementManager.processEvent({
-        type: 'depth_reached',
-        data: {
-          depth: completionResult.deepestDepth,
-          cashOut: true,
-        },
-        timestamp: new Date(),
+        return newEnergy;
       });
+    },
+    [updateEnergy, runState, run, router]
+  );
+}
 
-      // Collection achievement (for each completed set)
-      const progress = await collectionManager.getCollectionProgress();
-      for (const setId of progress.completedSets) {
-        achievementManager.processEvent({
-          type: 'collection_completed',
-          data: {
-            collectionSetId: setId,
-          },
-          timestamp: new Date(),
-        });
-      }
+function useNodePressHandler({
+  handlers,
+  runState,
+  run,
+  router,
+}: {
+  handlers: ReturnType<typeof useEncounterHandlers>;
+  runState: RunState | null;
+  run: DelvingRun | null;
+  router: any;
+}) {
+  return useCallback(
+    (node: DungeonNode) => {
+      handlers.handleNodePress(node, runState, () => {
+        if (runState && run) {
+          const itemsLost = runState.inventory.length;
+          const energyLost = runState.energyRemaining;
+          router.push({
+            pathname: '/(app)/bust-screen',
+            params: {
+              consequence: JSON.stringify({
+                itemsLost,
+                energyLost,
+                xpPreserved: true,
+                xpAmount: run.steps,
+                message:
+                  'You ran out of energy and could not afford to continue.',
+              }),
+            },
+          });
+        }
+      });
+    },
+    [handlers, runState, run, router]
+  );
+}
 
-      // Save achievements
-      await saveAchievements(achievementManager);
-
-      // Update run status to completed
-      // Store completion metadata (depth, items count, total value) in run metadata
-      const totalValue = completionResult.finalInventory.reduce(
-        (sum, item) => sum + item.value,
-        0
-      );
-      runQueueManager.updateRunStatus(run.id, 'completed');
-
-      // Store completion data for history (we'll need to extend DelvingRun or store separately)
-      // For now, the completion data is stored in CollectionManager, so run history can show items collected
-      
-      // Navigate back to run queue
-      router.push('/(app)/run-queue');
-    } catch (error) {
-      console.error('Failed to complete cash out:', error);
-      alert('Failed to complete cash out. Please try again.');
-    }
-  };
-
-  const handleContinue = () => {
-    if (!runState) return;
-
-    const safetyMargin = runState.energyRemaining - 100; // returnCost
-
-    // Determine risk level and show appropriate warning
-    let warningType: 'safe' | 'caution' | 'danger' | 'critical';
-    let message: string;
-    let severity: number;
-
-    if (safetyMargin < 0) {
-      warningType = 'critical';
-      message = 'You cannot return safely! Going deeper risks losing all progress.';
-      severity = 10;
-    } else if (safetyMargin < 50) {
-      warningType = 'danger';
-      message = 'Dangerous energy levels! You may not be able to return if you continue.';
-      severity = 8;
-    } else if (safetyMargin < 150) {
-      warningType = 'caution';
-      message = 'Low energy remaining. Consider cashing out to secure your rewards.';
-      severity = 5;
-    } else {
-      // Don't show warning for safe energy levels
-      return;
-    }
-
-    setRiskWarning({ type: warningType, message, severity });
-    setShowRiskWarning(true);
-  };
-
-  const handleConfirmRisk = () => {
-    setShowRiskWarning(false);
-    setRiskWarning(null);
-    // Unlock the next level for exploration
-    updateDepth((runState?.currentDepth || 0) + 1);
-  };
-
-  if (isLoading) return <LoadingView />;
-  if (error || !run)
-    return <ErrorView error={error || 'Run not found'} router={router} />;
-
-  if (handlers.showEncounter && handlers.selectedNode && run) {
-    return (
-      <EncounterScreen
-        run={run}
-        node={handlers.selectedNode}
-        onReturnToMap={handlers.handleReturnToMap}
-        onEncounterComplete={handlers.handleEncounterComplete}
-      />
-    );
-  }
-
+function EncounterView({
+  run,
+  node,
+  onReturnToMap,
+  onEncounterComplete,
+}: {
+  run: DelvingRun;
+  node: DungeonNode;
+  onReturnToMap: () => void;
+  onEncounterComplete: (result: 'success' | 'failure', rewards?: any[]) => void;
+}) {
   return (
-    <MapView
+    <EncounterScreen
       run={run}
-      nodes={nodes}
-      runState={runState}
-      onNodePress={handleNodePress}
-      router={router}
-      showCashOutModal={showCashOutModal}
-      onShowCashOut={() => setShowCashOutModal(true)}
-      onHideCashOut={() => setShowCashOutModal(false)}
-      onCashOutConfirm={handleCashOutConfirm}
-      showRiskWarning={showRiskWarning}
-      riskWarning={riskWarning}
-      onShowRiskWarning={handleContinue}
-      onHideRiskWarning={() => {
-        setShowRiskWarning(false);
-        setRiskWarning(null);
-      }}
-      onConfirmRisk={handleConfirmRisk}
+      node={node}
+      onReturnToMap={onReturnToMap}
+      onEncounterComplete={onEncounterComplete}
     />
   );
 }

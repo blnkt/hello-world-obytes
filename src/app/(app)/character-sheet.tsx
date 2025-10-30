@@ -22,10 +22,10 @@ export default function CharacterSheetScreen() {
   const { experience } = useExperienceData();
 
   // Use initial character if none exists in storage
-  const displayCharacter = {
-    ...(character || initialCharacter),
-    experience,
-  } as Character;
+  const displayCharacter = React.useMemo(
+    () => ({ ...(character || initialCharacter), experience }) as Character,
+    [character, experience]
+  );
 
   const handleCharacterChange = React.useCallback(
     (updated: Character | ((prev: Character) => Character)) => {

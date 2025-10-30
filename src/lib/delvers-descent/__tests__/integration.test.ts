@@ -3,9 +3,14 @@ import { RunStateManager } from '@/lib/delvers-descent/run-state-manager';
 import { EnergyCalculator } from '@/lib/delvers-descent/energy-calculator';
 import { DungeonMapGenerator } from '@/lib/delvers-descent/map-generator';
 import { generateDelvingRunsFromStepHistory } from '@/lib/delvers-descent/healthkit-integration';
-import type { DelvingRun, DungeonNode, RunState, CollectedItem } from '@/types/delvers-descent';
+import type {
+  DelvingRun,
+  DungeonNode,
+  RunState,
+  CollectedItem,
+} from '@/types/delvers-descent';
 
-describe('Delver\'s Descent Integration Tests', () => {
+describe("Delver's Descent Integration Tests", () => {
   let runQueueManager: RunQueueManager;
   let runStateManager: RunStateManager;
   let energyCalculator: EnergyCalculator;
@@ -17,7 +22,7 @@ describe('Delver\'s Descent Integration Tests', () => {
     runStateManager = new RunStateManager();
     energyCalculator = new EnergyCalculator();
     mapGenerator = new DungeonMapGenerator();
-    
+
     // Clear any existing data
     runQueueManager.clearAllRuns();
   });
@@ -43,7 +48,9 @@ describe('Delver\'s Descent Integration Tests', () => {
       const maxDepth = 5;
       const dungeonMap = mapGenerator.generateFullMap(maxDepth);
       expect(dungeonMap.length).toBeGreaterThan(0);
-      expect(dungeonMap.every(node => node.depth >= 1 && node.depth <= maxDepth)).toBe(true);
+      expect(
+        dungeonMap.every((node) => node.depth >= 1 && node.depth <= maxDepth)
+      ).toBe(true);
 
       // Initialize run state
       await runStateManager.initializeRun(run.id, run.totalEnergy);
@@ -53,7 +60,7 @@ describe('Delver\'s Descent Integration Tests', () => {
       expect(initialState?.energyRemaining).toBe(run.totalEnergy);
 
       // Step 3: Navigate through depths
-      const startNode = dungeonMap.find(node => node.depth === 1);
+      const startNode = dungeonMap.find((node) => node.depth === 1);
       expect(startNode).toBeDefined();
 
       if (startNode) {
@@ -62,7 +69,9 @@ describe('Delver\'s Descent Integration Tests', () => {
         const afterFirstMove = runStateManager.getCurrentState();
         expect(afterFirstMove?.currentNode).toBe(startNode.id);
         expect(afterFirstMove?.currentDepth).toBe(1);
-        expect(afterFirstMove?.energyRemaining).toBe(run.totalEnergy - startNode.energyCost);
+        expect(afterFirstMove?.energyRemaining).toBe(
+          run.totalEnergy - startNode.energyCost
+        );
 
         // Add some items to inventory
         const testItem: CollectedItem = {
@@ -111,12 +120,14 @@ describe('Delver\'s Descent Integration Tests', () => {
 
       // Initialize run
       await runStateManager.initializeRun(run.id, run.totalEnergy);
-      
+
       // Generate map
       const dungeonMap = mapGenerator.generateFullMap(3);
-      
+
       // Try to move to a node that costs more energy than available
-      const expensiveNode = dungeonMap.find(node => node.energyCost > run.totalEnergy);
+      const expensiveNode = dungeonMap.find(
+        (node) => node.energyCost > run.totalEnergy
+      );
       if (expensiveNode) {
         await expect(
           runStateManager.moveToNode(expensiveNode.id, expensiveNode.energyCost)
@@ -143,7 +154,10 @@ describe('Delver\'s Descent Integration Tests', () => {
       expect(run.totalEnergy).toBe(steps);
 
       // Test streak bonus (+20%)
-      const runWithBonus = runQueueManager.generateRunFromSteps('2024-01-18', steps);
+      const runWithBonus = runQueueManager.generateRunFromSteps(
+        '2024-01-18',
+        steps
+      );
       // Note: The actual bonus calculation is in the RunQueueManager
       expect(runWithBonus.totalEnergy).toBeGreaterThanOrEqual(steps);
 
@@ -173,7 +187,10 @@ describe('Delver\'s Descent Integration Tests', () => {
       ];
 
       const normalReturnCost = energyCalculator.calculateReturnCost(3);
-      const shortcutReturnCost = energyCalculator.calculateReturnCost(3, shortcuts);
+      const shortcutReturnCost = energyCalculator.calculateReturnCost(
+        3,
+        shortcuts
+      );
 
       expect(shortcutReturnCost).toBeLessThan(normalReturnCost);
       expect(shortcutReturnCost).toBeGreaterThan(0);
@@ -187,14 +204,18 @@ describe('Delver\'s Descent Integration Tests', () => {
 
       // Validate map structure
       expect(map.length).toBeGreaterThan(0);
-      
+
       // Check depth distribution
-      const depths = [...new Set(map.map(node => node.depth))];
+      const depths = [...new Set(map.map((node) => node.depth))];
       expect(depths.length).toBeLessThanOrEqual(maxDepth);
-      expect(depths.every(depth => depth >= 1 && depth <= maxDepth)).toBe(true);
+      expect(depths.every((depth) => depth >= 1 && depth <= maxDepth)).toBe(
+        true
+      );
 
       // Check node connections
-      const nodesWithConnections = map.filter(node => node.connections.length > 0);
+      const nodesWithConnections = map.filter(
+        (node) => node.connections.length > 0
+      );
       expect(nodesWithConnections.length).toBeGreaterThan(0);
 
       // Validate map
@@ -205,18 +226,21 @@ describe('Delver\'s Descent Integration Tests', () => {
 
     it('should create 2-3 nodes per depth level', () => {
       const map = mapGenerator.generateFullMap(3);
-      
+
       // Group nodes by depth
-      const nodesByDepth = map.reduce((acc, node) => {
-        if (!acc[node.depth]) {
-          acc[node.depth] = [];
-        }
-        acc[node.depth].push(node);
-        return acc;
-      }, {} as Record<number, DungeonNode[]>);
+      const nodesByDepth = map.reduce(
+        (acc, node) => {
+          if (!acc[node.depth]) {
+            acc[node.depth] = [];
+          }
+          acc[node.depth].push(node);
+          return acc;
+        },
+        {} as Record<number, DungeonNode[]>
+      );
 
       // Check each depth has 2-3 nodes
-      Object.values(nodesByDepth).forEach(nodes => {
+      Object.values(nodesByDepth).forEach((nodes) => {
         expect(nodes.length).toBeGreaterThanOrEqual(2);
         expect(nodes.length).toBeLessThanOrEqual(3);
       });
@@ -235,7 +259,7 @@ describe('Delver\'s Descent Integration Tests', () => {
       // Manually create runs to test the core functionality
       for (const day of stepHistory) {
         const run = runQueueManager.generateRunFromSteps(
-          day.date.toISOString().split('T')[0], 
+          day.date.toISOString().split('T')[0],
           day.steps
         );
         await runQueueManager.addRunToQueue(run);
@@ -246,9 +270,9 @@ describe('Delver\'s Descent Integration Tests', () => {
       expect(allRuns.length).toBe(3);
 
       // Check specific run properties
-      const run1 = allRuns.find(run => run.date === '2024-01-15');
-      const run2 = allRuns.find(run => run.date === '2024-01-16');
-      const run3 = allRuns.find(run => run.date === '2024-01-17');
+      const run1 = allRuns.find((run) => run.date === '2024-01-15');
+      const run2 = allRuns.find((run) => run.date === '2024-01-16');
+      const run3 = allRuns.find((run) => run.date === '2024-01-17');
 
       expect(run1?.steps).toBe(8000);
       expect(run2?.steps).toBe(12000);
@@ -266,9 +290,9 @@ describe('Delver\'s Descent Integration Tests', () => {
 
       // Generate map
       const map = mapGenerator.generateFullMap(5);
-      
+
       // Calculate energy costs
-      const returnCosts = map.map(node => 
+      const returnCosts = map.map((node) =>
         energyCalculator.calculateReturnCost(node.depth)
       );
 
@@ -289,7 +313,7 @@ describe('Delver\'s Descent Integration Tests', () => {
     it('should not interfere with existing HealthKit and XP systems', () => {
       // This test ensures that our new systems don't break existing functionality
       // The existing HealthKit integration should continue to work
-      
+
       // Test that we can still generate runs without affecting existing data
       const run = runQueueManager.generateRunFromSteps('2024-01-20', 5000);
       expect(run).toBeDefined();
@@ -307,7 +331,7 @@ describe('Delver\'s Descent Integration Tests', () => {
       // Create some runs
       const run1 = runQueueManager.generateRunFromSteps('2024-01-21', 8000);
       const run2 = runQueueManager.generateRunFromSteps('2024-01-22', 12000);
-      
+
       await runQueueManager.addRunToQueue(run1);
       await runQueueManager.addRunToQueue(run2);
 
@@ -317,21 +341,21 @@ describe('Delver\'s Descent Integration Tests', () => {
 
       // Simulate app restart by creating new manager instance
       const newRunQueueManager = new RunQueueManager();
-      
+
       // Verify runs persist
       const persistedRuns = newRunQueueManager.getAllRuns();
       expect(persistedRuns.length).toBe(2);
-      expect(persistedRuns.some(run => run.id === run1.id)).toBe(true);
-      expect(persistedRuns.some(run => run.id === run2.id)).toBe(true);
+      expect(persistedRuns.some((run) => run.id === run1.id)).toBe(true);
+      expect(persistedRuns.some((run) => run.id === run2.id)).toBe(true);
     });
 
     it('should persist active run state across app sessions', async () => {
       // Initialize a run
       const run = runQueueManager.generateRunFromSteps('2024-01-23', 10000);
       await runQueueManager.addRunToQueue(run);
-      
+
       await runStateManager.initializeRun(run.id, run.totalEnergy);
-      
+
       // Add some inventory
       const item: CollectedItem = {
         id: 'persistent-item',
@@ -341,7 +365,7 @@ describe('Delver\'s Descent Integration Tests', () => {
         name: 'Persistent Item',
         description: 'An item that should persist across sessions',
       };
-      
+
       await runStateManager.addToInventory(item);
 
       // Verify state is stored
@@ -350,7 +374,7 @@ describe('Delver\'s Descent Integration Tests', () => {
 
       // Simulate app restart
       const newRunStateManager = new RunStateManager();
-      
+
       // Verify state persists
       const persistedState = newRunStateManager.getCurrentState();
       expect(persistedState?.runId).toBe(run.id);

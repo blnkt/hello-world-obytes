@@ -52,8 +52,22 @@ describe('CashOutModal', () => {
 
   it('should display inventory items', () => {
     const items: CollectedItem[] = [
-      { id: 'item-1', name: 'Gold Coin', value: 100, type: 'trade_good', setId: 'test-set', description: 'A gold coin' },
-      { id: 'item-2', name: 'Gem', value: 250, type: 'discovery', setId: 'test-set', description: 'A gem' },
+      {
+        id: 'item-1',
+        name: 'Gold Coin',
+        value: 100,
+        type: 'trade_good',
+        setId: 'test-set',
+        description: 'A gold coin',
+      },
+      {
+        id: 'item-2',
+        name: 'Gem',
+        value: 250,
+        type: 'discovery',
+        setId: 'test-set',
+        description: 'A gem',
+      },
     ];
     const stateWithItems = createMockRunState(items);
     const { getByText } = render(
@@ -66,8 +80,22 @@ describe('CashOutModal', () => {
 
   it('should calculate and display total value', () => {
     const items: CollectedItem[] = [
-      { id: 'item-1', name: 'Gold Coin', value: 100, type: 'trade_good', setId: 'test-set', description: 'A gold coin' },
-      { id: 'item-2', name: 'Gem', value: 250, type: 'discovery', setId: 'test-set', description: 'A gem' },
+      {
+        id: 'item-1',
+        name: 'Gold Coin',
+        value: 100,
+        type: 'trade_good',
+        setId: 'test-set',
+        description: 'A gold coin',
+      },
+      {
+        id: 'item-2',
+        name: 'Gem',
+        value: 250,
+        type: 'discovery',
+        setId: 'test-set',
+        description: 'A gem',
+      },
     ];
     const stateWithItems = createMockRunState(items);
     const { getByText } = render(
@@ -154,9 +182,30 @@ describe('CashOutModal', () => {
 
   it('should display correct items count', () => {
     const items: CollectedItem[] = [
-      { id: 'item-1', name: 'Gold Coin', value: 100, type: 'trade_good', setId: 'test-set', description: 'A gold coin' },
-      { id: 'item-2', name: 'Gem', value: 250, type: 'discovery', setId: 'test-set', description: 'A gem' },
-      { id: 'item-3', name: 'Scroll', value: 50, type: 'trade_good', setId: 'test-set', description: 'A scroll' },
+      {
+        id: 'item-1',
+        name: 'Gold Coin',
+        value: 100,
+        type: 'trade_good',
+        setId: 'test-set',
+        description: 'A gold coin',
+      },
+      {
+        id: 'item-2',
+        name: 'Gem',
+        value: 250,
+        type: 'discovery',
+        setId: 'test-set',
+        description: 'A gem',
+      },
+      {
+        id: 'item-3',
+        name: 'Scroll',
+        value: 50,
+        type: 'trade_good',
+        setId: 'test-set',
+        description: 'A scroll',
+      },
     ];
     const stateWithItems = createMockRunState(items);
     const { getByText } = render(
@@ -185,4 +234,3 @@ describe('CashOutModal', () => {
     expect(getByText('0')).toBeDefined();
   });
 });
-
