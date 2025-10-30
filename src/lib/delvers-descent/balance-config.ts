@@ -202,6 +202,51 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
         hazard: 0.1,
         rest_site: 0.1,
       },
+      ruins: {
+        // Ancient Ruins (exploration/economy)
+        puzzle_chamber: 0.25,
+        trade_opportunity: 0.25,
+        discovery_site: 0.2,
+        risk_event: 0.1,
+        hazard: 0.1,
+        rest_site: 0.1,
+      },
+      caverns: {
+        // Crystal Caverns (tension + recovery)
+        puzzle_chamber: 0.2,
+        trade_opportunity: 0.1,
+        discovery_site: 0.15,
+        risk_event: 0.2,
+        hazard: 0.2,
+        rest_site: 0.15,
+      },
+      sanctum: {
+        // Sanctum Archives (puzzle-forward, restorative)
+        puzzle_chamber: 0.4,
+        trade_opportunity: 0.1,
+        discovery_site: 0.2,
+        risk_event: 0.1,
+        hazard: 0.05,
+        rest_site: 0.15,
+      },
+      market: {
+        // Frontier Market (economy burst, low danger)
+        puzzle_chamber: 0.2,
+        trade_opportunity: 0.35,
+        discovery_site: 0.2,
+        risk_event: 0.1,
+        hazard: 0.05,
+        rest_site: 0.1,
+      },
+      wastes: {
+        // Ashen Wastes (hard mode)
+        puzzle_chamber: 0.15,
+        trade_opportunity: 0.1,
+        discovery_site: 0.1,
+        risk_event: 0.25,
+        hazard: 0.25,
+        rest_site: 0.15,
+      },
     },
   },
 

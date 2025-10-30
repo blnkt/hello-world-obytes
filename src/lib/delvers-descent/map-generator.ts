@@ -4,6 +4,7 @@ import type {
   Shortcut,
 } from '@/types/delvers-descent';
 
+import { DEFAULT_BALANCE_CONFIG } from './balance-config';
 import { ReturnCostCalculator } from './return-cost-calculator';
 
 export class DungeonMapGenerator {
@@ -16,12 +17,43 @@ export class DungeonMapGenerator {
     'rest_site',
   ];
   private readonly returnCostCalculator: ReturnCostCalculator;
+  private readonly encounterWeights: { type: EncounterType; weight: number }[];
+  private readonly encounterTotalWeight: number;
+  private readonly regionKey?: string;
 
-  constructor(config?: { baseMultiplier?: number; exponent?: number }) {
+  constructor(config?: {
+    baseMultiplier?: number;
+    exponent?: number;
+    regionKey?: string;
+  }) {
     this.returnCostCalculator = new ReturnCostCalculator({
       baseMultiplier: config?.baseMultiplier ?? 5,
       exponent: config?.exponent ?? 1.5,
     });
+    this.regionKey = config?.regionKey;
+
+    // Initialize weighted distribution from balance config (region-aware)
+    const regionDist = this.regionKey
+      ? DEFAULT_BALANCE_CONFIG.region.encounterDistributions[this.regionKey]
+      : undefined;
+    const dist =
+      regionDist ||
+      DEFAULT_BALANCE_CONFIG.region.encounterDistributions.default ||
+      DEFAULT_BALANCE_CONFIG.encounter.encounterDistribution;
+    const weights: { type: EncounterType; weight: number }[] = [
+      { type: 'puzzle_chamber' as EncounterType, weight: dist.puzzle_chamber },
+      {
+        type: 'trade_opportunity' as EncounterType,
+        weight: dist.trade_opportunity,
+      },
+      { type: 'discovery_site' as EncounterType, weight: dist.discovery_site },
+      { type: 'risk_event' as EncounterType, weight: dist.risk_event },
+      { type: 'hazard' as EncounterType, weight: dist.hazard },
+      { type: 'rest_site' as EncounterType, weight: dist.rest_site },
+    ].filter((w) => w.weight > 0);
+
+    this.encounterWeights = weights;
+    this.encounterTotalWeight = weights.reduce((sum, w) => sum + w.weight, 0);
   }
 
   /**
@@ -33,7 +65,7 @@ export class DungeonMapGenerator {
     }
 
     const nodeCount = Math.floor(Math.random() * 2) + 2; // 2-3 nodes
-    const shuffledEncounters = this.shuffleArray([...this.encounterTypes]);
+    // Select encounter types using weighted distribution
 
     const nodes: DungeonNode[] = [];
 
@@ -42,7 +74,7 @@ export class DungeonMapGenerator {
         id: `depth${depth}-node${position}`,
         depth,
         position,
-        type: shuffledEncounters[position % shuffledEncounters.length],
+        type: this.pickWeightedEncounterType(),
         energyCost: this.calculateNodeCost(depth),
         returnCost: this.calculateReturnCost(depth),
         isRevealed: false,
@@ -231,6 +263,27 @@ export class DungeonMapGenerator {
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
     return shuffled;
+  }
+
+  /**
+   * Pick an encounter type based on configured weights
+   */
+  private pickWeightedEncounterType(): EncounterType {
+    // Fallback to uniform if misconfigured
+    if (!this.encounterWeights.length || this.encounterTotalWeight <= 0) {
+      const shuffled = this.shuffleArray([...this.encounterTypes]);
+      return shuffled[0];
+    }
+
+    const r = Math.random() * this.encounterTotalWeight;
+    let cumulative = 0;
+    for (let i = 0; i < this.encounterWeights.length; i++) {
+      cumulative += this.encounterWeights[i].weight;
+      if (r <= cumulative) {
+        return this.encounterWeights[i].type;
+      }
+    }
+    return this.encounterWeights[this.encounterWeights.length - 1].type;
   }
 
   /**
