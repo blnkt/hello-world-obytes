@@ -58,14 +58,19 @@ export class DungeonMapGenerator {
 
   /**
    * Generate a single depth level with 2-3 nodes
+   * Overload: optionally provide a regionKey to apply regional distribution for this depth
    */
-  generateDepthLevel(depth: number): DungeonNode[] {
+  // eslint-disable-next-line @typescript-eslint/unified-signatures
+  generateDepthLevel(depth: number): DungeonNode[];
+  generateDepthLevel(depth: number, regionKey?: string): DungeonNode[];
+  generateDepthLevel(depth: number, regionKey?: string): DungeonNode[] {
     if (depth < 1) {
       throw new Error('Depth must be at least 1');
     }
 
     const nodeCount = Math.floor(Math.random() * 2) + 2; // 2-3 nodes
-    // Select encounter types using weighted distribution
+    // Select encounter types using weighted distribution (region-aware per call)
+    const { weights, total } = this.getWeightsForRegion(regionKey);
 
     const nodes: DungeonNode[] = [];
 
@@ -74,7 +79,7 @@ export class DungeonMapGenerator {
         id: `depth${depth}-node${position}`,
         depth,
         position,
-        type: this.pickWeightedEncounterType(),
+        type: this.pickWeightedEncounterType(weights, total),
         energyCost: this.calculateNodeCost(depth),
         returnCost: this.calculateReturnCost(depth),
         isRevealed: false,
@@ -268,22 +273,59 @@ export class DungeonMapGenerator {
   /**
    * Pick an encounter type based on configured weights
    */
-  private pickWeightedEncounterType(): EncounterType {
+  private pickWeightedEncounterType(
+    weights: { type: EncounterType; weight: number }[],
+    total: number
+  ): EncounterType {
     // Fallback to uniform if misconfigured
-    if (!this.encounterWeights.length || this.encounterTotalWeight <= 0) {
+    if (!weights.length || total <= 0) {
       const shuffled = this.shuffleArray([...this.encounterTypes]);
       return shuffled[0];
     }
 
-    const r = Math.random() * this.encounterTotalWeight;
+    const r = Math.random() * total;
     let cumulative = 0;
-    for (let i = 0; i < this.encounterWeights.length; i++) {
-      cumulative += this.encounterWeights[i].weight;
+    for (let i = 0; i < weights.length; i++) {
+      cumulative += weights[i].weight;
       if (r <= cumulative) {
-        return this.encounterWeights[i].type;
+        return weights[i].type;
       }
     }
-    return this.encounterWeights[this.encounterWeights.length - 1].type;
+    return weights[weights.length - 1].type;
+  }
+
+  /**
+   * Resolve weights for a given region key, falling back to instance defaults
+   */
+  private getWeightsForRegion(regionKey?: string): {
+    weights: { type: EncounterType; weight: number }[];
+    total: number;
+  } {
+    if (!regionKey || regionKey === this.regionKey) {
+      return {
+        weights: this.encounterWeights,
+        total: this.encounterTotalWeight,
+      };
+    }
+    const regionDist =
+      DEFAULT_BALANCE_CONFIG.region.encounterDistributions[regionKey];
+    const dist =
+      regionDist ||
+      DEFAULT_BALANCE_CONFIG.region.encounterDistributions.default ||
+      DEFAULT_BALANCE_CONFIG.encounter.encounterDistribution;
+    const weights: { type: EncounterType; weight: number }[] = [
+      { type: 'puzzle_chamber' as EncounterType, weight: dist.puzzle_chamber },
+      {
+        type: 'trade_opportunity' as EncounterType,
+        weight: dist.trade_opportunity,
+      },
+      { type: 'discovery_site' as EncounterType, weight: dist.discovery_site },
+      { type: 'risk_event' as EncounterType, weight: dist.risk_event },
+      { type: 'hazard' as EncounterType, weight: dist.hazard },
+      { type: 'rest_site' as EncounterType, weight: dist.rest_site },
+    ].filter((w) => w.weight > 0);
+    const total = weights.reduce((sum, w) => sum + w.weight, 0);
+    return { weights, total };
   }
 
   /**
