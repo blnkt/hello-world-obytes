@@ -94,9 +94,10 @@ describe('Map Generator Performance', () => {
       expect(optimizedAvg).toBeGreaterThanOrEqual(0);
 
       // Optimized should perform at least as well
-      // When times are very fast (< 0.1ms), both are acceptable
+      // Use a floor baseline to avoid zero-baseline false failures
       if (originalAvg > 0.1 || optimizedAvg > 0.1) {
-        expect(optimizedAvg).toBeLessThanOrEqual(originalAvg * 1.5);
+        const baseline = Math.max(originalAvg, 0.1);
+        expect(optimizedAvg).toBeLessThanOrEqual(baseline * 1.5);
       }
     });
   });
@@ -144,6 +145,24 @@ describe('Map Generator Performance', () => {
       const end = performance.now();
 
       expect(end - start).toBeLessThan(200);
+    });
+
+    it('should reflect different distributions across regions (hazard higher in wastes)', () => {
+      const generator = new DungeonMapGenerator();
+      const samples = 200;
+
+      let wastesHazard = 0;
+      let sanctumHazard = 0;
+
+      for (let i = 0; i < samples; i++) {
+        const nodesWastes = generator.generateDepthLevel(2, 'wastes');
+        const nodesSanctum = generator.generateDepthLevel(2, 'sanctum');
+        wastesHazard += nodesWastes.filter((n) => n.type === 'hazard').length;
+        sanctumHazard += nodesSanctum.filter((n) => n.type === 'hazard').length;
+      }
+
+      // With weights (wastes hazard 0.25 vs sanctum 0.05), wastes should exceed sanctum
+      expect(wastesHazard).toBeGreaterThan(sanctumHazard);
     });
   });
 });
