@@ -289,7 +289,7 @@ interface InitializeConfig {
 
 const initializeEncounter = (config: InitializeConfig) => {
   const { nodeDepth, setEncounter, setRemainingReveals, setTiles } = config;
-  const puzzleEncounter = new PuzzleChamberEncounter(nodeDepth);
+  const puzzleEncounter = new PuzzleChamberEncounter(undefined, nodeDepth);
   setEncounter(puzzleEncounter);
   setRemainingReveals(puzzleEncounter.getTileRevealsRemaining());
 
