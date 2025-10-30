@@ -248,7 +248,8 @@ const handleTileLogic = (config: HandleTileLogicConfig) => {
       value: result.tileType === 'treasure' ? 10 : undefined,
     };
     setters.setTiles(newTiles);
-    setters.setRemainingReveals(encounter.getTileRevealsRemaining());
+    const newRemainingReveals = encounter.getTileRevealsRemaining();
+    setters.setRemainingReveals(newRemainingReveals);
 
     if (result.tileType === 'exit') {
       setters.setEncounterComplete(true);
@@ -262,11 +263,24 @@ const handleTileLogic = (config: HandleTileLogicConfig) => {
       setters.setRewards(processedRewards);
       onEncounterComplete('success', processedRewards);
     } else if (result.tileType === 'trap') {
+      setters.setEncounterComplete(true);
+      setters.setEncounterResult('failure');
       const _consequences = failureManager.processFailureConsequences(
         'objective_failed',
         node.depth,
         node.id
       );
+      onEncounterComplete('failure');
+    } else if (newRemainingReveals <= 0) {
+      // Auto-fail when out of reveals
+      setters.setEncounterComplete(true);
+      setters.setEncounterResult('failure');
+      const _consequences = failureManager.processFailureConsequences(
+        'objective_failed',
+        node.depth,
+        node.id
+      );
+      onEncounterComplete('failure');
     }
   } else {
     setters.setEncounterComplete(true);
