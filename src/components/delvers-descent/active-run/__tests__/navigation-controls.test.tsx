@@ -31,11 +31,11 @@ describe('NavigationControls', () => {
   });
 
   it('should render continue button when onContinue is provided', () => {
-    const onContinue = jest.fn();
-    const { getByText } = render(
-      <NavigationControls {...defaultProps} onContinue={onContinue} />
+    // Continue button was removed; ensure it is not rendered
+    const { queryByText } = render(
+      <NavigationControls {...defaultProps} />
     );
-    expect(getByText(/Continue/)).toBeDefined();
+    expect(queryByText(/Continue/)).toBeNull();
   });
 
   it('should not render continue button when onContinue is not provided', () => {
@@ -43,44 +43,7 @@ describe('NavigationControls', () => {
     expect(queryByText(/Continue/)).toBeNull();
   });
 
-  it('should call onContinue when continue button is pressed', () => {
-    const onContinue = jest.fn();
-    const { getByText } = render(
-      <NavigationControls {...defaultProps} onContinue={onContinue} />
-    );
-
-    const continueButton = getByText(/Continue/);
-    fireEvent.press(continueButton);
-    expect(onContinue).toHaveBeenCalledTimes(1);
-  });
-
-  it('should display safe continue button when energy is sufficient', () => {
-    const onContinue = jest.fn();
-    const { getByText } = render(
-      <NavigationControls
-        {...defaultProps}
-        onContinue={onContinue}
-        energyRemaining={150}
-        returnCost={50}
-      />
-    );
-    // Should be blue when safe (not orange)
-    expect(getByText('▶️ Continue Deeper')).toBeDefined();
-  });
-
-  it('should display risky continue button when energy is low', () => {
-    const onContinue = jest.fn();
-    const { getByText } = render(
-      <NavigationControls
-        {...defaultProps}
-        onContinue={onContinue}
-        energyRemaining={60}
-        returnCost={50}
-      />
-    );
-    // Should be orange when dangerous
-    expect(getByText('⚠️ Continue (Risky)')).toBeDefined();
-  });
+  // Removed tests related to Continue Deeper button appearance and behavior
 
   it('should show warning when cannot return safely', () => {
     const { getByText } = render(
@@ -110,62 +73,7 @@ describe('NavigationControls', () => {
     ).toBeNull();
   });
 
-  it('should calculate dangerous threshold correctly (1.5x return cost)', () => {
-    const onContinue = jest.fn();
-    const returnCost = 50;
-
-    // Safe: 100 energy, return cost 50, threshold is 75
-    // 100 > 75, so should be safe
-    const safeRender = render(
-      <NavigationControls
-        {...defaultProps}
-        onContinue={onContinue}
-        energyRemaining={100}
-        returnCost={returnCost}
-      />
-    );
-    expect(safeRender.getByText('▶️ Continue Deeper')).toBeDefined();
-
-    // Dangerous: 60 energy, return cost 50, threshold is 75
-    // 60 < 75, so should be dangerous
-    const dangerousRender = render(
-      <NavigationControls
-        {...defaultProps}
-        onContinue={onContinue}
-        energyRemaining={60}
-        returnCost={returnCost}
-      />
-    );
-    expect(dangerousRender.getByText('⚠️ Continue (Risky)')).toBeDefined();
-  });
-
-  it('should handle edge case at dangerous threshold', () => {
-    const onContinue = jest.fn();
-    const returnCost = 50;
-    const threshold = returnCost * 1.5; // 75
-
-    // Exactly at threshold - should be safe (>=)
-    const atThreshold = render(
-      <NavigationControls
-        {...defaultProps}
-        onContinue={onContinue}
-        energyRemaining={threshold}
-        returnCost={returnCost}
-      />
-    );
-    expect(atThreshold.getByText('▶️ Continue Deeper')).toBeDefined();
-
-    // Just below threshold - should be dangerous
-    const belowThreshold = render(
-      <NavigationControls
-        {...defaultProps}
-        onContinue={onContinue}
-        energyRemaining={threshold - 1}
-        returnCost={returnCost}
-      />
-    );
-    expect(belowThreshold.getByText('⚠️ Continue (Risky)')).toBeDefined();
-  });
+  // Removed threshold styling tests tied to Continue Deeper button
 
   it('should handle zero energy', () => {
     const { getByText, queryByText } = render(

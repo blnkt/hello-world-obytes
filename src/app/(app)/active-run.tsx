@@ -5,7 +5,6 @@ import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 import { CashOutModal } from '@/components/delvers-descent/active-run/cash-out-modal';
 import { InteractiveMap } from '@/components/delvers-descent/active-run/interactive-map';
 import { NavigationControls } from '@/components/delvers-descent/active-run/navigation-controls';
-import { RiskWarningModal } from '@/components/delvers-descent/active-run/risk-warning-modal';
 import { RunStatusPanel } from '@/components/delvers-descent/active-run/run-status-panel';
 import { EncounterScreen } from '@/components/delvers-descent/encounters/encounter-screen';
 import { useMapGenerator } from '@/components/delvers-descent/hooks/use-map-generator';
@@ -492,15 +491,7 @@ const MapView: React.FC<{
   onShowCashOut: () => void;
   onHideCashOut: () => void;
   onCashOutConfirm: () => void;
-  showRiskWarning: boolean;
-  riskWarning: {
-    type: 'safe' | 'caution' | 'danger' | 'critical';
-    message: string;
-    severity: number;
-  } | null;
-  onShowRiskWarning: () => void;
-  onHideRiskWarning: () => void;
-  onConfirmRisk: () => void;
+  // risk flow removed
 }> = ({
   run,
   nodes,
@@ -510,11 +501,6 @@ const MapView: React.FC<{
   onShowCashOut,
   onHideCashOut,
   onCashOutConfirm,
-  showRiskWarning,
-  riskWarning,
-  onShowRiskWarning,
-  onHideRiskWarning,
-  onConfirmRisk,
 }) => {
   return (
     <View className="flex-1 bg-gray-50 dark:bg-gray-900">
@@ -539,28 +525,17 @@ const MapView: React.FC<{
       )}
       <NavigationControls
         onCashOut={onShowCashOut}
-        onContinue={onShowRiskWarning}
         energyRemaining={runState?.energyRemaining || 0}
         returnCost={100}
       />
       {runState && (
-        <>
-          <CashOutModal
-            visible={showCashOutModal}
-            runState={runState}
-            returnCost={100}
-            onConfirm={onCashOutConfirm}
-            onCancel={onHideCashOut}
-          />
-          {riskWarning && (
-            <RiskWarningModal
-              visible={showRiskWarning}
-              warning={riskWarning}
-              onConfirm={onConfirmRisk}
-              onCancel={onHideRiskWarning}
-            />
-          )}
-        </>
+        <CashOutModal
+          visible={showCashOutModal}
+          runState={runState}
+          returnCost={100}
+          onConfirm={onCashOutConfirm}
+          onCancel={onHideCashOut}
+        />
       )}
     </View>
   );
@@ -604,11 +579,6 @@ function ActiveRunScreen({ router, runId }: { router: any; runId: string }) {
       onShowCashOut={controllers.showCashOut}
       onHideCashOut={controllers.hideCashOut}
       onCashOutConfirm={controllers.handleCashOutConfirm}
-      showRiskWarning={controllers.showRiskWarning}
-      riskWarning={controllers.riskWarning}
-      onShowRiskWarning={controllers.handleContinue}
-      onHideRiskWarning={controllers.hideRiskWarning}
-      onConfirmRisk={controllers.handleConfirmRisk}
     />
   );
 }
@@ -644,13 +614,7 @@ function useActiveRunControllers({
     router,
     setShowCashOutModal,
   });
-  const {
-    riskWarning,
-    showRiskWarning,
-    handleContinue,
-    handleConfirmRisk,
-    setShowRiskWarning,
-  } = useRiskFlow({ runState: data.runState, updateDepth: data.updateDepth });
+  // Removed risk flow and "Continue Deeper" UX
   return {
     run: data.run,
     nodes: data.nodes,
@@ -660,11 +624,7 @@ function useActiveRunControllers({
     handlers,
     handleNodePress,
     handleCashOutConfirm,
-    riskWarning,
-    showRiskWarning,
-    handleContinue,
-    handleConfirmRisk,
-    hideRiskWarning: () => setShowRiskWarning(false),
+    // risk flow removed
     showCashOutModal,
     showCashOut: () => setShowCashOutModal(true),
     hideCashOut: () => setShowCashOutModal(false),

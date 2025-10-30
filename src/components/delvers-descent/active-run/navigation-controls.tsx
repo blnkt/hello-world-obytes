@@ -3,14 +3,12 @@ import { Text, TouchableOpacity, View } from 'react-native';
 
 export interface NavigationControlsProps {
   onCashOut: () => void;
-  onContinue?: () => void;
   energyRemaining: number;
   returnCost: number;
 }
 
 export const NavigationControls: React.FC<NavigationControlsProps> = ({
   onCashOut,
-  onContinue,
   energyRemaining,
   returnCost,
 }) => {
@@ -28,18 +26,6 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
           💰 Cash Out
         </Text>
       </TouchableOpacity>
-
-      {onContinue && (
-        <TouchableOpacity
-          onPress={onContinue}
-          className={`rounded-lg py-3 ${isDangerous ? 'bg-orange-500' : 'bg-blue-500'}`}
-          activeOpacity={0.8}
-        >
-          <Text className="text-center font-semibold text-white">
-            {isDangerous ? '⚠️ Continue (Risky)' : '▶️ Continue Deeper'}
-          </Text>
-        </TouchableOpacity>
-      )}
 
       {!canReturn && (
         <View className="rounded-lg bg-red-50 p-3 dark:bg-red-900">
