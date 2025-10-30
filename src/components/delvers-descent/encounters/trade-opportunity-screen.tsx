@@ -29,6 +29,7 @@ const getRiskColor = (riskLevel: string): string => {
 const SuccessScreen: React.FC<{
   rewards: any[];
   onReturn: () => void;
+  result?: 'success' | 'failure';
 }> = ({ rewards, onReturn }) => (
   <ScrollView
     testID="encounter-success"
@@ -262,6 +263,56 @@ const TradeContent: React.FC<{
   );
 };
 
+const buildTradeDecisionHandler = ({
+  encounter,
+  encounterComplete,
+  rewardCalculator,
+  failureManager,
+  node,
+  setters,
+}: {
+  encounter: TradeOpportunityEncounter | null;
+  encounterComplete: boolean;
+  rewardCalculator: RewardCalculator;
+  failureManager: FailureConsequenceManager;
+  node: DungeonNode;
+  setters: {
+    setSelectedOption: (option: string | null) => void;
+    setTradeResult: (result: any) => void;
+    setEncounterComplete: (complete: boolean) => void;
+    setEncounterResult: (result: 'success' | 'failure' | null) => void;
+    setRewards: (rewards: any[]) => void;
+  };
+}) => {
+  return async (optionId: string) => {
+    if (!encounter || encounterComplete) return;
+
+    const result = encounter.processTradeDecision(optionId);
+    setters.setSelectedOption(optionId);
+    setters.setTradeResult(result);
+
+    if (result.success && encounter.isEncounterComplete()) {
+      setters.setEncounterComplete(true);
+      setters.setEncounterResult('success');
+      const encounterRewards = encounter.generateRewards();
+      const processedRewards = rewardCalculator.processEncounterRewards(
+        encounterRewards,
+        'trade_opportunity',
+        node.depth
+      );
+      setters.setRewards(processedRewards);
+    } else if (!result.success) {
+      failureManager.processFailureConsequences(
+        'objective_failed',
+        node.depth,
+        node.id
+      );
+      setters.setEncounterComplete(true);
+      setters.setEncounterResult('failure');
+    }
+  };
+};
+
 export const TradeOpportunityScreen: React.FC<TradeOpportunityScreenProps> = ({
   run: _run,
   node,
@@ -274,6 +325,9 @@ export const TradeOpportunityScreen: React.FC<TradeOpportunityScreenProps> = ({
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [tradeResult, setTradeResult] = useState<any>(null);
   const [encounterComplete, setEncounterComplete] = useState(false);
+  const [encounterResult, setEncounterResult] = useState<
+    'success' | 'failure' | null
+  >(null);
   const [rewards, setRewards] = useState<any[]>([]);
   const [rewardCalculator] = useState(() => new RewardCalculator());
   const [failureManager] = useState(() => new FailureConsequenceManager());
@@ -283,36 +337,72 @@ export const TradeOpportunityScreen: React.FC<TradeOpportunityScreenProps> = ({
     setEncounter(tradeEncounter);
   }, [node.depth]);
 
-  const handleTradeDecision = async (optionId: string) => {
-    if (!encounter || encounterComplete) return;
+  const handleTradeDecision = buildTradeDecisionHandler({
+    encounter,
+    encounterComplete,
+    rewardCalculator,
+    failureManager,
+    node,
+    setters: {
+      setSelectedOption,
+      setTradeResult,
+      setEncounterComplete,
+      setEncounterResult,
+      setRewards,
+    },
+  });
 
-    const result = encounter.processTradeDecision(optionId);
-    setSelectedOption(optionId);
-    setTradeResult(result);
-
-    if (result.success && encounter.isEncounterComplete()) {
-      setEncounterComplete(true);
-      const encounterRewards = encounter.generateRewards();
-      const processedRewards = rewardCalculator.processEncounterRewards(
-        encounterRewards,
-        'trade_opportunity',
-        node.depth
-      );
-      setRewards(processedRewards);
-      onEncounterComplete('success', processedRewards);
-    } else if (!result.success) {
-      const _consequences = failureManager.processFailureConsequences(
-        'objective_failed',
-        node.depth,
-        node.id
-      );
-      setEncounterComplete(true);
+  const handleReturnFromSuccess = () => {
+    if (encounterResult === 'success') {
+      onEncounterComplete('success', rewards);
+    } else if (encounterResult === 'failure') {
       onEncounterComplete('failure');
     }
+    onReturnToMap();
   };
 
-  if (encounterComplete) {
-    return <SuccessScreen rewards={rewards} onReturn={onReturnToMap} />;
+  return renderTradeScreen({
+    encounterComplete,
+    encounterResult,
+    rewards,
+    encounter,
+    selectedOption,
+    tradeResult,
+    onReturnToMap,
+    handleReturnFromSuccess,
+    handleTradeDecision,
+  });
+};
+
+const renderTradeScreen = ({
+  encounterComplete,
+  encounterResult,
+  rewards,
+  encounter,
+  selectedOption,
+  tradeResult,
+  onReturnToMap,
+  handleReturnFromSuccess,
+  handleTradeDecision,
+}: {
+  encounterComplete: boolean;
+  encounterResult: 'success' | 'failure' | null;
+  rewards: any[];
+  encounter: TradeOpportunityEncounter | null;
+  selectedOption: string | null;
+  tradeResult: any;
+  onReturnToMap: () => void;
+  handleReturnFromSuccess: () => void;
+  handleTradeDecision: (optionId: string) => Promise<void>;
+}) => {
+  if (encounterComplete && encounterResult) {
+    return (
+      <SuccessScreen
+        rewards={rewards}
+        onReturn={handleReturnFromSuccess}
+        result={encounterResult}
+      />
+    );
   }
 
   if (!encounter) {

@@ -343,6 +343,54 @@ const DiscoveryContent: React.FC<{
   );
 };
 
+const buildExplorationDecisionHandler = ({
+  encounter,
+  encounterComplete,
+  rewardCalculator,
+  failureManager,
+  node,
+  setters,
+}: {
+  encounter: DiscoverySiteEncounter | null;
+  encounterComplete: boolean;
+  rewardCalculator: RewardCalculator;
+  failureManager: FailureConsequenceManager;
+  node: DungeonNode;
+  setters: {
+    setExplorationResult: (result: any) => void;
+    setEncounterComplete: (complete: boolean) => void;
+    setEncounterResult: (result: 'success' | 'failure' | null) => void;
+    setRewards: (rewards: any[]) => void;
+  };
+}) => {
+  return async (pathId: string) => {
+    if (!encounter || encounterComplete) return;
+
+    const result = encounter.processExplorationDecision(pathId);
+    setters.setExplorationResult(result);
+
+    if (result.success) {
+      setters.setEncounterComplete(true);
+      setters.setEncounterResult('success');
+      const encounterRewards = encounter.generateRewards();
+      const processedRewards = rewardCalculator.processEncounterRewards(
+        encounterRewards,
+        'discovery_site',
+        node.depth
+      );
+      setters.setRewards(processedRewards);
+    } else {
+      failureManager.processFailureConsequences(
+        'objective_failed',
+        node.depth,
+        node.id
+      );
+      setters.setEncounterComplete(true);
+      setters.setEncounterResult('failure');
+    }
+  };
+};
+
 export const DiscoverySiteScreen: React.FC<DiscoverySiteScreenProps> = ({
   run: _run,
   node,
@@ -352,9 +400,11 @@ export const DiscoverySiteScreen: React.FC<DiscoverySiteScreenProps> = ({
   const [encounter, setEncounter] = useState<DiscoverySiteEncounter | null>(
     null
   );
-  const [_selectedPath, setSelectedPath] = useState<string | null>(null);
   const [explorationResult, setExplorationResult] = useState<any>(null);
   const [encounterComplete, setEncounterComplete] = useState(false);
+  const [encounterResult, setEncounterResult] = useState<
+    'success' | 'failure' | null
+  >(null);
   const [rewards, setRewards] = useState<any[]>([]);
   const [rewardCalculator] = useState(() => new RewardCalculator());
   const [failureManager] = useState(() => new FailureConsequenceManager());
@@ -364,36 +414,36 @@ export const DiscoverySiteScreen: React.FC<DiscoverySiteScreenProps> = ({
     setEncounter(discoveryEncounter);
   }, [node.depth]);
 
-  const handleExplorationDecision = async (pathId: string) => {
-    if (!encounter || encounterComplete) return;
+  const handleExplorationDecision = buildExplorationDecisionHandler({
+    encounter,
+    encounterComplete,
+    rewardCalculator,
+    failureManager,
+    node,
+    setters: {
+      setExplorationResult,
+      setEncounterComplete,
+      setEncounterResult,
+      setRewards,
+    },
+  });
 
-    const result = encounter.processExplorationDecision(pathId);
-    setSelectedPath(pathId);
-    setExplorationResult(result);
-
-    if (result.success) {
-      setEncounterComplete(true);
-      const encounterRewards = encounter.generateRewards();
-      const processedRewards = rewardCalculator.processEncounterRewards(
-        encounterRewards,
-        'discovery_site',
-        node.depth
-      );
-      setRewards(processedRewards);
-      onEncounterComplete('success', processedRewards);
-    } else {
-      const _consequences = failureManager.processFailureConsequences(
-        'objective_failed',
-        node.depth,
-        node.id
-      );
-      setEncounterComplete(true);
+  const handleReturnFromSuccess = () => {
+    if (encounterResult === 'success') {
+      onEncounterComplete('success', rewards);
+    } else if (encounterResult === 'failure') {
       onEncounterComplete('failure');
     }
+    onReturnToMap();
   };
 
-  if (encounterComplete) {
-    return <SuccessScreen rewards={rewards} onReturnToMap={onReturnToMap} />;
+  if (encounterComplete && encounterResult) {
+    return (
+      <SuccessScreen
+        rewards={rewards}
+        onReturnToMap={handleReturnFromSuccess}
+      />
+    );
   }
 
   if (!encounter) {
