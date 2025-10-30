@@ -58,7 +58,7 @@ try {
       ) {
         storageMock.storage.clear();
       }
-    } catch (e) {
+    } catch (_e) {
       // noop: test teardown should never throw
     }
   });

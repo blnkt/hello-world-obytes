@@ -47,14 +47,11 @@ export const useEncounterResolver = (
     });
   }, [node]);
 
-  const startEncounter = useCallback(
-    makeStartEncounter(encounterResolver, setError),
-    [encounterResolver]
-  );
+  const startEncounter = useStartEncounterCallback(encounterResolver, setError);
 
-  const updateEncounterProgress = useCallback(
-    makeUpdateProgress(encounterResolver, setError),
-    [encounterResolver]
+  const updateEncounterProgress = useUpdateEncounterProgressCallback(
+    encounterResolver,
+    setError
   );
 
   const completeEncounter = useCallback(
@@ -94,33 +91,36 @@ export const useEncounterResolver = (
   };
 };
 
-function makeStartEncounter(
+function useStartEncounterCallback(
   resolver: EncounterResolver | null,
   setError: (v: string | null) => void
 ) {
-  return async () => {
+  return useCallback(async () => {
     if (!resolver) return;
     setError(null);
-  };
+  }, [resolver, setError]);
 }
 
-function makeUpdateProgress(
+function useUpdateEncounterProgressCallback(
   resolver: EncounterResolver | null,
   setError: (v: string | null) => void
 ) {
-  return async (progress: any) => {
-    if (!resolver) return;
-    try {
-      setError(null);
-      await resolver.updateEncounterProgress(progress);
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'Failed to update encounter progress'
-      );
-    }
-  };
+  return useCallback(
+    async (progress: any) => {
+      if (!resolver) return;
+      try {
+        setError(null);
+        await resolver.updateEncounterProgress(progress);
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'Failed to update encounter progress'
+        );
+      }
+    },
+    [resolver, setError]
+  );
 }
 
 function useEncounterUtilities() {

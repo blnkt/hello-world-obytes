@@ -86,7 +86,7 @@ const getShopTabScreen = () => ({
   },
 });
 
-const getHiddenScreens = () => [
+const _getHiddenScreens = () => [
   {
     name: 'scenario',
     options: {
@@ -145,7 +145,7 @@ const getHiddenScreens = () => [
   },
 ];
 
-const getTabScreens = () => [
+const _getTabScreens = () => [
   getCharacterTabScreen(),
   getStepsHistoryTabScreen(),
   getSettingsTabScreen(),
