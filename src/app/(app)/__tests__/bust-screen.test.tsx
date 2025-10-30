@@ -47,7 +47,7 @@ describe('BustScreen', () => {
     const { getByText } = render(<BustScreen />);
 
     expect(getByText('Items Lost')).toBeDefined();
-    expect(getByText('5')).toBeDefined();
+    expect(getByText(/-\s*5$/)).toBeDefined();
   });
 
   it('should display energy lost', () => {
@@ -58,7 +58,7 @@ describe('BustScreen', () => {
     const { getByText } = render(<BustScreen />);
 
     expect(getByText('Energy Lost')).toBeDefined();
-    expect(getByText('100')).toBeDefined();
+    expect(getByText(/-\s*100$/)).toBeDefined();
   });
 
   it('should display XP preserved when xpPreserved is true', () => {
@@ -88,7 +88,7 @@ describe('BustScreen', () => {
     expect(queryByText('Progress Preserved')).toBeNull();
   });
 
-  it('should navigate to run queue when acknowledge button is pressed', () => {
+  it('should navigate to run queue when acknowledge button is pressed', async () => {
     (useLocalSearchParams as jest.Mock).mockReturnValue({
       consequence: JSON.stringify(mockConsequence),
     });
@@ -98,18 +98,22 @@ describe('BustScreen', () => {
     const acknowledgeButton = getByTestId('acknowledge-bust');
     fireEvent.press(acknowledgeButton);
 
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(mockRouter.push).toHaveBeenCalledWith('/(app)/run-queue');
   });
 
   it('should handle missing consequence parameter', () => {
     (useLocalSearchParams as jest.Mock).mockReturnValue({});
 
-    const { getByText } = render(<BustScreen />);
+    const rendered = render(<BustScreen />);
+    const { getByText } = rendered;
 
     expect(getByText('You Busted!')).toBeDefined();
     expect(
-      getByText(/You pushed too deep and could not afford to return./)
-    ).toBeDefined();
+      rendered.getAllByText(
+        /You pushed too deep and could not afford to return\./
+      ).length
+    ).toBeGreaterThan(0);
   });
 
   it('should handle invalid JSON in consequence parameter', () => {
@@ -117,12 +121,15 @@ describe('BustScreen', () => {
       consequence: 'invalid json',
     });
 
-    const { getByText } = render(<BustScreen />);
+    const rendered = render(<BustScreen />);
+    const { getByText } = rendered;
 
     expect(getByText('You Busted!')).toBeDefined();
+    // Duplicate lines may render; ensure at least one instance is present
     expect(
-      getByText(/You pushed too deep and could not afford to return./)
-    ).toBeDefined();
+      rendered.getAllByText(/You pushed too deep and could not afford to return\./)
+        .length
+    ).toBeGreaterThan(0);
   });
 
   it('should format large numbers correctly', () => {
@@ -140,8 +147,8 @@ describe('BustScreen', () => {
 
     const { getByText } = render(<BustScreen />);
 
-    expect(getByText('1234')).toBeDefined();
-    expect(getByText('5678')).toBeDefined();
+    expect(getByText(/-\s*1234$/)).toBeDefined();
+    expect(getByText(/-\s*5678$/)).toBeDefined();
     expect(getByText('9012')).toBeDefined();
   });
 

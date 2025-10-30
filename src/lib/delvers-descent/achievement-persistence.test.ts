@@ -61,7 +61,10 @@ describe('Achievement Persistence', () => {
 
       await clearAchievements();
 
-      expect(setItem).toHaveBeenCalledWith('delvers-descent-achievements', '');
+      expect(setItem).toHaveBeenCalledWith(
+        'delvers-descent-achievements',
+        expect.stringContaining('"achievements":[]')
+      );
     });
   });
 

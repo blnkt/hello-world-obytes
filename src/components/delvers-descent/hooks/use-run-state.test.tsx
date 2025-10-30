@@ -42,7 +42,7 @@ describe('useRunState', () => {
   });
 
   describe('initialization', () => {
-    it('should load initial run state', () => {
+    it('should load initial run state via refresh', async () => {
       const mockRunState: RunState = {
         runId: 'run-1',
         currentDepth: 1,
@@ -56,6 +56,10 @@ describe('useRunState', () => {
       mockRunStateManager.getCurrentState.mockReturnValue(mockRunState);
 
       const { result } = renderHook(() => useRunState());
+
+      await act(async () => {
+        await result.current.refreshData();
+      });
 
       expect(result.current.activeRunState).toEqual(mockRunState);
       expect(result.current.isLoading).toBe(false);
@@ -72,12 +76,16 @@ describe('useRunState', () => {
       expect(result.current.error).toBeNull();
     });
 
-    it('should handle errors during initialization', () => {
+    it('should handle errors during refresh', async () => {
       mockRunStateManager.getCurrentState.mockImplementation(() => {
         throw new Error('Failed to load run state');
       });
 
       const { result } = renderHook(() => useRunState());
+
+      await act(async () => {
+        await result.current.refreshData();
+      });
 
       expect(result.current.activeRunState).toBeNull();
       expect(result.current.error).toBe('Failed to load run state');
@@ -160,6 +168,10 @@ describe('useRunState', () => {
 
       const { result } = renderHook(() => useRunState());
 
+      await act(async () => {
+        await result.current.refreshData();
+      });
+
       let newState: RunState;
       await act(async () => {
         newState = await result.current.moveToNode('node-2', 50);
@@ -216,6 +228,10 @@ describe('useRunState', () => {
 
       const { result } = renderHook(() => useRunState());
 
+      await act(async () => {
+        await result.current.refreshData();
+      });
+
       let newState: RunState;
       await act(async () => {
         newState = await result.current.addToInventory(item);
@@ -260,6 +276,10 @@ describe('useRunState', () => {
 
       const { result } = renderHook(() => useRunState());
 
+      await act(async () => {
+        await result.current.refreshData();
+      });
+
       let newState: RunState;
       await act(async () => {
         newState = await result.current.removeFromInventory('item-1');
@@ -297,6 +317,10 @@ describe('useRunState', () => {
 
       const { result } = renderHook(() => useRunState());
 
+      await act(async () => {
+        await result.current.refreshData();
+      });
+
       let newState: RunState;
       await act(async () => {
         newState = await result.current.updateEnergy(-100);
@@ -321,10 +345,17 @@ describe('useRunState', () => {
       };
 
       mockRunStateManager.getCurrentState.mockReturnValue(initialRunState);
+      mockRunStateManager.initializeRun.mockResolvedValue(initialRunState);
       mockRunStateManager.completeRun.mockResolvedValue(undefined);
 
       const { result } = renderHook(() => useRunState());
 
+      await act(async () => {
+        await result.current.initializeRun('run-1', 1000);
+      });
+      await act(async () => {
+        await result.current.refreshData();
+      });
       await act(async () => {
         await result.current.completeRun();
       });
@@ -347,10 +378,17 @@ describe('useRunState', () => {
       };
 
       mockRunStateManager.getCurrentState.mockReturnValue(initialRunState);
+      mockRunStateManager.initializeRun.mockResolvedValue(initialRunState);
       mockRunStateManager.bustRun.mockResolvedValue(undefined);
 
       const { result } = renderHook(() => useRunState());
 
+      await act(async () => {
+        await result.current.initializeRun('run-1', 1000);
+      });
+      await act(async () => {
+        await result.current.refreshData();
+      });
       await act(async () => {
         await result.current.bustRun();
       });

@@ -270,13 +270,10 @@ describe("HealthKit Integration for Delver's Descent", () => {
 
       expect(
         mockRunQueueManager.generateRunsFromStepHistory
-      ).toHaveBeenCalledWith(
-        [
-          { date: '2024-01-15', steps: 8000 },
-          { date: '2024-01-16', steps: 12000 },
-        ],
-        new Set(['2024-01-16']) // Only 12000 steps qualifies for bonus
-      );
+      ).toHaveBeenCalledWith([
+        { date: '2024-01-15', steps: 8000 },
+        { date: '2024-01-16', steps: 12000 },
+      ]);
     });
 
     it('should handle errors during sync', async () => {

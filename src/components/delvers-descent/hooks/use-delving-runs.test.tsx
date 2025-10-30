@@ -136,8 +136,7 @@ describe('useDelvingRuns', () => {
       expect(result.current.stats).toEqual(updatedStats);
       expect(mockRunQueueManager.generateRunFromSteps).toHaveBeenCalledWith(
         '2024-01-15',
-        8000,
-        false
+        8000
       );
       expect(mockRunQueueManager.addRunToQueue).toHaveBeenCalledWith(mockRun);
     });

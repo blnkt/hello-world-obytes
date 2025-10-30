@@ -30,3 +30,38 @@ global.window = global;
 //     hasRequestedAuthorization: true,
 //   })),
 // }));
+
+// Ensure storage/MMKV mocks are reset between tests to avoid state bleed
+try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const {
+    clearMMKVStore,
+    mmkvMockStorage,
+  } = require('./__mocks__/react-native-mmkv');
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const storageMock = require('./__mocks__/storage.tsx');
+
+  afterEach(() => {
+    try {
+      if (typeof clearMMKVStore === 'function') {
+        clearMMKVStore();
+      }
+      if (mmkvMockStorage && typeof mmkvMockStorage === 'object') {
+        Object.keys(mmkvMockStorage).forEach(
+          (k: string) => delete mmkvMockStorage[k]
+        );
+      }
+      if (
+        storageMock &&
+        storageMock.storage &&
+        typeof storageMock.storage.clear === 'function'
+      ) {
+        storageMock.storage.clear();
+      }
+    } catch (e) {
+      // noop: test teardown should never throw
+    }
+  });
+} catch {
+  // If mocks are unavailable, skip teardown; individual tests will manage their state
+}
