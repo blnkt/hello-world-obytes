@@ -11,8 +11,10 @@ describe('PuzzleChamberEncounter', () => {
     it('should initialize with default settings', () => {
       expect(puzzleChamber.getEncounterType()).toBe('puzzle_chamber');
       expect(puzzleChamber.getTileRevealsRemaining()).toBeGreaterThan(0);
-      expect(puzzleChamber.getTileRevealsRemaining()).toBeLessThanOrEqual(12);
-      expect(puzzleChamber.getTileRevealsRemaining()).toBeGreaterThanOrEqual(8);
+      expect(puzzleChamber.getTileRevealsRemaining()).toBeLessThanOrEqual(21);
+      expect(puzzleChamber.getTileRevealsRemaining()).toBeGreaterThanOrEqual(
+        15
+      );
     });
 
     it('should initialize with custom tile reveal count', () => {
@@ -25,9 +27,9 @@ describe('PuzzleChamberEncounter', () => {
       const depth3Chamber = new PuzzleChamberEncounter(undefined, 3);
       const depth5Chamber = new PuzzleChamberEncounter(undefined, 5);
 
-      expect(depth1Chamber.getTileRevealsRemaining()).toBeGreaterThanOrEqual(8);
-      expect(depth3Chamber.getTileRevealsRemaining()).toBeGreaterThanOrEqual(8);
-      expect(depth5Chamber.getTileRevealsRemaining()).toBeGreaterThanOrEqual(8);
+      expect(depth1Chamber.getTileRevealsRemaining()).toBe(15);
+      expect(depth3Chamber.getTileRevealsRemaining()).toBe(19);
+      expect(depth5Chamber.getTileRevealsRemaining()).toBe(21); // Capped at max
     });
   });
 

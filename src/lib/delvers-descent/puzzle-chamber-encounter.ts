@@ -230,12 +230,13 @@ export class PuzzleChamberEncounter {
   }
 
   private calculateTileRevealsForDepth(depth: number): number {
-    // Base reveals: 10
-    // Depth scaling: +1 reveal per 2 depth levels
-    const baseReveals = 10;
-    const depthBonus = Math.floor((depth - 1) / 2);
+    // Base reveals: ~50% of grid (15 for 30 tiles)
+    // Depth scaling: +2 reveals per depth level
+    // Caps at ~70% of grid (21 for 30 tiles)
+    const baseReveals = 15;
+    const depthBonus = (depth - 1) * 2;
 
-    return Math.min(12, Math.max(8, baseReveals + depthBonus));
+    return Math.min(21, Math.max(15, baseReveals + depthBonus));
   }
 
   private generateTileDistribution(depth: number): TileDistribution {
