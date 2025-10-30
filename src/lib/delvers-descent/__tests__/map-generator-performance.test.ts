@@ -118,4 +118,32 @@ describe('Map Generator Performance', () => {
       });
     });
   });
+
+  describe('Regional selection (per-depth)', () => {
+    it('should generate a depth with a region quickly', () => {
+      const generator = new DungeonMapGenerator();
+
+      const start = performance.now();
+      const nodes = generator.generateDepthLevel(3, 'caverns');
+      const end = performance.now();
+
+      expect(nodes.length).toBeGreaterThan(0);
+      expect(end - start).toBeLessThan(10);
+    });
+
+    it('should handle many per-depth regional generations efficiently', () => {
+      const generator = new DungeonMapGenerator();
+      const regions = ['ruins', 'caverns', 'sanctum', 'market', 'wastes'] as const;
+
+      const start = performance.now();
+      for (let i = 0; i < 100; i++) {
+        const region = regions[i % regions.length];
+        const nodes = generator.generateDepthLevel(2 + (i % 3), region);
+        expect(nodes.length).toBeGreaterThan(0);
+      }
+      const end = performance.now();
+
+      expect(end - start).toBeLessThan(200);
+    });
+  });
 });
