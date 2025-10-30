@@ -224,7 +224,6 @@ interface HandleTileLogicConfig {
     setEncounterResult: (result: 'success' | 'failure' | null) => void;
     setRewards: (rewards: any[]) => void;
   };
-  onEncounterComplete: (result: 'success' | 'failure', rewards?: any[]) => void;
 }
 
 const handleTileLogic = (config: HandleTileLogicConfig) => {
@@ -238,7 +237,6 @@ const handleTileLogic = (config: HandleTileLogicConfig) => {
     node,
     failureManager,
     setters,
-    onEncounterComplete,
   } = config;
   if (result.success) {
     const newTiles = [...tiles];
@@ -261,36 +259,36 @@ const handleTileLogic = (config: HandleTileLogicConfig) => {
         node.depth
       );
       setters.setRewards(processedRewards);
-      onEncounterComplete('success', processedRewards);
+      // Don't call onEncounterComplete yet - wait for user to click "Return to Map"
     } else if (result.tileType === 'trap') {
       setters.setEncounterComplete(true);
       setters.setEncounterResult('failure');
-      const _consequences = failureManager.processFailureConsequences(
+      failureManager.processFailureConsequences(
         'objective_failed',
         node.depth,
         node.id
       );
-      onEncounterComplete('failure');
+      // Don't call onEncounterComplete yet - wait for user to click "Return to Map"
     } else if (newRemainingReveals <= 0) {
       // Auto-fail when out of reveals
       setters.setEncounterComplete(true);
       setters.setEncounterResult('failure');
-      const _consequences = failureManager.processFailureConsequences(
+      failureManager.processFailureConsequences(
         'objective_failed',
         node.depth,
         node.id
       );
-      onEncounterComplete('failure');
+      // Don't call onEncounterComplete yet - wait for user to click "Return to Map"
     }
   } else {
     setters.setEncounterComplete(true);
     setters.setEncounterResult('failure');
-    const _consequences = failureManager.processFailureConsequences(
+    failureManager.processFailureConsequences(
       'objective_failed',
       node.depth,
       node.id
     );
-    onEncounterComplete('failure');
+    // Don't call onEncounterComplete yet - wait for user to click "Return to Map"
   }
 };
 
@@ -317,10 +315,7 @@ const initializeEncounter = (config: InitializeConfig) => {
   setTiles(initialTiles);
 };
 
-const usePuzzleChamberState = (
-  nodeDepth: number,
-  _onComplete: (result: 'success' | 'failure', rewards?: any[]) => void
-) => {
+const usePuzzleChamberState = (nodeDepth: number) => {
   const [encounter, setEncounter] = useState<PuzzleChamberEncounter | null>(
     null
   );
@@ -361,15 +356,11 @@ const usePuzzleChamberState = (
   };
 };
 
-export const PuzzleChamberScreen: React.FC<PuzzleChamberScreenProps> = ({
-  run: _run,
-  node,
-  onReturnToMap,
-  onEncounterComplete,
-}) => {
-  const state = usePuzzleChamberState(node.depth, onEncounterComplete);
-
-  const handleTileClick = (row: number, col: number) => {
+const buildTileClickHandler = (
+  state: ReturnType<typeof usePuzzleChamberState>,
+  node: DungeonNode
+) => {
+  return (row: number, col: number) => {
     if (
       !state.encounter ||
       state.encounterComplete ||
@@ -393,17 +384,45 @@ export const PuzzleChamberScreen: React.FC<PuzzleChamberScreenProps> = ({
         setEncounterResult: state.setEncounterResult,
         setRewards: state.setRewards,
       },
-      onEncounterComplete,
     });
   };
+};
+
+export const PuzzleChamberScreen: React.FC<PuzzleChamberScreenProps> = ({
+  run: _run,
+  node,
+  onReturnToMap,
+  onEncounterComplete,
+}) => {
+  const state = usePuzzleChamberState(node.depth);
+
+  const handleTileClick = buildTileClickHandler(state, node);
 
   const handleFailEncounter = () => {
     state.setEncounterComplete(true);
     state.setEncounterResult('failure');
-    onEncounterComplete('failure');
   };
 
-  const renderContent = () => (
+  const handleReturnFromResult = () => {
+    if (state.encounterResult === 'success') {
+      onEncounterComplete('success', state.rewards);
+    } else if (state.encounterResult === 'failure') {
+      onEncounterComplete('failure');
+    }
+    onReturnToMap();
+  };
+
+  if (state.encounterComplete && state.encounterResult) {
+    return (
+      <ResultScreen
+        result={state.encounterResult}
+        rewards={state.rewards}
+        onReturn={handleReturnFromResult}
+      />
+    );
+  }
+
+  return (
     <PuzzleContent
       tiles={state.tiles}
       remainingReveals={state.remainingReveals}
@@ -413,16 +432,4 @@ export const PuzzleChamberScreen: React.FC<PuzzleChamberScreenProps> = ({
       onFail={handleFailEncounter}
     />
   );
-
-  if (state.encounterComplete && state.encounterResult) {
-    return (
-      <ResultScreen
-        result={state.encounterResult}
-        rewards={state.rewards}
-        onReturn={onReturnToMap}
-      />
-    );
-  }
-
-  return renderContent();
 };
