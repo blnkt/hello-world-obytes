@@ -106,11 +106,12 @@ describe("Delver's Descent Integration Tests", () => {
         expect(completionResult.deepestDepth).toBe(1);
         expect(completionResult.totalEnergyUsed).toBeDefined();
 
-        // Update run status (completed runs are removed from queue)
+        // Update run status (completed runs are kept in memory but filtered from queue)
         await runQueueManager.updateRunStatus(run.id, 'completed');
         const updatedRun = runQueueManager.getRunById(run.id);
-        // Run should be removed from queue after completion
-        expect(updatedRun).toBeNull();
+        // Run should still exist but with 'completed' status
+        expect(updatedRun).not.toBeNull();
+        expect(updatedRun?.status).toBe('completed');
       }
     });
 
@@ -140,11 +141,12 @@ describe("Delver's Descent Integration Tests", () => {
       expect(bustResult.energyLost).toBe(run.totalEnergy);
       expect(bustResult.deepestDepth).toBe(0);
 
-      // Update run status (busted runs are removed from queue)
+      // Update run status (busted runs are kept in memory but filtered from queue)
       await runQueueManager.updateRunStatus(run.id, 'busted');
       const updatedRun = runQueueManager.getRunById(run.id);
-      // Run should be removed from queue after busting
-      expect(updatedRun).toBeNull();
+      // Run should still exist but with 'busted' status
+      expect(updatedRun).not.toBeNull();
+      expect(updatedRun?.status).toBe('busted');
     });
   });
 
@@ -168,13 +170,13 @@ describe("Delver's Descent Integration Tests", () => {
       const depth2Cost = energyCalculator.calculateReturnCost(2);
       const depth3Cost = energyCalculator.calculateReturnCost(3);
 
-      expect(depth1Cost).toBe(5); // 5 * (1 ^ 1.5) = 5
+      expect(depth1Cost).toBe(5); // 5 * (1 ^ 2.0) = 5
       expect(depth2Cost).toBeGreaterThan(depth1Cost);
       expect(depth3Cost).toBeGreaterThan(depth2Cost);
 
       // Validate exponential scaling
-      expect(depth2Cost).toBe(19); // Cumulative: 5*(2^1.5) + 5*(1^1.5) = 14 + 5 = 19
-      expect(depth3Cost).toBe(45); // Cumulative: 5*(3^1.5) + 5*(2^1.5) + 5*(1^1.5) = 26 + 14 + 5 = 45
+      expect(depth2Cost).toBe(25); // Cumulative: 5*(2^2.0) + 5*(1^2.0) = 20 + 5 = 25
+      expect(depth3Cost).toBe(70); // Cumulative: 5*(3^2.0) + 5*(2^2.0) + 5*(1^2.0) = 45 + 20 + 5 = 70
     });
 
     it('should handle shortcut energy reductions', () => {

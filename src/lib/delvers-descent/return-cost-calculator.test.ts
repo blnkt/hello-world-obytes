@@ -9,12 +9,12 @@ describe('ReturnCostCalculator', () => {
   });
 
   describe('exponential scaling algorithm', () => {
-    it('should calculate base return cost using 5 * depth^1.5 formula', () => {
-      // Test the exponential scaling formula: 5 * depth^1.5
-      expect(calculator.calculateBaseReturnCost(1)).toBeCloseTo(5, 1); // 5 * 1^1.5 = 5
-      expect(calculator.calculateBaseReturnCost(2)).toBeCloseTo(14.14, 1); // 5 * 2^1.5 ≈ 14.14
-      expect(calculator.calculateBaseReturnCost(3)).toBeCloseTo(25.98, 1); // 5 * 3^1.5 ≈ 25.98
-      expect(calculator.calculateBaseReturnCost(4)).toBeCloseTo(40, 1); // 5 * 4^1.5 = 40
+    it('should calculate base return cost using 5 * depth^2.0 formula', () => {
+      // Test the exponential scaling formula: 5 * depth^2.0
+      expect(calculator.calculateBaseReturnCost(1)).toBeCloseTo(5, 1); // 5 * 1^2.0 = 5
+      expect(calculator.calculateBaseReturnCost(2)).toBeCloseTo(20, 1); // 5 * 2^2.0 = 20
+      expect(calculator.calculateBaseReturnCost(3)).toBeCloseTo(45, 1); // 5 * 3^2.0 = 45
+      expect(calculator.calculateBaseReturnCost(4)).toBeCloseTo(80, 1); // 5 * 4^2.0 = 80
     });
 
     it('should handle depth 0 correctly', () => {
@@ -22,7 +22,7 @@ describe('ReturnCostCalculator', () => {
     });
 
     it('should handle fractional depths', () => {
-      expect(calculator.calculateBaseReturnCost(1.5)).toBeCloseTo(9.19, 1); // 5 * 1.5^1.5 ≈ 9.19
+      expect(calculator.calculateBaseReturnCost(1.5)).toBeCloseTo(11.25, 1); // 5 * 1.5^2.0 = 11.25
     });
   });
 
@@ -99,8 +99,8 @@ describe('ReturnCostCalculator', () => {
     it('should allow custom base multiplier', () => {
       const customCalculator = new ReturnCostCalculator({ baseMultiplier: 10 });
 
-      // Should use 10 * depth^1.5 instead of 5 * depth^1.5
-      expect(customCalculator.calculateBaseReturnCost(2)).toBeCloseTo(28.28, 1); // 10 * 2^1.5 ≈ 28.28
+      // Should use 10 * depth^2.0 instead of 5 * depth^2.0
+      expect(customCalculator.calculateBaseReturnCost(2)).toBeCloseTo(40, 1); // 10 * 2^2.0 = 40
     });
 
     it('should allow custom exponent', () => {

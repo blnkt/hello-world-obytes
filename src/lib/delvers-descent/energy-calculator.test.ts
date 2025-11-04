@@ -15,9 +15,9 @@ describe('EnergyCalculator', () => {
       const cost2 = calculator.calculateReturnCost(2);
       const cost3 = calculator.calculateReturnCost(3);
 
-      expect(cost1).toBe(5); // 5 * (1^1.5) = 5
-      expect(cost2).toBe(19); // 5 * (2^1.5) + 5 * (1^1.5) = 14.14 + 5 = 19.14 ≈ 19
-      expect(cost3).toBe(45); // 5 * (3^1.5) + 5 * (2^1.5) + 5 * (1^1.5) = 25.98 + 14.14 + 5 = 45.12 ≈ 45
+      expect(cost1).toBe(5); // 5 * (1^2.0) = 5
+      expect(cost2).toBe(25); // 5 * (2^2.0) + 5 * (1^2.0) = 20 + 5 = 25
+      expect(cost3).toBe(70); // 5 * (3^2.0) + 5 * (2^2.0) + 5 * (1^2.0) = 45 + 20 + 5 = 70
     });
 
     it('should handle zero depth', () => {

@@ -93,6 +93,7 @@ describe('Region Difficulty Scaling', () => {
               hazard: 0.1,
               rest_site: 0.05,
               safe_passage: 0.1,
+              region_shortcut: 0.1,
             },
           },
         },

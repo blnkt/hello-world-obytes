@@ -20,6 +20,7 @@ export class DungeonMapGeneratorOptimized {
     'hazard',
     'rest_site',
     'safe_passage',
+    'region_shortcut',
   ];
   private readonly returnCostCalculator: ReturnCostCalculator;
   private readonly encounterWeights: { type: EncounterType; weight: number }[];
@@ -52,6 +53,10 @@ export class DungeonMapGeneratorOptimized {
       { type: 'hazard' as EncounterType, weight: dist.hazard },
       { type: 'rest_site' as EncounterType, weight: dist.rest_site },
       { type: 'safe_passage' as EncounterType, weight: dist.safe_passage },
+      {
+        type: 'region_shortcut' as EncounterType,
+        weight: dist.region_shortcut,
+      },
     ].filter((w) => w.weight > 0);
 
     this.encounterWeights = weights;
@@ -297,6 +302,10 @@ export class DungeonMapGeneratorOptimized {
       { type: 'hazard' as EncounterType, weight: dist.hazard },
       { type: 'rest_site' as EncounterType, weight: dist.rest_site },
       { type: 'safe_passage' as EncounterType, weight: dist.safe_passage },
+      {
+        type: 'region_shortcut' as EncounterType,
+        weight: dist.region_shortcut,
+      },
     ].filter((w) => w.weight > 0);
     const total = weights.reduce((sum, w) => sum + w.weight, 0);
     return { weights, total };

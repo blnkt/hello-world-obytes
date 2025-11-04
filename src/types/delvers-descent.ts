@@ -36,6 +36,7 @@ export interface RunState {
   inventory: CollectedItem[];
   visitedNodes: string[];
   discoveredShortcuts: Shortcut[];
+  currentRegionId?: string; // Track which region the player is currently in
 }
 
 export interface CollectedItem {
@@ -90,7 +91,8 @@ export type EncounterType =
   | 'risk_event'
   | 'hazard'
   | 'rest_site'
-  | 'safe_passage';
+  | 'safe_passage'
+  | 'region_shortcut';
 
 export interface CollectionSet {
   id: string;
@@ -198,6 +200,7 @@ export interface EncounterDistribution {
   hazard: number;
   rest_site: number;
   safe_passage: number;
+  region_shortcut: number;
 }
 
 export interface CollectionStatistics {
@@ -350,6 +353,7 @@ export const isValidEncounterType = (type: string): type is EncounterType => {
     'hazard',
     'rest_site',
     'safe_passage',
+    'region_shortcut',
   ].includes(type);
 };
 
@@ -361,6 +365,7 @@ export const ENCOUNTER_TYPES: EncounterType[] = [
   'hazard',
   'rest_site',
   'safe_passage',
+  'region_shortcut',
 ];
 
 // Constants for collection set types

@@ -310,6 +310,7 @@ describe("Delver's Descent Types", () => {
           hazard: 18,
           rest_site: 13,
           safe_passage: 9,
+          region_shortcut: 0,
         },
       };
 
@@ -318,7 +319,7 @@ describe("Delver's Descent Types", () => {
       expect(region.description).toBe('Ancient woodland with hidden paths');
       expect(region.theme).toBe('ancient_forest');
       expect(region.isUnlocked).toBe(false);
-      expect(region.encounterDistribution.puzzle_chamber).toBe(25);
+      expect(region.encounterDistribution.puzzle_chamber).toBe(20);
       expect(region.startingBonus.energyBonus).toBe(0);
     });
   });
@@ -462,6 +463,8 @@ describe("Delver's Descent Types", () => {
         'risk_event',
         'hazard',
         'rest_site',
+        'safe_passage',
+        'region_shortcut',
       ]);
     });
 

@@ -99,6 +99,7 @@ const RunDetailsCard: React.FC<{ run: DelvingRun }> = ({ run }) => (
   </View>
 );
 
+// eslint-disable-next-line max-lines-per-function
 const useActiveRunData = (runId: string) => {
   const [run, setRun] = useState<DelvingRun | null>(null);
   const [nodes, setNodes] = useState<DungeonNode[]>([]);
@@ -151,6 +152,15 @@ const useActiveRunData = (runId: string) => {
     [maxDepth, generateDepthLevel]
   );
 
+  const updateRegion = React.useCallback(
+    (newRegionId: string) =>
+      setRunState((prev) => {
+        if (!prev) return prev;
+        return { ...prev, currentRegionId: newRegionId };
+      }),
+    []
+  );
+
   return {
     run,
     nodes,
@@ -161,17 +171,25 @@ const useActiveRunData = (runId: string) => {
     addToInventory,
     markNodeVisited,
     updateDepth,
+    updateRegion,
   };
 };
 
 // eslint-disable-next-line max-lines-per-function
 const useEncounterHandlers = (params: {
   runState: RunState | null;
+  nodes: DungeonNode[];
   onEnergyUpdate: (energyDelta: number) => void;
   onInventoryUpdate: (items: any[]) => void;
   onNodeVisited: (nodeId: string) => void;
   onDepthUpdate: (depth: number) => void;
   onTriggerCashOut?: () => void;
+  onRegionUpdate?: (regionId: string) => void;
+  onRegenerateMap?: (
+    nodes: DungeonNode[],
+    visitedNodes: string[],
+    newRegionId: string
+  ) => void;
 }) => {
   const {
     onEnergyUpdate,
@@ -179,6 +197,10 @@ const useEncounterHandlers = (params: {
     onNodeVisited,
     onDepthUpdate,
     onTriggerCashOut,
+    onRegionUpdate,
+    onRegenerateMap,
+    runState,
+    nodes,
   } = params;
   const [selectedNode, setSelectedNode] = useState<DungeonNode | null>(null);
   const [showEncounter, setShowEncounter] = useState(false);
@@ -203,7 +225,7 @@ const useEncounterHandlers = (params: {
   );
 
   const handleEncounterComplete = useCallback(
-    (result: 'success' | 'failure', rewards?: any[]) =>
+    (result: 'success' | 'failure', rewards?: any[], targetRegionId?: string) =>
       handleEncounterCompleteImpl({
         selectedNode,
         setShowEncounter,
@@ -212,8 +234,13 @@ const useEncounterHandlers = (params: {
         onNodeVisited,
         onDepthUpdate,
         onTriggerCashOut,
+        onRegionUpdate,
+        onRegenerateMap,
+        runState,
+        nodes,
         result,
         rewards,
+        targetRegionId,
       }),
     [
       selectedNode,
@@ -222,6 +249,10 @@ const useEncounterHandlers = (params: {
       onNodeVisited,
       onDepthUpdate,
       onTriggerCashOut,
+      onRegionUpdate,
+      onRegenerateMap,
+      runState,
+      nodes,
     ]
   );
 
@@ -279,20 +310,69 @@ function updateDepthImpl({
   prevState: RunState | null;
   newDepth: number;
   maxDepth: number;
-  generateDepthLevel: (depth: number) => DungeonNode[];
+  generateDepthLevel: (depth: number, regionKey?: string) => DungeonNode[];
   setNodes: React.Dispatch<React.SetStateAction<DungeonNode[]>>;
   setMaxDepth: React.Dispatch<React.SetStateAction<number>>;
 }): RunState | null {
   if (!prevState) return prevState;
   const updatedDepth = Math.max(prevState.currentDepth, newDepth);
   if (updatedDepth >= maxDepth) {
-    const newNodes = generateDepthLevel(maxDepth + 1);
+    const regionKey = prevState.currentRegionId;
+    const newNodes = generateDepthLevel(maxDepth + 1, regionKey);
     setNodes((prevNodes) => [...prevNodes, ...newNodes]);
     setMaxDepth(maxDepth + 1);
   }
   return { ...prevState, currentDepth: updatedDepth };
 }
 
+function regenerateUnvisitedNodesWithRegion(params: {
+  nodes: DungeonNode[];
+  visitedNodes: string[];
+  newRegionId: string;
+  generateDepthLevel: (depth: number, regionKey?: string) => DungeonNode[];
+}): DungeonNode[] {
+  const { nodes, visitedNodes, newRegionId, generateDepthLevel } = params;
+  const visitedSet = new Set(visitedNodes);
+  const visitedNodesList = nodes.filter((node) => visitedSet.has(node.id));
+  const unvisitedNodes = nodes.filter((node) => !visitedSet.has(node.id));
+
+  // Group unvisited nodes by depth to preserve structure
+  const nodesByDepth = new Map<number, DungeonNode[]>();
+  unvisitedNodes.forEach((node) => {
+    const depth = node.depth;
+    if (!nodesByDepth.has(depth)) {
+      nodesByDepth.set(depth, []);
+    }
+    nodesByDepth.get(depth)!.push(node);
+  });
+
+  // Use region ID directly as region key
+  // The map generator will fall back to default if the region key doesn't exist in balance config
+  const regionKey = newRegionId;
+
+  // Regenerate nodes for each depth, preserving IDs and connections
+  const regeneratedNodes: DungeonNode[] = [];
+  nodesByDepth.forEach((oldNodesAtDepth, depth) => {
+    // Generate new nodes with new encounter types
+    const newNodes = generateDepthLevel(depth, regionKey);
+
+    // Map old nodes to new nodes by position, preserving IDs and connections
+    oldNodesAtDepth.forEach((oldNode, index) => {
+      const newNode = newNodes[index] || newNodes[0]; // Fallback to first if index mismatch
+      regeneratedNodes.push({
+        ...oldNode, // Preserve ID, connections, and other properties
+        type: newNode.type, // Update encounter type with new region's distribution
+        energyCost: newNode.energyCost, // Update energy cost (may vary by encounter type)
+        returnCost: newNode.returnCost, // Update return cost
+      });
+    });
+  });
+
+  // Combine visited nodes (unchanged) with regenerated unvisited nodes
+  return [...visitedNodesList, ...regeneratedNodes];
+}
+
+// eslint-disable-next-line max-lines-per-function
 function handleEncounterCompleteImpl({
   selectedNode,
   setShowEncounter,
@@ -301,8 +381,13 @@ function handleEncounterCompleteImpl({
   onNodeVisited,
   onDepthUpdate,
   onTriggerCashOut,
+  onRegionUpdate,
+  onRegenerateMap,
+  runState,
+  nodes,
   result,
   rewards,
+  targetRegionId,
 }: {
   selectedNode: DungeonNode | null;
   setShowEncounter: (v: boolean) => void;
@@ -311,8 +396,17 @@ function handleEncounterCompleteImpl({
   onNodeVisited: (id: string) => void;
   onDepthUpdate: (depth: number) => void;
   onTriggerCashOut?: () => void;
+  onRegionUpdate?: (regionId: string) => void;
+  onRegenerateMap?: (
+    nodes: DungeonNode[],
+    visitedNodes: string[],
+    newRegionId: string
+  ) => void;
+  runState: RunState | null;
+  nodes: DungeonNode[];
   result: 'success' | 'failure';
   rewards?: any[];
+  targetRegionId?: string;
 }) {
   if (!selectedNode) {
     setShowEncounter(false);
@@ -335,6 +429,30 @@ function handleEncounterCompleteImpl({
     setShowEncounter(false);
     // Trigger cash out with free return (return cost will be handled in cash out modal)
     onTriggerCashOut();
+    return;
+  }
+
+  // If this is a region shortcut encounter and it succeeded, update the region
+  if (
+    selectedNode.type === 'region_shortcut' &&
+    result === 'success' &&
+    targetRegionId &&
+    onRegionUpdate &&
+    onRegenerateMap &&
+    runState
+  ) {
+    // Process the encounter normally (deduct energy, mark visited, etc.)
+    onEnergyUpdate(-selectedNode.energyCost);
+    if (rewards) {
+      onInventoryUpdate(rewards);
+    }
+    onNodeVisited(selectedNode.id);
+    onDepthUpdate(selectedNode.depth);
+    // Update region in RunState
+    onRegionUpdate(targetRegionId);
+    // Regenerate unvisited nodes with new region's encounter distribution
+    onRegenerateMap(nodes, runState.visitedNodes, targetRegionId);
+    setShowEncounter(false);
     return;
   }
 
@@ -558,6 +676,7 @@ function ActiveRunScreen({ router, runId }: { router: any; runId: string }) {
       <EncounterView
         run={controllers.run}
         node={controllers.handlers.selectedNode}
+        runState={controllers.runState}
         onReturnToMap={controllers.handlers.handleReturnToMap}
         onEncounterComplete={controllers.handlers.handleEncounterComplete}
       />
@@ -578,6 +697,7 @@ function ActiveRunScreen({ router, runId }: { router: any; runId: string }) {
   );
 }
 
+// eslint-disable-next-line max-lines-per-function
 function useActiveRunControllers({
   router,
   runId,
@@ -588,6 +708,14 @@ function useActiveRunControllers({
   const [showCashOutModal, setShowCashOutModal] = useState(false);
   const [isFreeReturn, setIsFreeReturn] = useState(false);
   const data = useActiveRunData(runId);
+  const { generateDepthLevel } = useMapGenerator();
+  const [nodes, setNodes] = useState<DungeonNode[]>(data.nodes);
+
+  // Sync nodes when data.nodes changes
+  React.useEffect(() => {
+    setNodes(data.nodes);
+  }, [data.nodes]);
+
   const handleEnergyUpdate = useEnergyUpdateHandler({
     updateEnergy: data.updateEnergy,
     runState: data.runState,
@@ -595,12 +723,32 @@ function useActiveRunControllers({
     router,
   });
   const handleInventoryUpdate = buildInventoryUpdater(data.addToInventory);
+  const regenerateMap = React.useCallback(
+    (
+      currentNodes: DungeonNode[],
+      visitedNodes: string[],
+      newRegionId: string
+    ) => {
+      const regenerated = regenerateUnvisitedNodesWithRegion({
+        nodes: currentNodes,
+        visitedNodes,
+        newRegionId,
+        generateDepthLevel,
+      });
+      setNodes(regenerated);
+    },
+    [generateDepthLevel]
+  );
+
   const { handlers, handleNodePress } = useHandlersWiring({
     runState: data.runState,
+    nodes: nodes,
     handleEnergyUpdate,
     handleInventoryUpdate,
     markNodeVisited: data.markNodeVisited,
     updateDepth: data.updateDepth,
+    updateRegion: data.updateRegion,
+    regenerateMap,
     run: data.run,
     router,
     onTriggerCashOut: () => {
@@ -622,7 +770,7 @@ function useActiveRunControllers({
   // Removed risk flow and "Continue Deeper" UX
   return {
     run: data.run,
-    nodes: data.nodes,
+    nodes: nodes,
     runState: data.runState,
     isLoading: data.isLoading,
     error: data.error,
@@ -658,32 +806,46 @@ function buildInventoryUpdater(addToInventory: (item: any) => void) {
   };
 }
 
-function useHandlersWiring({
-  runState,
-  handleEnergyUpdate,
-  handleInventoryUpdate,
-  markNodeVisited,
-  updateDepth,
-  run,
-  router,
-  onTriggerCashOut,
-}: {
+function useHandlersWiring(params: {
   runState: RunState | null;
   handleEnergyUpdate: (delta: number) => void;
   handleInventoryUpdate: (items: any[]) => void;
   markNodeVisited: (id: string) => void;
   updateDepth: (d: number) => void;
+  updateRegion: (regionId: string) => void;
+  regenerateMap: (
+    nodes: DungeonNode[],
+    visitedNodes: string[],
+    newRegionId: string
+  ) => void;
+  nodes: DungeonNode[];
   run: DelvingRun | null;
   router: any;
   onTriggerCashOut?: () => void;
 }) {
+  const {
+    runState,
+    handleEnergyUpdate,
+    handleInventoryUpdate,
+    markNodeVisited,
+    updateDepth,
+    updateRegion,
+    regenerateMap,
+    nodes,
+    run,
+    router,
+    onTriggerCashOut,
+  } = params;
   const handlers = useEncounterHandlers({
     runState,
+    nodes,
     onEnergyUpdate: handleEnergyUpdate,
     onInventoryUpdate: handleInventoryUpdate,
     onNodeVisited: markNodeVisited,
     onDepthUpdate: updateDepth,
     onTriggerCashOut,
+    onRegionUpdate: updateRegion,
+    onRegenerateMap: regenerateMap,
   });
   const handleNodePress = useNodePressHandler({
     handlers,
@@ -773,18 +935,25 @@ function useNodePressHandler({
 function EncounterView({
   run,
   node,
+  runState,
   onReturnToMap,
   onEncounterComplete,
 }: {
   run: DelvingRun;
   node: DungeonNode;
+  runState: RunState | null;
   onReturnToMap: () => void;
-  onEncounterComplete: (result: 'success' | 'failure', rewards?: any[]) => void;
+  onEncounterComplete: (
+    result: 'success' | 'failure',
+    rewards?: any[],
+    targetRegionId?: string
+  ) => void;
 }) {
   return (
     <EncounterScreen
       run={run}
       node={node}
+      runState={runState}
       onReturnToMap={onReturnToMap}
       onEncounterComplete={onEncounterComplete}
     />

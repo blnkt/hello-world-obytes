@@ -41,6 +41,8 @@ describe('DungeonMapGenerator', () => {
         'risk_event',
         'hazard',
         'rest_site',
+        'safe_passage',
+        'region_shortcut',
       ];
 
       nodes.forEach((node) => {

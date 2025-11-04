@@ -6,7 +6,8 @@ export type EncounterRoute =
   | 'risk_event'
   | 'hazard'
   | 'rest_site'
-  | 'safe_passage';
+  | 'safe_passage'
+  | 'region_shortcut';
 
 /**
  * Routes dungeon node types to the appropriate encounter screen
@@ -19,6 +20,7 @@ export function getEncounterRoute(node: DungeonNode): EncounterRoute | null {
     hazard: 'hazard',
     rest_site: 'rest_site',
     safe_passage: 'safe_passage',
+    region_shortcut: 'region_shortcut',
   };
 
   return routeMap[node.type] || null;
@@ -35,6 +37,7 @@ export function isEncounterSupported(nodeType: string): boolean {
     'hazard',
     'rest_site',
     'safe_passage',
+    'region_shortcut',
   ];
   return supportedTypes.includes(nodeType);
 }

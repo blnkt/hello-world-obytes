@@ -1,14 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
+import { CollectionManager } from '@/lib/delvers-descent/collection-manager';
+import { ALL_COLLECTION_SETS } from '@/lib/delvers-descent/collection-sets';
 import { HazardEncounter } from '@/lib/delvers-descent/hazard-encounter';
+import { RegionManager } from '@/lib/delvers-descent/region-manager';
+import { RegionShortcutEncounter } from '@/lib/delvers-descent/region-shortcut-encounter';
 import { RestSiteEncounter } from '@/lib/delvers-descent/rest-site-encounter';
 import { RiskEventEncounter } from '@/lib/delvers-descent/risk-event-encounter';
 import { SafePassageEncounter } from '@/lib/delvers-descent/safe-passage-encounter';
-import type { DelvingRun, DungeonNode } from '@/types/delvers-descent';
+import type {
+  DelvingRun,
+  DungeonNode,
+  RunState,
+} from '@/types/delvers-descent';
 
 import { useEncounterResolver } from '../hooks/use-encounter-resolver';
 import { HazardScreen } from './advanced/hazard-screen';
+import { RegionShortcutScreen } from './advanced/region-shortcut-screen';
 import { RestSiteScreen } from './advanced/rest-site-screen';
 import { RiskEventScreen } from './advanced/risk-event-screen';
 import { SafePassageScreen } from './advanced/safe-passage-screen';
@@ -18,8 +27,13 @@ import { PuzzleChamberScreen } from './puzzle-chamber-screen';
 interface EncounterScreenProps {
   run: DelvingRun;
   node: DungeonNode;
+  runState?: RunState | null;
   onReturnToMap: () => void;
-  onEncounterComplete: (result: 'success' | 'failure', rewards?: any[]) => void;
+  onEncounterComplete: (
+    result: 'success' | 'failure',
+    rewards?: any[],
+    targetRegionId?: string
+  ) => void;
 }
 
 const LoadingScreen: React.FC = () => (
@@ -37,7 +51,7 @@ const LoadingScreen: React.FC = () => (
 );
 
 const ErrorScreen: React.FC<{ error: string; onReturn: () => void }> = ({
-  error,
+  error: _error,
   onReturn,
 }) => (
   <View
@@ -49,7 +63,7 @@ const ErrorScreen: React.FC<{ error: string; onReturn: () => void }> = ({
       <Text className="mb-2 text-center text-2xl font-bold text-gray-800">
         Encounter Error
       </Text>
-      <Text className="mb-4 text-center text-gray-600">{error}</Text>
+      <Text className="mb-4 text-center text-gray-600">{_error}</Text>
       <Pressable
         onPress={onReturn}
         className="rounded-lg bg-blue-500 px-6 py-3"
@@ -106,57 +120,106 @@ const ReadyToBeginScreen: React.FC<{ onStart: () => void }> = ({ onStart }) => (
   </View>
 );
 
-const useAdvancedEncounter = (node: DungeonNode) => {
+const createBasicEncounter = (
+  node: DungeonNode,
+  type: 'hazard' | 'risk_event' | 'rest_site' | 'safe_passage'
+) => {
+  if (type === 'hazard') {
+    const config = HazardEncounter.createHazardConfig(
+      'collapsed_passage',
+      5,
+      node.depth
+    );
+    return new HazardEncounter(node.id, config);
+  }
+  if (type === 'risk_event') {
+    const config = RiskEventEncounter.createRiskLevelConfig(
+      'medium',
+      node.depth
+    );
+    return new RiskEventEncounter(node.id, config);
+  }
+  if (type === 'rest_site') {
+    const config = RestSiteEncounter.createRestSiteConfig(
+      'ancient_shrine',
+      5,
+      node.depth
+    );
+    return new RestSiteEncounter(node.id, config);
+  }
+  const passageTypes = SafePassageEncounter.getPassageTypes();
+  const randomType =
+    passageTypes[Math.floor(Math.random() * passageTypes.length)];
+  const config = SafePassageEncounter.createSafePassageConfig(
+    randomType,
+    5,
+    node.depth
+  );
+  return new SafePassageEncounter(node.id, config);
+};
+
+const createRegionShortcutEncounter = async (
+  node: DungeonNode,
+  currentRegionId?: string
+) => {
+  const collectionManager = new CollectionManager(ALL_COLLECTION_SETS);
+  const regionManager = new RegionManager(collectionManager);
+  const shortcutTypes = RegionShortcutEncounter.getShortcutTypes();
+  const randomType =
+    shortcutTypes[Math.floor(Math.random() * shortcutTypes.length)];
+  const config = await RegionShortcutEncounter.createRegionShortcutConfig({
+    regionManager,
+    currentRegionId,
+    shortcutType: randomType,
+    quality: 5,
+    depth: node.depth,
+  });
+  return new RegionShortcutEncounter(node.id, config);
+};
+
+const useAdvancedEncounter = (node: DungeonNode, currentRegionId?: string) => {
   const [advancedEncounter, setAdvancedEncounter] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (node.type === 'hazard') {
-      const config = HazardEncounter.createHazardConfig(
-        'collapsed_passage',
-        5,
-        node.depth
-      );
-      const hazardEncounter = new HazardEncounter(node.id, config);
-      setAdvancedEncounter(hazardEncounter);
-    } else if (node.type === 'risk_event') {
-      const config = RiskEventEncounter.createRiskLevelConfig(
-        'medium',
-        node.depth
-      );
-      const riskEncounter = new RiskEventEncounter(node.id, config);
-      setAdvancedEncounter(riskEncounter);
-    } else if (node.type === 'rest_site') {
-      const config = RestSiteEncounter.createRestSiteConfig(
-        'ancient_shrine',
-        5,
-        node.depth
-      );
-      const restEncounter = new RestSiteEncounter(node.id, config);
-      setAdvancedEncounter(restEncounter);
-    } else if (node.type === 'safe_passage') {
-      const passageTypes = SafePassageEncounter.getPassageTypes();
-      const randomType =
-        passageTypes[Math.floor(Math.random() * passageTypes.length)];
-      const config = SafePassageEncounter.createSafePassageConfig(
-        randomType,
-        5,
-        node.depth
-      );
-      const safePassageEncounter = new SafePassageEncounter(node.id, config);
-      setAdvancedEncounter(safePassageEncounter);
+    if (
+      node.type === 'hazard' ||
+      node.type === 'risk_event' ||
+      node.type === 'rest_site' ||
+      node.type === 'safe_passage'
+    ) {
+      const encounter = createBasicEncounter(node, node.type);
+      setAdvancedEncounter(encounter);
+    } else if (node.type === 'region_shortcut') {
+      setIsLoading(true);
+      createRegionShortcutEncounter(node, currentRegionId)
+        .then((encounter) => {
+          setAdvancedEncounter(encounter);
+        })
+        .catch((_error) => {
+          console.error('Failed to create region shortcut:', _error);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
     }
-  }, [node.type, node.depth, node.id]);
+  }, [node.type, node.depth, node.id, currentRegionId]);
 
-  return advancedEncounter;
+  return { advancedEncounter, isLoading };
 };
 
 const handleAdvancedEncounterComplete = (
   outcome: any,
-  onEncounterComplete: (result: 'success' | 'failure', rewards?: any[]) => void
+  onEncounterComplete: (
+    result: 'success' | 'failure',
+    rewards?: any[],
+    targetRegionId?: string
+  ) => void
 ) => {
   const result = outcome.type === 'success' ? 'success' : 'failure';
   const rewards = outcome.reward ? [outcome.reward] : undefined;
-  onEncounterComplete(result, rewards);
+  const targetRegionId = outcome.targetRegionId;
+  onEncounterComplete(result, rewards, targetRegionId);
 };
 
 const renderStandardEncounter = (params: {
@@ -243,16 +306,38 @@ const renderAdvancedEncounter = (params: {
     );
   }
 
+  if (node.type === 'region_shortcut' && advancedEncounter) {
+    return (
+      <RegionShortcutScreen
+        encounter={advancedEncounter}
+        onComplete={completeHandler}
+        onReturn={onReturnToMap}
+      />
+    );
+  }
+
   return null;
 };
 
 const EncounterContent: React.FC<{
   run: DelvingRun;
   node: DungeonNode;
+  runState?: RunState | null;
   onReturnToMap: () => void;
-  onEncounterComplete: (result: 'success' | 'failure', rewards?: any[]) => void;
-}> = ({ run, node, onReturnToMap, onEncounterComplete }) => {
-  const advancedEncounter = useAdvancedEncounter(node);
+  onEncounterComplete: (
+    result: 'success' | 'failure',
+    rewards?: any[],
+    targetRegionId?: string
+  ) => void;
+}> = ({ run, node, runState, onReturnToMap, onEncounterComplete }) => {
+  const { advancedEncounter, isLoading } = useAdvancedEncounter(
+    node,
+    runState?.currentRegionId
+  );
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
 
   const standardContent = renderStandardEncounter({
     node,
@@ -278,10 +363,15 @@ const EncounterContent: React.FC<{
 const renderAdvancedEncounterScreen = (params: {
   run: DelvingRun;
   node: DungeonNode;
+  runState?: RunState | null;
   onReturnToMap: () => void;
-  onEncounterComplete: (result: 'success' | 'failure', rewards?: any[]) => void;
+  onEncounterComplete: (
+    result: 'success' | 'failure',
+    rewards?: any[],
+    targetRegionId?: string
+  ) => void;
 }) => {
-  const { run, node, onReturnToMap, onEncounterComplete } = params;
+  const { run, node, runState, onReturnToMap, onEncounterComplete } = params;
   return (
     <ScrollView
       testID="encounter-screen"
@@ -292,6 +382,7 @@ const renderAdvancedEncounterScreen = (params: {
         <EncounterContent
           run={run}
           node={node}
+          runState={runState}
           onReturnToMap={onReturnToMap}
           onEncounterComplete={onEncounterComplete}
         />
@@ -363,6 +454,7 @@ const renderStandardEncounterScreen = (params: {
 export const EncounterScreen: React.FC<EncounterScreenProps> = ({
   run,
   node,
+  runState,
   onReturnToMap,
   onEncounterComplete,
 }) => {
@@ -382,6 +474,7 @@ export const EncounterScreen: React.FC<EncounterScreenProps> = ({
     return renderAdvancedEncounterScreen({
       run,
       node,
+      runState,
       onReturnToMap,
       onEncounterComplete,
     });
@@ -391,11 +484,18 @@ export const EncounterScreen: React.FC<EncounterScreenProps> = ({
     return <ErrorScreen error={error} onReturn={onReturnToMap} />;
   }
 
-  const advancedTypes = ['hazard', 'risk_event', 'rest_site', 'safe_passage'];
+  const advancedTypes = [
+    'hazard',
+    'risk_event',
+    'rest_site',
+    'safe_passage',
+    'region_shortcut',
+  ];
   if (advancedTypes.includes(node.type)) {
     return renderAdvancedEncounterScreen({
       run,
       node,
+      runState,
       onReturnToMap,
       onEncounterComplete,
     });

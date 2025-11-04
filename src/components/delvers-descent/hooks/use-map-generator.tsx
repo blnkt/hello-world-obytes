@@ -8,8 +8,8 @@ export const useMapGenerator = () => {
   const mapGenerator = getDungeonMapGenerator();
 
   const generateDepthLevel = useMemo(() => {
-    return (depth: number): DungeonNode[] => {
-      return mapGenerator.generateDepthLevel(depth);
+    return (depth: number, regionKey?: string): DungeonNode[] => {
+      return mapGenerator.generateDepthLevel(depth, regionKey);
     };
   }, [mapGenerator]);
 

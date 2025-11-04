@@ -62,7 +62,10 @@ describe('useMapGenerator', () => {
 
       const nodes = _result.current.generateDepthLevel(1);
       expect(nodes).toEqual(mockNodes);
-      expect(mockMapGenerator.generateDepthLevel).toHaveBeenCalledWith(1);
+      expect(mockMapGenerator.generateDepthLevel).toHaveBeenCalledWith(
+        1,
+        undefined
+      );
     });
 
     it('should generate full map', () => {
@@ -403,7 +406,10 @@ describe('useMapGenerator', () => {
       // Should be called twice: once during initial render, once during rerender
       // But with same parameters, so memoization should work
       expect(mockMapGenerator.generateDepthLevel).toHaveBeenCalledTimes(2);
-      expect(mockMapGenerator.generateDepthLevel).toHaveBeenCalledWith(1);
+      expect(mockMapGenerator.generateDepthLevel).toHaveBeenCalledWith(
+        1,
+        undefined
+      );
     });
   });
 });
