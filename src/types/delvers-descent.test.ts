@@ -304,11 +304,12 @@ describe("Delver's Descent Types", () => {
           itemsBonus: 0,
         },
         encounterDistribution: {
-          puzzle_chamber: 25,
-          discovery_site: 30,
-          risk_event: 15,
-          hazard: 20,
-          rest_site: 15,
+          puzzle_chamber: 20,
+          discovery_site: 27,
+          risk_event: 13,
+          hazard: 18,
+          rest_site: 13,
+          safe_passage: 9,
         },
       };
 

@@ -87,11 +87,12 @@ describe('Region Difficulty Scaling', () => {
           encounterDistributions: {
             ...config.region.encounterDistributions,
             forest_depths: {
-              puzzle_chamber: 0.5,
+              puzzle_chamber: 0.4,
               discovery_site: 0.25,
               risk_event: 0.1,
               hazard: 0.1,
               rest_site: 0.05,
+              safe_passage: 0.1,
             },
           },
         },

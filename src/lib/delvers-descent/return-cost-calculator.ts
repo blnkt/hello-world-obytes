@@ -13,7 +13,7 @@ export class ReturnCostCalculator {
 
   constructor(config: ReturnCostCalculatorConfig = {}) {
     this.baseMultiplier = Math.max(0.1, config.baseMultiplier ?? 5); // Clamp to positive values
-    this.exponent = Math.max(0.1, config.exponent ?? 1.5); // Clamp to positive values
+    this.exponent = Math.max(0.1, config.exponent ?? 2.0); // Increased from 1.5 to 2.0 for more aggressive scaling
     this.shortcutReductionFactor = Math.max(
       0,
       Math.min(1, config.shortcutReductionFactor ?? 0.3)
@@ -108,11 +108,7 @@ export class ReturnCostCalculator {
       shortcutMap?: Map<string, ShortcutInfo>;
     } = {}
   ): number {
-    const {
-      visitedNodes: _visitedNodes = [],
-      availableShortcuts = [],
-      shortcutMap,
-    } = options;
+    const { availableShortcuts = [], shortcutMap } = options;
     if (currentDepth <= 0) {
       return 0;
     }

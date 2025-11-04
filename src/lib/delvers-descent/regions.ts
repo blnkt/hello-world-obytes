@@ -19,11 +19,12 @@ export const FOREST_DEPTHS: Region = {
     itemsBonus: 0,
   },
   encounterDistribution: {
-    puzzle_chamber: 25,
-    discovery_site: 31,
-    risk_event: 13,
-    hazard: 19,
-    rest_site: 12,
+    puzzle_chamber: 20,
+    discovery_site: 28,
+    risk_event: 11,
+    hazard: 17,
+    rest_site: 10,
+    safe_passage: 14,
   },
   visualTheme: {
     primaryColor: '#2d5016',
@@ -47,11 +48,12 @@ export const DESERT_OASIS: Region = {
     itemsBonus: 0,
   },
   encounterDistribution: {
-    puzzle_chamber: 20,
-    discovery_site: 38,
-    risk_event: 20,
-    hazard: 12,
-    rest_site: 10,
+    puzzle_chamber: 15,
+    discovery_site: 35,
+    risk_event: 18,
+    hazard: 10,
+    rest_site: 8,
+    safe_passage: 14,
   },
   visualTheme: {
     primaryColor: '#d4a574',
@@ -75,11 +77,12 @@ export const MOUNTAIN_PASS: Region = {
     itemsBonus: 3, // Extra starting items
   },
   encounterDistribution: {
-    puzzle_chamber: 12,
-    discovery_site: 24,
-    risk_event: 24,
-    hazard: 32,
-    rest_site: 8,
+    puzzle_chamber: 8,
+    discovery_site: 20,
+    risk_event: 20,
+    hazard: 28,
+    rest_site: 6,
+    safe_passage: 18,
   },
   visualTheme: {
     primaryColor: '#5d6d7e',
@@ -103,11 +106,12 @@ export const COASTAL_CAVES: Region = {
     itemsBonus: 5, // More starting items, fewer encounters
   },
   encounterDistribution: {
-    puzzle_chamber: 12,
-    discovery_site: 50,
-    risk_event: 12,
-    hazard: 13,
-    rest_site: 13,
+    puzzle_chamber: 8,
+    discovery_site: 45,
+    risk_event: 10,
+    hazard: 11,
+    rest_site: 11,
+    safe_passage: 15,
   },
   visualTheme: {
     primaryColor: '#34495e',
@@ -132,11 +136,12 @@ export const DRAGONS_LAIR: Region = {
     itemsBonus: 10, // Highest starting items
   },
   encounterDistribution: {
-    puzzle_chamber: 6,
-    discovery_site: 12,
-    risk_event: 34,
-    hazard: 34,
-    rest_site: 14, // Dragons are surprisingly hospitable
+    puzzle_chamber: 4,
+    discovery_site: 10,
+    risk_event: 30,
+    hazard: 30,
+    rest_site: 12,
+    safe_passage: 14, // Dragons are surprisingly hospitable
   },
   visualTheme: {
     primaryColor: '#8b0000',

@@ -4,12 +4,14 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { HazardEncounter } from '@/lib/delvers-descent/hazard-encounter';
 import { RestSiteEncounter } from '@/lib/delvers-descent/rest-site-encounter';
 import { RiskEventEncounter } from '@/lib/delvers-descent/risk-event-encounter';
+import { SafePassageEncounter } from '@/lib/delvers-descent/safe-passage-encounter';
 import type { DelvingRun, DungeonNode } from '@/types/delvers-descent';
 
 import { useEncounterResolver } from '../hooks/use-encounter-resolver';
 import { HazardScreen } from './advanced/hazard-screen';
 import { RestSiteScreen } from './advanced/rest-site-screen';
 import { RiskEventScreen } from './advanced/risk-event-screen';
+import { SafePassageScreen } from './advanced/safe-passage-screen';
 import { DiscoverySiteScreen } from './discovery-site-screen';
 import { PuzzleChamberScreen } from './puzzle-chamber-screen';
 
@@ -131,6 +133,17 @@ const useAdvancedEncounter = (node: DungeonNode) => {
       );
       const restEncounter = new RestSiteEncounter(node.id, config);
       setAdvancedEncounter(restEncounter);
+    } else if (node.type === 'safe_passage') {
+      const passageTypes = SafePassageEncounter.getPassageTypes();
+      const randomType =
+        passageTypes[Math.floor(Math.random() * passageTypes.length)];
+      const config = SafePassageEncounter.createSafePassageConfig(
+        randomType,
+        5,
+        node.depth
+      );
+      const safePassageEncounter = new SafePassageEncounter(node.id, config);
+      setAdvancedEncounter(safePassageEncounter);
     }
   }, [node.type, node.depth, node.id]);
 
@@ -213,6 +226,16 @@ const renderAdvancedEncounter = (params: {
   if (node.type === 'rest_site' && advancedEncounter) {
     return (
       <RestSiteScreen
+        encounter={advancedEncounter}
+        onComplete={completeHandler}
+        onReturn={onReturnToMap}
+      />
+    );
+  }
+
+  if (node.type === 'safe_passage' && advancedEncounter) {
+    return (
+      <SafePassageScreen
         encounter={advancedEncounter}
         onComplete={completeHandler}
         onReturn={onReturnToMap}
@@ -368,7 +391,7 @@ export const EncounterScreen: React.FC<EncounterScreenProps> = ({
     return <ErrorScreen error={error} onReturn={onReturnToMap} />;
   }
 
-  const advancedTypes = ['hazard', 'risk_event', 'rest_site'];
+  const advancedTypes = ['hazard', 'risk_event', 'rest_site', 'safe_passage'];
   if (advancedTypes.includes(node.type)) {
     return renderAdvancedEncounterScreen({
       run,

@@ -26,6 +26,7 @@ export class EncounterResolver {
     'risk_event',
     'hazard',
     'rest_site',
+    'safe_passage',
   ];
   private readonly encounterTypeMultipliers: Partial<
     Record<EncounterType, number>
@@ -35,6 +36,7 @@ export class EncounterResolver {
     risk_event: 1.5, // High-risk, high-reward
     hazard: 1.3, // Dangerous but manageable
     rest_site: 0.9, // Restful, slightly lower rewards
+    safe_passage: 0.7, // Low reward, but free return is the main benefit
   };
 
   constructor() {

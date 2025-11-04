@@ -17,6 +17,7 @@ export interface EnergyBalanceConfig {
     risk_event: number; // Default: 2
     hazard: number; // Default: 3
     rest_site: number; // Default: -3
+    safe_passage: number; // Default: -2 (low cost, free return is the benefit)
   };
 
   // Return cost configuration
@@ -36,6 +37,7 @@ export interface RewardBalanceConfig {
     risk_event: number; // Default: 1.5
     hazard: number; // Default: 0.8
     rest_site: number; // Default: 0.5
+    safe_passage: number; // Default: 0.6
   };
 
   // Reward variation (randomness)
@@ -73,11 +75,12 @@ export interface CollectionBalanceConfig {
 export interface EncounterBalanceConfig {
   // Encounter distribution percentages
   encounterDistribution: {
-    puzzle_chamber: number; // Default: 0.375 (37.5%)
+    puzzle_chamber: number; // Default: 0.25 (25%)
     discovery_site: number; // Default: 0.1875 (18.75%)
     risk_event: number; // Default: 0.1875 (18.75%)
     hazard: number; // Default: 0.125 (12.5%)
     rest_site: number; // Default: 0.125 (12.5%)
+    safe_passage: number; // Default: 0.125 (12.5%)
   };
 }
 
@@ -135,9 +138,10 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
       risk_event: 2,
       hazard: 3,
       rest_site: -3,
+      safe_passage: -2,
     },
     returnCostBase: 5,
-    returnCostExponent: 1.5,
+    returnCostExponent: 2.0, // Increased from 1.5 to make return cost scale more aggressively
     shortcutReductionPercent: 0.7,
   },
 
@@ -149,6 +153,7 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
       risk_event: 1.5,
       hazard: 0.8,
       rest_site: 0.5,
+      safe_passage: 0.6,
     },
     variationBase: 0.15,
     variationDepthMultiplier: 0.02,
@@ -175,11 +180,12 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
 
   encounter: {
     encounterDistribution: {
-      puzzle_chamber: 0.375,
+      puzzle_chamber: 0.25, // Reduced from 0.375 to make room for safe_passage
       discovery_site: 0.1875,
       risk_event: 0.1875,
       hazard: 0.125,
       rest_site: 0.125,
+      safe_passage: 0.125, // Same rarity as rest_site
     },
   },
 
@@ -189,58 +195,64 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
     },
     encounterDistributions: {
       default: {
-        puzzle_chamber: 0.375,
+        puzzle_chamber: 0.25,
         discovery_site: 0.1875,
         risk_event: 0.1875,
         hazard: 0.125,
         rest_site: 0.125,
+        safe_passage: 0.125,
       },
       ruins: {
         // Ancient Ruins (exploration/economy)
-        puzzle_chamber: 0.333,
+        puzzle_chamber: 0.208,
         discovery_site: 0.267,
         risk_event: 0.133,
         hazard: 0.133,
         rest_site: 0.134,
+        safe_passage: 0.125,
       },
       caverns: {
         // Crystal Caverns (tension + recovery)
-        puzzle_chamber: 0.222,
+        puzzle_chamber: 0.097,
         discovery_site: 0.167,
         risk_event: 0.222,
         hazard: 0.222,
         rest_site: 0.167,
+        safe_passage: 0.125,
       },
       sanctum: {
         // Sanctum Archives (puzzle-forward, restorative)
-        puzzle_chamber: 0.444,
+        puzzle_chamber: 0.319,
         discovery_site: 0.222,
         risk_event: 0.111,
         hazard: 0.056,
         rest_site: 0.167,
+        safe_passage: 0.125,
       },
       market: {
         // Frontier Market (economy burst, low danger)
-        puzzle_chamber: 0.308,
+        puzzle_chamber: 0.183,
         discovery_site: 0.308,
         risk_event: 0.154,
         hazard: 0.077,
         rest_site: 0.153,
+        safe_passage: 0.125,
       },
       wastes: {
         // Ashen Wastes (hard mode)
-        puzzle_chamber: 0.167,
+        puzzle_chamber: 0.042,
         discovery_site: 0.111,
         risk_event: 0.278,
         hazard: 0.278,
         rest_site: 0.166,
+        safe_passage: 0.125,
       },
     },
   },
 
   returnCost: {
     baseMultiplier: 5,
-    exponent: 1.5,
+    exponent: 2.0, // Increased from 1.5 to make return cost scale more aggressively with depth
     curveType: 'exponential',
   },
 };

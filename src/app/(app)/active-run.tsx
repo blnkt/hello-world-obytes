@@ -13,6 +13,7 @@ import { saveAchievements } from '@/lib/delvers-descent/achievement-persistence'
 import { ALL_ACHIEVEMENTS } from '@/lib/delvers-descent/achievement-types';
 import { CollectionManager } from '@/lib/delvers-descent/collection-manager';
 import { ALL_COLLECTION_SETS } from '@/lib/delvers-descent/collection-sets';
+import { EnergyCalculator } from '@/lib/delvers-descent/energy-calculator';
 import { getProgressionManager } from '@/lib/delvers-descent/progression-manager';
 import { getRunQueueManager } from '@/lib/delvers-descent/run-queue';
 import { useExperienceData } from '@/lib/health';
@@ -163,15 +164,22 @@ const useActiveRunData = (runId: string) => {
   };
 };
 
+// eslint-disable-next-line max-lines-per-function
 const useEncounterHandlers = (params: {
   runState: RunState | null;
   onEnergyUpdate: (energyDelta: number) => void;
   onInventoryUpdate: (items: any[]) => void;
   onNodeVisited: (nodeId: string) => void;
   onDepthUpdate: (depth: number) => void;
+  onTriggerCashOut?: () => void;
 }) => {
-  const { onEnergyUpdate, onInventoryUpdate, onNodeVisited, onDepthUpdate } =
-    params;
+  const {
+    onEnergyUpdate,
+    onInventoryUpdate,
+    onNodeVisited,
+    onDepthUpdate,
+    onTriggerCashOut,
+  } = params;
   const [selectedNode, setSelectedNode] = useState<DungeonNode | null>(null);
   const [showEncounter, setShowEncounter] = useState(false);
 
@@ -183,19 +191,15 @@ const useEncounterHandlers = (params: {
     ) => {
       if (!currentRunState) return false;
       if (currentRunState.energyRemaining < node.energyCost) {
-        // Check if we can't afford this node - might be bust
-        if (onBust) {
-          onBust();
-        } else {
-          alert('Not enough energy to reach this node!');
-        }
+        if (onBust) onBust();
+        else alert('Not enough energy to reach this node!');
         return false;
       }
       setSelectedNode(node);
       setShowEncounter(true);
       return true;
     },
-    []
+    [setSelectedNode, setShowEncounter]
   );
 
   const handleEncounterComplete = useCallback(
@@ -207,6 +211,7 @@ const useEncounterHandlers = (params: {
         onInventoryUpdate,
         onNodeVisited,
         onDepthUpdate,
+        onTriggerCashOut,
         result,
         rewards,
       }),
@@ -216,14 +221,17 @@ const useEncounterHandlers = (params: {
       onInventoryUpdate,
       onNodeVisited,
       onDepthUpdate,
+      onTriggerCashOut,
     ]
   );
+
+  const handleReturnToMap = useCallback(() => setShowEncounter(false), []);
 
   return {
     selectedNode,
     showEncounter,
     handleNodePress,
-    handleReturnToMap: () => setShowEncounter(false),
+    handleReturnToMap,
     handleEncounterComplete,
   };
 };
@@ -292,6 +300,7 @@ function handleEncounterCompleteImpl({
   onInventoryUpdate,
   onNodeVisited,
   onDepthUpdate,
+  onTriggerCashOut,
   result,
   rewards,
 }: {
@@ -301,6 +310,7 @@ function handleEncounterCompleteImpl({
   onInventoryUpdate: (items: any[]) => void;
   onNodeVisited: (id: string) => void;
   onDepthUpdate: (depth: number) => void;
+  onTriggerCashOut?: () => void;
   result: 'success' | 'failure';
   rewards?: any[];
 }) {
@@ -308,6 +318,27 @@ function handleEncounterCompleteImpl({
     setShowEncounter(false);
     return;
   }
+
+  // If this is a safe passage encounter and it succeeded, trigger cash out immediately
+  if (
+    selectedNode.type === 'safe_passage' &&
+    result === 'success' &&
+    onTriggerCashOut
+  ) {
+    // Process the encounter normally (deduct energy, mark visited, etc.)
+    onEnergyUpdate(-selectedNode.energyCost);
+    if (rewards) {
+      onInventoryUpdate(rewards);
+    }
+    onNodeVisited(selectedNode.id);
+    onDepthUpdate(selectedNode.depth);
+    setShowEncounter(false);
+    // Trigger cash out with free return (return cost will be handled in cash out modal)
+    onTriggerCashOut();
+    return;
+  }
+
+  // Normal encounter completion
   onEnergyUpdate(-selectedNode.energyCost);
   if (result === 'success' && rewards) {
     onInventoryUpdate(rewards);
@@ -317,62 +348,7 @@ function handleEncounterCompleteImpl({
   setShowEncounter(false);
 }
 
-function _useRiskFlow({
-  runState,
-  updateDepth,
-}: {
-  runState: RunState | null;
-  updateDepth: (d: number) => void;
-}) {
-  const [showRiskWarning, setShowRiskWarning] = useState(false);
-  const [riskWarning, setRiskWarning] = useState<{
-    type: 'safe' | 'caution' | 'danger' | 'critical';
-    message: string;
-    severity: number;
-  } | null>(null);
-
-  const handleContinue = () => {
-    if (!runState) return;
-    const safetyMargin = runState.energyRemaining - 100;
-    let warningType: 'safe' | 'caution' | 'danger' | 'critical';
-    let message: string;
-    let severity: number;
-    if (safetyMargin < 0) {
-      warningType = 'critical';
-      message =
-        'You cannot return safely! Going deeper risks losing all progress.';
-      severity = 10;
-    } else if (safetyMargin < 50) {
-      warningType = 'danger';
-      message =
-        'Dangerous energy levels! You may not be able to return if you continue.';
-      severity = 8;
-    } else if (safetyMargin < 150) {
-      warningType = 'caution';
-      message =
-        'Low energy remaining. Consider cashing out to secure your rewards.';
-      severity = 5;
-    } else {
-      return;
-    }
-    setRiskWarning({ type: warningType, message, severity });
-    setShowRiskWarning(true);
-  };
-
-  const handleConfirmRisk = () => {
-    setShowRiskWarning(false);
-    setRiskWarning(null);
-    updateDepth((runState?.currentDepth || 0) + 1);
-  };
-
-  return {
-    riskWarning,
-    showRiskWarning,
-    handleContinue,
-    handleConfirmRisk,
-    setShowRiskWarning,
-  };
-}
+// Risk flow removed - no longer needed
 
 function useCashOutFlow({
   run,
@@ -494,6 +470,7 @@ const MapView: React.FC<{
   runState: RunState | null;
   onNodePress: (node: DungeonNode) => void;
   showCashOutModal: boolean;
+  isFreeReturn: boolean;
   onShowCashOut: () => void;
   onHideCashOut: () => void;
   onCashOutConfirm: () => void;
@@ -504,10 +481,21 @@ const MapView: React.FC<{
   runState,
   onNodePress,
   showCashOutModal,
+  isFreeReturn,
   onShowCashOut,
   onHideCashOut,
   onCashOutConfirm,
 }) => {
+  // Calculate return cost - 0 if free return, otherwise use normal calculation
+  const energyCalculator = new EnergyCalculator();
+  const returnCost = isFreeReturn
+    ? 0
+    : runState
+      ? energyCalculator.calculateReturnCost(
+          runState.currentDepth,
+          runState.discoveredShortcuts
+        )
+      : 0;
   return (
     <View className="flex-1 bg-gray-50 dark:bg-gray-900">
       <View className="p-4">
@@ -518,7 +506,7 @@ const MapView: React.FC<{
         <RunDetailsCard run={run} />
         <RunStatusPanel
           energyRemaining={runState?.energyRemaining || 0}
-          returnCost={100}
+          returnCost={returnCost}
           currentDepth={runState?.currentDepth || 0}
         />
       </View>
@@ -532,13 +520,13 @@ const MapView: React.FC<{
       <NavigationControls
         onCashOut={onShowCashOut}
         energyRemaining={runState?.energyRemaining || 0}
-        returnCost={100}
+        returnCost={returnCost}
       />
       {runState && (
         <CashOutModal
           visible={showCashOutModal}
           runState={runState}
-          returnCost={100}
+          returnCost={returnCost}
           onConfirm={onCashOutConfirm}
           onCancel={onHideCashOut}
         />
@@ -582,6 +570,7 @@ function ActiveRunScreen({ router, runId }: { router: any; runId: string }) {
       runState={controllers.runState}
       onNodePress={controllers.handleNodePress}
       showCashOutModal={controllers.showCashOutModal}
+      isFreeReturn={controllers.isFreeReturn}
       onShowCashOut={controllers.showCashOut}
       onHideCashOut={controllers.hideCashOut}
       onCashOutConfirm={controllers.handleCashOutConfirm}
@@ -597,6 +586,7 @@ function useActiveRunControllers({
   runId: string;
 }) {
   const [showCashOutModal, setShowCashOutModal] = useState(false);
+  const [isFreeReturn, setIsFreeReturn] = useState(false);
   const data = useActiveRunData(runId);
   const handleEnergyUpdate = useEnergyUpdateHandler({
     updateEnergy: data.updateEnergy,
@@ -613,12 +603,21 @@ function useActiveRunControllers({
     updateDepth: data.updateDepth,
     run: data.run,
     router,
+    onTriggerCashOut: () => {
+      setIsFreeReturn(true);
+      setShowCashOutModal(true);
+    },
   });
   const { handleCashOutConfirm } = useCashOutFlow({
     run: data.run,
     runState: data.runState,
     router,
-    setShowCashOutModal,
+    setShowCashOutModal: (v: boolean) => {
+      setShowCashOutModal(v);
+      if (!v) {
+        setIsFreeReturn(false); // Reset when modal closes
+      }
+    },
   });
   // Removed risk flow and "Continue Deeper" UX
   return {
@@ -632,8 +631,15 @@ function useActiveRunControllers({
     handleCashOutConfirm,
     // risk flow removed
     showCashOutModal,
-    showCashOut: () => setShowCashOutModal(true),
-    hideCashOut: () => setShowCashOutModal(false),
+    isFreeReturn,
+    showCashOut: () => {
+      setIsFreeReturn(false);
+      setShowCashOutModal(true);
+    },
+    hideCashOut: () => {
+      setIsFreeReturn(false);
+      setShowCashOutModal(false);
+    },
   } as const;
 }
 
@@ -660,6 +666,7 @@ function useHandlersWiring({
   updateDepth,
   run,
   router,
+  onTriggerCashOut,
 }: {
   runState: RunState | null;
   handleEnergyUpdate: (delta: number) => void;
@@ -668,6 +675,7 @@ function useHandlersWiring({
   updateDepth: (d: number) => void;
   run: DelvingRun | null;
   router: any;
+  onTriggerCashOut?: () => void;
 }) {
   const handlers = useEncounterHandlers({
     runState,
@@ -675,6 +683,7 @@ function useHandlersWiring({
     onInventoryUpdate: handleInventoryUpdate,
     onNodeVisited: markNodeVisited,
     onDepthUpdate: updateDepth,
+    onTriggerCashOut,
   });
   const handleNodePress = useNodePressHandler({
     handlers,
