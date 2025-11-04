@@ -4,32 +4,52 @@ export interface ReturnCostCalculatorConfig {
   baseMultiplier?: number;
   exponent?: number;
   shortcutReductionFactor?: number;
+  // Linear tier-based scaling
+  tierSize?: number; // Number of depth levels per tier (default: 5)
+  linearIncrement?: number; // Linear increment per tier (default: 5)
 }
 
 export class ReturnCostCalculator {
   private readonly baseMultiplier: number;
   private readonly exponent: number;
   private readonly shortcutReductionFactor: number;
+  private readonly tierSize: number;
+  private readonly linearIncrement: number;
 
   constructor(config: ReturnCostCalculatorConfig = {}) {
     this.baseMultiplier = Math.max(0.1, config.baseMultiplier ?? 5); // Clamp to positive values
-    this.exponent = Math.max(0.1, config.exponent ?? 2.0); // Increased from 1.5 to 2.0 for more aggressive scaling
+    this.exponent = Math.max(0.1, config.exponent ?? 2.0); // Kept for backward compatibility
     this.shortcutReductionFactor = Math.max(
       0,
       Math.min(1, config.shortcutReductionFactor ?? 0.3)
     ); // Clamp to 0-1 range
+    this.tierSize = Math.max(1, config.tierSize ?? 5); // Default: 5 depth levels per tier
+    this.linearIncrement = Math.max(0, config.linearIncrement ?? 5); // Default: +5 per tier
   }
 
   /**
-   * Calculate the base return cost for a single depth level using exponential scaling
-   * Formula: baseMultiplier * depth^exponent
+   * Calculate the tier for a given depth (1-based tiers)
+   * Tier 1: depths 1-5, Tier 2: depths 6-10, etc.
+   */
+  private getTier(depth: number): number {
+    if (depth <= 0) {
+      return 0;
+    }
+    return Math.ceil(depth / this.tierSize);
+  }
+
+  /**
+   * Calculate the base return cost for a single depth level using linear tier-based scaling
+   * Formula: baseMultiplier + (tier - 1) * linearIncrement
+   * All depths in the same tier have the same base cost
    */
   calculateBaseReturnCost(depth: number): number {
     if (depth <= 0) {
       return 0;
     }
 
-    return this.baseMultiplier * Math.pow(depth, this.exponent);
+    const tier = this.getTier(depth);
+    return this.baseMultiplier + (tier - 1) * this.linearIncrement;
   }
 
   /**
@@ -169,6 +189,8 @@ export class ReturnCostCalculator {
       baseMultiplier: this.baseMultiplier,
       exponent: this.exponent,
       shortcutReductionFactor: this.shortcutReductionFactor,
+      tierSize: this.tierSize,
+      linearIncrement: this.linearIncrement,
     };
   }
 
@@ -183,6 +205,8 @@ export class ReturnCostCalculator {
       exponent: config.exponent ?? this.exponent,
       shortcutReductionFactor:
         config.shortcutReductionFactor ?? this.shortcutReductionFactor,
+      tierSize: config.tierSize ?? this.tierSize,
+      linearIncrement: config.linearIncrement ?? this.linearIncrement,
     });
   }
 }

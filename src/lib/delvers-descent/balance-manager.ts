@@ -55,11 +55,18 @@ export class BalanceManager {
   }
 
   /**
-   * Calculate return cost using the configured exponential formula
+   * Calculate return cost for a single depth level using tier-based linear scaling
+   * Formula: baseMultiplier + (tier - 1) * linearIncrement
+   * Where tier = Math.ceil(depth / tierSize)
    */
   calculateReturnCost(depth: number): number {
-    const { baseMultiplier, exponent } = this.config.returnCost;
-    return Math.round(baseMultiplier * Math.pow(depth, exponent));
+    const { baseMultiplier, tierSize, linearIncrement } =
+      this.config.returnCost;
+    if (depth <= 0) {
+      return 0;
+    }
+    const tier = Math.ceil(depth / tierSize);
+    return Math.round(baseMultiplier + (tier - 1) * linearIncrement);
   }
 
   /**

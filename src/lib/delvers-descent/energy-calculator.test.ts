@@ -10,14 +10,18 @@ describe('EnergyCalculator', () => {
   });
 
   describe('calculateReturnCost', () => {
-    it('should calculate return cost with exponential scaling', () => {
+    it('should calculate return cost with linear tier-based scaling', () => {
       const cost1 = calculator.calculateReturnCost(1);
       const cost2 = calculator.calculateReturnCost(2);
       const cost3 = calculator.calculateReturnCost(3);
 
-      expect(cost1).toBe(5); // 5 * (1^2.0) = 5
-      expect(cost2).toBe(25); // 5 * (2^2.0) + 5 * (1^2.0) = 20 + 5 = 25
-      expect(cost3).toBe(70); // 5 * (3^2.0) + 5 * (2^2.0) + 5 * (1^2.0) = 45 + 20 + 5 = 70
+      // Tier 1 (depths 1-5): all cost 5 per depth
+      // Depth 1: 5
+      expect(cost1).toBe(5);
+      // Depth 2: 5 + 5 = 10
+      expect(cost2).toBe(10);
+      // Depth 3: 5 + 5 + 5 = 15
+      expect(cost3).toBe(15);
     });
 
     it('should handle zero depth', () => {
@@ -270,7 +274,8 @@ describe('EnergyCalculator', () => {
       const totalCost = calculator.calculatePathCost(pathDepths);
 
       // Should include node costs + return cost from depth 3
-      const expectedMinCost = 5 + 7 + 9 + 45; // Node costs + return cost
+      // Return cost from depth 3: 5 + 5 + 5 = 15 (tier 1, all depths cost 5)
+      const expectedMinCost = 5 + 7 + 9 + 15; // Node costs + return cost
       expect(totalCost).toBeGreaterThanOrEqual(expectedMinCost);
     });
 

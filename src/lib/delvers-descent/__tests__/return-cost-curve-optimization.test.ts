@@ -30,9 +30,11 @@ describe('Exponential Return Cost Curve Optimization', () => {
       const config = balanceManager.getConfig();
       const cost = balanceManager.calculateReturnCost(3);
 
+      // Depth 3 is in tier 1 (depths 1-5), so cost = baseMultiplier = 5
+      const tier = Math.ceil(3 / config.returnCost.tierSize);
       const expectedCost = Math.round(
-        config.returnCost.baseMultiplier *
-          Math.pow(3, config.returnCost.exponent)
+        config.returnCost.baseMultiplier +
+          (tier - 1) * config.returnCost.linearIncrement
       );
 
       expect(cost).toBe(expectedCost);

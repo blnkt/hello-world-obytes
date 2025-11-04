@@ -100,9 +100,11 @@ export interface RegionBalanceConfig {
 }
 
 export interface ReturnCostBalanceConfig {
-  // Exponential return cost curve parameters
+  // Linear tier-based return cost parameters
   baseMultiplier: number; // Default: 5
-  exponent: number; // Default: 1.5
+  exponent?: number; // Kept for backward compatibility, not used in tier system
+  tierSize: number; // Number of depth levels per tier (default: 5)
+  linearIncrement: number; // Linear increment per tier (default: 5)
 
   // Can be adjusted for different difficulty curves
   curveType: 'linear' | 'exponential' | 'quadratic';
@@ -264,8 +266,9 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
 
   returnCost: {
     baseMultiplier: 5,
-    exponent: 2.0, // Increased from 1.5 to make return cost scale more aggressively with depth
-    curveType: 'exponential',
+    tierSize: 5, // Cost increases every 5 depth levels
+    linearIncrement: 5, // +5 per tier
+    curveType: 'linear',
   },
 };
 

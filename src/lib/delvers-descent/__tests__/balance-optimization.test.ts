@@ -89,11 +89,13 @@ describe('BalanceManager', () => {
       expect(cost3).toBeGreaterThan(cost1 * 2); // Exponential growth
     });
 
-    it('should use configured base multiplier and exponent', () => {
+    it('should use configured base multiplier and tier system', () => {
       const config = manager.getConfig();
+      // Depth 3 is in tier 1 (depths 1-5), so cost = baseMultiplier = 5
+      const tier = Math.ceil(3 / config.returnCost.tierSize);
       const expectedCost = Math.round(
-        config.returnCost.baseMultiplier *
-          Math.pow(3, config.returnCost.exponent)
+        config.returnCost.baseMultiplier +
+          (tier - 1) * config.returnCost.linearIncrement
       );
 
       const actualCost = manager.calculateReturnCost(3);

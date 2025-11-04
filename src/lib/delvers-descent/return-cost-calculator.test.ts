@@ -8,13 +8,25 @@ describe('ReturnCostCalculator', () => {
     calculator = new ReturnCostCalculator();
   });
 
-  describe('exponential scaling algorithm', () => {
-    it('should calculate base return cost using 5 * depth^2.0 formula', () => {
-      // Test the exponential scaling formula: 5 * depth^2.0
-      expect(calculator.calculateBaseReturnCost(1)).toBeCloseTo(5, 1); // 5 * 1^2.0 = 5
-      expect(calculator.calculateBaseReturnCost(2)).toBeCloseTo(20, 1); // 5 * 2^2.0 = 20
-      expect(calculator.calculateBaseReturnCost(3)).toBeCloseTo(45, 1); // 5 * 3^2.0 = 45
-      expect(calculator.calculateBaseReturnCost(4)).toBeCloseTo(80, 1); // 5 * 4^2.0 = 80
+  describe('linear tier-based scaling algorithm', () => {
+    it('should calculate base return cost using tier-based linear formula', () => {
+      // Tier 1 (depths 1-5): baseMultiplier = 5
+      expect(calculator.calculateBaseReturnCost(1)).toBe(5);
+      expect(calculator.calculateBaseReturnCost(2)).toBe(5);
+      expect(calculator.calculateBaseReturnCost(3)).toBe(5);
+      expect(calculator.calculateBaseReturnCost(4)).toBe(5);
+      expect(calculator.calculateBaseReturnCost(5)).toBe(5);
+
+      // Tier 2 (depths 6-10): baseMultiplier + increment = 5 + 5 = 10
+      expect(calculator.calculateBaseReturnCost(6)).toBe(10);
+      expect(calculator.calculateBaseReturnCost(7)).toBe(10);
+      expect(calculator.calculateBaseReturnCost(8)).toBe(10);
+      expect(calculator.calculateBaseReturnCost(9)).toBe(10);
+      expect(calculator.calculateBaseReturnCost(10)).toBe(10);
+
+      // Tier 3 (depths 11-15): baseMultiplier + 2*increment = 5 + 10 = 15
+      expect(calculator.calculateBaseReturnCost(11)).toBe(15);
+      expect(calculator.calculateBaseReturnCost(15)).toBe(15);
     });
 
     it('should handle depth 0 correctly', () => {
@@ -22,22 +34,23 @@ describe('ReturnCostCalculator', () => {
     });
 
     it('should handle fractional depths', () => {
-      expect(calculator.calculateBaseReturnCost(1.5)).toBeCloseTo(11.25, 1); // 5 * 1.5^2.0 = 11.25
+      // Depth 1.5 is still in tier 1, so cost is 5
+      expect(calculator.calculateBaseReturnCost(1.5)).toBe(5);
+      // Depth 5.5 is in tier 2, so cost is 10
+      expect(calculator.calculateBaseReturnCost(5.5)).toBe(10);
     });
   });
 
   describe('cumulative return cost calculation', () => {
     it('should calculate cumulative cost from current depth to surface', () => {
       // From depth 3 to surface: cost(1) + cost(2) + cost(3)
+      // All are in tier 1, so: 5 + 5 + 5 = 15
       const expectedCost =
         calculator.calculateBaseReturnCost(1) +
         calculator.calculateBaseReturnCost(2) +
         calculator.calculateBaseReturnCost(3);
 
-      expect(calculator.calculateCumulativeReturnCost(3)).toBeCloseTo(
-        expectedCost,
-        1
-      );
+      expect(calculator.calculateCumulativeReturnCost(3)).toBe(expectedCost);
     });
 
     it('should return 0 for surface depth (depth 0)', () => {
@@ -99,15 +112,10 @@ describe('ReturnCostCalculator', () => {
     it('should allow custom base multiplier', () => {
       const customCalculator = new ReturnCostCalculator({ baseMultiplier: 10 });
 
-      // Should use 10 * depth^2.0 instead of 5 * depth^2.0
-      expect(customCalculator.calculateBaseReturnCost(2)).toBeCloseTo(40, 1); // 10 * 2^2.0 = 40
-    });
-
-    it('should allow custom exponent', () => {
-      const customCalculator = new ReturnCostCalculator({ exponent: 2 });
-
-      // Should use 5 * depth^2 instead of 5 * depth^1.5
-      expect(customCalculator.calculateBaseReturnCost(2)).toBeCloseTo(20, 1); // 5 * 2^2 = 20
+      // Tier 1 (depth 2): baseMultiplier = 10
+      expect(customCalculator.calculateBaseReturnCost(2)).toBe(10);
+      // Tier 2 (depth 6): baseMultiplier + increment = 10 + 5 = 15
+      expect(customCalculator.calculateBaseReturnCost(6)).toBe(15);
     });
 
     it('should allow custom shortcut reduction factor', () => {

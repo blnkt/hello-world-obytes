@@ -14,7 +14,7 @@ export class EnergyCalculator {
 
   /**
    * Calculate return cost from current depth to surface
-   * Uses exponential scaling: 5 * (depth ^ 1.5)
+   * Uses linear tier-based scaling: cost increases every 5 depth levels
    */
   calculateReturnCost(
     currentDepth: number,
