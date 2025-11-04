@@ -131,8 +131,8 @@ describe('Full Gameplay Loop Integration Tests', () => {
             i === 0
               ? 'puzzle_chamber'
               : i === 1
-                ? 'trade_opportunity'
-                : 'discovery_site',
+                ? 'discovery_site'
+                : 'risk_event',
           energyCost: 50 * depth,
           returnCost: 100 * depth,
           isRevealed: depth === 1,

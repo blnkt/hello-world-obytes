@@ -326,7 +326,6 @@ describe('Advanced Encounters Integration with Existing System (Task 6.4)', () =
     it('should support all encounter types uniformly', () => {
       const encounterTypes: EncounterType[] = [
         'puzzle_chamber',
-        'trade_opportunity',
         'discovery_site',
         'risk_event',
         'hazard',

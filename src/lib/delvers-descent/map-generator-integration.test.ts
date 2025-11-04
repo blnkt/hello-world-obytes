@@ -120,11 +120,10 @@ describe('Map Generator Integration with Return Cost Calculator', () => {
       const encounterTypes = map.map((node) => node.type);
       const uniqueTypes = new Set(encounterTypes);
 
-      // Should include at least puzzle_chamber, trade_opportunity, discovery_site
+      // Should include at least puzzle_chamber, discovery_site
       // Note: Random encounter distribution means we can't guarantee all types appear
       const expectedTypes: EncounterType[] = [
         'puzzle_chamber',
-        'trade_opportunity',
         'discovery_site',
         'risk_event',
         'hazard',

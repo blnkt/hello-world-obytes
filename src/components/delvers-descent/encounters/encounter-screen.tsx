@@ -12,7 +12,6 @@ import { RestSiteScreen } from './advanced/rest-site-screen';
 import { RiskEventScreen } from './advanced/risk-event-screen';
 import { DiscoverySiteScreen } from './discovery-site-screen';
 import { PuzzleChamberScreen } from './puzzle-chamber-screen';
-import { TradeOpportunityScreen } from './trade-opportunity-screen';
 
 interface EncounterScreenProps {
   run: DelvingRun;
@@ -157,17 +156,6 @@ const renderStandardEncounter = (params: {
   if (node.type === 'puzzle_chamber') {
     return (
       <PuzzleChamberScreen
-        run={run}
-        node={node}
-        onReturnToMap={onReturnToMap}
-        onEncounterComplete={onEncounterComplete}
-      />
-    );
-  }
-
-  if (node.type === 'trade_opportunity') {
-    return (
-      <TradeOpportunityScreen
         run={run}
         node={node}
         onReturnToMap={onReturnToMap}

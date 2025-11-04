@@ -22,7 +22,6 @@ export class EncounterResolver {
   };
   private readonly supportedEncounterTypes: EncounterType[] = [
     'puzzle_chamber',
-    'trade_opportunity',
     'discovery_site',
     'risk_event',
     'hazard',
@@ -32,7 +31,6 @@ export class EncounterResolver {
     Record<EncounterType, number>
   > = {
     puzzle_chamber: 1.0,
-    trade_opportunity: 1.2,
     discovery_site: 1.1,
     risk_event: 1.5, // High-risk, high-reward
     hazard: 1.3, // Dangerous but manageable
@@ -63,7 +61,6 @@ export class EncounterResolver {
 
     const handlerMap: Partial<Record<EncounterType, string>> = {
       puzzle_chamber: 'puzzle_chamber_handler',
-      trade_opportunity: 'trade_opportunity_handler',
       discovery_site: 'discovery_site_handler',
       risk_event: 'risk_event_handler',
       hazard: 'hazard_handler',

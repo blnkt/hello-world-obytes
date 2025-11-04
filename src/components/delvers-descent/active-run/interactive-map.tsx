@@ -12,7 +12,6 @@ export interface InteractiveMapProps {
 const getNodeEmoji = (type: string) => {
   const emojiMap: Record<string, string> = {
     puzzle_chamber: '🧩',
-    trade_opportunity: '🤝',
     discovery_site: '🔍',
     risk_event: '⚠️',
     hazard: '⚡',

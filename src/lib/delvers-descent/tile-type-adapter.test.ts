@@ -166,7 +166,6 @@ describe('TileTypeAdapter', () => {
   describe('encounter context validation', () => {
     it('should validate encounter types', () => {
       expect(adapter.isValidEncounterType('puzzle_chamber')).toBe(true);
-      expect(adapter.isValidEncounterType('trade_opportunity')).toBe(true);
       expect(adapter.isValidEncounterType('discovery_site')).toBe(true);
       expect(adapter.isValidEncounterType('invalid_type')).toBe(false);
     });
@@ -175,7 +174,6 @@ describe('TileTypeAdapter', () => {
       const supportedTypes = adapter.getSupportedEncounterTypes();
 
       expect(supportedTypes).toContain('puzzle_chamber');
-      expect(supportedTypes).toContain('trade_opportunity');
       expect(supportedTypes).toContain('discovery_site');
       expect(supportedTypes.length).toBeGreaterThan(0);
     });

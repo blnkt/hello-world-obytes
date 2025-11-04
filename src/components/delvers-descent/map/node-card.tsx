@@ -26,8 +26,6 @@ export const NodeCard: React.FC<NodeCardProps> = ({
     switch (node.type) {
       case 'puzzle_chamber':
         return 'bg-blue-100 border-blue-400';
-      case 'trade_opportunity':
-        return 'bg-green-100 border-green-400';
       case 'discovery_site':
         return 'bg-purple-100 border-purple-400';
       case 'risk_event':

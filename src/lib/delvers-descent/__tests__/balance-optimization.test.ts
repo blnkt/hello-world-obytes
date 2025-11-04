@@ -53,10 +53,10 @@ describe('BalanceManager', () => {
 
     it('should apply type-specific modifiers', () => {
       const puzzleCost = manager.calculateNodeCost(2, 'puzzle_chamber');
-      const tradeCost = manager.calculateNodeCost(2, 'trade_opportunity');
+      const discoveryCost = manager.calculateNodeCost(2, 'discovery_site');
       const hazardCost = manager.calculateNodeCost(2, 'hazard');
 
-      expect(tradeCost).toBeLessThan(puzzleCost);
+      expect(discoveryCost).toBeGreaterThan(puzzleCost);
       expect(hazardCost).toBeGreaterThan(puzzleCost);
     });
 

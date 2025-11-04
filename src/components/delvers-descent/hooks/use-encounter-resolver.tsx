@@ -5,7 +5,6 @@ import { EncounterResolver } from '@/lib/delvers-descent/encounter-resolver';
 import { FailureConsequenceManager } from '@/lib/delvers-descent/failure-consequence-manager';
 import { PuzzleChamberEncounter } from '@/lib/delvers-descent/puzzle-chamber-encounter';
 import { RewardCalculator } from '@/lib/delvers-descent/reward-calculator';
-import { TradeOpportunityEncounter } from '@/lib/delvers-descent/trade-opportunity-encounter';
 import type {
   DelvingRun,
   DungeonNode,
@@ -153,9 +152,6 @@ async function initializeEncounterResolver({
     switch (node.type) {
       case 'puzzle_chamber':
         new PuzzleChamberEncounter(undefined, node.depth);
-        break;
-      case 'trade_opportunity':
-        new TradeOpportunityEncounter(node.depth);
         break;
       case 'discovery_site':
         new DiscoverySiteEncounter(node.depth);

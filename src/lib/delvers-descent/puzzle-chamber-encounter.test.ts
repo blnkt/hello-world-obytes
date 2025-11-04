@@ -196,13 +196,13 @@ describe('PuzzleChamberEncounter', () => {
       const depth3Reveals = depth3Chamber.getTileRevealsRemaining();
       const depth5Reveals = depth5Chamber.getTileRevealsRemaining();
 
-      // All should be within reasonable range
-      expect(depth1Reveals).toBeGreaterThanOrEqual(8);
-      expect(depth1Reveals).toBeLessThanOrEqual(12);
-      expect(depth3Reveals).toBeGreaterThanOrEqual(8);
-      expect(depth3Reveals).toBeLessThanOrEqual(12);
-      expect(depth5Reveals).toBeGreaterThanOrEqual(8);
-      expect(depth5Reveals).toBeLessThanOrEqual(12);
+      // All should be within reasonable range (base 15, scaling up to 21)
+      expect(depth1Reveals).toBeGreaterThanOrEqual(15);
+      expect(depth1Reveals).toBeLessThanOrEqual(21);
+      expect(depth3Reveals).toBeGreaterThanOrEqual(15);
+      expect(depth3Reveals).toBeLessThanOrEqual(21);
+      expect(depth5Reveals).toBeGreaterThanOrEqual(15);
+      expect(depth5Reveals).toBeLessThanOrEqual(21);
     });
 
     it('should scale rewards based on depth', () => {

@@ -48,7 +48,7 @@ describe('useMapGenerator', () => {
           id: 'depth1-node1',
           depth: 1,
           position: 1,
-          type: 'trade_opportunity',
+          type: 'discovery_site',
           energyCost: 5,
           returnCost: 0,
           isRevealed: false,
@@ -200,8 +200,8 @@ describe('useMapGenerator', () => {
         nodesPerDepth: { 1: 2, 2: 2 },
         encounterTypeDistribution: {
           puzzle_chamber: 1,
-          trade_opportunity: 1,
           discovery_site: 2,
+          risk_event: 1,
         },
         averageConnectionsPerNode: 1.5,
       };

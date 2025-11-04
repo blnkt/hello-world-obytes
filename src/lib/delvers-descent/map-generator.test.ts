@@ -37,7 +37,6 @@ describe('DungeonMapGenerator', () => {
       const nodes = generator.generateDepthLevel(1);
       const validTypes: EncounterType[] = [
         'puzzle_chamber',
-        'trade_opportunity',
         'discovery_site',
         'risk_event',
         'hazard',
@@ -246,7 +245,7 @@ describe('DungeonMapGenerator', () => {
           id: 'duplicate',
           depth: 1,
           position: 1,
-          type: 'trade_opportunity',
+          type: 'discovery_site',
           energyCost: 10,
           returnCost: 5,
           isRevealed: false,
@@ -318,7 +317,7 @@ describe('DungeonMapGenerator', () => {
           id: 'orphan',
           depth: 2,
           position: 0,
-          type: 'trade_opportunity',
+          type: 'discovery_site',
           energyCost: 10,
           returnCost: 5,
           isRevealed: false,

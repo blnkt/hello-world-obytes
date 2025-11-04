@@ -13,7 +13,6 @@ export interface EnergyBalanceConfig {
   // Type-specific modifiers
   typeModifiers: {
     puzzle_chamber: number; // Default: 0
-    trade_opportunity: number; // Default: -2
     discovery_site: number; // Default: 1
     risk_event: number; // Default: 2
     hazard: number; // Default: 3
@@ -33,7 +32,6 @@ export interface RewardBalanceConfig {
   // Encounter type multipliers
   typeMultipliers: {
     puzzle_chamber: number; // Default: 1.0
-    trade_opportunity: number; // Default: 1.2
     discovery_site: number; // Default: 1.1
     risk_event: number; // Default: 1.5
     hazard: number; // Default: 0.8
@@ -75,12 +73,11 @@ export interface CollectionBalanceConfig {
 export interface EncounterBalanceConfig {
   // Encounter distribution percentages
   encounterDistribution: {
-    puzzle_chamber: number; // Default: 0.3 (30%)
-    trade_opportunity: number; // Default: 0.2 (20%)
-    discovery_site: number; // Default: 0.15 (15%)
-    risk_event: number; // Default: 0.15 (15%)
-    hazard: number; // Default: 0.1 (10%)
-    rest_site: number; // Default: 0.1 (10%)
+    puzzle_chamber: number; // Default: 0.375 (37.5%)
+    discovery_site: number; // Default: 0.1875 (18.75%)
+    risk_event: number; // Default: 0.1875 (18.75%)
+    hazard: number; // Default: 0.125 (12.5%)
+    rest_site: number; // Default: 0.125 (12.5%)
   };
 }
 
@@ -134,7 +131,6 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
     maxCost: 30,
     typeModifiers: {
       puzzle_chamber: 0,
-      trade_opportunity: -2,
       discovery_site: 1,
       risk_event: 2,
       hazard: 3,
@@ -149,7 +145,6 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
     depthScalingFactor: 0.2,
     typeMultipliers: {
       puzzle_chamber: 1.0,
-      trade_opportunity: 1.2,
       discovery_site: 1.1,
       risk_event: 1.5,
       hazard: 0.8,
@@ -180,12 +175,11 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
 
   encounter: {
     encounterDistribution: {
-      puzzle_chamber: 0.3,
-      trade_opportunity: 0.2,
-      discovery_site: 0.15,
-      risk_event: 0.15,
-      hazard: 0.1,
-      rest_site: 0.1,
+      puzzle_chamber: 0.375,
+      discovery_site: 0.1875,
+      risk_event: 0.1875,
+      hazard: 0.125,
+      rest_site: 0.125,
     },
   },
 
@@ -195,57 +189,51 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
     },
     encounterDistributions: {
       default: {
-        puzzle_chamber: 0.3,
-        trade_opportunity: 0.2,
-        discovery_site: 0.15,
-        risk_event: 0.15,
-        hazard: 0.1,
-        rest_site: 0.1,
+        puzzle_chamber: 0.375,
+        discovery_site: 0.1875,
+        risk_event: 0.1875,
+        hazard: 0.125,
+        rest_site: 0.125,
       },
       ruins: {
         // Ancient Ruins (exploration/economy)
-        puzzle_chamber: 0.25,
-        trade_opportunity: 0.25,
-        discovery_site: 0.2,
-        risk_event: 0.1,
-        hazard: 0.1,
-        rest_site: 0.1,
+        puzzle_chamber: 0.333,
+        discovery_site: 0.267,
+        risk_event: 0.133,
+        hazard: 0.133,
+        rest_site: 0.134,
       },
       caverns: {
         // Crystal Caverns (tension + recovery)
-        puzzle_chamber: 0.2,
-        trade_opportunity: 0.1,
-        discovery_site: 0.15,
-        risk_event: 0.2,
-        hazard: 0.2,
-        rest_site: 0.15,
+        puzzle_chamber: 0.222,
+        discovery_site: 0.167,
+        risk_event: 0.222,
+        hazard: 0.222,
+        rest_site: 0.167,
       },
       sanctum: {
         // Sanctum Archives (puzzle-forward, restorative)
-        puzzle_chamber: 0.4,
-        trade_opportunity: 0.1,
-        discovery_site: 0.2,
-        risk_event: 0.1,
-        hazard: 0.05,
-        rest_site: 0.15,
+        puzzle_chamber: 0.444,
+        discovery_site: 0.222,
+        risk_event: 0.111,
+        hazard: 0.056,
+        rest_site: 0.167,
       },
       market: {
         // Frontier Market (economy burst, low danger)
-        puzzle_chamber: 0.2,
-        trade_opportunity: 0.35,
-        discovery_site: 0.2,
-        risk_event: 0.1,
-        hazard: 0.05,
-        rest_site: 0.1,
+        puzzle_chamber: 0.308,
+        discovery_site: 0.308,
+        risk_event: 0.154,
+        hazard: 0.077,
+        rest_site: 0.153,
       },
       wastes: {
         // Ashen Wastes (hard mode)
-        puzzle_chamber: 0.15,
-        trade_opportunity: 0.1,
-        discovery_site: 0.1,
-        risk_event: 0.25,
-        hazard: 0.25,
-        rest_site: 0.15,
+        puzzle_chamber: 0.167,
+        discovery_site: 0.111,
+        risk_event: 0.278,
+        hazard: 0.278,
+        rest_site: 0.166,
       },
     },
   },

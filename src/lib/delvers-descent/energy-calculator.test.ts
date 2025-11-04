@@ -83,11 +83,11 @@ describe('EnergyCalculator', () => {
 
     it('should apply type-specific modifiers', () => {
       const puzzleCost = calculator.calculateNodeCost(2, 'puzzle_chamber');
-      const tradeCost = calculator.calculateNodeCost(2, 'trade_opportunity');
+      const discoveryCost = calculator.calculateNodeCost(2, 'discovery_site');
       const hazardCost = calculator.calculateNodeCost(2, 'hazard');
       const restCost = calculator.calculateNodeCost(2, 'rest_site');
 
-      expect(tradeCost).toBeLessThan(puzzleCost); // -2 modifier
+      expect(discoveryCost).toBeGreaterThan(puzzleCost); // +1 modifier
       expect(hazardCost).toBeGreaterThan(puzzleCost); // +3 modifier
       expect(restCost).toBeLessThan(puzzleCost); // -3 modifier
     });

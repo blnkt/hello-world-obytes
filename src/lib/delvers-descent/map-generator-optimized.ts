@@ -15,7 +15,6 @@ import { ReturnCostCalculator } from './return-cost-calculator';
 export class DungeonMapGeneratorOptimized {
   private readonly encounterTypes: EncounterType[] = [
     'puzzle_chamber',
-    'trade_opportunity',
     'discovery_site',
     'risk_event',
     'hazard',
@@ -47,10 +46,6 @@ export class DungeonMapGeneratorOptimized {
       DEFAULT_BALANCE_CONFIG.encounter.encounterDistribution;
     const weights: { type: EncounterType; weight: number }[] = [
       { type: 'puzzle_chamber' as EncounterType, weight: dist.puzzle_chamber },
-      {
-        type: 'trade_opportunity' as EncounterType,
-        weight: dist.trade_opportunity,
-      },
       { type: 'discovery_site' as EncounterType, weight: dist.discovery_site },
       { type: 'risk_event' as EncounterType, weight: dist.risk_event },
       { type: 'hazard' as EncounterType, weight: dist.hazard },
@@ -295,10 +290,6 @@ export class DungeonMapGeneratorOptimized {
       DEFAULT_BALANCE_CONFIG.encounter.encounterDistribution;
     const weights: { type: EncounterType; weight: number }[] = [
       { type: 'puzzle_chamber' as EncounterType, weight: dist.puzzle_chamber },
-      {
-        type: 'trade_opportunity' as EncounterType,
-        weight: dist.trade_opportunity,
-      },
       { type: 'discovery_site' as EncounterType, weight: dist.discovery_site },
       { type: 'risk_event' as EncounterType, weight: dist.risk_event },
       { type: 'hazard' as EncounterType, weight: dist.hazard },

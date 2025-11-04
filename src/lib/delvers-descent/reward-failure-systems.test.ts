@@ -65,15 +65,11 @@ describe('Reward and Failure Systems', () => {
         const multipliers = rewardCalculator.getEncounterTypeMultipliers();
 
         expect(multipliers.puzzle_chamber).toBeDefined();
-        expect(multipliers.trade_opportunity).toBeDefined();
         expect(multipliers.discovery_site).toBeDefined();
+        expect(multipliers.risk_event).toBeDefined();
 
-        expect(multipliers.puzzle_chamber).not.toBe(
-          multipliers.trade_opportunity
-        );
-        expect(multipliers.trade_opportunity).not.toBe(
-          multipliers.discovery_site
-        );
+        expect(multipliers.puzzle_chamber).not.toBe(multipliers.discovery_site);
+        expect(multipliers.discovery_site).not.toBe(multipliers.risk_event);
       });
 
       it('should apply encounter type multipliers to rewards', () => {
@@ -85,25 +81,25 @@ describe('Reward and Failure Systems', () => {
           'puzzle_chamber',
           depth
         );
-        const tradeReward = rewardCalculator.calculateFinalReward(
-          baseReward,
-          'trade_opportunity',
-          depth
-        );
         const discoveryReward = rewardCalculator.calculateFinalReward(
           baseReward,
           'discovery_site',
           depth
         );
+        const riskReward = rewardCalculator.calculateFinalReward(
+          baseReward,
+          'risk_event',
+          depth
+        );
 
         expect(puzzleReward).toBeGreaterThan(0);
-        expect(tradeReward).toBeGreaterThan(0);
         expect(discoveryReward).toBeGreaterThan(0);
+        expect(riskReward).toBeGreaterThan(0);
 
         // Multipliers may yield equal values in some configs; ensure non-negative and reasonable ordering
         expect(puzzleReward).toBeGreaterThanOrEqual(0);
-        expect(tradeReward).toBeGreaterThanOrEqual(0);
         expect(discoveryReward).toBeGreaterThanOrEqual(0);
+        expect(riskReward).toBeGreaterThanOrEqual(0);
       });
 
       it('should handle unknown encounter types gracefully', () => {
@@ -206,7 +202,7 @@ describe('Reward and Failure Systems', () => {
       it('should respect minimum and maximum variation bounds', () => {
         const baseReward = 100;
         const depth = 2;
-        const encounterType = 'trade_opportunity';
+        const encounterType = 'discovery_site';
 
         const rewards = Array.from({ length: 20 }, () =>
           rewardCalculator.calculateFinalReward(
@@ -297,7 +293,7 @@ describe('Reward and Failure Systems', () => {
 
         const processedRewards = rewardCalculator.processEncounterRewards(
           baseRewards,
-          'trade_opportunity',
+          'discovery_site',
           2
         );
 
@@ -593,14 +589,14 @@ describe('Reward and Failure Systems', () => {
         'puzzle_chamber',
         depth
       );
-      const tradeReward = rewardCalculator.calculateFinalReward(
-        baseReward,
-        'trade_opportunity',
-        depth
-      );
       const discoveryReward = rewardCalculator.calculateFinalReward(
         baseReward,
         'discovery_site',
+        depth
+      );
+      const riskReward = rewardCalculator.calculateFinalReward(
+        baseReward,
+        'risk_event',
         depth
       );
 
@@ -608,7 +604,7 @@ describe('Reward and Failure Systems', () => {
         'objective_failed',
         depth
       );
-      const tradeFailure = failureManager.calculateEnergyLoss(
+      const riskFailure = failureManager.calculateEnergyLoss(
         'objective_failed',
         depth
       );
@@ -618,12 +614,12 @@ describe('Reward and Failure Systems', () => {
       );
 
       // Rewards should be different due to encounter type multipliers
-      expect(puzzleReward).not.toBe(tradeReward);
-      expect(tradeReward).not.toBe(discoveryReward);
+      expect(puzzleReward).not.toBe(discoveryReward);
+      expect(discoveryReward).not.toBe(riskReward);
 
       // Failure consequences should be the same for same failure type and depth
-      expect(puzzleFailure).toBe(tradeFailure);
-      expect(tradeFailure).toBe(discoveryFailure);
+      expect(puzzleFailure).toBe(riskFailure);
+      expect(riskFailure).toBe(discoveryFailure);
     });
   });
 });

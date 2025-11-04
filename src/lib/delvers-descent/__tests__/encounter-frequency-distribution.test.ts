@@ -14,7 +14,6 @@ describe('Encounter Frequency Distribution Tuning', () => {
 
       // Check that all encounter types are represented
       expect(distribution.puzzle_chamber).toBeDefined();
-      expect(distribution.trade_opportunity).toBeDefined();
       expect(distribution.discovery_site).toBeDefined();
       expect(distribution.risk_event).toBeDefined();
       expect(distribution.hazard).toBeDefined();
@@ -85,9 +84,8 @@ describe('Encounter Frequency Distribution Tuning', () => {
         const riskPercentage =
           (distribution.hazard + distribution.risk_event) / 100;
 
-        // Low risk encounters (rest_site, trade_opportunity) percentage
-        const safePercentage =
-          (distribution.rest_site + distribution.trade_opportunity) / 100;
+        // Low risk encounters (rest_site) percentage
+        const safePercentage = distribution.rest_site / 100;
 
         // Moderate encounters (puzzle_chamber, discovery_site) percentage
         const moderatePercentage =
@@ -95,7 +93,7 @@ describe('Encounter Frequency Distribution Tuning', () => {
 
         // Should have reasonable balance across all three categories
         expect(riskPercentage).toBeGreaterThan(0.05);
-        expect(safePercentage).toBeGreaterThan(0.1);
+        expect(safePercentage).toBeGreaterThanOrEqual(0.06); // At least 6% rest sites
         expect(moderatePercentage).toBeGreaterThanOrEqual(0.15);
       });
     });
@@ -109,9 +107,8 @@ describe('Encounter Frequency Distribution Tuning', () => {
       balanceManager.updateConfig({
         encounter: {
           encounterDistribution: {
-            puzzle_chamber: 0.4,
-            trade_opportunity: 0.2,
-            discovery_site: 0.1,
+            puzzle_chamber: 0.5,
+            discovery_site: 0.2,
             risk_event: 0.1,
             hazard: 0.1,
             rest_site: 0.1,
@@ -120,7 +117,7 @@ describe('Encounter Frequency Distribution Tuning', () => {
       });
 
       const newDistribution = balanceManager.getEncounterDistribution();
-      expect(newDistribution.puzzle_chamber).toBe(0.4);
+      expect(newDistribution.puzzle_chamber).toBe(0.5);
       expect(newDistribution.puzzle_chamber).not.toBe(
         originalDistribution.puzzle_chamber
       );

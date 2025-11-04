@@ -158,7 +158,6 @@ describe('Balance Testing Framework', () => {
       const start = Date.now();
       const types = [
         'puzzle_chamber',
-        'trade_opportunity',
         'discovery_site',
         'risk_event',
         'hazard',
@@ -211,7 +210,6 @@ function calculateRegionDifficulty(region: any): number {
 
   const difficultyWeights: Record<string, number> = {
     puzzle_chamber: 1.0,
-    trade_opportunity: 1.2,
     discovery_site: 1.1,
     risk_event: 2.0,
     hazard: 2.5,

@@ -84,7 +84,7 @@ describe('ActiveRunRoute Integration Tests', () => {
       id: 'node-2',
       depth: 2,
       position: 1,
-      type: 'trade_opportunity',
+      type: 'discovery_site',
       energyCost: 75,
       returnCost: 150,
       isRevealed: true,

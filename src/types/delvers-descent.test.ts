@@ -304,11 +304,10 @@ describe("Delver's Descent Types", () => {
           itemsBonus: 0,
         },
         encounterDistribution: {
-          puzzle_chamber: 20,
-          trade_opportunity: 20,
-          discovery_site: 20,
-          risk_event: 10,
-          hazard: 15,
+          puzzle_chamber: 25,
+          discovery_site: 30,
+          risk_event: 15,
+          hazard: 20,
           rest_site: 15,
         },
       };
@@ -318,7 +317,7 @@ describe("Delver's Descent Types", () => {
       expect(region.description).toBe('Ancient woodland with hidden paths');
       expect(region.theme).toBe('ancient_forest');
       expect(region.isUnlocked).toBe(false);
-      expect(region.encounterDistribution.puzzle_chamber).toBe(20);
+      expect(region.encounterDistribution.puzzle_chamber).toBe(25);
       expect(region.startingBonus.energyBonus).toBe(0);
     });
   });
@@ -458,7 +457,6 @@ describe("Delver's Descent Types", () => {
     it('should have correct ENCOUNTER_TYPES', () => {
       expect(ENCOUNTER_TYPES).toEqual([
         'puzzle_chamber',
-        'trade_opportunity',
         'discovery_site',
         'risk_event',
         'hazard',

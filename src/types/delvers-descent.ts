@@ -79,7 +79,6 @@ export interface RiskData {
 
 export type EncounterType =
   | 'puzzle_chamber'
-  | 'trade_opportunity'
   | 'discovery_site'
   | 'risk_event'
   | 'hazard'
@@ -186,7 +185,6 @@ export interface Region {
 
 export interface EncounterDistribution {
   puzzle_chamber: number;
-  trade_opportunity: number;
   discovery_site: number;
   risk_event: number;
   hazard: number;
@@ -338,7 +336,6 @@ export const isCollectedItem = (obj: any): obj is CollectedItem => {
 export const isValidEncounterType = (type: string): type is EncounterType => {
   return [
     'puzzle_chamber',
-    'trade_opportunity',
     'discovery_site',
     'risk_event',
     'hazard',
@@ -349,7 +346,6 @@ export const isValidEncounterType = (type: string): type is EncounterType => {
 // Constants for encounter types
 export const ENCOUNTER_TYPES: EncounterType[] = [
   'puzzle_chamber',
-  'trade_opportunity',
   'discovery_site',
   'risk_event',
   'hazard',

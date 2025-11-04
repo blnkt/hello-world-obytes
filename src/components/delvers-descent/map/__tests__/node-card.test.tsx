@@ -30,17 +30,17 @@ describe('NodeCard (Task 1.2)', () => {
 
   it('should display different colors for different encounter types', () => {
     const puzzleNode = createMockNode('node-puzzle', 1, 'puzzle_chamber');
-    const tradeNode = createMockNode('node-trade', 1, 'trade_opportunity');
+    const discoveryNode = createMockNode('node-discovery', 1, 'discovery_site');
 
     const { getByTestId: puzzleGetByTestId } = render(
       <NodeCard node={puzzleNode} />
     );
-    const { getByTestId: tradeGetByTestId } = render(
-      <NodeCard node={tradeNode} />
+    const { getByTestId: discoveryGetByTestId } = render(
+      <NodeCard node={discoveryNode} />
     );
 
     expect(puzzleGetByTestId('node-card-node-puzzle')).toBeDefined();
-    expect(tradeGetByTestId('node-card-node-trade')).toBeDefined();
+    expect(discoveryGetByTestId('node-card-node-discovery')).toBeDefined();
   });
 
   it('should indicate current node', () => {

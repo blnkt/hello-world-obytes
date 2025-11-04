@@ -4,7 +4,6 @@ import { getBalanceManager } from './balance-manager';
 
 export interface EncounterTypeMultipliers {
   puzzle_chamber: number;
-  trade_opportunity: number;
   discovery_site: number;
   risk_event: number;
   hazard: number;
@@ -245,7 +244,7 @@ export class RewardCalculator {
   ): EncounterType {
     switch (type) {
       case 'trade_good':
-        return 'trade_opportunity';
+        return 'discovery_site'; // Trade goods now come from discovery sites
       case 'discovery':
         return 'discovery_site';
       case 'legendary':

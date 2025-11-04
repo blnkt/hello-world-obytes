@@ -87,9 +87,8 @@ describe('Region Difficulty Scaling', () => {
           encounterDistributions: {
             ...config.region.encounterDistributions,
             forest_depths: {
-              puzzle_chamber: 0.4,
-              trade_opportunity: 0.2,
-              discovery_site: 0.15,
+              puzzle_chamber: 0.5,
+              discovery_site: 0.25,
               risk_event: 0.1,
               hazard: 0.1,
               rest_site: 0.05,
@@ -171,7 +170,6 @@ function calculateRegionDifficulty(region: Region): number {
   // Weight different encounter types by their difficulty
   const difficultyWeights: Record<string, number> = {
     puzzle_chamber: 1.0,
-    trade_opportunity: 1.2,
     discovery_site: 1.1,
     risk_event: 2.0,
     hazard: 2.5,

@@ -226,21 +226,6 @@ describe('EncounterResolver', () => {
       expect(encounterResolver.getEncounterType()).toBe('puzzle_chamber');
     });
 
-    it('should detect trade opportunity encounter type', () => {
-      const encounterData = {
-        type: 'trade_opportunity' as EncounterType,
-        nodeId: 'node-2',
-        depth: 2,
-        energyCost: 20,
-      };
-
-      encounterResolver.startEncounter(encounterData);
-      const state = encounterResolver.getCurrentState();
-
-      expect(state?.type).toBe('trade_opportunity');
-      expect(encounterResolver.getEncounterType()).toBe('trade_opportunity');
-    });
-
     it('should detect discovery site encounter type', () => {
       const encounterData = {
         type: 'discovery_site' as EncounterType,
@@ -276,7 +261,7 @@ describe('EncounterResolver', () => {
 
     it('should route trade opportunity encounters to appropriate handler', () => {
       const encounterData = {
-        type: 'trade_opportunity' as EncounterType,
+        type: 'discovery_site' as EncounterType,
         nodeId: 'node-2',
         depth: 2,
         energyCost: 20,
@@ -285,7 +270,7 @@ describe('EncounterResolver', () => {
       encounterResolver.startEncounter(encounterData);
       const handler = encounterResolver.getEncounterHandler();
 
-      expect(handler).toBe('trade_opportunity_handler');
+      expect(handler).toBe('discovery_site_handler');
     });
 
     it('should route discovery site encounters to appropriate handler', () => {
@@ -310,7 +295,7 @@ describe('EncounterResolver', () => {
       expect(encounterResolver.isValidEncounterType('puzzle_chamber')).toBe(
         true
       );
-      expect(encounterResolver.isValidEncounterType('trade_opportunity')).toBe(
+      expect(encounterResolver.isValidEncounterType('discovery_site')).toBe(
         true
       );
       expect(encounterResolver.isValidEncounterType('discovery_site')).toBe(
@@ -395,7 +380,7 @@ describe('EncounterResolver', () => {
 
     it('should persist encounter state across resolver instances', () => {
       const encounterData = {
-        type: 'trade_opportunity' as EncounterType,
+        type: 'discovery_site' as EncounterType,
         nodeId: 'node-2',
         depth: 2,
         energyCost: 20,
@@ -413,7 +398,7 @@ describe('EncounterResolver', () => {
       newResolver.loadEncounterState(encounterResolver.getCurrentState());
 
       const state = newResolver.getCurrentState();
-      expect(state?.type).toBe('trade_opportunity');
+      expect(state?.type).toBe('discovery_site');
       expect(state?.progress?.selectedOption).toBe('buy');
       expect(state?.progress?.negotiationAttempts).toBe(2);
     });
@@ -506,7 +491,7 @@ describe('EncounterResolver', () => {
 
     it('should clear persisted state when encounter is completed', () => {
       const encounterData = {
-        type: 'trade_opportunity' as EncounterType,
+        type: 'discovery_site' as EncounterType,
         nodeId: 'node-2',
         depth: 2,
         energyCost: 20,
@@ -590,7 +575,7 @@ describe('EncounterResolver', () => {
 
     it('should process failed encounter outcomes with consequences', () => {
       const encounterData = {
-        type: 'trade_opportunity' as EncounterType,
+        type: 'discovery_site' as EncounterType,
         nodeId: 'node-2',
         depth: 3,
         energyCost: 25,
@@ -650,23 +635,18 @@ describe('EncounterResolver', () => {
 
       const puzzleChamberMultiplier =
         encounterResolver.getEncounterTypeMultiplier('puzzle_chamber');
-      const tradeMultiplier =
-        encounterResolver.getEncounterTypeMultiplier('trade_opportunity');
       const discoveryMultiplier =
         encounterResolver.getEncounterTypeMultiplier('discovery_site');
+      const riskMultiplier =
+        encounterResolver.getEncounterTypeMultiplier('risk_event');
 
       expect(puzzleChamberMultiplier).toBeGreaterThan(0);
-      expect(tradeMultiplier).toBeGreaterThan(0);
       expect(discoveryMultiplier).toBeGreaterThan(0);
+      expect(riskMultiplier).toBeGreaterThan(0);
 
       const puzzleReward = encounterResolver.calculateFinalReward(
         baseReward,
         'puzzle_chamber',
-        depth
-      );
-      const tradeReward = encounterResolver.calculateFinalReward(
-        baseReward,
-        'trade_opportunity',
         depth
       );
       const discoveryReward = encounterResolver.calculateFinalReward(
@@ -674,10 +654,15 @@ describe('EncounterResolver', () => {
         'discovery_site',
         depth
       );
+      const riskReward = encounterResolver.calculateFinalReward(
+        baseReward,
+        'risk_event',
+        depth
+      );
 
       expect(puzzleReward).toBeGreaterThan(baseReward);
-      expect(tradeReward).toBeGreaterThan(baseReward);
       expect(discoveryReward).toBeGreaterThan(baseReward);
+      expect(riskReward).toBeGreaterThan(baseReward);
     });
 
     it('should handle failure consequences with different severity levels', () => {
@@ -801,7 +786,7 @@ describe('EncounterResolver', () => {
 
     it('should validate state transitions from active to progress', () => {
       const encounterData = {
-        type: 'trade_opportunity' as EncounterType,
+        type: 'discovery_site' as EncounterType,
         nodeId: 'node-2',
         depth: 2,
         energyCost: 20,
@@ -926,7 +911,7 @@ describe('EncounterResolver', () => {
 
     it('should handle state transition errors gracefully', () => {
       const encounterData = {
-        type: 'trade_opportunity' as EncounterType,
+        type: 'discovery_site' as EncounterType,
         nodeId: 'node-2',
         depth: 2,
         energyCost: 20,
@@ -1115,7 +1100,7 @@ describe('EncounterResolver', () => {
 
     it('should handle large numbers without overflow', () => {
       const largeNumberData = {
-        type: 'trade_opportunity' as EncounterType,
+        type: 'discovery_site' as EncounterType,
         nodeId: 'node-large',
         depth: 50,
         energyCost: 999999,
@@ -1255,7 +1240,7 @@ describe('EncounterResolver', () => {
 
     it('should handle concurrent access simulation', () => {
       const encounterData = {
-        type: 'trade_opportunity' as EncounterType,
+        type: 'discovery_site' as EncounterType,
         nodeId: 'node-concurrent',
         depth: 2,
         energyCost: 20,

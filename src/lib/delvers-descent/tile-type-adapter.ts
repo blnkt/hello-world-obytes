@@ -46,7 +46,6 @@ export interface EncounterTileData {
 export class TileTypeAdapter {
   private readonly supportedEncounterTypes: EncounterType[] = [
     'puzzle_chamber',
-    'trade_opportunity',
     'discovery_site',
   ];
 

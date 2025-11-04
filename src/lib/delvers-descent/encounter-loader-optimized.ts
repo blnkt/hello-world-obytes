@@ -26,7 +26,6 @@ export class EncounterLoaderOptimized {
   };
   private readonly supportedEncounterTypes: EncounterType[] = [
     'puzzle_chamber',
-    'trade_opportunity',
     'discovery_site',
     'risk_event',
     'hazard',
@@ -35,7 +34,6 @@ export class EncounterLoaderOptimized {
   private readonly encounterTypeMultipliers: Map<EncounterType, number> =
     new Map([
       ['puzzle_chamber', 1.0],
-      ['trade_opportunity', 1.2],
       ['discovery_site', 1.1],
       ['risk_event', 1.5], // High-risk, high-reward
       ['hazard', 1.3], // Dangerous but manageable

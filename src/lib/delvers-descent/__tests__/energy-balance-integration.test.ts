@@ -40,13 +40,13 @@ describe('EnergyCalculator with Balance Integration', () => {
         2,
         'puzzle_chamber'
       );
-      const tradeCost = energyCalculator.calculateNodeCost(
+      const discoveryCost = energyCalculator.calculateNodeCost(
         2,
-        'trade_opportunity'
+        'discovery_site'
       );
       const hazardCost = energyCalculator.calculateNodeCost(2, 'hazard');
 
-      expect(tradeCost).toBe(puzzleCost - 2); // -2 modifier
+      expect(discoveryCost).toBe(puzzleCost + 1); // +1 modifier
       expect(hazardCost).toBe(puzzleCost + 3); // +3 modifier
     });
   });
