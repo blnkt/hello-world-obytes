@@ -73,19 +73,6 @@ const getDungeonGameTabScreen = () => ({
   },
 });
 
-const getShopTabScreen = () => ({
-  name: 'shop',
-  options: {
-    href: null,
-    title: 'Shop',
-    headerShown: true,
-    tabBarIcon: ({ color }: { color: string }) => (
-      <MerchantIcon color={color} />
-    ),
-    tabBarButtonTestID: 'shop-tab',
-  },
-});
-
 const _getHiddenScreens = () => [
   {
     name: 'scenario',
@@ -150,9 +137,8 @@ const _getTabScreens = () => [
   getStepsHistoryTabScreen(),
   getSettingsTabScreen(),
   getHomeTabScreen(),
-  // Note: scenario, dungeon-game, shop already have href: null in their individual configs
+  // Note: scenario, dungeon-game already have href: null in their individual configs
   getDungeonGameTabScreen(),
-  getShopTabScreen(),
 ];
 
 export default function AppLayout() {

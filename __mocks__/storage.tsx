@@ -331,60 +331,6 @@ export const useCurrency = () => {
   return [currency, setCurrency] as const;
 };
 
-export function getPurchasedItems(): any[] {
-  const value = storage.getString('purchasedItems');
-  return value ? JSON.parse(value) || [] : [];
-}
-
-export async function setPurchasedItems(items: any[]) {
-  await setItem('purchasedItems', items);
-}
-
-export async function addPurchasedItem(itemId: string) {
-  const currentItems = getPurchasedItems();
-  const existingItem = currentItems.find((item) => item.id === itemId);
-
-  if (existingItem) {
-    // Increment quantity if item already exists
-    existingItem.quantity += 1;
-    await setPurchasedItems(currentItems);
-  } else {
-    // Add new item with quantity 1
-    const updatedItems = [...currentItems, { id: itemId, quantity: 1 }];
-    await setPurchasedItems(updatedItems);
-  }
-}
-
-export async function useItem(itemId: string): Promise<boolean> {
-  const currentItems = getPurchasedItems();
-  const itemIndex = currentItems.findIndex((item) => item.id === itemId);
-
-  if (itemIndex === -1 || currentItems[itemIndex].quantity <= 0) {
-    return false; // Item not found or no quantity left
-  }
-
-  // Decrease quantity
-  currentItems[itemIndex].quantity -= 1;
-
-  // Remove item if quantity reaches 0
-  if (currentItems[itemIndex].quantity === 0) {
-    currentItems.splice(itemIndex, 1);
-  }
-
-  await setPurchasedItems(currentItems);
-  return true; // Item used successfully
-}
-
-export async function clearPurchasedItems() {
-  await removeItem('purchasedItems');
-}
-
-export const usePurchasedItems = () => {
-  const [purchasedItems, setPurchasedItems] =
-    React.useState<any[]>(getPurchasedItems());
-  return [purchasedItems, setPurchasedItems] as const;
-};
-
 export type HealthCore = {
   experience: number;
   cumulativeExperience: number;

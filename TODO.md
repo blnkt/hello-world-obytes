@@ -73,11 +73,6 @@ This document consolidates all TODOs from the codebase, organized by development
   - **Priority**: Medium
   - **Description**: Verify complete user journeys work end-to-end
 
-- [ ] **Add E2E tests for shop purchase flow** - Test complete purchase journey
-  - **File**: `src/app/(app)/shop.tsx`
-  - **Priority**: Medium
-  - **Description**: Ensure shop functionality works in real scenarios
-
 - [ ] **Set up CI coverage threshold** - Fail builds on coverage drop below 80%
   - **File**: `.github/workflows/`
   - **Priority**: High

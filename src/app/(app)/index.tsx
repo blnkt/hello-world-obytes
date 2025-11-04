@@ -256,13 +256,6 @@ const QuickNavigation = () => {
       color: 'bg-purple-500',
       onPress: () => router.push('/steps-history'),
     },
-    // {
-    //   title: 'Shop',
-    //   subtitle: 'Spend your coins',
-    //   icon: '💰',
-    //   color: 'bg-yellow-500',
-    //   onPress: () => router.push('/shop'),
-    // },
     {
       title: 'Settings',
       subtitle: 'App Preferences',

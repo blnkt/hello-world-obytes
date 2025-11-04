@@ -13,7 +13,6 @@ describe('Component Color Imports', () => {
     'src/components/dungeon-game/game-grid.tsx',
     // 'src/components/dungeon-game/grid-tile.tsx', // Now uses pure Tailwind classes
     'src/components/dungeon-game/persistence-error-display.tsx',
-    'src/components/dungeon-game/purchased-items-grid.tsx',
     'src/components/dungeon-game/resume-choice-modal.tsx',
     'src/components/history/scenario-illustrations.tsx',
     'src/components/history/scenario-stats.tsx',
