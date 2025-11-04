@@ -199,12 +199,17 @@ describe('RunQueueManager', () => {
       await manager.addRunToQueue(run1);
       await manager.addRunToQueue(run2);
 
-      // Completed runs are removed from queue, so only run2 should remain
+      // Completed runs are now kept in memory to track processed dates
       await manager.updateRunStatus(run1.id, 'completed');
 
       const allRuns = manager.getAllRuns();
-      expect(allRuns).toHaveLength(1);
-      expect(allRuns[0].id).toBe(run2.id);
+      expect(allRuns).toHaveLength(2);
+      // Completed run should still be in the list
+      const completedRun = allRuns.find((r) => r.id === run1.id);
+      expect(completedRun?.status).toBe('completed');
+      // Queued run should also be in the list
+      const queuedRun = allRuns.find((r) => r.id === run2.id);
+      expect(queuedRun?.status).toBe('queued');
     });
   });
 
@@ -241,9 +246,15 @@ describe('RunQueueManager', () => {
       const bustedRuns = manager.getRunsByStatus('busted');
       const queuedRuns = manager.getRunsByStatus('queued');
 
-      expect(completedRuns).toHaveLength(0);
-      expect(bustedRuns).toHaveLength(0);
+      // Completed and busted runs are now kept in memory to track processed dates
+      expect(completedRuns).toHaveLength(1);
+      expect(bustedRuns).toHaveLength(1);
       expect(queuedRuns).toHaveLength(1);
+
+      // But they should still be filtered from the queue display
+      const allQueuedRuns = manager.getQueuedRuns();
+      expect(allQueuedRuns).toHaveLength(1);
+      expect(allQueuedRuns.every((r) => r.status === 'queued')).toBe(true);
     });
   });
 
@@ -357,7 +368,8 @@ describe('RunQueueManager', () => {
       const stats = manager.getRunStatistics();
 
       // Total runs includes queued (1) + completed (1) + busted (1) from progression data
-      expect(stats.totalRuns).toBe(3);
+      // currentRuns counts only queued/active (1), plus completed/busted from progression (2)
+      expect(stats.totalRuns).toBe(3); // 1 queued + 1 completed (progression) + 1 busted (progression)
       expect(stats.queuedRuns).toBe(1);
       // Completed/busted counts come from progression data, not queue
       expect(stats.completedRuns).toBe(1);

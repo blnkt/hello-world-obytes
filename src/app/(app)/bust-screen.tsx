@@ -91,28 +91,41 @@ function useBustHandlers(router: ReturnType<typeof useRouter>) {
 
       await achievementManager.loadSavedState();
 
+      // Get active run first to ensure we have the run ID
+      const activeRuns = runQueueManager.getRunsByStatus('active');
+      const activeRun = activeRuns.length > 0 ? activeRuns[0] : null;
+
+      // Process bust from run state if available
+      let deepestDepth = 0;
       try {
         const bustResult = await runStateManager.bustRun();
+        deepestDepth = bustResult.deepestDepth;
         achievementManager.processEvent({
           type: 'depth_reached',
           data: { depth: bustResult.deepestDepth, cashOut: false },
           timestamp: new Date(),
         });
         await saveAchievements(achievementManager);
-        // Persist progression data before removing run
-        await progressionManager.processRunBust(bustResult.deepestDepth);
       } catch (error) {
+        // If no run state, try to get depth from current state
+        const runState = runStateManager.getCurrentState();
+        if (runState) {
+          deepestDepth = runState.currentDepth;
+        }
         console.log('No active run state to bust:', error);
       }
 
-      const activeRuns = runQueueManager.getRunsByStatus('active');
-      if (activeRuns.length > 0) {
-        // Persist progression data before removing run
-        const runState = runStateManager.getCurrentState();
-        if (runState) {
-          await progressionManager.processRunBust(runState.currentDepth);
+      // Update run status to busted and remove from queue
+      if (activeRun) {
+        // Update progression data with the deepest depth reached
+        if (deepestDepth > 0) {
+          await progressionManager.processRunBust(deepestDepth);
+        } else {
+          // Fallback: just increment busted count if we don't have depth
+          await progressionManager.incrementBustedRuns();
         }
-        runQueueManager.updateRunStatus(activeRuns[0].id, 'busted');
+        // Update run status to 'busted' - this will also remove it from the queue
+        await runQueueManager.updateRunStatus(activeRun.id, 'busted');
       }
 
       router.push('/(app)/run-queue');

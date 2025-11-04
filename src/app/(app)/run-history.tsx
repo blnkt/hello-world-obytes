@@ -1,5 +1,6 @@
+import { useFocusEffect } from '@react-navigation/native';
 import { Stack } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 
 import { ProgressionNavigation } from '@/components/delvers-descent/progression/progression-navigation';
@@ -62,10 +63,17 @@ const InfoMessage: React.FC = () => (
 export default function RunHistoryScreen() {
   const [progression, setProgression] = useState<ProgressionData | null>(null);
 
-  useEffect(() => {
+  const refreshProgression = useCallback(() => {
     const progressionManager = getProgressionManager();
     setProgression(progressionManager.getProgressionData());
   }, []);
+
+  // Refresh progression data when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      refreshProgression();
+    }, [refreshProgression])
+  );
 
   return (
     <>

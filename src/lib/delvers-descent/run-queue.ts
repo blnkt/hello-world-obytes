@@ -99,7 +99,8 @@ export class RunQueueManager {
 
   /**
    * Update run status
-   * Removes runs from queue when they are completed or busted
+   * Keeps completed/busted runs in memory (with status) to prevent regenerating runs
+   * for dates that have already been processed, but filters them from queue display
    */
   async updateRunStatus(
     runId: string,
@@ -110,12 +111,10 @@ export class RunQueueManager {
       throw new Error(`Run with id ${runId} not found`);
     }
 
+    // Update the run status
+    // We keep completed/busted runs in this.runs to track that the date has been processed
+    // This prevents regenerating runs for dates that have already been completed/busted
     run.status = status;
-
-    // Remove completed or busted runs from queue (no longer archiving them)
-    if (status === 'completed' || status === 'busted') {
-      this.runs = this.runs.filter((r) => r.id !== runId);
-    }
 
     await this.saveRuns();
   }
@@ -129,7 +128,8 @@ export class RunQueueManager {
     const newRuns: DelvingRun[] = [];
 
     for (const entry of stepHistory) {
-      // Skip if run already exists for this date
+      // Skip if run already exists for this date (regardless of status)
+      // This prevents regenerating runs for dates that have been processed (completed/busted)
       const existingRun = this.runs.find((r) => r.date === entry.date);
       if (existingRun) {
         continue;
@@ -167,8 +167,15 @@ export class RunQueueManager {
   } {
     const queuedRuns = this.runs.filter((r) => r.status === 'queued').length;
     const activeRuns = this.runs.filter((r) => r.status === 'active').length;
-    const totalSteps = this.runs.reduce((sum, run) => sum + run.steps, 0);
-    const currentRuns = this.runs.length;
+    // Only count steps for queued/active runs (not completed/busted)
+    const activeAndQueuedRuns = this.runs.filter(
+      (r) => r.status === 'queued' || r.status === 'active'
+    );
+    const totalSteps = activeAndQueuedRuns.reduce(
+      (sum, run) => sum + run.steps,
+      0
+    );
+    const currentRuns = activeAndQueuedRuns.length;
     const averageSteps = currentRuns > 0 ? totalSteps / currentRuns : 0;
 
     // Get progression data for completed/busted counts
@@ -176,6 +183,7 @@ export class RunQueueManager {
     const progression = progressionManager.getProgressionData();
     const completedRuns = progression.totalRunsCompleted;
     const bustedRuns = progression.totalRunsBusted;
+    // Total runs = active/queued runs in memory + completed/busted from progression
     const totalRuns = completedRuns + bustedRuns + currentRuns;
 
     return {
@@ -240,28 +248,17 @@ export class RunQueueManager {
 
   /**
    * Load runs from storage
-   * Automatically cleans up any existing completed/busted runs (no longer archiving them)
+   * Keeps all runs (including completed/busted) to track processed dates
+   * They are filtered out when displaying the queue but kept to prevent regeneration
    */
   private loadRuns(): void {
     try {
       const value = storage.getString(DELVING_RUNS_KEY);
       if (value) {
         const loadedRuns = JSON.parse(value) || [];
-        // Filter out completed/busted runs - they're no longer archived
-        const initialLength = loadedRuns.length;
-        this.runs = loadedRuns.filter(
-          (run: DelvingRun) =>
-            run.status !== 'completed' && run.status !== 'busted'
-        );
-        // If we filtered out any runs, save the cleaned list
-        // Note: saveRuns is async but we can't await in constructor, so save synchronously
-        if (this.runs.length !== initialLength) {
-          try {
-            storage.set(DELVING_RUNS_KEY, JSON.stringify(this.runs));
-          } catch (error) {
-            console.error('Error saving cleaned runs:', error);
-          }
-        }
+        // Keep all runs, including completed/busted ones
+        // This allows us to check if a date has already been processed
+        this.runs = loadedRuns;
       } else {
         this.runs = [];
       }

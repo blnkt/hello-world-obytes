@@ -1,5 +1,6 @@
+import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 
 import { useDelvingRuns } from '@/components/delvers-descent/hooks/use-delving-runs';
@@ -147,6 +148,14 @@ export const RunQueueScreen: React.FC = () => {
       refreshData();
     }
   }, [isSyncing, refreshData]);
+
+  // Refresh data when screen comes into focus
+  // This ensures data is up-to-date after navigation (e.g., from bust screen)
+  useFocusEffect(
+    useCallback(() => {
+      refreshData();
+    }, [refreshData])
+  );
 
   return (
     <RunQueueMainContent
