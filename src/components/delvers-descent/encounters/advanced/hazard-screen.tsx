@@ -42,9 +42,11 @@ const OutcomeDisplay: React.FC<{
         {outcome.reward && (
           <View className="mb-6 rounded bg-green-50 p-4">
             <Text className="mb-2 font-semibold text-green-800">Rewards</Text>
-            <Text className="text-green-700">
-              Energy: +{outcome.reward.energy}
-            </Text>
+            {outcome.reward.energy > 0 && (
+              <Text className="text-green-700">
+                Energy: +{outcome.reward.energy}
+              </Text>
+            )}
             <Text className="text-green-700">XP: +{outcome.reward.xp}</Text>
           </View>
         )}

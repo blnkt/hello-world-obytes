@@ -166,7 +166,7 @@ describe('RiskEventEncounter', () => {
 
       expect(outcome.type).toBe('success');
       expect(outcome.reward).toBeDefined();
-      expect(outcome.reward!.energy).toBeGreaterThan(0);
+      expect(outcome.reward!.energy).toBe(0);
       expect(outcome.reward!.items).toBeDefined();
       expect(outcome.reward!.xp).toBeGreaterThan(0);
 
@@ -228,9 +228,7 @@ describe('RiskEventEncounter', () => {
       const outcome = encounter.resolve();
 
       if (outcome.type === 'success') {
-        expect(outcome.reward!.energy).toBeGreaterThan(
-          config.baseReward.energy
-        );
+        expect(outcome.reward!.energy).toBe(0);
         expect(outcome.reward!.xp).toBeGreaterThan(config.baseReward.xp);
       }
 
@@ -349,7 +347,7 @@ describe('RiskEventEncounter', () => {
 
       expect(config.riskLevel).toBe('low');
       expect(config.successRate).toBe(0.8);
-      expect(config.baseReward.energy).toBe(10);
+      expect(config.baseReward.energy).toBe(0);
       expect(config.baseReward.items[0].rarity).toBe('common');
       expect(config.failureConsequence.energyLoss).toBe(5);
       expect(config.failureConsequence.forcedRetreat).toBe(false);
@@ -360,7 +358,7 @@ describe('RiskEventEncounter', () => {
 
       expect(config.riskLevel).toBe('medium');
       expect(config.successRate).toBe(0.6);
-      expect(config.baseReward.energy).toBe(20);
+      expect(config.baseReward.energy).toBe(0);
       expect(config.baseReward.items[0].rarity).toBe('rare');
       expect(config.failureConsequence.energyLoss).toBe(15);
       expect(config.failureConsequence.forcedRetreat).toBe(false);
@@ -371,7 +369,7 @@ describe('RiskEventEncounter', () => {
 
       expect(config.riskLevel).toBe('high');
       expect(config.successRate).toBe(0.4);
-      expect(config.baseReward.energy).toBe(35);
+      expect(config.baseReward.energy).toBe(0);
       expect(config.baseReward.items[0].rarity).toBe('epic');
       expect(config.legendaryReward).toBeDefined();
       expect(config.legendaryReward!.items[0].rarity).toBe('legendary');
@@ -383,7 +381,7 @@ describe('RiskEventEncounter', () => {
 
       expect(config.riskLevel).toBe('extreme');
       expect(config.successRate).toBe(0.2);
-      expect(config.baseReward.energy).toBe(60);
+      expect(config.baseReward.energy).toBe(0);
       // Rarity has been adjusted in current config
       expect(['legendary', 'mythic']).toContain(
         config.baseReward.items[0].rarity
@@ -406,9 +404,8 @@ describe('RiskEventEncounter', () => {
         3
       );
 
-      expect(depth3Config.baseReward.energy).toBeGreaterThan(
-        depth1Config.baseReward.energy
-      );
+      expect(depth3Config.baseReward.energy).toBe(0);
+      expect(depth1Config.baseReward.energy).toBe(0);
       expect(depth3Config.baseReward.xp).toBeGreaterThan(
         depth1Config.baseReward.xp
       );
@@ -451,9 +448,7 @@ describe('RiskEventEncounter', () => {
 
       expect(outcome.type).toBe('success');
       expect(outcome.message).toContain('LEGENDARY SUCCESS');
-      expect(outcome.reward!.energy).toBeGreaterThan(
-        extremeConfig.baseReward.energy
-      );
+      expect(outcome.reward!.energy).toBe(0);
 
       Math.random = originalRandom;
     });

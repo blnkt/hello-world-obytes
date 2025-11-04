@@ -184,7 +184,7 @@ describe('HazardEncounter', () => {
 
       expect(outcome.type).toBe('success');
       expect(outcome.reward).toBeDefined();
-      expect(outcome.reward!.energy).toBeGreaterThan(0);
+      expect(outcome.reward!.energy).toBe(0);
       expect(outcome.reward!.items).toBeDefined();
       expect(outcome.reward!.xp).toBeGreaterThan(0);
 
@@ -231,9 +231,7 @@ describe('HazardEncounter', () => {
       const outcome = encounter.resolve();
 
       if (outcome.type === 'success') {
-        expect(outcome.reward!.energy).toBeGreaterThan(
-          config.baseReward.energy
-        );
+        expect(outcome.reward!.energy).toBe(0);
         expect(outcome.reward!.xp).toBeGreaterThan(config.baseReward.xp);
       }
 
@@ -358,7 +356,7 @@ describe('HazardEncounter', () => {
         expect(hazardConfig.obstacleType).toBe(obstacleType);
         expect(hazardConfig.difficulty).toBeGreaterThan(0);
         expect(hazardConfig.difficulty).toBeLessThanOrEqual(10);
-        expect(hazardConfig.baseReward.energy).toBeGreaterThan(0);
+        expect(hazardConfig.baseReward.energy).toBe(0);
         expect(hazardConfig.failureConsequence.energyLoss).toBeGreaterThan(0);
       });
     });
@@ -375,9 +373,8 @@ describe('HazardEncounter', () => {
         3
       );
 
-      expect(depth3Config.baseReward.energy).toBeGreaterThan(
-        depth1Config.baseReward.energy
-      );
+      expect(depth3Config.baseReward.energy).toBe(0);
+      expect(depth1Config.baseReward.energy).toBe(0);
       expect(depth3Config.baseReward.xp).toBeGreaterThan(
         depth1Config.baseReward.xp
       );

@@ -89,7 +89,7 @@ export class RiskEventEncounter {
       riskLevel: 'low',
       successRate: 0.8,
       baseReward: {
-        energy: Math.round(10 * depthMultiplier),
+        energy: 0,
         items: [
           {
             id: 'common_gem',
@@ -120,7 +120,7 @@ export class RiskEventEncounter {
       riskLevel: 'medium',
       successRate: 0.6,
       baseReward: {
-        energy: Math.round(20 * depthMultiplier),
+        energy: 0,
         items: [
           {
             id: 'rare_crystal',
@@ -151,7 +151,7 @@ export class RiskEventEncounter {
       riskLevel: 'high',
       successRate: 0.4,
       baseReward: {
-        energy: Math.round(35 * depthMultiplier),
+        energy: 0,
         items: [
           {
             id: 'epic_artifact',
@@ -167,7 +167,7 @@ export class RiskEventEncounter {
         xp: Math.round(100 * depthMultiplier),
       },
       legendaryReward: {
-        energy: Math.round(50 * depthMultiplier),
+        energy: 0,
         items: [
           {
             id: 'legendary_relic',
@@ -198,7 +198,7 @@ export class RiskEventEncounter {
       riskLevel: 'extreme',
       successRate: 0.2,
       baseReward: {
-        energy: Math.round(60 * depthMultiplier),
+        energy: 0,
         items: [
           {
             id: 'mythic_treasure',
@@ -214,7 +214,7 @@ export class RiskEventEncounter {
         xp: Math.round(200 * depthMultiplier),
       },
       legendaryReward: {
-        energy: Math.round(100 * depthMultiplier),
+        energy: 0,
         items: [
           {
             id: 'divine_artifact',
@@ -388,7 +388,7 @@ export class RiskEventEncounter {
 
     const message = isLegendarySuccess
       ? `LEGENDARY SUCCESS! You discovered incredible treasures!`
-      : `Risk paid off! You gained ${modifiedReward.energy} energy and valuable items.`;
+      : `Risk paid off! You gained valuable items.`;
 
     return {
       type: 'success',

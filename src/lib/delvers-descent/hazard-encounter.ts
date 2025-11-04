@@ -350,7 +350,7 @@ export class HazardEncounter {
     );
 
     const baseReward: EncounterReward = {
-      energy: Math.round(15 * depthMultiplier),
+      energy: 0,
       items: [
         {
           id: 'hazard_loot',
