@@ -13,6 +13,7 @@ import { saveAchievements } from '@/lib/delvers-descent/achievement-persistence'
 import { ALL_ACHIEVEMENTS } from '@/lib/delvers-descent/achievement-types';
 import { CollectionManager } from '@/lib/delvers-descent/collection-manager';
 import { ALL_COLLECTION_SETS } from '@/lib/delvers-descent/collection-sets';
+import { getProgressionManager } from '@/lib/delvers-descent/progression-manager';
 import { getRunQueueManager } from '@/lib/delvers-descent/run-queue';
 import { useExperienceData } from '@/lib/health';
 import { useCharacter } from '@/lib/storage';
@@ -316,7 +317,7 @@ function handleEncounterCompleteImpl({
   setShowEncounter(false);
 }
 
-function useRiskFlow({
+function _useRiskFlow({
   runState,
   updateDepth,
 }: {
@@ -391,6 +392,7 @@ function useCashOutFlow({
       const runQueueManager = getRunQueueManager();
       const collectionManager = new CollectionManager(ALL_COLLECTION_SETS);
       const achievementManager = new AchievementManager(ALL_ACHIEVEMENTS);
+      const progressionManager = getProgressionManager();
       await achievementManager.loadSavedState();
       const completionResult = {
         finalInventory: runState.inventory,
@@ -428,6 +430,10 @@ function useCashOutFlow({
         });
       }
       await saveAchievements(achievementManager);
+      // Persist progression data before removing run
+      await progressionManager.processRunCompletion(
+        completionResult.deepestDepth
+      );
       runQueueManager.updateRunStatus(run.id, 'completed');
       router.push('/(app)/run-queue');
     } catch (error) {

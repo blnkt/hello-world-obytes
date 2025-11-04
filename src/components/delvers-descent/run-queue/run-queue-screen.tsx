@@ -90,21 +90,17 @@ const RunQueueContent: React.FC<{
   onRunPress: (runId: string) => void;
   queuedRuns: DelvingRun[];
   activeRuns: DelvingRun[];
-  completedRuns: DelvingRun[];
-  bustedRuns: DelvingRun[];
+  _completedRuns: DelvingRun[];
+  _bustedRuns: DelvingRun[];
 }> = ({
   onStartRun,
   onRunPress,
   queuedRuns,
   activeRuns,
-  completedRuns,
-  bustedRuns,
+  _completedRuns: _completedRuns,
+  _bustedRuns: _bustedRuns,
 }) => {
-  const hasAnyRuns =
-    queuedRuns.length > 0 ||
-    activeRuns.length > 0 ||
-    completedRuns.length > 0 ||
-    bustedRuns.length > 0;
+  const hasAnyRuns = queuedRuns.length > 0 || activeRuns.length > 0;
 
   if (!hasAnyRuns) {
     return <EmptyStateView />;
@@ -124,18 +120,7 @@ const RunQueueContent: React.FC<{
         onStartRun={onStartRun}
         onRunPress={onRunPress}
       />
-      <RunSection
-        title="Completed"
-        runs={completedRuns}
-        onStartRun={onStartRun}
-        onRunPress={onRunPress}
-      />
-      <RunSection
-        title="Failed"
-        runs={bustedRuns}
-        onStartRun={onStartRun}
-        onRunPress={onRunPress}
-      />
+      {/* Completed and busted runs are no longer archived - see Run History for statistics */}
     </>
   );
 };
@@ -242,8 +227,8 @@ const RunQueueMainContent: React.FC<{
           onRunPress={handleRunPress}
           queuedRuns={queuedRuns}
           activeRuns={activeRuns}
-          completedRuns={completedRuns}
-          bustedRuns={bustedRuns}
+          _completedRuns={completedRuns}
+          _bustedRuns={bustedRuns}
         />
       </View>
     </ScrollView>

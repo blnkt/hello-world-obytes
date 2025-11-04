@@ -1,6 +1,8 @@
 import { storage } from '@/lib/storage';
 import type { DelvingRun } from '@/types/delvers-descent';
 
+import { getProgressionManager } from './progression-manager';
+
 const DELVING_RUNS_KEY = 'delvingRuns';
 
 export class RunQueueManager {
@@ -97,6 +99,7 @@ export class RunQueueManager {
 
   /**
    * Update run status
+   * Removes runs from queue when they are completed or busted
    */
   async updateRunStatus(
     runId: string,
@@ -108,6 +111,12 @@ export class RunQueueManager {
     }
 
     run.status = status;
+
+    // Remove completed or busted runs from queue (no longer archiving them)
+    if (status === 'completed' || status === 'busted') {
+      this.runs = this.runs.filter((r) => r.id !== runId);
+    }
+
     await this.saveRuns();
   }
 
@@ -145,6 +154,7 @@ export class RunQueueManager {
 
   /**
    * Get run statistics
+   * Uses progression data for completed/busted counts instead of calculating from runs array
    */
   getRunStatistics(): {
     totalRuns: number;
@@ -155,15 +165,18 @@ export class RunQueueManager {
     totalSteps: number;
     averageSteps: number;
   } {
-    const totalRuns = this.runs.length;
     const queuedRuns = this.runs.filter((r) => r.status === 'queued').length;
-    const completedRuns = this.runs.filter(
-      (r) => r.status === 'completed'
-    ).length;
-    const bustedRuns = this.runs.filter((r) => r.status === 'busted').length;
     const activeRuns = this.runs.filter((r) => r.status === 'active').length;
     const totalSteps = this.runs.reduce((sum, run) => sum + run.steps, 0);
-    const averageSteps = totalRuns > 0 ? totalSteps / totalRuns : 0;
+    const currentRuns = this.runs.length;
+    const averageSteps = currentRuns > 0 ? totalSteps / currentRuns : 0;
+
+    // Get progression data for completed/busted counts
+    const progressionManager = getProgressionManager();
+    const progression = progressionManager.getProgressionData();
+    const completedRuns = progression.totalRunsCompleted;
+    const bustedRuns = progression.totalRunsBusted;
+    const totalRuns = completedRuns + bustedRuns + currentRuns;
 
     return {
       totalRuns,
@@ -227,11 +240,31 @@ export class RunQueueManager {
 
   /**
    * Load runs from storage
+   * Automatically cleans up any existing completed/busted runs (no longer archiving them)
    */
   private loadRuns(): void {
     try {
       const value = storage.getString(DELVING_RUNS_KEY);
-      this.runs = value ? JSON.parse(value) || [] : [];
+      if (value) {
+        const loadedRuns = JSON.parse(value) || [];
+        // Filter out completed/busted runs - they're no longer archived
+        const initialLength = loadedRuns.length;
+        this.runs = loadedRuns.filter(
+          (run: DelvingRun) =>
+            run.status !== 'completed' && run.status !== 'busted'
+        );
+        // If we filtered out any runs, save the cleaned list
+        // Note: saveRuns is async but we can't await in constructor, so save synchronously
+        if (this.runs.length !== initialLength) {
+          try {
+            storage.set(DELVING_RUNS_KEY, JSON.stringify(this.runs));
+          } catch (error) {
+            console.error('Error saving cleaned runs:', error);
+          }
+        }
+      } else {
+        this.runs = [];
+      }
     } catch (error) {
       console.error('Error loading delving runs:', error);
       this.runs = [];

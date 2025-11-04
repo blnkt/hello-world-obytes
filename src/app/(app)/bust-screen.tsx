@@ -5,6 +5,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { AchievementManager } from '@/lib/delvers-descent/achievement-manager';
 import { saveAchievements } from '@/lib/delvers-descent/achievement-persistence';
 import { ALL_ACHIEVEMENTS } from '@/lib/delvers-descent/achievement-types';
+import { getProgressionManager } from '@/lib/delvers-descent/progression-manager';
 import { getRunQueueManager } from '@/lib/delvers-descent/run-queue';
 import { getRunStateManager } from '@/lib/delvers-descent/run-state-manager';
 
@@ -86,6 +87,7 @@ function useBustHandlers(router: ReturnType<typeof useRouter>) {
       const runQueueManager = getRunQueueManager();
       const runStateManager = getRunStateManager();
       const achievementManager = new AchievementManager(ALL_ACHIEVEMENTS);
+      const progressionManager = getProgressionManager();
 
       await achievementManager.loadSavedState();
 
@@ -97,12 +99,19 @@ function useBustHandlers(router: ReturnType<typeof useRouter>) {
           timestamp: new Date(),
         });
         await saveAchievements(achievementManager);
+        // Persist progression data before removing run
+        await progressionManager.processRunBust(bustResult.deepestDepth);
       } catch (error) {
         console.log('No active run state to bust:', error);
       }
 
       const activeRuns = runQueueManager.getRunsByStatus('active');
       if (activeRuns.length > 0) {
+        // Persist progression data before removing run
+        const runState = runStateManager.getCurrentState();
+        if (runState) {
+          await progressionManager.processRunBust(runState.currentDepth);
+        }
         runQueueManager.updateRunStatus(activeRuns[0].id, 'busted');
       }
 

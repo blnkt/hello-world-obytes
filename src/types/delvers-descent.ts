@@ -9,6 +9,13 @@ export interface DelvingRun {
   status: 'queued' | 'active' | 'completed' | 'busted';
 }
 
+export interface ProgressionData {
+  allTimeDeepestDepth: number;
+  totalRunsCompleted: number;
+  totalRunsBusted: number;
+  totalRunsAttempted: number; // Calculated: completed + busted
+}
+
 export interface DungeonNode {
   id: string;
   depth: number;
