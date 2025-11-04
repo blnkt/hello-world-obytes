@@ -119,3 +119,11 @@ export function getProgressionManager(): ProgressionManager {
   }
   return progressionManagerInstance;
 }
+
+/**
+ * Reset the singleton instance (for testing only)
+ * @internal
+ */
+export function resetProgressionManager(): void {
+  progressionManagerInstance = null;
+}

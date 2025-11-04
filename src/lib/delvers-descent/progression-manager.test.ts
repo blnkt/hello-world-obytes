@@ -3,6 +3,7 @@ import { getItem, setItem } from '@/lib/storage';
 import {
   getProgressionManager,
   ProgressionManager,
+  resetProgressionManager,
 } from './progression-manager';
 
 // Mock storage
@@ -14,13 +15,6 @@ jest.mock('@/lib/storage', () => ({
 
 const mockGetItem = getItem as jest.MockedFunction<typeof getItem>;
 const mockSetItem = setItem as jest.MockedFunction<typeof setItem>;
-
-// Helper to reset singleton
-function resetProgressionManager() {
-  // Access the module's internal singleton
-  const module = require('./progression-manager');
-  module.progressionManagerInstance = null;
-}
 
 describe('ProgressionManager', () => {
   beforeEach(() => {

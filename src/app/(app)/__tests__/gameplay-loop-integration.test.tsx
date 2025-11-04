@@ -30,6 +30,7 @@ jest.mock('expo-router', () => ({
 jest.mock('@/components/delvers-descent/hooks/use-map-generator');
 jest.mock('@/components/delvers-descent/hooks/use-encounter-resolver');
 jest.mock('@/lib/delvers-descent/run-queue');
+jest.mock('@/lib/delvers-descent/progression-manager');
 jest.mock('@/lib/delvers-descent/collection-manager');
 jest.mock('@/lib/delvers-descent/achievement-manager');
 jest.mock('@/lib/health', () => ({
@@ -95,6 +96,22 @@ jest.mock('@/lib/delvers-descent/run-queue', () => ({
       if (status === 'busted') return mockGetBustedRuns();
       return [];
     },
+  }),
+}));
+
+const mockProcessRunCompletion = jest.fn().mockResolvedValue(undefined);
+const mockProcessRunBust = jest.fn().mockResolvedValue(undefined);
+
+jest.mock('@/lib/delvers-descent/progression-manager', () => ({
+  getProgressionManager: () => ({
+    processRunCompletion: mockProcessRunCompletion,
+    processRunBust: mockProcessRunBust,
+    getProgressionData: jest.fn().mockReturnValue({
+      allTimeDeepestDepth: 0,
+      totalRunsCompleted: 0,
+      totalRunsBusted: 0,
+      totalRunsAttempted: 0,
+    }),
   }),
 }));
 

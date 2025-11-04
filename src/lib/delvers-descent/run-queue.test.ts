@@ -8,6 +8,24 @@ jest.mock('@/lib/storage', () => ({
   },
 }));
 
+// Mock progression manager
+const mockProcessRunCompletion = jest.fn().mockResolvedValue(undefined);
+const mockProcessRunBust = jest.fn().mockResolvedValue(undefined);
+const mockGetProgressionData = jest.fn().mockReturnValue({
+  allTimeDeepestDepth: 0,
+  totalRunsCompleted: 0,
+  totalRunsBusted: 0,
+  totalRunsAttempted: 0,
+});
+
+jest.mock('./progression-manager', () => ({
+  getProgressionManager: jest.fn(() => ({
+    processRunCompletion: mockProcessRunCompletion,
+    processRunBust: mockProcessRunBust,
+    getProgressionData: mockGetProgressionData,
+  })),
+}));
+
 describe('RunQueueManager', () => {
   let manager: RunQueueManager;
   let mockStorage: any;
@@ -23,6 +41,14 @@ describe('RunQueueManager', () => {
     // Mock empty storage by default
     mockStorage.getString.mockReturnValue(null);
     mockStorage.set.mockImplementation(() => {}); // Default successful save
+
+    // Reset progression manager mocks
+    mockGetProgressionData.mockReturnValue({
+      allTimeDeepestDepth: 0,
+      totalRunsCompleted: 0,
+      totalRunsBusted: 0,
+      totalRunsAttempted: 0,
+    });
 
     // Create new manager instance
     manager = new RunQueueManager();
@@ -173,10 +199,12 @@ describe('RunQueueManager', () => {
       await manager.addRunToQueue(run1);
       await manager.addRunToQueue(run2);
 
+      // Completed runs are removed from queue, so only run2 should remain
       await manager.updateRunStatus(run1.id, 'completed');
 
       const allRuns = manager.getAllRuns();
-      expect(allRuns).toHaveLength(2);
+      expect(allRuns).toHaveLength(1);
+      expect(allRuns[0].id).toBe(run2.id);
     });
   });
 
@@ -208,12 +236,13 @@ describe('RunQueueManager', () => {
       await manager.updateRunStatus(run1.id, 'completed');
       await manager.updateRunStatus(run2.id, 'busted');
 
+      // Completed and busted runs are removed from queue
       const completedRuns = manager.getRunsByStatus('completed');
       const bustedRuns = manager.getRunsByStatus('busted');
       const queuedRuns = manager.getRunsByStatus('queued');
 
-      expect(completedRuns).toHaveLength(1);
-      expect(bustedRuns).toHaveLength(1);
+      expect(completedRuns).toHaveLength(0);
+      expect(bustedRuns).toHaveLength(0);
       expect(queuedRuns).toHaveLength(1);
     });
   });
@@ -314,18 +343,29 @@ describe('RunQueueManager', () => {
       await manager.addRunToQueue(run2);
       await manager.addRunToQueue(run3);
 
+      // Update progression data mock to reflect completed/busted runs
+      mockGetProgressionData.mockReturnValue({
+        allTimeDeepestDepth: 5,
+        totalRunsCompleted: 1,
+        totalRunsBusted: 1,
+        totalRunsAttempted: 2,
+      });
+
       await manager.updateRunStatus(run1.id, 'completed');
       await manager.updateRunStatus(run2.id, 'busted');
 
       const stats = manager.getRunStatistics();
 
+      // Total runs includes queued (1) + completed (1) + busted (1) from progression data
       expect(stats.totalRuns).toBe(3);
       expect(stats.queuedRuns).toBe(1);
+      // Completed/busted counts come from progression data, not queue
       expect(stats.completedRuns).toBe(1);
       expect(stats.bustedRuns).toBe(1);
       expect(stats.activeRuns).toBe(0);
-      expect(stats.totalSteps).toBe(25000);
-      expect(stats.averageSteps).toBeCloseTo(8333.33, 2);
+      // Only queued run's steps are counted (run3)
+      expect(stats.totalSteps).toBe(5000);
+      expect(stats.averageSteps).toBe(5000);
     });
 
     it('should handle empty runs', () => {

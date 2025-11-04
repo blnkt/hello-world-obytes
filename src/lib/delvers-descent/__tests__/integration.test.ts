@@ -106,10 +106,11 @@ describe("Delver's Descent Integration Tests", () => {
         expect(completionResult.deepestDepth).toBe(1);
         expect(completionResult.totalEnergyUsed).toBeDefined();
 
-        // Update run status
+        // Update run status (completed runs are removed from queue)
         await runQueueManager.updateRunStatus(run.id, 'completed');
         const updatedRun = runQueueManager.getRunById(run.id);
-        expect(updatedRun?.status).toBe('completed');
+        // Run should be removed from queue after completion
+        expect(updatedRun).toBeNull();
       }
     });
 
@@ -139,10 +140,11 @@ describe("Delver's Descent Integration Tests", () => {
       expect(bustResult.energyLost).toBe(run.totalEnergy);
       expect(bustResult.deepestDepth).toBe(0);
 
-      // Update run status
+      // Update run status (busted runs are removed from queue)
       await runQueueManager.updateRunStatus(run.id, 'busted');
       const updatedRun = runQueueManager.getRunById(run.id);
-      expect(updatedRun?.status).toBe('busted');
+      // Run should be removed from queue after busting
+      expect(updatedRun).toBeNull();
     });
   });
 
