@@ -28,7 +28,9 @@ const DepthLevel: React.FC<{
   onNodePress: (node: DungeonNode) => void;
 }> = ({ depth, nodes, currentDepth, visitedNodes, onNodePress }) => {
   const isNodeAvailable = (node: DungeonNode) => {
-    return node.depth <= currentDepth + 1 || node.isRevealed;
+    // After completing an encounter, only allow nodes at the next depth (currentDepth + 1)
+    // This prevents backtracking and doing multiple encounters at the same depth
+    return node.depth === currentDepth + 1 || node.isRevealed;
   };
 
   const isNodeVisited = (nodeId: string) => {

@@ -425,6 +425,16 @@ function handleEncounterCompleteImpl({
       onInventoryUpdate(rewards);
     }
     onNodeVisited(selectedNode.id);
+
+    // Mark all nodes at this depth as visited to prevent backtracking or same-depth encounters
+    const completedDepth = selectedNode.depth;
+    const nodesAtDepth = nodes.filter((node) => node.depth === completedDepth);
+    nodesAtDepth.forEach((node) => {
+      if (node.id !== selectedNode.id) {
+        onNodeVisited(node.id);
+      }
+    });
+
     onDepthUpdate(selectedNode.depth);
     setShowEncounter(false);
     // Trigger cash out with free return (return cost will be handled in cash out modal)
@@ -447,6 +457,16 @@ function handleEncounterCompleteImpl({
       onInventoryUpdate(rewards);
     }
     onNodeVisited(selectedNode.id);
+
+    // Mark all nodes at this depth as visited to prevent backtracking or same-depth encounters
+    const completedDepth = selectedNode.depth;
+    const nodesAtDepth = nodes.filter((node) => node.depth === completedDepth);
+    nodesAtDepth.forEach((node) => {
+      if (node.id !== selectedNode.id) {
+        onNodeVisited(node.id);
+      }
+    });
+
     onDepthUpdate(selectedNode.depth);
     // Update region in RunState
     onRegionUpdate(targetRegionId);
@@ -462,6 +482,16 @@ function handleEncounterCompleteImpl({
     onInventoryUpdate(rewards);
   }
   onNodeVisited(selectedNode.id);
+
+  // Mark all nodes at this depth as visited to prevent backtracking or same-depth encounters
+  const completedDepth = selectedNode.depth;
+  const nodesAtDepth = nodes.filter((node) => node.depth === completedDepth);
+  nodesAtDepth.forEach((node) => {
+    if (node.id !== selectedNode.id) {
+      onNodeVisited(node.id);
+    }
+  });
+
   onDepthUpdate(selectedNode.depth);
   setShowEncounter(false);
 }
