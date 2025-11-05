@@ -27,7 +27,7 @@
 
 ## Tasks
 
-- [ ] 1.0 Add Scoundrel Encounter Type to System
+- [x] 1.0 Add Scoundrel Encounter Type to System
   - [x] 1.1 Add `'scoundrel'` to `EncounterType` union type in `src/types/delvers-descent.ts`
   - [x] 1.2 Add `'scoundrel'` to `ENCOUNTER_TYPES` constant array
   - [x] 1.3 Update `isValidEncounterType` function to include `'scoundrel'`
