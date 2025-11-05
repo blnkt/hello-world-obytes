@@ -39,6 +39,7 @@ export class EncounterLoaderOptimized {
       ['risk_event', 1.5], // High-risk, high-reward
       ['hazard', 1.3], // Dangerous but manageable
       ['rest_site', 0.9], // Restful, slightly lower rewards
+      ['scoundrel', 1.2], // Tiered rewards based on score
     ]);
 
   private stateCache: Map<string, EncounterState> = new Map();
