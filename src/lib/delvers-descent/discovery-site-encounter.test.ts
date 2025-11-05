@@ -59,6 +59,77 @@ describe('DiscoverySiteEncounter', () => {
     });
   });
 
+  describe('region unlock set selection', () => {
+    it('should get available region unlock sets that have not unlocked their regions', async () => {
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        regionManager,
+        collectionManager
+      );
+      const availableSets = await encounter.getAvailableRegionUnlockSets();
+
+      expect(availableSets).toBeDefined();
+      expect(Array.isArray(availableSets)).toBe(true);
+      expect(availableSets.length).toBeGreaterThan(0);
+
+      // Should only include region unlock sets
+      const validSets = [
+        'silk_road_set',
+        'spice_trade_set',
+        'ancient_temple_set',
+        'dragons_hoard_set',
+      ];
+      availableSets.forEach((setId) => {
+        expect(validSets).toContain(setId);
+      });
+    });
+
+    it('should return all region unlock sets when no regions are unlocked', async () => {
+      // Create a new region manager with no unlocked regions (default state)
+      const freshCollectionManager = new CollectionManager();
+      const freshRegionManager = new RegionManager(freshCollectionManager);
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        freshRegionManager,
+        freshCollectionManager
+      );
+
+      const availableSets = await encounter.getAvailableRegionUnlockSets();
+
+      // Should include all 4 region unlock sets
+      expect(availableSets.length).toBe(4);
+      expect(availableSets).toContain('silk_road_set');
+      expect(availableSets).toContain('spice_trade_set');
+      expect(availableSets).toContain('ancient_temple_set');
+      expect(availableSets).toContain('dragons_hoard_set');
+    });
+
+    it('should exclude sets whose regions are already unlocked', async () => {
+      // Mock region manager to indicate a region is unlocked
+      const mockRegionManager = {
+        isRegionUnlocked: jest.fn(async (regionId: string) => {
+          return regionId === 'desert_oasis'; // silk_road_set unlocks desert_oasis
+        }),
+      } as unknown as RegionManager;
+
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        mockRegionManager,
+        collectionManager
+      );
+
+      const availableSets = await encounter.getAvailableRegionUnlockSets();
+
+      // Should not include silk_road_set since desert_oasis is unlocked
+      expect(availableSets).not.toContain('silk_road_set');
+      // Should still include other sets
+      expect(availableSets.length).toBe(3);
+      expect(availableSets).toContain('spice_trade_set');
+      expect(availableSets).toContain('ancient_temple_set');
+      expect(availableSets).toContain('dragons_hoard_set');
+    });
+  });
+
   describe('exploration mechanics and branching choices', () => {
     it('should provide multiple exploration paths', () => {
       const paths = discoveryEncounter.getExplorationPaths();

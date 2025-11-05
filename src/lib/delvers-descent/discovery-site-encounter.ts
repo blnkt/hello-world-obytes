@@ -137,6 +137,40 @@ export class DiscoverySiteEncounter {
     return this.depth;
   }
 
+  /**
+   * Get available region unlock sets that haven't unlocked their regions yet
+   * Returns array of collection set IDs (silk_road_set, spice_trade_set, ancient_temple_set, dragons_hoard_set)
+   * that are still needed to unlock regions
+   */
+  async getAvailableRegionUnlockSets(): Promise<string[]> {
+    // If regionManager is not provided, return empty array
+    if (!this.regionManager) {
+      return [];
+    }
+
+    // Mapping of collection set IDs to region IDs
+    const setToRegionMap: Record<string, string> = {
+      silk_road_set: 'desert_oasis',
+      spice_trade_set: 'coastal_caves',
+      ancient_temple_set: 'mountain_pass',
+      dragons_hoard_set: 'dragons_lair',
+    };
+
+    const allRegionUnlockSets = Object.keys(setToRegionMap);
+    const availableSets: string[] = [];
+
+    // Check each set to see if its region is unlocked
+    for (const setId of allRegionUnlockSets) {
+      const regionId = setToRegionMap[setId];
+      const isUnlocked = await this.regionManager.isRegionUnlocked(regionId);
+      if (!isUnlocked) {
+        availableSets.push(setId);
+      }
+    }
+
+    return availableSets;
+  }
+
   getExplorationPaths(): ExplorationPath[] {
     return [...this.explorationPaths];
   }
