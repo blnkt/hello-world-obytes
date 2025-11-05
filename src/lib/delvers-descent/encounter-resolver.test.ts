@@ -304,6 +304,7 @@ describe('EncounterResolver', () => {
       expect(encounterResolver.isValidEncounterType('risk_event')).toBe(true);
       expect(encounterResolver.isValidEncounterType('hazard')).toBe(true);
       expect(encounterResolver.isValidEncounterType('rest_site')).toBe(true);
+      expect(encounterResolver.isValidEncounterType('scoundrel')).toBe(true);
       expect(encounterResolver.isValidEncounterType('invalid_type')).toBe(
         false
       );
@@ -349,6 +350,38 @@ describe('EncounterResolver', () => {
       const handler = encounterResolver.getEncounterHandler();
 
       expect(handler).toBe('rest_site_handler');
+    });
+
+    it('should detect scoundrel encounter type', () => {
+      const encounterData = {
+        type: 'scoundrel' as EncounterType,
+        nodeId: 'node-scoundrel',
+        depth: 3,
+        energyCost: 25,
+      };
+
+      encounterResolver.startEncounter(encounterData);
+      const state = encounterResolver.getCurrentState();
+
+      expect(state?.type).toBe('scoundrel');
+      expect(encounterResolver.getEncounterType()).toBe('scoundrel');
+    });
+
+    it('should route scoundrel encounters to appropriate handler', () => {
+      const encounterData = {
+        type: 'scoundrel' as EncounterType,
+        nodeId: 'node-scoundrel',
+        depth: 3,
+        energyCost: 25,
+      };
+
+      encounterResolver.startEncounter(encounterData);
+      const handler = encounterResolver.getEncounterHandler();
+
+      // Scoundrel handler may not be implemented yet, so handler will be null
+      // This test verifies the routing logic accepts scoundrel type
+      // The handler will be added in a later task when ScoundrelEncounter is implemented
+      expect(handler).toBeNull();
     });
   });
 
@@ -639,10 +672,13 @@ describe('EncounterResolver', () => {
         encounterResolver.getEncounterTypeMultiplier('discovery_site');
       const riskMultiplier =
         encounterResolver.getEncounterTypeMultiplier('risk_event');
+      const scoundrelMultiplier =
+        encounterResolver.getEncounterTypeMultiplier('scoundrel');
 
       expect(puzzleChamberMultiplier).toBeGreaterThan(0);
       expect(discoveryMultiplier).toBeGreaterThan(0);
       expect(riskMultiplier).toBeGreaterThan(0);
+      expect(scoundrelMultiplier).toBe(1.2);
 
       const puzzleReward = encounterResolver.calculateFinalReward(
         baseReward,

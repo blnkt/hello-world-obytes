@@ -18,6 +18,7 @@ export class DungeonMapGenerator {
     'rest_site',
     'safe_passage',
     'region_shortcut',
+    'scoundrel',
   ];
   private readonly returnCostCalculator: ReturnCostCalculator;
   private readonly encounterWeights: { type: EncounterType; weight: number }[];
@@ -57,6 +58,7 @@ export class DungeonMapGenerator {
         type: 'region_shortcut' as EncounterType,
         weight: dist.region_shortcut,
       },
+      { type: 'scoundrel' as EncounterType, weight: dist.scoundrel },
     ].filter((w) => w.weight > 0);
 
     this.encounterWeights = weights;
@@ -80,16 +82,30 @@ export class DungeonMapGenerator {
 
     const nodeCount = Math.floor(Math.random() * 2) + 2; // 2-3 nodes
     // Select encounter types using weighted distribution (region-aware per call)
-    const { weights, total } = await this.getWeightsForRegion(regionKey);
+    let { weights, total } = await this.getWeightsForRegion(regionKey, depth);
 
     const nodes: DungeonNode[] = [];
+    let safePassageUsed = false;
 
     for (let position = 0; position < nodeCount; position++) {
+      // If safe_passage was already used in this depth, remove it from weights
+      if (safePassageUsed) {
+        weights = weights.filter((w) => w.type !== 'safe_passage');
+        total = weights.reduce((sum, w) => sum + w.weight, 0);
+      }
+
+      const encounterType = this.pickWeightedEncounterType(weights, total);
+
+      // Track if safe_passage was selected
+      if (encounterType === 'safe_passage') {
+        safePassageUsed = true;
+      }
+
       const node: DungeonNode = {
         id: `depth${depth}-node${position}`,
         depth,
         position,
-        type: this.pickWeightedEncounterType(weights, total),
+        type: encounterType,
         energyCost: this.calculateNodeCost(depth),
         returnCost: this.calculateReturnCost(depth),
         isRevealed: false,
@@ -323,10 +339,28 @@ export class DungeonMapGenerator {
   }
 
   /**
+   * Check if only the default region (forest_depths) is unlocked
+   */
+  private async hasOnlyDefaultRegionUnlocked(): Promise<boolean> {
+    if (!this.regionManager) {
+      return true; // Without RegionManager, assume only default is unlocked
+    }
+
+    const unlockedRegions = await this.regionManager.getUnlockedRegions();
+    // Only default region (forest_depths) is unlocked if count is 1 or less
+    return unlockedRegions.length <= 1;
+  }
+
+  /**
    * Resolve weights for a given region key, falling back to instance defaults
    * Excludes discovery_site when all regions are unlocked
+   * Excludes region_shortcut when depth <= 10 or only default region is unlocked
+   * Excludes safe_passage when depth <= 10
    */
-  private async getWeightsForRegion(regionKey?: string): Promise<{
+  private async getWeightsForRegion(
+    regionKey?: string,
+    depth?: number
+  ): Promise<{
     weights: { type: EncounterType; weight: number }[];
     total: number;
   }> {
@@ -360,6 +394,7 @@ export class DungeonMapGenerator {
           type: 'region_shortcut' as EncounterType,
           weight: dist.region_shortcut,
         },
+        { type: 'scoundrel' as EncounterType, weight: dist.scoundrel },
       ];
     }
 
@@ -370,6 +405,22 @@ export class DungeonMapGenerator {
     const allUnlocked = await this.areAllRegionsUnlocked();
     if (allUnlocked) {
       weights = weights.filter((w) => w.type !== 'discovery_site');
+    }
+
+    // Exclude region_shortcut if depth <= 10
+    if (depth !== undefined && depth <= 10) {
+      weights = weights.filter((w) => w.type !== 'region_shortcut');
+    }
+
+    // Exclude region_shortcut if only default region is unlocked
+    const onlyDefaultUnlocked = await this.hasOnlyDefaultRegionUnlocked();
+    if (onlyDefaultUnlocked) {
+      weights = weights.filter((w) => w.type !== 'region_shortcut');
+    }
+
+    // Exclude safe_passage if depth <= 10
+    if (depth !== undefined && depth <= 10) {
+      weights = weights.filter((w) => w.type !== 'safe_passage');
     }
 
     // Recalculate total after filtering

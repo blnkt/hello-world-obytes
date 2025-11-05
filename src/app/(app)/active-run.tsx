@@ -234,6 +234,8 @@ const useEncounterHandlers = (params: {
       rewards?: any[];
       targetRegionId?: string;
       unlockedRegionId?: string;
+      itemsToSteal?: string[];
+      additionalEnergyLoss?: number;
     }) => {
       await handleEncounterCompleteImpl({
         selectedNode,
@@ -251,6 +253,8 @@ const useEncounterHandlers = (params: {
         rewards: params.rewards,
         targetRegionId: params.targetRegionId,
         _unlockedRegionId: params.unlockedRegionId,
+        itemsToSteal: params.itemsToSteal,
+        additionalEnergyLoss: params.additionalEnergyLoss,
       });
       // Store unlockedRegionId to display notification after returning to map
       if (params.unlockedRegionId) {
@@ -412,6 +416,8 @@ async function handleEncounterCompleteImpl({
   rewards,
   targetRegionId,
   _unlockedRegionId,
+  itemsToSteal,
+  additionalEnergyLoss,
 }: {
   selectedNode: DungeonNode | null;
   setShowEncounter: (v: boolean) => void;
@@ -432,6 +438,8 @@ async function handleEncounterCompleteImpl({
   rewards?: any[];
   targetRegionId?: string;
   _unlockedRegionId?: string; // Used by caller to track unlocked region
+  itemsToSteal?: string[];
+  additionalEnergyLoss?: number;
 }) {
   if (!selectedNode) {
     setShowEncounter(false);
@@ -501,8 +509,35 @@ async function handleEncounterCompleteImpl({
     return;
   }
 
-  // Normal encounter completion
-  onEnergyUpdate(-selectedNode.energyCost);
+  // Handle scoundrel failure consequences (item theft and additional energy loss)
+  // Note: Item removal is handled by filtering runState.inventory
+  // The state will be updated when the component re-renders
+  if (
+    selectedNode.type === 'scoundrel' &&
+    result === 'failure' &&
+    runState &&
+    itemsToSteal &&
+    itemsToSteal.length > 0
+  ) {
+    // Remove stolen items from inventory by filtering them out
+    runState.inventory = runState.inventory.filter(
+      (item) => !itemsToSteal.includes(item.id)
+    );
+  }
+
+  // Apply energy cost and additional energy loss for scoundrel failures
+  if (
+    selectedNode.type === 'scoundrel' &&
+    result === 'failure' &&
+    additionalEnergyLoss !== undefined
+  ) {
+    const totalEnergyLoss = selectedNode.energyCost + additionalEnergyLoss;
+    onEnergyUpdate(-totalEnergyLoss);
+  } else {
+    // Normal encounter completion
+    onEnergyUpdate(-selectedNode.energyCost);
+  }
+
   if (result === 'success' && rewards) {
     onInventoryUpdate(rewards);
   }

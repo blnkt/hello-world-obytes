@@ -102,6 +102,23 @@ describe("Delver's Descent Types", () => {
         expect(node.type).toBe(type);
       });
     });
+
+    it('should create a valid DungeonNode with scoundrel type', () => {
+      const node: DungeonNode = {
+        id: 'scoundrel-node',
+        depth: 3,
+        position: 1,
+        type: 'scoundrel',
+        energyCost: 25,
+        returnCost: 15,
+        isRevealed: false,
+        connections: [],
+      };
+
+      expect(node.type).toBe('scoundrel');
+      expect(node.depth).toBe(3);
+      expect(node.energyCost).toBe(25);
+    });
   });
 
   describe('RunState interface', () => {
@@ -199,6 +216,23 @@ describe("Delver's Descent Types", () => {
       expect(encounter.energyCost).toBe(30);
       expect(encounter.rewards).toEqual([]);
       expect(encounter.risks).toEqual([]);
+    });
+
+    it('should create a valid EncounterData object with scoundrel type', () => {
+      const encounter: EncounterData = {
+        id: 'scoundrel-encounter-1',
+        type: 'scoundrel',
+        title: 'Scoundrel Challenge',
+        description: 'A strategic dungeon challenge',
+        energyCost: 20,
+        rewards: [],
+        risks: [],
+      };
+
+      expect(encounter.id).toBe('scoundrel-encounter-1');
+      expect(encounter.type).toBe('scoundrel');
+      expect(encounter.title).toBe('Scoundrel Challenge');
+      expect(encounter.energyCost).toBe(20);
     });
   });
 
@@ -304,13 +338,14 @@ describe("Delver's Descent Types", () => {
           itemsBonus: 0,
         },
         encounterDistribution: {
-          puzzle_chamber: 20,
-          discovery_site: 27,
-          risk_event: 13,
-          hazard: 18,
+          puzzle_chamber: 19,
+          discovery_site: 26,
+          risk_event: 12,
+          hazard: 17,
           rest_site: 13,
           safe_passage: 9,
           region_shortcut: 0,
+          scoundrel: 5,
         },
       };
 
@@ -447,6 +482,10 @@ describe("Delver's Descent Types", () => {
         });
       });
 
+      it('should return true for scoundrel encounter type', () => {
+        expect(isValidEncounterType('scoundrel')).toBe(true);
+      });
+
       it('should return false for invalid encounter types', () => {
         expect(isValidEncounterType('invalid_type')).toBe(false);
         expect(isValidEncounterType('')).toBe(false);
@@ -465,6 +504,7 @@ describe("Delver's Descent Types", () => {
         'rest_site',
         'safe_passage',
         'region_shortcut',
+        'scoundrel',
       ]);
     });
 

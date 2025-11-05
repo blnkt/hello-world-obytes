@@ -92,7 +92,8 @@ export type EncounterType =
   | 'hazard'
   | 'rest_site'
   | 'safe_passage'
-  | 'region_shortcut';
+  | 'region_shortcut'
+  | 'scoundrel';
 
 export interface CollectionSet {
   id: string;
@@ -201,6 +202,7 @@ export interface EncounterDistribution {
   rest_site: number;
   safe_passage: number;
   region_shortcut: number;
+  scoundrel: number;
 }
 
 export interface CollectionStatistics {
@@ -354,6 +356,7 @@ export const isValidEncounterType = (type: string): type is EncounterType => {
     'rest_site',
     'safe_passage',
     'region_shortcut',
+    'scoundrel',
   ].includes(type);
 };
 
@@ -366,6 +369,7 @@ export const ENCOUNTER_TYPES: EncounterType[] = [
   'rest_site',
   'safe_passage',
   'region_shortcut',
+  'scoundrel',
 ];
 
 // Constants for collection set types
