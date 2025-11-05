@@ -140,7 +140,7 @@
   - [x] 7.13 Add "Continue" button to proceed after outcome
   - [x] 7.14 Add "Return to Map" button to exit encounter
   - [x] 7.15 Integrate with encounter state management
-  - [ ] 7.16 Write unit tests for ScoundrelScreen component
+  - [x] 7.16 Write unit tests for ScoundrelScreen component
   - [ ] 7.17 Write unit tests for UI state management
 
 - [x] 8.0 Integrate Scoundrel into Map Generation
