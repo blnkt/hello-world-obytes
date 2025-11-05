@@ -59,21 +59,21 @@
   - [x] 2.14 Implement `getRemainingMonsters()` method returning monsters not yet encountered
   - [x] 2.15 Write unit tests for ScoundrelEncounter initialization and state management
 
-- [ ] 3.0 Implement Dungeon Structure and Gameplay
-  - [ ] 3.1 Implement `generateDungeon()` method creating 5-10 rooms based on config
-  - [ ] 3.2 Implement `generateMonsters()` method creating monsters with values and life damage
-  - [ ] 3.3 Implement `generateCards()` method creating abstracted cards (monsters, health potions, treasures, traps)
-  - [ ] 3.4 Implement `selectCard(cardId: string)` method for player card selection
-  - [ ] 3.5 Implement `processCard(card: Card)` method updating life and game state
-  - [ ] 3.6 Implement `advanceRoom()` method moving to next room in dungeon
-  - [ ] 3.7 Implement `getCurrentRoom()` method returning current room info
-  - [ ] 3.8 Implement `getDungeonProgress()` method returning current room / total rooms
-  - [ ] 3.9 Implement `getAvailableCards()` method returning cards available in current room
-  - [ ] 3.10 Implement `trackLastCard()` method storing last card played (for health potion bonus)
-  - [ ] 3.11 Implement `getLastCard()` method returning last card played
-  - [ ] 3.12 Write unit tests for dungeon generation
-  - [ ] 3.13 Write unit tests for card selection and processing
-  - [ ] 3.14 Write unit tests for room advancement
+- [x] 3.0 Implement Dungeon Structure and Gameplay
+  - [x] 3.1 Implement `generateDungeon()` method creating 5-10 rooms based on config
+  - [x] 3.2 Implement `generateMonsters()` method creating monsters with values and life damage
+  - [x] 3.3 Implement `generateCards()` method creating abstracted cards (monsters, health potions, treasures, traps)
+  - [x] 3.4 Implement `selectCard(cardId: string)` method for player card selection
+  - [x] 3.5 Implement `processCard(card: Card)` method updating life and game state
+  - [x] 3.6 Implement `advanceRoom()` method moving to next room in dungeon
+  - [x] 3.7 Implement `getCurrentRoom()` method returning current room info
+  - [x] 3.8 Implement `getDungeonProgress()` method returning current room / total rooms
+  - [x] 3.9 Implement `getAvailableCards()` method returning cards available in current room
+  - [x] 3.10 Implement `trackLastCard()` method storing last card played (for health potion bonus)
+  - [x] 3.11 Implement `getLastCard()` method returning last card played
+  - [x] 3.12 Write unit tests for dungeon generation
+  - [x] 3.13 Write unit tests for card selection and processing
+  - [x] 3.14 Write unit tests for room advancement
 
 - [ ] 4.0 Implement Scoring System
   - [ ] 4.1 Implement `calculateScore()` method with scoring logic
