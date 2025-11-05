@@ -304,6 +304,7 @@ describe('EncounterResolver', () => {
       expect(encounterResolver.isValidEncounterType('risk_event')).toBe(true);
       expect(encounterResolver.isValidEncounterType('hazard')).toBe(true);
       expect(encounterResolver.isValidEncounterType('rest_site')).toBe(true);
+      expect(encounterResolver.isValidEncounterType('scoundrel')).toBe(true);
       expect(encounterResolver.isValidEncounterType('invalid_type')).toBe(
         false
       );

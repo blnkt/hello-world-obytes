@@ -28,6 +28,7 @@ export class EncounterResolver {
     'rest_site',
     'safe_passage',
     'region_shortcut',
+    'scoundrel',
   ];
   private readonly encounterTypeMultipliers: Partial<
     Record<EncounterType, number>
