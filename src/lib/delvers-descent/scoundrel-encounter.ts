@@ -384,4 +384,64 @@ export class ScoundrelEncounter {
   getLastCard(): Card | undefined {
     return this.lastCardPlayed;
   }
+
+  /**
+   * Get sum of remaining monster values
+   */
+  getRemainingMonsterValues(): number {
+    const remainingMonsters = this.getRemainingMonsters();
+    return remainingMonsters.reduce((sum, monster) => sum + monster.value, 0);
+  }
+
+  /**
+   * Check if card is a health potion
+   */
+  isHealthPotion(card: Card): boolean {
+    return card.type === 'health_potion';
+  }
+
+  /**
+   * Get health potion value (heal amount)
+   */
+  getHealthPotionValue(card: Card): number {
+    if (!this.isHealthPotion(card)) {
+      return 0;
+    }
+
+    return card.effect?.healAmount ?? 0;
+  }
+
+  /**
+   * Calculate final score based on encounter outcome
+   * Note: Life = 0 takes priority over dungeon completion (failure > success)
+   */
+  calculateScore(): number {
+    const currentLife = this.state.currentLife;
+    const isDungeonCompleted =
+      this.state.currentRoom >= this.state.dungeon.length;
+
+    // Failure scoring: life = 0 (takes priority over dungeon completion)
+    if (currentLife <= 0) {
+      const remainingMonsterValues = this.getRemainingMonsterValues();
+      // Score = life (0) - remaining monster values = negative score
+      return 0 - remainingMonsterValues;
+    }
+
+    // Success scoring: dungeon completed AND life > 0
+    if (isDungeonCompleted) {
+      let score = currentLife;
+
+      // Health potion bonus: if life = 20 and last card was health potion
+      const lastCard = this.getLastCard();
+      if (lastCard && this.isHealthPotion(lastCard) && currentLife === 20) {
+        const potionValue = this.getHealthPotionValue(lastCard);
+        score = currentLife + potionValue;
+      }
+
+      return score;
+    }
+
+    // Encounter not yet complete
+    return 0;
+  }
 }

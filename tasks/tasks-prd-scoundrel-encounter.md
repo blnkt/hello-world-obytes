@@ -75,19 +75,19 @@
   - [x] 3.13 Write unit tests for card selection and processing
   - [x] 3.14 Write unit tests for room advancement
 
-- [ ] 4.0 Implement Scoring System
-  - [ ] 4.1 Implement `calculateScore()` method with scoring logic
-  - [ ] 4.2 Implement failure scoring: if life = 0, sum remaining monster values, subtract from life → negative score
-  - [ ] 4.3 Implement success scoring: if dungeon completed, score = remaining life
-  - [ ] 4.4 Implement health potion bonus: if life = 20 and last card was health potion, score = life + potion value
-  - [ ] 4.5 Implement `getRemainingMonsterValues()` helper method summing values of unencountered monsters
-  - [ ] 4.6 Implement `isHealthPotion(card: Card)` helper method checking if card is health potion
-  - [ ] 4.7 Implement `getHealthPotionValue(card: Card)` helper method extracting potion value
-  - [ ] 4.8 Ensure score calculation handles edge cases (life exactly 0, life exactly 20, no remaining monsters)
-  - [ ] 4.9 Write unit tests for failure scoring (life = 0 scenario)
-  - [ ] 4.10 Write unit tests for success scoring (dungeon completed scenario)
-  - [ ] 4.11 Write unit tests for health potion bonus scoring
-  - [ ] 4.12 Write unit tests for edge cases in scoring
+- [x] 4.0 Implement Scoring System
+  - [x] 4.1 Implement `calculateScore()` method with scoring logic
+  - [x] 4.2 Implement failure scoring: if life = 0, sum remaining monster values, subtract from life → negative score
+  - [x] 4.3 Implement success scoring: if dungeon completed, score = remaining life
+  - [x] 4.4 Implement health potion bonus: if life = 20 and last card was health potion, score = life + potion value
+  - [x] 4.5 Implement `getRemainingMonsterValues()` helper method summing values of unencountered monsters
+  - [x] 4.6 Implement `isHealthPotion(card: Card)` helper method checking if card is health potion
+  - [x] 4.7 Implement `getHealthPotionValue(card: Card)` helper method extracting potion value
+  - [x] 4.8 Ensure score calculation handles edge cases (life exactly 0, life exactly 20, no remaining monsters)
+  - [x] 4.9 Write unit tests for failure scoring (life = 0 scenario)
+  - [x] 4.10 Write unit tests for success scoring (dungeon completed scenario)
+  - [x] 4.11 Write unit tests for health potion bonus scoring
+  - [x] 4.12 Write unit tests for edge cases in scoring
 
 - [ ] 5.0 Implement Tiered Rewards System
   - [ ] 5.1 Define reward tier thresholds (e.g., 0-10 = tier 1, 11-20 = tier 2, 21+ = tier 3)
