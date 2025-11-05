@@ -46,8 +46,8 @@ Based on PRD: `prd-metaphysical-encounters.md`
   - [x] 1.8 Update `getEncounterRoute` function to return routes for new encounter types
   - [x] 1.9 Update `isEncounterSupported` function to include new encounter types
   - [x] 1.10 Add new encounter types to `supportedEncounterTypes` array in `EncounterResolver` class
-  - [ ] 1.11 Add new encounter types to encounter type lists in `DungeonMapGenerator` class
-  - [ ] 1.12 Add new encounter types to encounter type lists in `DungeonMapGeneratorOptimized` class
+  - [x] 1.11 Add new encounter types to encounter type lists in `DungeonMapGenerator` class
+  - [x] 1.12 Add new encounter types to encounter type lists in `DungeonMapGeneratorOptimized` class
   - [x] 1.13 Write unit tests for type definitions and type guards
   - [x] 1.14 Write unit tests for encounter router with new types
 

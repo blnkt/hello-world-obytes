@@ -19,6 +19,10 @@ export class DungeonMapGenerator {
     'safe_passage',
     'region_shortcut',
     'scoundrel',
+    'luck_shrine',
+    'energy_nexus',
+    'time_distortion',
+    'fate_weaver',
   ];
   private readonly returnCostCalculator: ReturnCostCalculator;
   private readonly encounterWeights: { type: EncounterType; weight: number }[];
