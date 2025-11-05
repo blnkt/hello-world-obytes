@@ -516,17 +516,73 @@ describe('DiscoverySiteEncounter', () => {
       expect(uniqueItems.length).toBeGreaterThanOrEqual(1);
     });
 
-    it('should provide different regional collection sets', () => {
-      const regionalSets = discoveryEncounter.getRegionalCollectionSets();
+    it('should return region unlock sets instead of old regional sets', async () => {
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        regionManager,
+        collectionManager
+      );
+      const regionalSets = encounter.getRegionalCollectionSets();
 
       expect(regionalSets).toBeDefined();
       expect(regionalSets.length).toBeGreaterThan(0);
+
+      // Should return region unlock sets, not old regional sets
+      const regionUnlockSetIds = [
+        'silk_road_set',
+        'spice_trade_set',
+        'ancient_temple_set',
+        'dragons_hoard_set',
+      ];
+
+      const oldRegionalSetIds = [
+        'ancient_ruins_set',
+        'crystal_caverns_set',
+        'shadow_realm_set',
+        'ethereal_plains_set',
+      ];
 
       regionalSets.forEach((set) => {
         expect(set.id).toBeDefined();
         expect(set.name).toBeDefined();
         expect(set.region).toBeDefined();
         expect(set.items).toBeDefined();
+
+        // Should be region unlock sets
+        expect(regionUnlockSetIds).toContain(set.id);
+        // Should NOT be old regional sets
+        expect(oldRegionalSetIds).not.toContain(set.id);
+      });
+
+      // Should have all 4 region unlock sets
+      const returnedIds = regionalSets.map((s) => s.id);
+      expect(returnedIds.length).toBe(4);
+      regionUnlockSetIds.forEach((setId) => {
+        expect(returnedIds).toContain(setId);
+      });
+    });
+
+    it('should map region unlock sets to correct region names', () => {
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        regionManager,
+        collectionManager
+      );
+      const regionalSets = encounter.getRegionalCollectionSets();
+
+      // Mapping of set IDs to expected region names
+      const setToRegionMap: Record<string, string> = {
+        silk_road_set: 'Desert Oasis',
+        spice_trade_set: 'Coastal Caves',
+        ancient_temple_set: 'Mountain Pass',
+        dragons_hoard_set: "Dragon's Lair",
+      };
+
+      regionalSets.forEach((set) => {
+        const expectedRegion = setToRegionMap[set.id];
+        if (expectedRegion) {
+          expect(set.region).toBe(expectedRegion);
+        }
       });
     });
 

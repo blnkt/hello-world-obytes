@@ -295,32 +295,50 @@ export class DiscoverySiteEncounter {
   }
 
   getRegionalCollectionSets(): RegionalCollectionSet[] {
-    return [
-      {
-        id: 'ancient_ruins_set',
-        name: 'Ancient Ruins Collection',
-        region: 'Forgotten Depths',
-        items: [],
-      },
-      {
-        id: 'crystal_caverns_set',
-        name: 'Crystal Caverns Collection',
-        region: 'Crystal Depths',
-        items: [],
-      },
-      {
-        id: 'shadow_realm_set',
-        name: 'Shadow Realm Collection',
-        region: 'Shadow Depths',
-        items: [],
-      },
-      {
-        id: 'ethereal_plains_set',
-        name: 'Ethereal Plains Collection',
-        region: 'Ethereal Depths',
-        items: [],
-      },
-    ];
+    // Mapping of collection set IDs to region names
+    const setToRegionMap: Record<string, string> = {
+      silk_road_set: 'Desert Oasis',
+      spice_trade_set: 'Coastal Caves',
+      ancient_temple_set: 'Mountain Pass',
+      dragons_hoard_set: "Dragon's Lair",
+    };
+
+    // Get all region unlock sets
+    const regionUnlockSetIds = Object.keys(setToRegionMap);
+
+    // Build RegionalCollectionSet objects from collection sets
+    const regionalSets: RegionalCollectionSet[] = [];
+
+    for (const setId of regionUnlockSetIds) {
+      const collectionSet = getCollectionSetById(setId);
+      if (collectionSet) {
+        // Convert CollectionItem[] to CollectedItem[]
+        const collectedItems: CollectedItem[] = collectionSet.items.map(
+          (item) => ({
+            id: item.id,
+            type:
+              collectionSet.category === 'trade_goods'
+                ? 'trade_good'
+                : collectionSet.category === 'discoveries'
+                  ? 'discovery'
+                  : 'legendary',
+            setId: item.setId,
+            value: item.value,
+            name: item.name,
+            description: item.description,
+          })
+        );
+
+        regionalSets.push({
+          id: collectionSet.id,
+          name: collectionSet.name,
+          region: setToRegionMap[setId],
+          items: collectedItems,
+        });
+      }
+    }
+
+    return regionalSets;
   }
 
   // Risk/Reward System
