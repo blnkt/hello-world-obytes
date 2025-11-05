@@ -52,13 +52,13 @@ Based on PRD: `prd-metaphysical-encounters.md`
   - [x] 1.14 Write unit tests for encounter router with new types
 
 - [ ] 2.0 Luck Shrine Encounter Implementation
-  - [ ] 2.1 Create `src/lib/delvers-descent/luck-shrine-encounter.ts` with `LuckShrineEncounter` class
-  - [ ] 2.2 Define `LuckShrineState` interface with encounter ID, config, and outcome fields
-  - [ ] 2.3 Define `LuckShrineConfig` interface with multiplier bonus and duration (2-3 encounters)
-  - [ ] 2.4 Implement constructor that accepts encounter ID and depth, generates config with fixed multiplier bonus
-  - [ ] 2.5 Implement `getState()` method to return current state
-  - [ ] 2.6 Implement `activate()` method that sets luck boost in run state and returns `AdvancedEncounterOutcome`
-  - [ ] 2.7 Calculate fixed energy cost based on depth and encounter type modifier
+  - [x] 2.1 Create `src/lib/delvers-descent/luck-shrine-encounter.ts` with `LuckShrineEncounter` class
+  - [x] 2.2 Define `LuckShrineState` interface with encounter ID, config, and outcome fields
+  - [x] 2.3 Define `LuckShrineConfig` interface with multiplier bonus and duration (2-3 encounters)
+  - [x] 2.4 Implement constructor that accepts encounter ID and depth, generates config with fixed multiplier bonus
+  - [x] 2.5 Implement `getState()` method to return current state
+  - [x] 2.6 Implement `activate()` method that sets luck boost in run state and returns `AdvancedEncounterOutcome`
+  - [x] 2.7 Calculate fixed energy cost based on depth and encounter type modifier
   - [ ] 2.8 Create `src/components/delvers-descent/encounters/advanced/luck-shrine-screen.tsx` UI component
   - [ ] 2.9 Display current reward multiplier and boosted multiplier in UI
   - [ ] 2.10 Display how many encounters the boost will last (2-3)
