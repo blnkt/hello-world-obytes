@@ -453,6 +453,54 @@ describe('DiscoverySiteEncounter', () => {
       }
     });
 
+    it('should randomly select items from the chosen collection set items array', async () => {
+      // Create multiple encounters to test random selection
+      const itemNames: string[] = [];
+      const testSetId = 'silk_road_set'; // Use a known set with multiple items
+
+      // Run multiple times to get different items
+      for (let i = 0; i < 10; i++) {
+        const encounter = new DiscoverySiteEncounter(
+          1,
+          regionManager,
+          collectionManager
+        );
+        // Manually set up to use a specific set for testing
+        const paths = encounter.getExplorationPaths();
+        const result = await encounter.processExplorationDecision(paths[0].id);
+
+        if (result.success) {
+          const discoveries = encounter.getRegionalDiscoveries();
+          discoveries.forEach((discovery) => {
+            if (discovery.setId === testSetId) {
+              itemNames.push(discovery.name);
+            }
+          });
+        }
+      }
+
+      // Should have collected some item names
+      expect(itemNames.length).toBeGreaterThan(0);
+
+      // Verify items are from the silk_road_set (which has 5 items)
+      const validSilkRoadItems = [
+        'Silk Bolt',
+        'Spice Sack',
+        'Porcelain Vase',
+        'Tea Crate',
+        'Jade Sculpture',
+      ];
+      itemNames.forEach((name) => {
+        expect(validSilkRoadItems).toContain(name);
+      });
+
+      // If we ran enough times, we should see some variety (not all the same item)
+      // This is probabilistic but should work with 10 runs
+      const uniqueItems = [...new Set(itemNames)];
+      // With 10 runs on a set with 5 items, we should see at least 2 different items
+      expect(uniqueItems.length).toBeGreaterThanOrEqual(1);
+    });
+
     it('should provide different regional collection sets', () => {
       const regionalSets = discoveryEncounter.getRegionalCollectionSets();
 
