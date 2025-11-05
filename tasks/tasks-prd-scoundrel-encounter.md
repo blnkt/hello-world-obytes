@@ -122,7 +122,7 @@
   - [x] 6.14 Write unit tests for item theft calculation
   - [x] 6.15 Write unit tests for energy loss calculation
   - [x] 6.16 Write unit tests for failure consequences integration
-  - [ ] 6.17 Write integration tests with RunStateManager (Task 7.0)
+  - [x] 6.17 Write integration tests with RunStateManager (Task 7.0)
 
 - [x] 7.0 Create Scoundrel Encounter UI Screen
   - [x] 7.1 Create `src/components/delvers-descent/encounters/scoundrel-screen.tsx` file
