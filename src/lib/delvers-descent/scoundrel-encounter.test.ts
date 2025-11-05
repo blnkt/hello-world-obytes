@@ -741,4 +741,308 @@ describe('ScoundrelEncounter', () => {
       });
     });
   });
+
+  describe('tiered rewards system', () => {
+    describe('getRewardTier', () => {
+      it('should return tier 1 for scores 0-10', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-tier-1',
+          createDefaultConfig()
+        );
+
+        const tier0 = encounter.getRewardTier(0);
+        const tier5 = encounter.getRewardTier(5);
+        const tier10 = encounter.getRewardTier(10);
+
+        expect(tier0.xp).toBe(50);
+        expect(tier0.itemCount).toBe(1);
+        expect(tier5.xp).toBe(50);
+        expect(tier5.itemCount).toBe(1);
+        expect(tier10.xp).toBe(50);
+        expect(tier10.itemCount).toBe(1);
+      });
+
+      it('should return tier 2 for scores 11-20', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-tier-2',
+          createDefaultConfig()
+        );
+
+        const tier11 = encounter.getRewardTier(11);
+        const tier15 = encounter.getRewardTier(15);
+        const tier20 = encounter.getRewardTier(20);
+
+        expect(tier11.xp).toBe(100);
+        expect(tier11.itemCount).toBe(2);
+        expect(tier15.xp).toBe(100);
+        expect(tier15.itemCount).toBe(2);
+        expect(tier20.xp).toBe(100);
+        expect(tier20.itemCount).toBe(2);
+      });
+
+      it('should return tier 3 for scores 21+', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-tier-3',
+          createDefaultConfig()
+        );
+
+        const tier21 = encounter.getRewardTier(21);
+        const tier30 = encounter.getRewardTier(30);
+        const tier100 = encounter.getRewardTier(100);
+
+        expect(tier21.xp).toBe(200);
+        expect(tier21.itemCount).toBe(3);
+        expect(tier30.xp).toBe(200);
+        expect(tier30.itemCount).toBe(3);
+        expect(tier100.xp).toBe(200);
+        expect(tier100.itemCount).toBe(3);
+      });
+
+      it('should return tier 1 for negative scores (failures)', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-tier-failure',
+          createDefaultConfig()
+        );
+
+        const tierNegative = encounter.getRewardTier(-10);
+        expect(tierNegative.xp).toBe(50);
+        expect(tierNegative.itemCount).toBe(1);
+      });
+    });
+
+    describe('calculateRewardXP', () => {
+      it('should return correct XP for each tier', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-xp-1',
+          createDefaultConfig()
+        );
+
+        expect(encounter.calculateRewardXP(1)).toBe(50);
+        expect(encounter.calculateRewardXP(2)).toBe(100);
+        expect(encounter.calculateRewardXP(3)).toBe(200);
+      });
+
+      it('should handle invalid tier numbers', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-xp-2',
+          createDefaultConfig()
+        );
+
+        expect(encounter.calculateRewardXP(0)).toBe(50); // Default to tier 1
+        expect(encounter.calculateRewardXP(4)).toBe(50); // Default to tier 1
+      });
+    });
+
+    describe('calculateRewardItemCount', () => {
+      it('should return correct item count for each tier', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-items-1',
+          createDefaultConfig()
+        );
+
+        expect(encounter.calculateRewardItemCount(1)).toBe(1);
+        expect(encounter.calculateRewardItemCount(2)).toBe(2);
+        expect(encounter.calculateRewardItemCount(3)).toBe(3);
+      });
+
+      it('should handle invalid tier numbers', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-items-2',
+          createDefaultConfig()
+        );
+
+        expect(encounter.calculateRewardItemCount(0)).toBe(1); // Default to tier 1
+        expect(encounter.calculateRewardItemCount(4)).toBe(1); // Default to tier 1
+      });
+    });
+
+    describe('generateRewards', () => {
+      it('should return empty array for negative scores (failures)', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-rewards-1',
+          createDefaultConfig()
+        );
+
+        const rewards = encounter.generateRewards(-10);
+        expect(rewards).toEqual([]);
+      });
+
+      it('should generate tier 1 rewards for scores 0-10', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-rewards-2',
+          createDefaultConfig()
+        );
+
+        const rewards = encounter.generateRewards(5);
+        expect(rewards.length).toBe(1);
+        expect(rewards[0].type).toMatch(/trade_good|discovery/);
+      });
+
+      it('should generate tier 2 rewards for scores 11-20', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-rewards-3',
+          createDefaultConfig()
+        );
+
+        const rewards = encounter.generateRewards(15);
+        expect(rewards.length).toBe(2);
+        rewards.forEach((reward) => {
+          expect(reward.type).toMatch(/trade_good|discovery/);
+        });
+      });
+
+      it('should generate tier 3 rewards for scores 21+', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-rewards-4',
+          createDefaultConfig()
+        );
+
+        const rewards = encounter.generateRewards(25);
+        expect(rewards.length).toBe(3);
+        // Tier 3 can include legendary items
+        const hasLegendary = rewards.some((r) => r.type === 'legendary');
+        // May or may not have legendary, but should have 3 items
+        expect(rewards.length).toBe(3);
+      });
+
+      it('should generate rewards with proper scaling', () => {
+        const config: ScoundrelConfig = {
+          startingLife: 10,
+          dungeonSize: 5,
+          depth: 3,
+        };
+        const encounter = new ScoundrelEncounter('test-rewards-5', config);
+
+        const rewards = encounter.generateRewards(15);
+        expect(rewards.length).toBeGreaterThan(0);
+        rewards.forEach((reward) => {
+          expect(reward.value).toBeGreaterThan(0);
+          expect(reward.setId).toBeDefined();
+          expect(reward.name).toBeDefined();
+        });
+      });
+    });
+
+    describe('resolve', () => {
+      it('should throw error if already resolved', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-resolve-1',
+          createDefaultConfig()
+        );
+
+        // Complete the encounter
+        const state = encounter.getState();
+        for (let i = 0; i < state.dungeon.length; i++) {
+          encounter.advanceRoom();
+        }
+
+        encounter.resolve();
+
+        expect(() => encounter.resolve()).toThrow('Encounter already resolved');
+      });
+
+      it('should return success outcome when dungeon completed', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-resolve-2',
+          createDefaultConfig()
+        );
+
+        // Complete the dungeon
+        const state = encounter.getState();
+        for (let i = 0; i < state.dungeon.length; i++) {
+          encounter.advanceRoom();
+        }
+
+        const outcome = encounter.resolve();
+
+        expect(outcome.type).toBe('success');
+        expect(outcome.reward).toBeDefined();
+        expect(outcome.reward?.xp).toBeGreaterThan(0);
+        expect(outcome.reward?.items.length).toBeGreaterThan(0);
+        expect(outcome.message).toContain('Dungeon completed');
+      });
+
+      it('should return failure outcome when life reaches 0', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-resolve-3',
+          createDefaultConfig()
+        );
+
+        // Take damage to bring life to 0
+        const trap = {
+          id: 'test-trap',
+          name: 'Trap',
+          type: 'trap' as const,
+          effect: { damageAmount: encounter.getCurrentLife() },
+        };
+        encounter.processCard(trap);
+
+        const outcome = encounter.resolve();
+
+        expect(outcome.type).toBe('failure');
+        expect(outcome.consequence).toBeDefined();
+        expect(outcome.message).toContain('Defeated');
+        expect(outcome.reward).toBeUndefined();
+      });
+
+      it('should mark encounter as resolved after calling resolve', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-resolve-4',
+          createDefaultConfig()
+        );
+
+        // Complete the dungeon
+        const state = encounter.getState();
+        for (let i = 0; i < state.dungeon.length; i++) {
+          encounter.advanceRoom();
+        }
+
+        encounter.resolve();
+
+        const finalState = encounter.getState();
+        expect(finalState.isResolved).toBe(true);
+        expect(finalState.outcome).toBeDefined();
+      });
+
+      it('should include score in success message', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-resolve-5',
+          createDefaultConfig()
+        );
+
+        // Complete the dungeon
+        const state = encounter.getState();
+        for (let i = 0; i < state.dungeon.length; i++) {
+          encounter.advanceRoom();
+        }
+
+        const score = encounter.calculateScore();
+        const outcome = encounter.resolve();
+
+        expect(outcome.message).toContain(`Score: ${score}`);
+      });
+
+      it('should include XP and item count in success message', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-resolve-6',
+          createDefaultConfig()
+        );
+
+        // Complete the dungeon
+        const state = encounter.getState();
+        for (let i = 0; i < state.dungeon.length; i++) {
+          encounter.advanceRoom();
+        }
+
+        const outcome = encounter.resolve();
+
+        if (outcome.type === 'success' && outcome.reward) {
+          expect(outcome.message).toContain(`${outcome.reward.xp} XP`);
+          expect(outcome.message).toContain(
+            `${outcome.reward.items.length} items`
+          );
+        }
+      });
+    });
+  });
 });

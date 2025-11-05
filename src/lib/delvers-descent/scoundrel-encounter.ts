@@ -1,5 +1,10 @@
-import { type EncounterType } from '@/types/delvers-descent';
+import type {
+  AdvancedEncounterItem,
+  CollectedItem,
+  EncounterType,
+} from '@/types/delvers-descent';
 
+import { RewardCalculator } from './reward-calculator';
 import type { AdvancedEncounterOutcome } from './risk-event-encounter';
 
 /**
@@ -60,9 +65,26 @@ export interface ScoundrelState {
   outcome?: AdvancedEncounterOutcome;
 }
 
+/**
+ * Reward tier configuration
+ */
+export interface RewardTier {
+  minScore: number;
+  maxScore: number;
+  xp: number;
+  itemCount: number;
+}
+
+const REWARD_TIERS: RewardTier[] = [
+  { minScore: 0, maxScore: 10, xp: 50, itemCount: 1 }, // Tier 1
+  { minScore: 11, maxScore: 20, xp: 100, itemCount: 2 }, // Tier 2
+  { minScore: 21, maxScore: Infinity, xp: 200, itemCount: 3 }, // Tier 3
+];
+
 export class ScoundrelEncounter {
   private state: ScoundrelState;
   private lastCardPlayed?: Card;
+  private rewardCalculator: RewardCalculator;
 
   constructor(encounterId: string, config: ScoundrelConfig) {
     this.state = {
@@ -75,6 +97,7 @@ export class ScoundrelEncounter {
       isResolved: false,
     };
 
+    this.rewardCalculator = new RewardCalculator();
     this.initializeDungeon();
   }
 
@@ -443,5 +466,164 @@ export class ScoundrelEncounter {
 
     // Encounter not yet complete
     return 0;
+  }
+
+  /**
+   * Get reward tier based on score
+   */
+  getRewardTier(score: number): RewardTier {
+    // For negative scores (failures), use tier 1
+    if (score < 0) {
+      return REWARD_TIERS[0];
+    }
+
+    // Find the tier that matches the score
+    for (const tier of REWARD_TIERS) {
+      if (score >= tier.minScore && score <= tier.maxScore) {
+        return tier;
+      }
+    }
+
+    // Default to tier 1 if no match (shouldn't happen)
+    return REWARD_TIERS[0];
+  }
+
+  /**
+   * Calculate reward XP for a given tier
+   */
+  calculateRewardXP(tier: number): number {
+    if (tier < 1 || tier > REWARD_TIERS.length) {
+      return REWARD_TIERS[0].xp;
+    }
+
+    return REWARD_TIERS[tier - 1].xp;
+  }
+
+  /**
+   * Calculate reward item count for a given tier
+   */
+  calculateRewardItemCount(tier: number): number {
+    if (tier < 1 || tier > REWARD_TIERS.length) {
+      return REWARD_TIERS[0].itemCount;
+    }
+
+    return REWARD_TIERS[tier - 1].itemCount;
+  }
+
+  /**
+   * Generate rewards based on score
+   */
+  generateRewards(score: number): CollectedItem[] {
+    // No rewards for failures (negative scores)
+    if (score < 0) {
+      return [];
+    }
+
+    const tier = this.getRewardTier(score);
+    const items: CollectedItem[] = [];
+
+    // Generate items based on tier
+    // Mix of trade_goods, discoveries, and potentially legendaries for higher tiers
+    const itemTypes: ('trade_good' | 'discovery' | 'legendary')[] = [
+      'trade_good',
+      'discovery',
+    ];
+
+    // Add legendary items for tier 3 (score 21+)
+    if (tier.itemCount === 3) {
+      itemTypes.push('legendary');
+    }
+
+    for (let i = 0; i < tier.itemCount; i++) {
+      const itemType =
+        itemTypes[Math.floor(Math.random() * itemTypes.length)] || 'trade_good';
+
+      const item = this.rewardCalculator.generateCollectionReward(
+        itemType,
+        this.state.config.depth
+      );
+
+      items.push(item);
+    }
+
+    // Process rewards through RewardCalculator for proper scaling
+    return this.rewardCalculator.processEncounterRewards(
+      items,
+      'scoundrel',
+      this.state.config.depth
+    );
+  }
+
+  /**
+   * Resolve the encounter and return outcome
+   */
+  resolve(): AdvancedEncounterOutcome {
+    if (this.state.isResolved) {
+      throw new Error('Encounter already resolved');
+    }
+
+    const score = this.calculateScore();
+    const currentLife = this.state.currentLife;
+    const isDungeonCompleted =
+      this.state.currentRoom >= this.state.dungeon.length;
+
+    // Determine success or failure
+    const isSuccess = currentLife > 0 && isDungeonCompleted;
+
+    this.state.isResolved = true;
+
+    let outcome: AdvancedEncounterOutcome;
+
+    if (isSuccess) {
+      // Success: generate rewards based on score
+      const rewards = this.generateRewards(score);
+      const tier = this.getRewardTier(score);
+      const xp = tier.xp;
+
+      // Convert CollectedItem[] to EncounterReward format
+      const items: AdvancedEncounterItem[] = rewards.map((item) => {
+        // CollectedItem has optional setId and description, but AdvancedEncounterItem requires them
+        const rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' =
+          item.type === 'legendary' ? 'legendary' : 'common';
+
+        return {
+          id: item.id,
+          name: item.name,
+          quantity: 1,
+          rarity,
+          type: item.type as 'trade_good' | 'discovery' | 'legendary',
+          setId: item.setId || 'unknown_set',
+          value: item.value,
+          description: item.description || `A ${item.type} item`,
+        };
+      });
+
+      const encounterReward = {
+        energy: 0,
+        items,
+        xp,
+      };
+
+      outcome = {
+        type: 'success',
+        message: `Dungeon completed! Score: ${score}. Earned ${xp} XP and ${rewards.length} items.`,
+        reward: encounterReward,
+      };
+    } else {
+      // Failure: life reached 0
+      outcome = {
+        type: 'failure',
+        message: `Defeated! Your score: ${score}. All remaining monsters counted against you.`,
+        consequence: {
+          energyLoss: 0, // Will be calculated by failure consequences system
+          itemLossRisk: 0,
+          forcedRetreat: false,
+          encounterLockout: false,
+        },
+      };
+    }
+
+    this.state.outcome = outcome;
+    return outcome;
   }
 }

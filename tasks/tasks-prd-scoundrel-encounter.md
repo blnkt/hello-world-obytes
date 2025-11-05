@@ -89,21 +89,21 @@
   - [x] 4.11 Write unit tests for health potion bonus scoring
   - [x] 4.12 Write unit tests for edge cases in scoring
 
-- [ ] 5.0 Implement Tiered Rewards System
-  - [ ] 5.1 Define reward tier thresholds (e.g., 0-10 = tier 1, 11-20 = tier 2, 21+ = tier 3)
-  - [ ] 5.2 Define XP amounts per tier (e.g., tier 1 = 50 XP, tier 2 = 100 XP, tier 3 = 200 XP)
-  - [ ] 5.3 Define item counts per tier (e.g., tier 1 = 1 item, tier 2 = 2 items, tier 3 = 3 items)
-  - [ ] 5.4 Implement `getRewardTier(score: number)` method determining tier from score
-  - [ ] 5.5 Implement `calculateRewardXP(tier: number)` method returning XP for tier
-  - [ ] 5.6 Implement `calculateRewardItemCount(tier: number)` method returning item count for tier
-  - [ ] 5.7 Implement `generateRewards(score: number)` method creating EncounterReward with XP and items
-  - [ ] 5.8 Integrate with `RewardCalculator.processEncounterRewards()` for item value scaling
-  - [ ] 5.9 Ensure rewards use existing collection item generation (trade_goods, discoveries, legendaries)
-  - [ ] 5.10 Implement `resolve()` method that calculates score and generates rewards
-  - [ ] 5.11 Ensure `resolve()` returns `AdvancedEncounterOutcome` with success/failure type
-  - [ ] 5.12 Write unit tests for tier calculation
-  - [ ] 5.13 Write unit tests for reward generation per tier
-  - [ ] 5.14 Write unit tests for reward integration with RewardCalculator
+- [x] 5.0 Implement Tiered Rewards System
+  - [x] 5.1 Define reward tier thresholds (e.g., 0-10 = tier 1, 11-20 = tier 2, 21+ = tier 3)
+  - [x] 5.2 Define XP amounts per tier (e.g., tier 1 = 50 XP, tier 2 = 100 XP, tier 3 = 200 XP)
+  - [x] 5.3 Define item counts per tier (e.g., tier 1 = 1 item, tier 2 = 2 items, tier 3 = 3 items)
+  - [x] 5.4 Implement `getRewardTier(score: number)` method determining tier from score
+  - [x] 5.5 Implement `calculateRewardXP(tier: number)` method returning XP for tier
+  - [x] 5.6 Implement `calculateRewardItemCount(tier: number)` method returning item count for tier
+  - [x] 5.7 Implement `generateRewards(score: number)` method creating EncounterReward with XP and items
+  - [x] 5.8 Integrate with `RewardCalculator.processEncounterRewards()` for item value scaling
+  - [x] 5.9 Ensure rewards use existing collection item generation (trade_goods, discoveries, legendaries)
+  - [x] 5.10 Implement `resolve()` method that calculates score and generates rewards
+  - [x] 5.11 Ensure `resolve()` returns `AdvancedEncounterOutcome` with success/failure type
+  - [x] 5.12 Write unit tests for tier calculation
+  - [x] 5.13 Write unit tests for reward generation per tier
+  - [x] 5.14 Write unit tests for reward integration with RewardCalculator
 
 - [ ] 6.0 Implement Failure Consequences (Item Theft and Energy Loss)
   - [ ] 6.1 Implement `calculateItemsToSteal(score: number)` method (lower score = more items)
