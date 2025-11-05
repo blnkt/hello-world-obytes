@@ -56,16 +56,16 @@
   - [x] 3.7 Write unit tests verifying encounter weights are properly normalized after exclusion
   - [x] 3.8 Write integration tests for map generation with all regions unlocked scenario
 
-- [ ] 4.0 Add Region Unlock Progress UI to Discovery Site Screen
-  - [ ] 4.1 Create helper function to get region unlock progress for a given collection set
-  - [ ] 4.2 Add RegionManager and CollectionManager to DiscoverySiteScreen component props or context
-  - [ ] 4.3 Create RegionUnlockProgress component to display progress for relevant regions
-  - [ ] 4.4 Display which region unlock set items are being offered in the current encounter
-  - [ ] 4.5 Show progress indicators (e.g., "2/5 items collected for Desert Oasis unlock") for relevant regions
-  - [ ] 4.6 Display which regions are already unlocked to avoid confusion
-  - [ ] 4.7 Integrate RegionUnlockProgress component into DiscoveryContent
-  - [ ] 4.8 Write unit tests for RegionUnlockProgress component
-  - [ ] 4.9 Write integration tests for discovery site screen with progress display
+- [x] 4.0 Add Region Unlock Progress UI to Discovery Site Screen
+  - [x] 4.1 Create helper function to get region unlock progress for a given collection set
+  - [x] 4.2 Add RegionManager and CollectionManager to DiscoverySiteScreen component props or context
+  - [x] 4.3 Create RegionUnlockProgress component to display progress for relevant regions
+  - [x] 4.4 Display which region unlock set items are being offered in the current encounter
+  - [x] 4.5 Show progress indicators (e.g., "2/5 items collected for Desert Oasis unlock") for relevant regions
+  - [x] 4.6 Display which regions are already unlocked to avoid confusion
+  - [x] 4.7 Integrate RegionUnlockProgress component into DiscoveryContent
+  - [x] 4.8 Write unit tests for RegionUnlockProgress component
+  - [x] 4.9 Write integration tests for discovery site screen with progress display
 
 - [ ] 5.0 Implement Region Unlock Notification System
   - [ ] 5.1 Create RegionUnlockNotification component to display unlock notifications
