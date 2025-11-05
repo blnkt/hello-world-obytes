@@ -42,22 +42,22 @@
   - [x] 1.12 Write unit tests for type definitions and validation
   - [x] 1.13 Write unit tests for encounter routing
 
-- [ ] 2.0 Create ScoundrelEncounter Class and Core Mechanics
-  - [ ] 2.1 Create `src/lib/delvers-descent/scoundrel-encounter.ts` file
-  - [ ] 2.2 Define `ScoundrelConfig` interface with startingLife (default: 10), dungeonSize, and depth
-  - [ ] 2.3 Define `ScoundrelState` interface with encounterId, encounterType, config, currentLife, currentRoom, isResolved, outcome
-  - [ ] 2.4 Define `DungeonRoom` interface with id, roomNumber, monsters, cards, isCompleted
-  - [ ] 2.5 Define `Monster` interface with id, name, value (for scoring), lifeDamage
-  - [ ] 2.6 Define `Card` interface with id, name, type ('monster' | 'health_potion' | 'treasure' | 'trap'), effect
-  - [ ] 2.7 Define `AdvancedEncounterOutcome` interface (reuse from risk-event-encounter.ts)
-  - [ ] 2.8 Implement `ScoundrelEncounter` class with constructor taking encounterId and config
-  - [ ] 2.9 Implement `getState()` method returning current state
-  - [ ] 2.10 Implement `initializeDungeon()` method to create dungeon structure
-  - [ ] 2.11 Implement `getCurrentLife()` method returning current life points
-  - [ ] 2.12 Implement `getMaxLife()` method returning starting life (10)
-  - [ ] 2.13 Implement `isEncounterComplete()` method checking if life = 0 OR dungeon completed
-  - [ ] 2.14 Implement `getRemainingMonsters()` method returning monsters not yet encountered
-  - [ ] 2.15 Write unit tests for ScoundrelEncounter initialization and state management
+- [x] 2.0 Create ScoundrelEncounter Class and Core Mechanics
+  - [x] 2.1 Create `src/lib/delvers-descent/scoundrel-encounter.ts` file
+  - [x] 2.2 Define `ScoundrelConfig` interface with startingLife (default: 10), dungeonSize, and depth
+  - [x] 2.3 Define `ScoundrelState` interface with encounterId, encounterType, config, currentLife, currentRoom, isResolved, outcome
+  - [x] 2.4 Define `DungeonRoom` interface with id, roomNumber, monsters, cards, isCompleted
+  - [x] 2.5 Define `Monster` interface with id, name, value (for scoring), lifeDamage
+  - [x] 2.6 Define `Card` interface with id, name, type ('monster' | 'health_potion' | 'treasure' | 'trap'), effect
+  - [x] 2.7 Define `AdvancedEncounterOutcome` interface (reuse from risk-event-encounter.ts)
+  - [x] 2.8 Implement `ScoundrelEncounter` class with constructor taking encounterId and config
+  - [x] 2.9 Implement `getState()` method returning current state
+  - [x] 2.10 Implement `initializeDungeon()` method to create dungeon structure
+  - [x] 2.11 Implement `getCurrentLife()` method returning current life points
+  - [x] 2.12 Implement `getMaxLife()` method returning starting life (10)
+  - [x] 2.13 Implement `isEncounterComplete()` method checking if life = 0 OR dungeon completed
+  - [x] 2.14 Implement `getRemainingMonsters()` method returning monsters not yet encountered
+  - [x] 2.15 Write unit tests for ScoundrelEncounter initialization and state management
 
 - [ ] 3.0 Implement Dungeon Structure and Gameplay
   - [ ] 3.1 Implement `generateDungeon()` method creating 5-10 rooms based on config
