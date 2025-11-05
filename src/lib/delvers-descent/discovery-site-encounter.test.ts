@@ -171,11 +171,11 @@ describe('DiscoverySiteEncounter', () => {
       expect(uniqueRiskLevels.length).toBeGreaterThan(1);
     });
 
-    it('should process exploration decisions', () => {
+    it('should process exploration decisions', async () => {
       const paths = discoveryEncounter.getExplorationPaths();
       const selectedPath = paths[0];
 
-      const result = discoveryEncounter.processExplorationDecision(
+      const result = await discoveryEncounter.processExplorationDecision(
         selectedPath.id
       );
 
@@ -185,9 +185,9 @@ describe('DiscoverySiteEncounter', () => {
       expect(result.consequences).toBeDefined();
     });
 
-    it('should handle invalid exploration decisions', () => {
+    it('should handle invalid exploration decisions', async () => {
       const result =
-        discoveryEncounter.processExplorationDecision('invalid_path');
+        await discoveryEncounter.processExplorationDecision('invalid_path');
 
       expect(result).toBeDefined();
       expect(result.success).toBe(false);
@@ -196,9 +196,11 @@ describe('DiscoverySiteEncounter', () => {
   });
 
   describe('lore collection system', () => {
-    it('should generate lore discoveries', () => {
+    it('should generate lore discoveries', async () => {
       const paths = discoveryEncounter.getExplorationPaths();
-      const result = discoveryEncounter.processExplorationDecision(paths[0].id);
+      const result = await discoveryEncounter.processExplorationDecision(
+        paths[0].id
+      );
 
       if (result.success) {
         const lore = discoveryEncounter.getLoreDiscoveries();
@@ -228,9 +230,11 @@ describe('DiscoverySiteEncounter', () => {
       });
     });
 
-    it('should track lore collection progress', () => {
+    it('should track lore collection progress', async () => {
       const paths = discoveryEncounter.getExplorationPaths();
-      const result = discoveryEncounter.processExplorationDecision(paths[0].id);
+      const result = await discoveryEncounter.processExplorationDecision(
+        paths[0].id
+      );
 
       if (result.success) {
         const progress = discoveryEncounter.getLoreProgress();
@@ -241,15 +245,15 @@ describe('DiscoverySiteEncounter', () => {
       }
     });
 
-    it('should scale lore discoveries with depth', () => {
+    it('should scale lore discoveries with depth', async () => {
       const depth1Encounter = new DiscoverySiteEncounter(1);
       const depth5Encounter = new DiscoverySiteEncounter(5);
 
       const depth1Paths = depth1Encounter.getExplorationPaths();
       const depth5Paths = depth5Encounter.getExplorationPaths();
 
-      depth1Encounter.processExplorationDecision(depth1Paths[0].id);
-      depth5Encounter.processExplorationDecision(depth5Paths[0].id);
+      await depth1Encounter.processExplorationDecision(depth1Paths[0].id);
+      await depth5Encounter.processExplorationDecision(depth5Paths[0].id);
 
       const depth1Lore = depth1Encounter.getLoreDiscoveries();
       const depth5Lore = depth5Encounter.getLoreDiscoveries();
@@ -263,9 +267,11 @@ describe('DiscoverySiteEncounter', () => {
   });
 
   describe('map information rewards', () => {
-    it('should provide map intelligence', () => {
+    it('should provide map intelligence', async () => {
       const paths = discoveryEncounter.getExplorationPaths();
-      const result = discoveryEncounter.processExplorationDecision(paths[0].id);
+      const result = await discoveryEncounter.processExplorationDecision(
+        paths[0].id
+      );
 
       if (result.success) {
         const mapIntel = discoveryEncounter.getMapIntelligence();
@@ -320,9 +326,11 @@ describe('DiscoverySiteEncounter', () => {
   });
 
   describe('regional discovery items', () => {
-    it('should generate regional discovery items', () => {
+    it('should generate regional discovery items', async () => {
       const paths = discoveryEncounter.getExplorationPaths();
-      const result = discoveryEncounter.processExplorationDecision(paths[0].id);
+      const result = await discoveryEncounter.processExplorationDecision(
+        paths[0].id
+      );
 
       if (result.success) {
         const discoveries = discoveryEncounter.getRegionalDiscoveries();
@@ -335,6 +343,76 @@ describe('DiscoverySiteEncounter', () => {
           expect(discovery.value).toBeGreaterThan(0);
         });
       }
+    });
+
+    it('should use region unlock sets when RegionManager is provided', async () => {
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        regionManager,
+        collectionManager
+      );
+      const paths = encounter.getExplorationPaths();
+      const result = await encounter.processExplorationDecision(paths[0].id);
+
+      if (result.success) {
+        const discoveries = encounter.getRegionalDiscoveries();
+        expect(discoveries.length).toBeGreaterThan(0);
+
+        const regionUnlockSets = [
+          'silk_road_set',
+          'spice_trade_set',
+          'ancient_temple_set',
+          'dragons_hoard_set',
+        ];
+
+        discoveries.forEach((discovery) => {
+          // Should use region unlock sets, not old regional sets
+          expect(regionUnlockSets).toContain(discovery.setId);
+        });
+      }
+    });
+
+    it('should randomly select from available region unlock sets', async () => {
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        regionManager,
+        collectionManager
+      );
+      const paths = encounter.getExplorationPaths();
+
+      // Process multiple paths to get multiple discoveries
+      const discoveries: string[] = [];
+      for (let i = 0; i < paths.length; i++) {
+        const testEncounter = new DiscoverySiteEncounter(
+          1,
+          regionManager,
+          collectionManager
+        );
+        const testPaths = testEncounter.getExplorationPaths();
+        const result = await testEncounter.processExplorationDecision(
+          testPaths[i].id
+        );
+        if (result.success) {
+          const regionalDiscoveries = testEncounter.getRegionalDiscoveries();
+          regionalDiscoveries.forEach((d) => {
+            if (!discoveries.includes(d.setId)) {
+              discoveries.push(d.setId);
+            }
+          });
+        }
+      }
+
+      // Should have discovered items from different sets (random selection)
+      expect(discoveries.length).toBeGreaterThan(0);
+      const regionUnlockSets = [
+        'silk_road_set',
+        'spice_trade_set',
+        'ancient_temple_set',
+        'dragons_hoard_set',
+      ];
+      discoveries.forEach((setId) => {
+        expect(regionUnlockSets).toContain(setId);
+      });
     });
 
     it('should provide different regional collection sets', () => {
@@ -351,15 +429,15 @@ describe('DiscoverySiteEncounter', () => {
       });
     });
 
-    it('should scale regional discoveries with depth', () => {
+    it('should scale regional discoveries with depth', async () => {
       const depth1Encounter = new DiscoverySiteEncounter(1);
       const depth5Encounter = new DiscoverySiteEncounter(5);
 
       const depth1Paths = depth1Encounter.getExplorationPaths();
       const depth5Paths = depth5Encounter.getExplorationPaths();
 
-      depth1Encounter.processExplorationDecision(depth1Paths[0].id);
-      depth5Encounter.processExplorationDecision(depth5Paths[0].id);
+      await depth1Encounter.processExplorationDecision(depth1Paths[0].id);
+      await depth5Encounter.processExplorationDecision(depth5Paths[0].id);
 
       const depth1Discoveries = depth1Encounter.getRegionalDiscoveries();
       const depth5Discoveries = depth5Encounter.getRegionalDiscoveries();
@@ -410,12 +488,12 @@ describe('DiscoverySiteEncounter', () => {
       expect(stats.averageRiskLevel).toBeDefined();
     });
 
-    it('should prevent excessive failures', () => {
+    it('should prevent excessive failures', async () => {
       // Simulate multiple failed explorations
       for (let i = 0; i < 5; i++) {
         const testEncounter = new DiscoverySiteEncounter();
         const _paths = testEncounter.getExplorationPaths();
-        testEncounter.processExplorationDecision('invalid_path');
+        await testEncounter.processExplorationDecision('invalid_path');
       }
 
       const stats = discoveryEncounter.getExplorationStatistics();
@@ -430,17 +508,21 @@ describe('DiscoverySiteEncounter', () => {
   });
 
   describe('encounter completion', () => {
-    it('should complete encounter after successful exploration', () => {
+    it('should complete encounter after successful exploration', async () => {
       const paths = discoveryEncounter.getExplorationPaths();
-      const result = discoveryEncounter.processExplorationDecision(paths[0].id);
+      const result = await discoveryEncounter.processExplorationDecision(
+        paths[0].id
+      );
 
       expect(result.success).toBe(true);
       expect(discoveryEncounter.isEncounterComplete()).toBe(true);
     });
 
-    it('should generate appropriate rewards on completion', () => {
+    it('should generate appropriate rewards on completion', async () => {
       const paths = discoveryEncounter.getExplorationPaths();
-      const result = discoveryEncounter.processExplorationDecision(paths[0].id);
+      const result = await discoveryEncounter.processExplorationDecision(
+        paths[0].id
+      );
 
       if (result.success) {
         const rewards = discoveryEncounter.generateRewards();
@@ -449,9 +531,9 @@ describe('DiscoverySiteEncounter', () => {
       }
     });
 
-    it('should handle encounter failure', () => {
+    it('should handle encounter failure', async () => {
       const result =
-        discoveryEncounter.processExplorationDecision('invalid_path');
+        await discoveryEncounter.processExplorationDecision('invalid_path');
 
       expect(result.success).toBe(false);
       expect(discoveryEncounter.isEncounterComplete()).toBe(true);
@@ -459,7 +541,7 @@ describe('DiscoverySiteEncounter', () => {
   });
 
   describe('comprehensive integration tests', () => {
-    it('should integrate all features seamlessly', () => {
+    it('should integrate all features seamlessly', async () => {
       const depth3Encounter = new DiscoverySiteEncounter(3);
 
       // Test exploration paths
@@ -475,7 +557,9 @@ describe('DiscoverySiteEncounter', () => {
       expect(mapIntel.length).toBeGreaterThan(0);
 
       // Test exploration processing
-      const result = depth3Encounter.processExplorationDecision(paths[0].id);
+      const result = await depth3Encounter.processExplorationDecision(
+        paths[0].id
+      );
 
       if (result.success) {
         // Should have rewards
@@ -492,12 +576,14 @@ describe('DiscoverySiteEncounter', () => {
       }
     });
 
-    it('should maintain backward compatibility', () => {
+    it('should maintain backward compatibility', async () => {
       // All existing functionality should still work
       const paths = discoveryEncounter.getExplorationPaths();
       expect(paths).toHaveLength(3);
 
-      const result = discoveryEncounter.processExplorationDecision(paths[0].id);
+      const result = await discoveryEncounter.processExplorationDecision(
+        paths[0].id
+      );
       expect(result.success).toBe(true);
     });
 

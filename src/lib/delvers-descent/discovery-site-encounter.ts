@@ -175,12 +175,12 @@ export class DiscoverySiteEncounter {
     return [...this.explorationPaths];
   }
 
-  processExplorationDecision(pathId: string): {
+  async processExplorationDecision(pathId: string): Promise<{
     success: boolean;
     rewards?: CollectedItem[];
     consequences?: ExplorationConsequence[];
     error?: string;
-  } {
+  }> {
     if (this.encounterComplete) {
       return { success: false, error: 'Encounter already complete' };
     }
@@ -200,7 +200,7 @@ export class DiscoverySiteEncounter {
     this.generateLoreDiscoveries(path);
 
     // Generate regional discoveries
-    this.generateRegionalDiscoveries(path);
+    await this.generateRegionalDiscoveries(path);
 
     this.encounterComplete = true;
     this.encounterResult = 'success';
@@ -558,15 +558,40 @@ export class DiscoverySiteEncounter {
     this.loreDiscoveries.push(scaledLore);
   }
 
-  private generateRegionalDiscoveries(path: ExplorationPath): void {
-    const regionalSets = [
-      'ancient_ruins_set',
-      'crystal_caverns_set',
-      'shadow_realm_set',
-      'ethereal_plains_set',
-    ];
-    const setIndex = this.explorationPaths.indexOf(path);
-    const selectedSet = regionalSets[setIndex] || regionalSets[0];
+  private async generateRegionalDiscoveries(
+    path: ExplorationPath
+  ): Promise<void> {
+    let selectedSet: string;
+
+    // If regionManager is available, use region unlock sets
+    if (this.regionManager) {
+      const availableSets = await this.getAvailableRegionUnlockSets();
+      if (availableSets.length > 0) {
+        // Randomly select from available region unlock sets
+        const randomIndex = Math.floor(Math.random() * availableSets.length);
+        selectedSet = availableSets[randomIndex];
+      } else {
+        // Fallback to old behavior if no sets available (all regions unlocked)
+        const fallbackSets = [
+          'ancient_ruins_set',
+          'crystal_caverns_set',
+          'shadow_realm_set',
+          'ethereal_plains_set',
+        ];
+        const setIndex = this.explorationPaths.indexOf(path);
+        selectedSet = fallbackSets[setIndex] || fallbackSets[0];
+      }
+    } else {
+      // Backward compatibility: use old hardcoded sets if no regionManager
+      const regionalSets = [
+        'ancient_ruins_set',
+        'crystal_caverns_set',
+        'shadow_realm_set',
+        'ethereal_plains_set',
+      ];
+      const setIndex = this.explorationPaths.indexOf(path);
+      selectedSet = regionalSets[setIndex] || regionalSets[0];
+    }
 
     const baseValue = 50;
     const depthMultiplier = 1 + this.depth * 0.2;

@@ -27,7 +27,7 @@
 - [ ] 1.0 Update DiscoverySiteEncounter to Generate Region Unlock Set Items
   - [x] 1.1 Add RegionManager and CollectionManager dependencies to DiscoverySiteEncounter constructor
   - [x] 1.2 Create helper method to get available region unlock sets (silk_road_set, spice_trade_set, ancient_temple_set, dragons_hoard_set) that haven't unlocked their regions yet
-  - [ ] 1.3 Update generateRegionalDiscoveries to randomly select from available region unlock sets instead of hardcoded regional sets
+  - [x] 1.3 Update generateRegionalDiscoveries to randomly select from available region unlock sets instead of hardcoded regional sets
   - [ ] 1.4 Update createDiscoveryReward to use actual collection set items from collection-sets.ts instead of hardcoded regional items
   - [ ] 1.5 Update createDiscoveryReward to randomly select items from the chosen collection set's items array
   - [ ] 1.6 Remove hardcoded regional sets (ancient_ruins_set, crystal_caverns_set, shadow_realm_set, ethereal_plains_set) and related mappings

@@ -366,7 +366,7 @@ const buildExplorationDecisionHandler = ({
   return async (pathId: string) => {
     if (!encounter || encounterComplete) return;
 
-    const result = encounter.processExplorationDecision(pathId);
+    const result = await encounter.processExplorationDecision(pathId);
     setters.setExplorationResult(result);
 
     if (result.success) {
