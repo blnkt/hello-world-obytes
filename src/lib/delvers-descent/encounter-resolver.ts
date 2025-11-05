@@ -40,6 +40,7 @@ export class EncounterResolver {
     rest_site: 0.9, // Restful, slightly lower rewards
     safe_passage: 0.7, // Low reward, but free return is the main benefit
     region_shortcut: 0.5, // Low reward, region switching is the main benefit
+    scoundrel: 1.2, // Tiered rewards based on score
   };
 
   constructor() {

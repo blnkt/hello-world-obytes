@@ -640,10 +640,13 @@ describe('EncounterResolver', () => {
         encounterResolver.getEncounterTypeMultiplier('discovery_site');
       const riskMultiplier =
         encounterResolver.getEncounterTypeMultiplier('risk_event');
+      const scoundrelMultiplier =
+        encounterResolver.getEncounterTypeMultiplier('scoundrel');
 
       expect(puzzleChamberMultiplier).toBeGreaterThan(0);
       expect(discoveryMultiplier).toBeGreaterThan(0);
       expect(riskMultiplier).toBeGreaterThan(0);
+      expect(scoundrelMultiplier).toBe(1.2);
 
       const puzzleReward = encounterResolver.calculateFinalReward(
         baseReward,
