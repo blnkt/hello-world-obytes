@@ -30,6 +30,7 @@ export class EncounterLoaderOptimized {
     'risk_event',
     'hazard',
     'rest_site',
+    'scoundrel',
   ];
   private readonly encounterTypeMultipliers: Map<EncounterType, number> =
     new Map([

@@ -35,7 +35,7 @@
   - [x] 1.5 Add `'scoundrel'` route mapping in `getEncounterRoute` function
   - [x] 1.6 Add `'scoundrel'` to `isEncounterSupported` function
   - [x] 1.7 Add `'scoundrel'` to `supportedEncounterTypes` array in `EncounterResolver`
-  - [ ] 1.8 Add `'scoundrel'` to `supportedEncounterTypes` array in `EncounterLoaderOptimized`
+  - [x] 1.8 Add `'scoundrel'` to `supportedEncounterTypes` array in `EncounterLoaderOptimized`
   - [ ] 1.9 Add `scoundrel` multiplier to `encounterTypeMultipliers` in `EncounterResolver` (suggest 1.2x)
   - [ ] 1.10 Add `scoundrel` multiplier to `encounterTypeMultipliers` in `EncounterLoaderOptimized`
   - [ ] 1.11 Update `balance-config.ts` to include `scoundrel` in `typeMultipliers` (default: 1.2)
