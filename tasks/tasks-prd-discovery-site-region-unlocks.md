@@ -67,13 +67,13 @@
   - [x] 4.8 Write unit tests for RegionUnlockProgress component
   - [x] 4.9 Write integration tests for discovery site screen with progress display
 
-- [ ] 5.0 Implement Region Unlock Notification System
-  - [ ] 5.1 Create RegionUnlockNotification component to display unlock notifications
-  - [ ] 5.2 Component should display region name, description, starting bonuses, and theme information
-  - [ ] 5.3 Add state management in DiscoverySiteScreen to track unlocked region
-  - [ ] 5.4 Update DiscoverySiteScreen to receive unlocked region information from encounter
-  - [ ] 5.5 Integrate notification display in active-run.tsx after returning to map (after encounter completion)
-  - [ ] 5.6 Ensure notification appears after returning to map, not during encounter (per PRD requirement)
-  - [ ] 5.7 Add proper styling and animations for notification display
-  - [ ] 5.8 Write unit tests for RegionUnlockNotification component
-  - [ ] 5.9 Write integration tests for notification display flow
+- [x] 5.0 Implement Region Unlock Notification System
+  - [x] 5.1 Create RegionUnlockNotification component to display unlock notifications
+  - [x] 5.2 Component should display region name, description, starting bonuses, and theme information
+  - [x] 5.3 Add state management in DiscoverySiteScreen to track unlocked region
+  - [x] 5.4 Update DiscoverySiteScreen to receive unlocked region information from encounter
+  - [x] 5.5 Integrate notification display in active-run.tsx after returning to map (after encounter completion)
+  - [x] 5.6 Ensure notification appears after returning to map, not during encounter (per PRD requirement)
+  - [x] 5.7 Add proper styling and animations for notification display
+  - [x] 5.8 Write unit tests for RegionUnlockNotification component
+  - [x] 5.9 Write integration tests for notification display flow

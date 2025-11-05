@@ -8,6 +8,7 @@ import { NavigationControls } from '@/components/delvers-descent/active-run/navi
 import { RunStatusPanel } from '@/components/delvers-descent/active-run/run-status-panel';
 import { EncounterScreen } from '@/components/delvers-descent/encounters/encounter-screen';
 import { useMapGenerator } from '@/components/delvers-descent/hooks/use-map-generator';
+import { RegionUnlockNotification } from '@/components/delvers-descent/region-unlock-notification';
 import { AchievementManager } from '@/lib/delvers-descent/achievement-manager';
 import { saveAchievements } from '@/lib/delvers-descent/achievement-persistence';
 import { ALL_ACHIEVEMENTS } from '@/lib/delvers-descent/achievement-types';
@@ -204,6 +205,9 @@ const useEncounterHandlers = (params: {
   } = params;
   const [selectedNode, setSelectedNode] = useState<DungeonNode | null>(null);
   const [showEncounter, setShowEncounter] = useState(false);
+  const [unlockedRegionId, setUnlockedRegionId] = useState<string | undefined>(
+    undefined
+  );
 
   const handleNodePress = useCallback(
     (
@@ -225,11 +229,12 @@ const useEncounterHandlers = (params: {
   );
 
   const handleEncounterComplete = useCallback(
-    async (
-      result: 'success' | 'failure',
-      rewards?: any[],
-      targetRegionId?: string
-    ) =>
+    async (params: {
+      result: 'success' | 'failure';
+      rewards?: any[];
+      targetRegionId?: string;
+      unlockedRegionId?: string;
+    }) => {
       await handleEncounterCompleteImpl({
         selectedNode,
         setShowEncounter,
@@ -242,10 +247,16 @@ const useEncounterHandlers = (params: {
         onRegenerateMap,
         runState,
         nodes,
-        result,
-        rewards,
-        targetRegionId,
-      }),
+        result: params.result,
+        rewards: params.rewards,
+        targetRegionId: params.targetRegionId,
+        _unlockedRegionId: params.unlockedRegionId,
+      });
+      // Store unlockedRegionId to display notification after returning to map
+      if (params.unlockedRegionId) {
+        setUnlockedRegionId(params.unlockedRegionId);
+      }
+    },
     [
       selectedNode,
       onEnergyUpdate,
@@ -268,6 +279,8 @@ const useEncounterHandlers = (params: {
     handleNodePress,
     handleReturnToMap,
     handleEncounterComplete,
+    unlockedRegionId,
+    setUnlockedRegionId,
   };
 };
 
@@ -398,6 +411,7 @@ async function handleEncounterCompleteImpl({
   result,
   rewards,
   targetRegionId,
+  _unlockedRegionId,
 }: {
   selectedNode: DungeonNode | null;
   setShowEncounter: (v: boolean) => void;
@@ -417,6 +431,7 @@ async function handleEncounterCompleteImpl({
   result: 'success' | 'failure';
   rewards?: any[];
   targetRegionId?: string;
+  _unlockedRegionId?: string; // Used by caller to track unlocked region
 }) {
   if (!selectedNode) {
     setShowEncounter(false);
@@ -632,7 +647,8 @@ const MapView: React.FC<{
   onShowCashOut: () => void;
   onHideCashOut: () => void;
   onCashOutConfirm: () => void;
-  // risk flow removed
+  unlockedRegionId?: string;
+  onCloseUnlockNotification: () => void;
 }> = ({
   run,
   nodes,
@@ -643,6 +659,8 @@ const MapView: React.FC<{
   onShowCashOut,
   onHideCashOut,
   onCashOutConfirm,
+  unlockedRegionId,
+  onCloseUnlockNotification,
 }) => {
   // Calculate return cost - 0 if free return, otherwise use normal calculation
   const energyCalculator = new EnergyCalculator();
@@ -689,6 +707,12 @@ const MapView: React.FC<{
           onCancel={onHideCashOut}
         />
       )}
+
+      <RegionUnlockNotification
+        regionId={unlockedRegionId}
+        visible={!!unlockedRegionId}
+        onClose={onCloseUnlockNotification}
+      />
     </View>
   );
 };
@@ -702,11 +726,17 @@ export default function ActiveRunRoute() {
 
 function ActiveRunScreen({ router, runId }: { router: any; runId: string }) {
   const controllers = useActiveRunControllers({ router, runId });
+
+  const handleCloseUnlockNotification = useCallback(() => {
+    controllers.handlers.setUnlockedRegionId?.(undefined);
+  }, [controllers.handlers]);
+
   if (controllers.isLoading) return <LoadingView />;
   if (controllers.error || !controllers.run)
     return (
       <ErrorView error={controllers.error || 'Run not found'} router={router} />
     );
+
   if (
     controllers.handlers.showEncounter &&
     controllers.handlers.selectedNode &&
@@ -722,6 +752,7 @@ function ActiveRunScreen({ router, runId }: { router: any; runId: string }) {
       />
     );
   }
+
   return (
     <MapView
       run={controllers.run}
@@ -733,6 +764,8 @@ function ActiveRunScreen({ router, runId }: { router: any; runId: string }) {
       onShowCashOut={controllers.showCashOut}
       onHideCashOut={controllers.hideCashOut}
       onCashOutConfirm={controllers.handleCashOutConfirm}
+      unlockedRegionId={controllers.handlers.unlockedRegionId}
+      onCloseUnlockNotification={handleCloseUnlockNotification}
     />
   );
 }
@@ -983,19 +1016,29 @@ function EncounterView({
   node: DungeonNode;
   runState: RunState | null;
   onReturnToMap: () => void;
-  onEncounterComplete: (
-    result: 'success' | 'failure',
-    rewards?: any[],
-    targetRegionId?: string
-  ) => void;
+  onEncounterComplete: (params: {
+    result: 'success' | 'failure';
+    rewards?: any[];
+    targetRegionId?: string;
+    unlockedRegionId?: string;
+  }) => void;
 }) {
+  const wrappedOnEncounterComplete = (encounterParams: {
+    result: 'success' | 'failure';
+    rewards?: any[];
+    targetRegionId?: string;
+    unlockedRegionId?: string;
+  }) => {
+    onEncounterComplete(encounterParams);
+  };
+
   return (
     <EncounterScreen
       run={run}
       node={node}
       runState={runState}
       onReturnToMap={onReturnToMap}
-      onEncounterComplete={onEncounterComplete}
+      onEncounterComplete={wrappedOnEncounterComplete}
     />
   );
 }

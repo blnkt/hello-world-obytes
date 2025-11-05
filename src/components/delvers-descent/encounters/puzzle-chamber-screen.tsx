@@ -10,7 +10,10 @@ interface PuzzleChamberScreenProps {
   run: DelvingRun;
   node: DungeonNode;
   onReturnToMap: () => void;
-  onEncounterComplete: (result: 'success' | 'failure', rewards?: any[]) => void;
+  onEncounterComplete: (params: {
+    result: 'success' | 'failure';
+    rewards?: any[];
+  }) => void;
 }
 
 interface TileState {
@@ -405,9 +408,9 @@ export const PuzzleChamberScreen: React.FC<PuzzleChamberScreenProps> = ({
 
   const handleReturnFromResult = () => {
     if (state.encounterResult === 'success') {
-      onEncounterComplete('success', state.rewards);
+      onEncounterComplete({ result: 'success', rewards: state.rewards });
     } else if (state.encounterResult === 'failure') {
-      onEncounterComplete('failure');
+      onEncounterComplete({ result: 'failure' });
     }
     onReturnToMap();
   };
