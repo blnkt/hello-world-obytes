@@ -119,7 +119,7 @@ export class DungeonMapGeneratorOptimized {
     }
 
     const nodeCount = Math.floor(Math.random() * 2) + 2; // 2-3 nodes
-    const { weights, total } = await this.getWeightsForRegion(regionKey);
+    const { weights, total } = await this.getWeightsForRegion(regionKey, depth);
     const nodes: DungeonNode[] = [];
 
     for (let position = 0; position < nodeCount; position++) {
@@ -310,7 +310,23 @@ export class DungeonMapGeneratorOptimized {
     return true;
   }
 
-  private async getWeightsForRegion(regionKey?: string): Promise<{
+  /**
+   * Check if only the default region (forest_depths) is unlocked
+   */
+  private async hasOnlyDefaultRegionUnlocked(): Promise<boolean> {
+    if (!this.regionManager) {
+      return true; // Without RegionManager, assume only default is unlocked
+    }
+
+    const unlockedRegions = await this.regionManager.getUnlockedRegions();
+    // Only default region (forest_depths) is unlocked if count is 1 or less
+    return unlockedRegions.length <= 1;
+  }
+
+  private async getWeightsForRegion(
+    regionKey?: string,
+    depth?: number
+  ): Promise<{
     weights: { type: EncounterType; weight: number }[];
     total: number;
   }> {
@@ -355,6 +371,17 @@ export class DungeonMapGeneratorOptimized {
     const allUnlocked = await this.areAllRegionsUnlocked();
     if (allUnlocked) {
       weights = weights.filter((w) => w.type !== 'discovery_site');
+    }
+
+    // Exclude region_shortcut if depth <= 10
+    if (depth !== undefined && depth <= 10) {
+      weights = weights.filter((w) => w.type !== 'region_shortcut');
+    }
+
+    // Exclude region_shortcut if only default region is unlocked
+    const onlyDefaultUnlocked = await this.hasOnlyDefaultRegionUnlocked();
+    if (onlyDefaultUnlocked) {
+      weights = weights.filter((w) => w.type !== 'region_shortcut');
     }
 
     // Recalculate total after filtering

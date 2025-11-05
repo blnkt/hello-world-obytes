@@ -119,23 +119,17 @@ export class RegionShortcutEncounter {
     } = params;
     const unlockedRegions = await regionManager.getUnlockedRegions();
 
-    // Filter out current region
+    // Filter out current region - never offer shortcut to region player is already in
     const availableRegions = unlockedRegions.filter(
       (region) => region.id !== currentRegionId
     );
 
     if (availableRegions.length === 0) {
-      // Fallback: if no other regions available, use first unlocked (or current if must)
-      const fallbackRegion = unlockedRegions[0];
-      if (!fallbackRegion) {
-        throw new Error('No unlocked regions available for shortcut');
-      }
-      return this.createConfigForRegion({
-        targetRegion: fallbackRegion,
-        shortcutType,
-        quality,
-        depth,
-      });
+      // No other regions available - should not happen if restrictions are properly applied
+      // (region_shortcut should be excluded if only default region is unlocked)
+      throw new Error(
+        'No other unlocked regions available for shortcut. Current region cannot be offered.'
+      );
     }
 
     // Pick a random available region
