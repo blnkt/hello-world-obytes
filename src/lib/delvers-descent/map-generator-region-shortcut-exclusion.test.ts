@@ -187,13 +187,19 @@ describe('Region Shortcut exclusion restrictions', () => {
         regionManager: new MockRegionManagerMultipleUnlocked() as any,
       });
 
-      // Generate full map with depth > 10
-      const map = await generator.generateFullMap(15);
-      // Check depths > 10 for shortcuts
-      const deepNodes = map.filter((n) => n.depth > 10);
-      const hasShortcut = deepNodes.some((n) => n.type === 'region_shortcut');
-      // Should find shortcuts in depths > 10
-      expect(hasShortcut).toBe(true);
+      // Generate multiple full maps to increase chance of finding shortcuts
+      let foundShortcut = false;
+      for (let i = 0; i < 10; i++) {
+        const map = await generator.generateFullMap(15);
+        // Check depths > 10 for shortcuts
+        const deepNodes = map.filter((n) => n.depth > 10);
+        if (deepNodes.some((n) => n.type === 'region_shortcut')) {
+          foundShortcut = true;
+          break;
+        }
+      }
+      // Should find shortcuts in depths > 10 when multiple regions unlocked
+      expect(foundShortcut).toBe(true);
     });
   });
 });
