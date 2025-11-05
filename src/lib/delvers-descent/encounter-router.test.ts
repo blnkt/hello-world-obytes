@@ -45,6 +45,21 @@ describe('EncounterRouter', () => {
       expect(getEncounterRoute(node)).toBe('discovery_site');
     });
 
+    it('should return route for scoundrel node', () => {
+      const node: DungeonNode = {
+        id: 'test',
+        depth: 1,
+        position: 0,
+        type: 'scoundrel',
+        energyCost: 10,
+        returnCost: 5,
+        isRevealed: false,
+        connections: [],
+      };
+
+      expect(getEncounterRoute(node)).toBe('scoundrel');
+    });
+
     it('should return null for unsupported encounter types', () => {
       const node: DungeonNode = {
         id: 'test',

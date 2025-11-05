@@ -22,6 +22,7 @@ export function getEncounterRoute(node: DungeonNode): EncounterRoute | null {
     rest_site: 'rest_site',
     safe_passage: 'safe_passage',
     region_shortcut: 'region_shortcut',
+    scoundrel: 'scoundrel',
   };
 
   return routeMap[node.type] || null;
