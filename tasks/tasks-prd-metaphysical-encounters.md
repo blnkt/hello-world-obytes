@@ -79,13 +79,13 @@ Based on PRD: `prd-metaphysical-encounters.md`
   - [x] 3.9 Implement `convertEnergyToItems()` method that calculates items from energy and validates
   - [x] 3.10 Implement `executeConversion()` method that performs conversion and returns outcome (limit to 1 conversion)
   - [x] 3.11 Calculate energy cost based on depth and encounter type modifier
-  - [ ] 3.12 Create `src/components/delvers-descent/encounters/advanced/energy-nexus-screen.tsx` UI component
-  - [ ] 3.13 Display current energy and inventory in UI
-  - [ ] 3.14 Display conversion rate clearly
-  - [ ] 3.15 Add "Convert Items → Energy" button (disabled if insufficient items)
-  - [ ] 3.16 Add "Convert Energy → Items" button (disabled if insufficient energy)
-  - [ ] 3.17 Show preview of what player will receive after conversion
-  - [ ] 3.18 Style UI to match existing advanced encounter screens
+  - [x] 3.12 Create `src/components/delvers-descent/encounters/advanced/energy-nexus-screen.tsx` UI component
+  - [x] 3.13 Display current energy and inventory in UI
+  - [x] 3.14 Display conversion rate clearly
+  - [x] 3.15 Add "Convert Items → Energy" button (disabled if insufficient items)
+  - [x] 3.16 Add "Convert Energy → Items" button (disabled if insufficient energy)
+  - [x] 3.17 Show preview of what player will receive after conversion
+  - [x] 3.18 Style UI to match existing advanced encounter screens
   - [ ] 3.19 Write unit tests for `EnergyNexusEncounter` class covering both conversion directions, validation, and limits
   - [ ] 3.20 Write UI tests for `energy-nexus-screen.tsx` component
 

@@ -3,6 +3,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { CollectionManager } from '@/lib/delvers-descent/collection-manager';
 import { ALL_COLLECTION_SETS } from '@/lib/delvers-descent/collection-sets';
+import { EnergyNexusEncounter } from '@/lib/delvers-descent/energy-nexus-encounter';
 import { HazardEncounter } from '@/lib/delvers-descent/hazard-encounter';
 import { LuckShrineEncounter } from '@/lib/delvers-descent/luck-shrine-encounter';
 import { RegionManager } from '@/lib/delvers-descent/region-manager';
@@ -18,6 +19,7 @@ import type {
 } from '@/types/delvers-descent';
 
 import { useEncounterResolver } from '../hooks/use-encounter-resolver';
+import { EnergyNexusScreen } from './advanced/energy-nexus-screen';
 import { HazardScreen } from './advanced/hazard-screen';
 import { LuckShrineScreen } from './advanced/luck-shrine-screen';
 import { RegionShortcutScreen } from './advanced/region-shortcut-screen';
@@ -212,6 +214,8 @@ const useAdvancedEncounter = (node: DungeonNode, currentRegionId?: string) => {
       setAdvancedEncounter(new ScoundrelEncounter(node.id, config));
     } else if (node.type === 'luck_shrine') {
       setAdvancedEncounter(new LuckShrineEncounter(node.id, node.depth));
+    } else if (node.type === 'energy_nexus') {
+      setAdvancedEncounter(new EnergyNexusEncounter(node.id, node.depth));
     }
   }, [node, currentRegionId]);
 
@@ -375,6 +379,26 @@ const renderLuckShrineScreen = (params: {
   return null;
 };
 
+const renderEnergyNexusScreen = (params: {
+  node: DungeonNode;
+  advancedEncounter: any;
+  runState?: RunState | null;
+  handlers: { complete: (outcome: any) => void; return: () => void };
+}) => {
+  if (params.node.type === 'energy_nexus' && params.advancedEncounter) {
+    return (
+      <EnergyNexusScreen
+        encounter={params.advancedEncounter}
+        runState={params.runState}
+        onComplete={params.handlers.complete}
+        onReturn={params.handlers.return}
+      />
+    );
+  }
+
+  return null;
+};
+
 const renderBasicEncounterScreens = (params: {
   node: DungeonNode;
   advancedEncounter: any;
@@ -423,6 +447,9 @@ const renderEncounterByType = (params: {
 
   const luckShrineScreen = renderLuckShrineScreen(params);
   if (luckShrineScreen) return luckShrineScreen;
+
+  const energyNexusScreen = renderEnergyNexusScreen(params);
+  if (energyNexusScreen) return energyNexusScreen;
 
   return renderScoundrelScreen({
     ...params,
@@ -669,6 +696,7 @@ export const EncounterScreen: React.FC<EncounterScreenProps> = ({
     'region_shortcut',
     'scoundrel',
     'luck_shrine',
+    'energy_nexus',
   ];
   if (advancedTypes.includes(node.type)) {
     return renderAdvancedEncounterScreen({
