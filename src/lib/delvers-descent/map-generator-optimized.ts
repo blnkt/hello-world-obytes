@@ -119,15 +119,29 @@ export class DungeonMapGeneratorOptimized {
     }
 
     const nodeCount = Math.floor(Math.random() * 2) + 2; // 2-3 nodes
-    const { weights, total } = await this.getWeightsForRegion(regionKey, depth);
+    let { weights, total } = await this.getWeightsForRegion(regionKey, depth);
     const nodes: DungeonNode[] = [];
+    let safePassageUsed = false;
 
     for (let position = 0; position < nodeCount; position++) {
+      // If safe_passage was already used in this depth, remove it from weights
+      if (safePassageUsed) {
+        weights = weights.filter((w) => w.type !== 'safe_passage');
+        total = weights.reduce((sum, w) => sum + w.weight, 0);
+      }
+
+      const encounterType = this.pickWeightedEncounterType(weights, total);
+
+      // Track if safe_passage was selected
+      if (encounterType === 'safe_passage') {
+        safePassageUsed = true;
+      }
+
       const node: DungeonNode = {
         id: `depth${depth}-node${position}`,
         depth,
         position,
-        type: this.pickWeightedEncounterType(weights, total),
+        type: encounterType,
         energyCost: this.calculateNodeCost(depth),
         returnCost: this.calculateReturnCost(depth),
         isRevealed: false,
@@ -382,6 +396,11 @@ export class DungeonMapGeneratorOptimized {
     const onlyDefaultUnlocked = await this.hasOnlyDefaultRegionUnlocked();
     if (onlyDefaultUnlocked) {
       weights = weights.filter((w) => w.type !== 'region_shortcut');
+    }
+
+    // Exclude safe_passage if depth <= 10
+    if (depth !== undefined && depth <= 10) {
+      weights = weights.filter((w) => w.type !== 'safe_passage');
     }
 
     // Recalculate total after filtering

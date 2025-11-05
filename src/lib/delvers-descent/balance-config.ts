@@ -86,7 +86,7 @@ export interface EncounterBalanceConfig {
     rest_site: number; // Default: 0.1121 (11.21%)
     safe_passage: number; // Default: 0.1121 (11.21%)
     region_shortcut: number; // Default: 0.057 (5.7% - rare)
-    scoundrel: number; // Default: 0.05 (5% - rare)
+    scoundrel: number; // Default: 0.22325 (22.325% - same as puzzle_chamber)
   };
 }
 
@@ -192,14 +192,14 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
 
   encounter: {
     encounterDistribution: {
-      puzzle_chamber: 0.22325, // Scaled down to make room for scoundrel
+      puzzle_chamber: 0.22325,
       discovery_site: 0.1672,
       risk_event: 0.1672,
       hazard: 0.1121,
       rest_site: 0.1121,
       safe_passage: 0.1121,
-      region_shortcut: 0.057, // Scaled down
-      scoundrel: 0.05, // Rare - 5%
+      region_shortcut: 0.057,
+      scoundrel: 0.22325, // Same probability as puzzle_chamber
     },
   },
 
@@ -216,7 +216,7 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
         rest_site: 0.1121,
         safe_passage: 0.1121,
         region_shortcut: 0.057,
-        scoundrel: 0.05,
+        scoundrel: 0.22325, // Same probability as puzzle_chamber
       },
       ruins: {
         // Ancient Ruins (exploration/economy)
@@ -227,7 +227,7 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
         rest_site: 0.1197,
         safe_passage: 0.1121,
         region_shortcut: 0.057,
-        scoundrel: 0.05,
+        scoundrel: 0.18525, // Same probability as puzzle_chamber
       },
       caverns: {
         // Crystal Caverns (tension + recovery)
@@ -238,7 +238,7 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
         rest_site: 0.14915,
         safe_passage: 0.1121,
         region_shortcut: 0.057,
-        scoundrel: 0.05,
+        scoundrel: 0.08645, // Same probability as puzzle_chamber
       },
       sanctum: {
         // Sanctum Archives (puzzle-forward, restorative)
@@ -249,7 +249,7 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
         rest_site: 0.14915,
         safe_passage: 0.1121,
         region_shortcut: 0.057,
-        scoundrel: 0.05,
+        scoundrel: 0.285, // Same probability as puzzle_chamber
       },
       market: {
         // Frontier Market (economy burst, low danger)
@@ -260,7 +260,7 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
         rest_site: 0.1368,
         safe_passage: 0.1121,
         region_shortcut: 0.057,
-        scoundrel: 0.05,
+        scoundrel: 0.1634, // Same probability as puzzle_chamber
       },
       wastes: {
         // Ashen Wastes (hard mode)
@@ -271,7 +271,7 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
         rest_site: 0.1482,
         safe_passage: 0.1121,
         region_shortcut: 0.057,
-        scoundrel: 0.05,
+        scoundrel: 0.03705, // Same probability as puzzle_chamber
       },
     },
   },

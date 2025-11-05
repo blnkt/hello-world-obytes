@@ -26,7 +26,7 @@ export const FOREST_DEPTHS: Region = {
     rest_site: 9,
     safe_passage: 12,
     region_shortcut: 7,
-    scoundrel: 5,
+    scoundrel: 18, // Same as puzzle_chamber
   },
   visualTheme: {
     primaryColor: '#2d5016',
@@ -57,7 +57,7 @@ export const DESERT_OASIS: Region = {
     rest_site: 8,
     safe_passage: 12,
     region_shortcut: 6,
-    scoundrel: 5,
+    scoundrel: 13, // Same as puzzle_chamber
   },
   visualTheme: {
     primaryColor: '#d4a574',
@@ -88,7 +88,7 @@ export const MOUNTAIN_PASS: Region = {
     rest_site: 6,
     safe_passage: 16,
     region_shortcut: 5,
-    scoundrel: 5,
+    scoundrel: 8, // Same as puzzle_chamber
   },
   visualTheme: {
     primaryColor: '#5d6d7e',
@@ -119,7 +119,7 @@ export const COASTAL_CAVES: Region = {
     rest_site: 10,
     safe_passage: 13,
     region_shortcut: 7,
-    scoundrel: 5,
+    scoundrel: 8, // Same as puzzle_chamber
   },
   visualTheme: {
     primaryColor: '#34495e',
@@ -151,7 +151,7 @@ export const DRAGONS_LAIR: Region = {
     rest_site: 10,
     safe_passage: 12,
     region_shortcut: 7, // Dragons are surprisingly hospitable
-    scoundrel: 5,
+    scoundrel: 4, // Same as puzzle_chamber
   },
   visualTheme: {
     primaryColor: '#8b0000',

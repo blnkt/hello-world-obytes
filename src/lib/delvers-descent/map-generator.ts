@@ -82,16 +82,30 @@ export class DungeonMapGenerator {
 
     const nodeCount = Math.floor(Math.random() * 2) + 2; // 2-3 nodes
     // Select encounter types using weighted distribution (region-aware per call)
-    const { weights, total } = await this.getWeightsForRegion(regionKey, depth);
+    let { weights, total } = await this.getWeightsForRegion(regionKey, depth);
 
     const nodes: DungeonNode[] = [];
+    let safePassageUsed = false;
 
     for (let position = 0; position < nodeCount; position++) {
+      // If safe_passage was already used in this depth, remove it from weights
+      if (safePassageUsed) {
+        weights = weights.filter((w) => w.type !== 'safe_passage');
+        total = weights.reduce((sum, w) => sum + w.weight, 0);
+      }
+
+      const encounterType = this.pickWeightedEncounterType(weights, total);
+
+      // Track if safe_passage was selected
+      if (encounterType === 'safe_passage') {
+        safePassageUsed = true;
+      }
+
       const node: DungeonNode = {
         id: `depth${depth}-node${position}`,
         depth,
         position,
-        type: this.pickWeightedEncounterType(weights, total),
+        type: encounterType,
         energyCost: this.calculateNodeCost(depth),
         returnCost: this.calculateReturnCost(depth),
         isRevealed: false,
@@ -341,6 +355,7 @@ export class DungeonMapGenerator {
    * Resolve weights for a given region key, falling back to instance defaults
    * Excludes discovery_site when all regions are unlocked
    * Excludes region_shortcut when depth <= 10 or only default region is unlocked
+   * Excludes safe_passage when depth <= 10
    */
   private async getWeightsForRegion(
     regionKey?: string,
@@ -401,6 +416,11 @@ export class DungeonMapGenerator {
     const onlyDefaultUnlocked = await this.hasOnlyDefaultRegionUnlocked();
     if (onlyDefaultUnlocked) {
       weights = weights.filter((w) => w.type !== 'region_shortcut');
+    }
+
+    // Exclude safe_passage if depth <= 10
+    if (depth !== undefined && depth <= 10) {
+      weights = weights.filter((w) => w.type !== 'safe_passage');
     }
 
     // Recalculate total after filtering

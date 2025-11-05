@@ -180,7 +180,7 @@ describe('Map Generator Integration with Return Cost Calculator', () => {
   });
 
   describe('Task 8.14: Scoundrel encounter frequency verification', () => {
-    it('should generate scoundrel encounters at approximately 5% frequency', async () => {
+    it('should generate scoundrel encounters at approximately 22.3% frequency (same as puzzle_chamber)', async () => {
       // Generate many maps to sample the distribution
       const samples: EncounterType[] = [];
 
@@ -194,9 +194,9 @@ describe('Map Generator Integration with Return Cost Calculator', () => {
       ).length;
       const scoundrelFrequency = scoundrelCount / samples.length;
 
-      // With 5% distribution, we expect approximately 5% ± 2% (accounting for randomness)
-      expect(scoundrelFrequency).toBeGreaterThan(0.03); // At least 3%
-      expect(scoundrelFrequency).toBeLessThan(0.08); // At most 8%
+      // With 22.325% distribution (same as puzzle_chamber), we expect approximately 22.3% ± 7% (accounting for randomness)
+      expect(scoundrelFrequency).toBeGreaterThan(0.15); // At least 15%
+      expect(scoundrelFrequency).toBeLessThan(0.3); // At most 30%
     });
 
     it('should include scoundrel in encounter type distribution across multiple maps', async () => {
