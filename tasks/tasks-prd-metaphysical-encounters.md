@@ -64,21 +64,21 @@ Based on PRD: `prd-metaphysical-encounters.md`
   - [x] 2.10 Display how many encounters the boost will last (2-3)
   - [x] 2.11 Add "Activate Shrine" button that calls onComplete with outcome
   - [x] 2.12 Style UI to match existing advanced encounter screens with appropriate visual theme
-  - [ ] 2.13 Write unit tests for `LuckShrineEncounter` class covering activation, state management, and edge cases
-  - [ ] 2.14 Write UI tests for `luck-shrine-screen.tsx` component
+  - [x] 2.13 Write unit tests for `LuckShrineEncounter` class covering activation, state management, and edge cases
+  - [x] 2.14 Write UI tests for `luck-shrine-screen.tsx` component
 
 - [ ] 3.0 Energy Nexus Encounter Implementation
-  - [ ] 3.1 Create `src/lib/delvers-descent/energy-nexus-encounter.ts` with `EnergyNexusEncounter` class
-  - [ ] 3.2 Define `EnergyNexusState` interface with encounter ID, config, conversion direction, and outcome fields
-  - [ ] 3.3 Define `EnergyNexusConfig` interface with fixed conversion rate (e.g., 1 item value = 10 energy)
-  - [ ] 3.4 Implement constructor that accepts encounter ID and depth, generates config with conversion rate
-  - [ ] 3.5 Implement `getState()` method to return current state
-  - [ ] 3.6 Implement `selectConversionDirection()` method to choose items→energy or energy→items
-  - [ ] 3.7 Implement `validateConversion()` method to check if player has sufficient resources
-  - [ ] 3.8 Implement `convertItemsToEnergy()` method that calculates energy from item values and validates
-  - [ ] 3.9 Implement `convertEnergyToItems()` method that calculates items from energy and validates
-  - [ ] 3.10 Implement `executeConversion()` method that performs conversion and returns outcome (limit to 1 conversion)
-  - [ ] 3.11 Calculate energy cost based on depth and encounter type modifier
+  - [x] 3.1 Create `src/lib/delvers-descent/energy-nexus-encounter.ts` with `EnergyNexusEncounter` class
+  - [x] 3.2 Define `EnergyNexusState` interface with encounter ID, config, conversion direction, and outcome fields
+  - [x] 3.3 Define `EnergyNexusConfig` interface with fixed conversion rate (e.g., 1 item value = 10 energy)
+  - [x] 3.4 Implement constructor that accepts encounter ID and depth, generates config with conversion rate
+  - [x] 3.5 Implement `getState()` method to return current state
+  - [x] 3.6 Implement `selectConversionDirection()` method to choose items→energy or energy→items
+  - [x] 3.7 Implement `validateConversion()` method to check if player has sufficient resources
+  - [x] 3.8 Implement `convertItemsToEnergy()` method that calculates energy from item values and validates
+  - [x] 3.9 Implement `convertEnergyToItems()` method that calculates items from energy and validates
+  - [x] 3.10 Implement `executeConversion()` method that performs conversion and returns outcome (limit to 1 conversion)
+  - [x] 3.11 Calculate energy cost based on depth and encounter type modifier
   - [ ] 3.12 Create `src/components/delvers-descent/encounters/advanced/energy-nexus-screen.tsx` UI component
   - [ ] 3.13 Display current energy and inventory in UI
   - [ ] 3.14 Display conversion rate clearly
