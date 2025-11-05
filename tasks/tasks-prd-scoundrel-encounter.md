@@ -40,7 +40,7 @@
   - [x] 1.10 Add `scoundrel` multiplier to `encounterTypeMultipliers` in `EncounterLoaderOptimized`
   - [x] 1.11 Update `balance-config.ts` to include `scoundrel` in `typeMultipliers` (default: 1.2)
   - [x] 1.12 Write unit tests for type definitions and validation
-  - [ ] 1.13 Write unit tests for encounter routing
+  - [x] 1.13 Write unit tests for encounter routing
 
 - [ ] 2.0 Create ScoundrelEncounter Class and Core Mechanics
   - [ ] 2.1 Create `src/lib/delvers-descent/scoundrel-encounter.ts` file

@@ -60,6 +60,35 @@ describe('EncounterRouter', () => {
       expect(getEncounterRoute(node)).toBe('scoundrel');
     });
 
+    it('should route all supported encounter types correctly', () => {
+      const supportedTypes = [
+        'puzzle_chamber',
+        'discovery_site',
+        'risk_event',
+        'hazard',
+        'rest_site',
+        'safe_passage',
+        'region_shortcut',
+        'scoundrel',
+      ];
+
+      supportedTypes.forEach((type) => {
+        const node: DungeonNode = {
+          id: `test-${type}`,
+          depth: 1,
+          position: 0,
+          type: type as DungeonNode['type'],
+          energyCost: 10,
+          returnCost: 5,
+          isRevealed: false,
+          connections: [],
+        };
+
+        const route = getEncounterRoute(node);
+        expect(route).toBe(type);
+      });
+    });
+
     it('should return null for unsupported encounter types', () => {
       const node: DungeonNode = {
         id: 'test',
