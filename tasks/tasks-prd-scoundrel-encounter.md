@@ -141,7 +141,7 @@
   - [x] 7.14 Add "Return to Map" button to exit encounter
   - [x] 7.15 Integrate with encounter state management
   - [x] 7.16 Write unit tests for ScoundrelScreen component
-  - [ ] 7.17 Write unit tests for UI state management
+  - [x] 7.17 Write unit tests for UI state management
 
 - [x] 8.0 Integrate Scoundrel into Map Generation
   - [x] 8.1 Update `DungeonMapGeneratorOptimized.encounterTypes` array to include `'scoundrel'`

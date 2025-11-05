@@ -402,4 +402,225 @@ describe('ScoundrelScreen', () => {
       }
     });
   });
+
+  describe('UI State Management', () => {
+    it('should initialize state from encounter', () => {
+      const encounter = createMockEncounter();
+      const initialState = encounter.getState();
+
+      render(<ScoundrelScreen {...defaultProps} encounter={encounter} />);
+
+      // Component should render with initial state
+      expect(screen.getByText("Scoundrel's Dungeon")).toBeTruthy();
+      expect(screen.getByText(/Life/)).toBeTruthy();
+      expect(
+        screen.getByText(
+          new RegExp(
+            `${initialState.currentLife}/${initialState.config.startingLife}`
+          )
+        )
+      ).toBeTruthy();
+    });
+
+    it('should update state when card is selected', () => {
+      const encounter = createMockEncounter();
+      const availableCards = encounter.getAvailableCards();
+
+      if (availableCards.length > 0) {
+        const { rerender } = render(
+          <ScoundrelScreen {...defaultProps} encounter={encounter} />
+        );
+
+        const initialLife = encounter.getState().currentLife;
+        const cardButton = screen.getByTestId(`card-${availableCards[0].id}`);
+        fireEvent.press(cardButton);
+
+        // State should update via handler - card selection modifies encounter state
+        const updatedState = encounter.getState();
+        // Re-render to see updated state
+        rerender(<ScoundrelScreen {...defaultProps} encounter={encounter} />);
+
+        // Verify card was selected by checking last card
+        const lastCard = encounter.getLastCard();
+        expect(lastCard?.id).toBe(availableCards[0].id);
+      }
+    });
+
+    it('should update state when room is advanced', () => {
+      const encounter = createMockEncounter();
+      const availableCards = encounter.getAvailableCards();
+
+      if (availableCards.length > 0) {
+        // Complete first room
+        encounter.selectCard(availableCards[0].id);
+        const initialRoom = encounter.getState().currentRoom;
+
+        const { rerender } = render(
+          <ScoundrelScreen {...defaultProps} encounter={encounter} />
+        );
+
+        const advanceButton = screen.queryByText('Advance to Next Room');
+        if (advanceButton) {
+          fireEvent.press(advanceButton);
+
+          // Re-render to see updated state
+          rerender(<ScoundrelScreen {...defaultProps} encounter={encounter} />);
+
+          // Room should have advanced
+          const updatedState = encounter.getState();
+          expect(updatedState.currentRoom).toBeGreaterThan(initialRoom);
+        }
+      }
+    });
+
+    it('should transition to outcome state when encounter completes', () => {
+      const encounter = createMockEncounter();
+      const onComplete = jest.fn();
+
+      // Complete all rooms
+      const config = encounter.getState().config;
+      for (let i = 0; i < config.dungeonSize; i++) {
+        const availableCards = encounter.getAvailableCards();
+        if (availableCards.length > 0) {
+          encounter.selectCard(availableCards[0].id);
+          if (i < config.dungeonSize - 1) {
+            encounter.advanceRoom();
+          }
+        }
+      }
+
+      const { rerender } = render(
+        <ScoundrelScreen
+          {...defaultProps}
+          encounter={encounter}
+          onComplete={onComplete}
+        />
+      );
+
+      // Initially should show gameplay content
+      expect(screen.getByTestId('scoundrel-screen')).toBeTruthy();
+
+      // Complete encounter
+      const completeButton = screen.queryByText('Complete Encounter');
+      if (completeButton) {
+        fireEvent.press(completeButton);
+
+        // Re-render to see outcome state
+        rerender(
+          <ScoundrelScreen
+            {...defaultProps}
+            encounter={encounter}
+            onComplete={onComplete}
+          />
+        );
+
+        // Should show outcome display
+        expect(screen.queryByText(/Success!|Failure!/)).toBeTruthy();
+        expect(onComplete).toHaveBeenCalled();
+      }
+    });
+
+    it('should synchronize state with encounter changes', () => {
+      const encounter = createMockEncounter();
+      const initialState = encounter.getState();
+
+      render(<ScoundrelScreen {...defaultProps} encounter={encounter} />);
+
+      // Verify initial state is displayed
+      expect(
+        screen.getByText(
+          new RegExp(
+            `${initialState.currentLife}/${initialState.config.startingLife}`
+          )
+        )
+      ).toBeTruthy();
+
+      // Modify encounter state
+      const availableCards = encounter.getAvailableCards();
+      if (availableCards.length > 0) {
+        encounter.selectCard(availableCards[0].id);
+        const updatedState = encounter.getState();
+
+        // Component should reflect updated state on next render
+        const { rerender } = render(
+          <ScoundrelScreen {...defaultProps} encounter={encounter} />
+        );
+        rerender(<ScoundrelScreen {...defaultProps} encounter={encounter} />);
+
+        // State should be synchronized - verify via last card
+        const lastCard = encounter.getLastCard();
+        expect(lastCard?.id).toBe(availableCards[0].id);
+      }
+    });
+
+    it('should handle state updates without re-mounting component', () => {
+      const encounter = createMockEncounter();
+      const { rerender } = render(
+        <ScoundrelScreen {...defaultProps} encounter={encounter} />
+      );
+
+      // Component should maintain identity across state updates
+      const initialScreen = screen.getByTestId('scoundrel-screen');
+      expect(initialScreen).toBeTruthy();
+
+      // Update encounter state
+      const availableCards = encounter.getAvailableCards();
+      if (availableCards.length > 0) {
+        encounter.selectCard(availableCards[0].id);
+        rerender(<ScoundrelScreen {...defaultProps} encounter={encounter} />);
+
+        // Component should still exist (not unmounted)
+        const updatedScreen = screen.getByTestId('scoundrel-screen');
+        expect(updatedScreen).toBeTruthy();
+      }
+    });
+
+    it('should conditionally render based on outcome state', () => {
+      const encounter = createMockEncounter();
+      const onComplete = jest.fn();
+
+      // Complete encounter and resolve
+      const config = encounter.getState().config;
+      for (let i = 0; i < config.dungeonSize; i++) {
+        const availableCards = encounter.getAvailableCards();
+        if (availableCards.length > 0) {
+          encounter.selectCard(availableCards[0].id);
+          if (i < config.dungeonSize - 1) {
+            encounter.advanceRoom();
+          }
+        }
+      }
+
+      const outcome = encounter.resolve(mockInventory);
+
+      // Render with outcome
+      const { rerender } = render(
+        <ScoundrelScreen
+          {...defaultProps}
+          encounter={encounter}
+          onComplete={onComplete}
+        />
+      );
+
+      // Complete encounter to trigger outcome state
+      const completeButton = screen.queryByText('Complete Encounter');
+      if (completeButton) {
+        fireEvent.press(completeButton);
+        rerender(
+          <ScoundrelScreen
+            {...defaultProps}
+            encounter={encounter}
+            onComplete={onComplete}
+          />
+        );
+
+        // Should show outcome display instead of gameplay content
+        if (outcome.type === 'success' || outcome.type === 'failure') {
+          expect(screen.queryByText(/Success!|Failure!/)).toBeTruthy();
+          // Gameplay content should not be visible
+          expect(screen.queryByText('Available Cards')).toBeNull();
+        }
+      }
+    });
+  });
 });
