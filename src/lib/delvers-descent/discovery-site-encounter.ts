@@ -117,6 +117,7 @@ export class DiscoverySiteEncounter {
   };
   private encounterComplete: boolean = false;
   private encounterResult: 'success' | 'failure' | null = null;
+  private selectedCollectionSetId: string | null = null;
 
   constructor(
     depth: number = 1,
@@ -333,6 +334,14 @@ export class DiscoverySiteEncounter {
     }
 
     return [...this.regionalDiscoveries];
+  }
+
+  /**
+   * Get the collection set ID that is currently being offered in this encounter
+   * Returns null if no collection set has been selected yet
+   */
+  getSelectedCollectionSetId(): string | null {
+    return this.selectedCollectionSetId;
   }
 
   // Lore Collection System
@@ -678,7 +687,7 @@ export class DiscoverySiteEncounter {
   }
 
   private async generateRegionalDiscoveries(
-    path: ExplorationPath
+    _path: ExplorationPath
   ): Promise<void> {
     let selectedSet: string | null = null;
 
@@ -708,6 +717,7 @@ export class DiscoverySiteEncounter {
 
     const discovery = this.createDiscoveryReward(selectedSet, scaledValue);
     this.regionalDiscoveries.push(discovery);
+    this.selectedCollectionSetId = selectedSet;
   }
 
   private createDiscoveryReward(

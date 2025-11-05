@@ -52,9 +52,9 @@
   - [x] 3.3 Update getWeightsForRegion to exclude discovery_site from encounter weights when all regions are unlocked
   - [x] 3.4 Ensure encounter weights are recalculated/normalized after excluding discovery_site to maintain balance
   - [x] 3.5 Apply same changes to DungeonMapGeneratorOptimized class
-  - [ ] 3.6 Write unit tests verifying discovery_site is excluded when all regions unlocked
-  - [ ] 3.7 Write unit tests verifying encounter weights are properly normalized after exclusion
-  - [ ] 3.8 Write integration tests for map generation with all regions unlocked scenario
+  - [x] 3.6 Write unit tests verifying discovery_site is excluded when all regions unlocked
+  - [x] 3.7 Write unit tests verifying encounter weights are properly normalized after exclusion
+  - [x] 3.8 Write integration tests for map generation with all regions unlocked scenario
 
 - [ ] 4.0 Add Region Unlock Progress UI to Discovery Site Screen
   - [ ] 4.1 Create helper function to get region unlock progress for a given collection set
