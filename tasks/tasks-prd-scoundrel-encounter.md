@@ -39,7 +39,7 @@
   - [x] 1.9 Add `scoundrel` multiplier to `encounterTypeMultipliers` in `EncounterResolver` (suggest 1.2x)
   - [x] 1.10 Add `scoundrel` multiplier to `encounterTypeMultipliers` in `EncounterLoaderOptimized`
   - [x] 1.11 Update `balance-config.ts` to include `scoundrel` in `typeMultipliers` (default: 1.2)
-  - [ ] 1.12 Write unit tests for type definitions and validation
+  - [x] 1.12 Write unit tests for type definitions and validation
   - [ ] 1.13 Write unit tests for encounter routing
 
 - [ ] 2.0 Create ScoundrelEncounter Class and Core Mechanics

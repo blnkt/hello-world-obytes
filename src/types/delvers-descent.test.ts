@@ -102,6 +102,23 @@ describe("Delver's Descent Types", () => {
         expect(node.type).toBe(type);
       });
     });
+
+    it('should create a valid DungeonNode with scoundrel type', () => {
+      const node: DungeonNode = {
+        id: 'scoundrel-node',
+        depth: 3,
+        position: 1,
+        type: 'scoundrel',
+        energyCost: 25,
+        returnCost: 15,
+        isRevealed: false,
+        connections: [],
+      };
+
+      expect(node.type).toBe('scoundrel');
+      expect(node.depth).toBe(3);
+      expect(node.energyCost).toBe(25);
+    });
   });
 
   describe('RunState interface', () => {
@@ -199,6 +216,23 @@ describe("Delver's Descent Types", () => {
       expect(encounter.energyCost).toBe(30);
       expect(encounter.rewards).toEqual([]);
       expect(encounter.risks).toEqual([]);
+    });
+
+    it('should create a valid EncounterData object with scoundrel type', () => {
+      const encounter: EncounterData = {
+        id: 'scoundrel-encounter-1',
+        type: 'scoundrel',
+        title: 'Scoundrel Challenge',
+        description: 'A strategic dungeon challenge',
+        energyCost: 20,
+        rewards: [],
+        risks: [],
+      };
+
+      expect(encounter.id).toBe('scoundrel-encounter-1');
+      expect(encounter.type).toBe('scoundrel');
+      expect(encounter.title).toBe('Scoundrel Challenge');
+      expect(encounter.energyCost).toBe(20);
     });
   });
 
@@ -445,6 +479,10 @@ describe("Delver's Descent Types", () => {
         ENCOUNTER_TYPES.forEach((type) => {
           expect(isValidEncounterType(type)).toBe(true);
         });
+      });
+
+      it('should return true for scoundrel encounter type', () => {
+        expect(isValidEncounterType('scoundrel')).toBe(true);
       });
 
       it('should return false for invalid encounter types', () => {
