@@ -112,34 +112,34 @@
   - [x] 6.4 Implement `calculateEnergyLoss(score: number, remainingLife: number)` method
   - [x] 6.5 Ensure energy loss scales with failure severity (negative score magnitude or life deficit)
   - [x] 6.6 Implement `applyFailureConsequences()` method combining item theft and energy loss
-  - [ ] 6.7 Integrate with `RunStateManager` to access current run inventory (UI integration - Task 7.0)
+  - [x] 6.7 Integrate with `RunStateManager` to access current run inventory (UI integration - Task 7.0)
   - [x] 6.8 Ensure consequences are returned in `AdvancedEncounterOutcome.consequence` on failure
   - [x] 6.9 Update `resolve()` method to apply failure consequences when life = 0
   - [x] 6.10 Ensure failure consequences message describes items stolen and energy lost
-  - [ ] 6.11 Update `active-run.tsx` to handle scoundrel failure consequences (item theft and energy loss) (Task 7.0)
-  - [ ] 6.12 Ensure stolen items are removed from run inventory when failure occurs (Task 7.0)
-  - [ ] 6.13 Ensure additional energy loss is applied to run state when failure occurs (Task 7.0)
+  - [x] 6.11 Update `active-run.tsx` to handle scoundrel failure consequences (item theft and energy loss) (Task 7.0)
+  - [x] 6.12 Ensure stolen items are removed from run inventory when failure occurs (Task 7.0)
+  - [x] 6.13 Ensure additional energy loss is applied to run state when failure occurs (Task 7.0)
   - [x] 6.14 Write unit tests for item theft calculation
   - [x] 6.15 Write unit tests for energy loss calculation
   - [x] 6.16 Write unit tests for failure consequences integration
   - [ ] 6.17 Write integration tests with RunStateManager (Task 7.0)
 
-- [ ] 7.0 Create Scoundrel Encounter UI Screen
-  - [ ] 7.1 Create `src/components/delvers-descent/encounters/scoundrel-screen.tsx` file
-  - [ ] 7.2 Define `ScoundrelScreenProps` interface with encounter, onComplete, onReturn
-  - [ ] 7.3 Implement life display component showing "Life: X/10" with visual indicator
-  - [ ] 7.4 Implement dungeon progress display showing "Room X/Y"
-  - [ ] 7.5 Implement current score display (for success scenarios)
-  - [ ] 7.6 Implement remaining monsters display showing list with values (for failure scenarios)
-  - [ ] 7.7 Implement last card display showing last card played (especially health potion)
-  - [ ] 7.8 Implement reward preview showing potential tier based on current score
-  - [ ] 7.9 Implement failure warning when life ≤ 2 (e.g., "Life: 1/10 - Risk of Failure!")
-  - [ ] 7.10 Implement card selection UI (abstracted, not actual cards - choices/actions)
-  - [ ] 7.11 Implement room navigation UI showing available cards/choices
-  - [ ] 7.12 Implement outcome display showing success/failure, score, rewards, consequences
-  - [ ] 7.13 Add "Continue" button to proceed after outcome
-  - [ ] 7.14 Add "Return to Map" button to exit encounter
-  - [ ] 7.15 Integrate with encounter state management
+- [x] 7.0 Create Scoundrel Encounter UI Screen
+  - [x] 7.1 Create `src/components/delvers-descent/encounters/scoundrel-screen.tsx` file
+  - [x] 7.2 Define `ScoundrelScreenProps` interface with encounter, onComplete, onReturn
+  - [x] 7.3 Implement life display component showing "Life: X/10" with visual indicator
+  - [x] 7.4 Implement dungeon progress display showing "Room X/Y"
+  - [x] 7.5 Implement current score display (for success scenarios)
+  - [x] 7.6 Implement remaining monsters display showing list with values (for failure scenarios)
+  - [x] 7.7 Implement last card display showing last card played (especially health potion)
+  - [x] 7.8 Implement reward preview showing potential tier based on current score
+  - [x] 7.9 Implement failure warning when life ≤ 2 (e.g., "Life: 1/10 - Risk of Failure!")
+  - [x] 7.10 Implement card selection UI (abstracted, not actual cards - choices/actions)
+  - [x] 7.11 Implement room navigation UI showing available cards/choices
+  - [x] 7.12 Implement outcome display showing success/failure, score, rewards, consequences
+  - [x] 7.13 Add "Continue" button to proceed after outcome
+  - [x] 7.14 Add "Return to Map" button to exit encounter
+  - [x] 7.15 Integrate with encounter state management
   - [ ] 7.16 Write unit tests for ScoundrelScreen component
   - [ ] 7.17 Write unit tests for UI state management
 

@@ -9,6 +9,10 @@ import { RegionShortcutEncounter } from '@/lib/delvers-descent/region-shortcut-e
 import { RestSiteEncounter } from '@/lib/delvers-descent/rest-site-encounter';
 import { RiskEventEncounter } from '@/lib/delvers-descent/risk-event-encounter';
 import { SafePassageEncounter } from '@/lib/delvers-descent/safe-passage-encounter';
+import {
+  type ScoundrelConfig,
+  ScoundrelEncounter,
+} from '@/lib/delvers-descent/scoundrel-encounter';
 import type {
   DelvingRun,
   DungeonNode,
@@ -23,6 +27,7 @@ import { RiskEventScreen } from './advanced/risk-event-screen';
 import { SafePassageScreen } from './advanced/safe-passage-screen';
 import { DiscoverySiteScreen } from './discovery-site-screen';
 import { PuzzleChamberScreen } from './puzzle-chamber-screen';
+import { ScoundrelScreen } from './scoundrel-screen';
 
 interface EncounterScreenProps {
   run: DelvingRun;
@@ -203,6 +208,13 @@ const useAdvancedEncounter = (node: DungeonNode, currentRegionId?: string) => {
         .finally(() => {
           setIsLoading(false);
         });
+    } else if (node.type === 'scoundrel') {
+      const config: ScoundrelConfig = {
+        startingLife: 10,
+        dungeonSize: 5 + Math.floor(Math.random() * 6), // 5-10 rooms
+        depth: node.depth,
+      };
+      setAdvancedEncounter(new ScoundrelEncounter(node.id, config));
     }
   }, [node, currentRegionId]);
 
@@ -215,12 +227,29 @@ const handleAdvancedEncounterComplete = (
     result: 'success' | 'failure';
     rewards?: any[];
     targetRegionId?: string;
+    itemsToSteal?: string[];
+    additionalEnergyLoss?: number;
   }) => void
 ) => {
   const result = outcome.type === 'success' ? 'success' : 'failure';
   const rewards = outcome.reward ? [outcome.reward] : undefined;
   const targetRegionId = outcome.targetRegionId;
-  onEncounterComplete({ result, rewards, targetRegionId });
+  // Extract scoundrel-specific failure consequences
+  const itemsToSteal =
+    outcome.consequence && (outcome.consequence as any).itemsToSteal
+      ? (outcome.consequence as any).itemsToSteal
+      : undefined;
+  const additionalEnergyLoss =
+    outcome.consequence && outcome.consequence.energyLoss
+      ? outcome.consequence.energyLoss
+      : undefined;
+  onEncounterComplete({
+    result,
+    rewards,
+    targetRegionId,
+    itemsToSteal,
+    additionalEnergyLoss,
+  });
 };
 
 const renderStandardEncounter = (params: {
@@ -280,9 +309,112 @@ const renderStandardEncounter = (params: {
   return null;
 };
 
+// eslint-disable-next-line max-params
+const getBasicScreen = (params: {
+  node: DungeonNode;
+  advancedEncounter: any;
+  screenProps: { onComplete: (outcome: any) => void; onReturn: () => void };
+}) => {
+  if (params.node.type === 'hazard' && params.advancedEncounter) {
+    return (
+      <HazardScreen
+        encounter={params.advancedEncounter}
+        {...params.screenProps}
+      />
+    );
+  }
+  if (params.node.type === 'risk_event' && params.advancedEncounter) {
+    return (
+      <RiskEventScreen
+        encounter={params.advancedEncounter}
+        {...params.screenProps}
+      />
+    );
+  }
+  if (params.node.type === 'rest_site' && params.advancedEncounter) {
+    return (
+      <RestSiteScreen
+        encounter={params.advancedEncounter}
+        {...params.screenProps}
+      />
+    );
+  }
+  if (params.node.type === 'safe_passage' && params.advancedEncounter) {
+    return (
+      <SafePassageScreen
+        encounter={params.advancedEncounter}
+        {...params.screenProps}
+      />
+    );
+  }
+  if (params.node.type === 'region_shortcut' && params.advancedEncounter) {
+    return (
+      <RegionShortcutScreen
+        encounter={params.advancedEncounter}
+        {...params.screenProps}
+      />
+    );
+  }
+  return null;
+};
+
+const renderBasicEncounterScreens = (params: {
+  node: DungeonNode;
+  advancedEncounter: any;
+  handlers: { complete: (outcome: any) => void; return: () => void };
+}) => {
+  const screenProps = {
+    onComplete: params.handlers.complete,
+    onReturn: params.handlers.return,
+  };
+  return getBasicScreen({
+    node: params.node,
+    advancedEncounter: params.advancedEncounter,
+    screenProps,
+  });
+};
+
+const renderScoundrelScreen = (params: {
+  node: DungeonNode;
+  advancedEncounter: any;
+  runState?: RunState | null;
+  completeHandler: (outcome: any) => void;
+  onReturnToMap: () => void;
+}) => {
+  if (params.node.type === 'scoundrel' && params.advancedEncounter) {
+    return (
+      <ScoundrelScreen
+        encounter={params.advancedEncounter}
+        runInventory={params.runState?.inventory}
+        onComplete={params.completeHandler}
+        onReturn={params.onReturnToMap}
+      />
+    );
+  }
+
+  return null;
+};
+
+const renderEncounterByType = (params: {
+  node: DungeonNode;
+  advancedEncounter: any;
+  runState?: RunState | null;
+  handlers: { complete: (outcome: any) => void; return: () => void };
+}) => {
+  const basicScreen = renderBasicEncounterScreens(params);
+  if (basicScreen) return basicScreen;
+
+  return renderScoundrelScreen({
+    ...params,
+    completeHandler: params.handlers.complete,
+    onReturnToMap: params.handlers.return,
+  });
+};
+
 const renderAdvancedEncounter = (params: {
   node: DungeonNode;
   advancedEncounter: any;
+  runState?: RunState | null;
   onReturnToMap: () => void;
   onEncounterComplete: (params: {
     result: 'success' | 'failure';
@@ -290,63 +422,19 @@ const renderAdvancedEncounter = (params: {
     targetRegionId?: string;
   }) => void;
 }) => {
-  const { node, advancedEncounter, onReturnToMap, onEncounterComplete } =
-    params;
   const completeHandler = (outcome: any) => {
-    handleAdvancedEncounterComplete(outcome, onEncounterComplete);
+    handleAdvancedEncounterComplete(outcome, params.onEncounterComplete);
   };
 
-  if (node.type === 'hazard' && advancedEncounter) {
-    return (
-      <HazardScreen
-        encounter={advancedEncounter}
-        onComplete={completeHandler}
-        onReturn={onReturnToMap}
-      />
-    );
-  }
-
-  if (node.type === 'risk_event' && advancedEncounter) {
-    return (
-      <RiskEventScreen
-        encounter={advancedEncounter}
-        onComplete={completeHandler}
-        onReturn={onReturnToMap}
-      />
-    );
-  }
-
-  if (node.type === 'rest_site' && advancedEncounter) {
-    return (
-      <RestSiteScreen
-        encounter={advancedEncounter}
-        onComplete={completeHandler}
-        onReturn={onReturnToMap}
-      />
-    );
-  }
-
-  if (node.type === 'safe_passage' && advancedEncounter) {
-    return (
-      <SafePassageScreen
-        encounter={advancedEncounter}
-        onComplete={completeHandler}
-        onReturn={onReturnToMap}
-      />
-    );
-  }
-
-  if (node.type === 'region_shortcut' && advancedEncounter) {
-    return (
-      <RegionShortcutScreen
-        encounter={advancedEncounter}
-        onComplete={completeHandler}
-        onReturn={onReturnToMap}
-      />
-    );
-  }
-
-  return null;
+  return renderEncounterByType({
+    node: params.node,
+    advancedEncounter: params.advancedEncounter,
+    runState: params.runState,
+    handlers: {
+      complete: completeHandler,
+      return: params.onReturnToMap,
+    },
+  });
 };
 
 const EncounterContent: React.FC<{
@@ -388,6 +476,7 @@ const EncounterContent: React.FC<{
   const advancedContent = renderAdvancedEncounter({
     node,
     advancedEncounter,
+    runState,
     onReturnToMap,
     onEncounterComplete: (params) => {
       onEncounterComplete({
@@ -436,6 +525,46 @@ const renderAdvancedEncounterScreen = (params: {
   );
 };
 
+const buildStartHandler = (params: {
+  encounterResolver: any;
+  startEncounter: () => Promise<void>;
+}) => {
+  return async () => {
+    if (params.encounterResolver) {
+      await params.startEncounter();
+    }
+  };
+};
+
+const buildCompleteHandler = (params: {
+  encounterResolver: any;
+  completeEncounter: (
+    result: 'success' | 'failure',
+    rewards?: any[]
+  ) => Promise<void>;
+  onEncounterComplete: (params: {
+    result: 'success' | 'failure';
+    rewards?: any[];
+    targetRegionId?: string;
+    unlockedRegionId?: string;
+  }) => void;
+}) => {
+  return async (completeParams: {
+    result: 'success' | 'failure';
+    rewards?: any[];
+    targetRegionId?: string;
+    unlockedRegionId?: string;
+  }) => {
+    if (params.encounterResolver) {
+      await params.completeEncounter(
+        completeParams.result,
+        completeParams.rewards
+      );
+      params.onEncounterComplete(completeParams);
+    }
+  };
+};
+
 const renderStandardEncounterScreen = (params: {
   run: DelvingRun;
   node: DungeonNode;
@@ -453,33 +582,8 @@ const renderStandardEncounterScreen = (params: {
     rewards?: any[]
   ) => Promise<void>;
 }) => {
-  const {
-    run,
-    node,
-    onReturnToMap,
-    onEncounterComplete,
-    encounterResolver,
-    startEncounter,
-    completeEncounter,
-  } = params;
-
-  const handleStartEncounter = async () => {
-    if (encounterResolver) {
-      await startEncounter();
-    }
-  };
-
-  const handleEncounterComplete = async (params: {
-    result: 'success' | 'failure';
-    rewards?: any[];
-    targetRegionId?: string;
-    unlockedRegionId?: string;
-  }) => {
-    if (encounterResolver) {
-      await completeEncounter(params.result, params.rewards);
-      onEncounterComplete(params);
-    }
-  };
+  const handleStartEncounter = buildStartHandler(params);
+  const handleEncounterComplete = buildCompleteHandler(params);
 
   return (
     <ScrollView
@@ -487,14 +591,15 @@ const renderStandardEncounterScreen = (params: {
       className="min-h-screen bg-gray-50"
       contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}
     >
-      {encounterResolver && !encounterResolver.getEncounterState() ? (
+      {params.encounterResolver &&
+      !params.encounterResolver.getEncounterState() ? (
         <ReadyToBeginScreen onStart={handleStartEncounter} />
       ) : (
         <View className="min-h-screen bg-gray-50">
           <EncounterContent
-            run={run}
-            node={node}
-            onReturnToMap={onReturnToMap}
+            run={params.run}
+            node={params.node}
+            onReturnToMap={params.onReturnToMap}
             onEncounterComplete={handleEncounterComplete}
           />
         </View>

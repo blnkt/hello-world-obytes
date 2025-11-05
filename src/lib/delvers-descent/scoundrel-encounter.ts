@@ -7,6 +7,9 @@ import type {
 import { RewardCalculator } from './reward-calculator';
 import type { AdvancedEncounterOutcome } from './risk-event-encounter';
 
+// Re-export for UI components
+export type { AdvancedEncounterOutcome };
+
 /**
  * Configuration for a Scoundrel encounter
  */
@@ -710,6 +713,10 @@ export class ScoundrelEncounter {
         itemLossRisk: 0, // Not used for scoundrel (we steal exact items)
         forcedRetreat: false,
         encounterLockout: false,
+        // Store item IDs to steal for scoundrel encounters
+        itemsToSteal: consequences.itemsToSteal,
+      } as AdvancedEncounterOutcome['consequence'] & {
+        itemsToSteal?: string[];
       },
     };
   }
