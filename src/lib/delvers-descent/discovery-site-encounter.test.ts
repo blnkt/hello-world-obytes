@@ -415,6 +415,44 @@ describe('DiscoverySiteEncounter', () => {
       });
     });
 
+    it('should use actual collection set items from collection-sets.ts', async () => {
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        regionManager,
+        collectionManager
+      );
+      const paths = encounter.getExplorationPaths();
+      const result = await encounter.processExplorationDecision(paths[0].id);
+
+      if (result.success) {
+        const discoveries = encounter.getRegionalDiscoveries();
+        expect(discoveries.length).toBeGreaterThan(0);
+
+        discoveries.forEach((discovery) => {
+          // Should have proper item structure from collection sets
+          expect(discovery.name).toBeDefined();
+          expect(discovery.description).toBeDefined();
+          expect(discovery.setId).toBeDefined();
+          expect(discovery.value).toBeGreaterThan(0);
+
+          // Item name should be from actual collection set items
+          // (not hardcoded names like "Ancient Artifact")
+          const regionUnlockSets = [
+            'silk_road_set',
+            'spice_trade_set',
+            'ancient_temple_set',
+            'dragons_hoard_set',
+          ];
+          if (regionUnlockSets.includes(discovery.setId)) {
+            // Should have real item names from collection sets
+            expect(discovery.name).not.toBe('Ancient Artifact');
+            expect(discovery.name).not.toBe('Ruined Relic');
+            expect(discovery.name).not.toBe('Lost Treasure');
+          }
+        });
+      }
+    });
+
     it('should provide different regional collection sets', () => {
       const regionalSets = discoveryEncounter.getRegionalCollectionSets();
 

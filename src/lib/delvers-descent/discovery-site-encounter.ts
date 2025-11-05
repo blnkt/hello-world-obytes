@@ -1,6 +1,7 @@
 import type { CollectedItem, EncounterType } from '@/types/delvers-descent';
 
 import type { CollectionManager } from './collection-manager';
+import { getCollectionSetById } from './collection-sets';
 import type { RegionManager } from './region-manager';
 
 export interface ExplorationPath {
@@ -605,6 +606,34 @@ export class DiscoverySiteEncounter {
     collectionSet: string,
     value: number
   ): CollectedItem {
+    // Try to get the collection set from collection-sets.ts
+    const collectionSetData = getCollectionSetById(collectionSet);
+
+    if (collectionSetData && collectionSetData.items.length > 0) {
+      // Use actual collection set items
+      const availableItems = collectionSetData.items;
+      const randomIndex = Math.floor(Math.random() * availableItems.length);
+      const selectedItem = availableItems[randomIndex];
+
+      // Map CollectionItem category to CollectedItem type
+      const typeMap: Record<string, 'trade_good' | 'discovery' | 'legendary'> =
+        {
+          trade_goods: 'trade_good',
+          discoveries: 'discovery',
+          legendaries: 'legendary',
+        };
+
+      return {
+        id: `discovery-${collectionSet}-${selectedItem.id}-${Date.now()}-${Math.random()}`,
+        type: typeMap[collectionSetData.category] || 'discovery',
+        setId: collectionSet,
+        value: value, // Use provided value (scaled by depth)
+        name: selectedItem.name,
+        description: selectedItem.description,
+      };
+    }
+
+    // Fallback to old hardcoded behavior for backward compatibility
     const setNames: Record<string, string> = {
       ancient_ruins_set: 'Ancient Ruins',
       crystal_caverns_set: 'Crystal Caverns',
