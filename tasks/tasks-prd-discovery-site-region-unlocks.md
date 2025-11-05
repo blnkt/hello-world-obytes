@@ -47,11 +47,11 @@
   - [x] 2.9 Write unit tests for random selection when multiple regions become available
 
 - [ ] 3.0 Update Map Generation to Exclude Discovery Sites When All Regions Unlocked
-  - [ ] 3.1 Add RegionManager dependency to DungeonMapGenerator constructor (optional parameter)
-  - [ ] 3.2 Create helper method to check if all regions are unlocked
-  - [ ] 3.3 Update getWeightsForRegion to exclude discovery_site from encounter weights when all regions are unlocked
-  - [ ] 3.4 Ensure encounter weights are recalculated/normalized after excluding discovery_site to maintain balance
-  - [ ] 3.5 Apply same changes to DungeonMapGeneratorOptimized class
+  - [x] 3.1 Add RegionManager dependency to DungeonMapGenerator constructor (optional parameter)
+  - [x] 3.2 Create helper method to check if all regions are unlocked
+  - [x] 3.3 Update getWeightsForRegion to exclude discovery_site from encounter weights when all regions are unlocked
+  - [x] 3.4 Ensure encounter weights are recalculated/normalized after excluding discovery_site to maintain balance
+  - [x] 3.5 Apply same changes to DungeonMapGeneratorOptimized class
   - [ ] 3.6 Write unit tests verifying discovery_site is excluded when all regions unlocked
   - [ ] 3.7 Write unit tests verifying encounter weights are properly normalized after exclusion
   - [ ] 3.8 Write integration tests for map generation with all regions unlocked scenario

@@ -5,6 +5,8 @@ import type {
 } from '@/types/delvers-descent';
 
 import { DEFAULT_BALANCE_CONFIG } from './balance-config';
+import { type RegionManager } from './region-manager';
+import { REGIONS } from './regions';
 import { ReturnCostCalculator } from './return-cost-calculator';
 
 export class DungeonMapGenerator {
@@ -21,17 +23,20 @@ export class DungeonMapGenerator {
   private readonly encounterWeights: { type: EncounterType; weight: number }[];
   private readonly encounterTotalWeight: number;
   private readonly regionKey?: string;
+  private readonly regionManager?: RegionManager;
 
   constructor(config?: {
     baseMultiplier?: number;
     exponent?: number;
     regionKey?: string;
+    regionManager?: RegionManager;
   }) {
     this.returnCostCalculator = new ReturnCostCalculator({
       baseMultiplier: config?.baseMultiplier ?? 5,
       exponent: config?.exponent ?? 1.5,
     });
     this.regionKey = config?.regionKey;
+    this.regionManager = config?.regionManager;
 
     // Initialize weighted distribution from balance config (region-aware)
     const regionDist = this.regionKey
@@ -63,16 +68,19 @@ export class DungeonMapGenerator {
    * Overload: optionally provide a regionKey to apply regional distribution for this depth
    */
   // eslint-disable-next-line @typescript-eslint/unified-signatures
-  generateDepthLevel(depth: number): DungeonNode[];
-  generateDepthLevel(depth: number, regionKey?: string): DungeonNode[];
-  generateDepthLevel(depth: number, regionKey?: string): DungeonNode[] {
+  generateDepthLevel(depth: number): Promise<DungeonNode[]>;
+  generateDepthLevel(depth: number, regionKey?: string): Promise<DungeonNode[]>;
+  async generateDepthLevel(
+    depth: number,
+    regionKey?: string
+  ): Promise<DungeonNode[]> {
     if (depth < 1) {
       throw new Error('Depth must be at least 1');
     }
 
     const nodeCount = Math.floor(Math.random() * 2) + 2; // 2-3 nodes
     // Select encounter types using weighted distribution (region-aware per call)
-    const { weights, total } = this.getWeightsForRegion(regionKey);
+    const { weights, total } = await this.getWeightsForRegion(regionKey);
 
     const nodes: DungeonNode[] = [];
 
@@ -97,7 +105,7 @@ export class DungeonMapGenerator {
   /**
    * Generate a complete dungeon map with specified maximum depth
    */
-  generateFullMap(maxDepth: number): DungeonNode[] {
+  async generateFullMap(maxDepth: number): Promise<DungeonNode[]> {
     if (maxDepth < 1) {
       throw new Error('Maximum depth must be at least 1');
     }
@@ -106,7 +114,7 @@ export class DungeonMapGenerator {
 
     // Generate all depth levels
     for (let depth = 1; depth <= maxDepth; depth++) {
-      const depthNodes = this.generateDepthLevel(depth);
+      const depthNodes = await this.generateDepthLevel(depth);
       allNodes.push(...depthNodes);
     }
 
@@ -297,36 +305,74 @@ export class DungeonMapGenerator {
   }
 
   /**
-   * Resolve weights for a given region key, falling back to instance defaults
+   * Check if all regions are unlocked
    */
-  private getWeightsForRegion(regionKey?: string): {
+  private async areAllRegionsUnlocked(): Promise<boolean> {
+    if (!this.regionManager) {
+      return false; // Can't determine if all unlocked without RegionManager
+    }
+
+    for (const region of REGIONS) {
+      const isUnlocked = await this.regionManager.isRegionUnlocked(region.id);
+      if (!isUnlocked) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * Resolve weights for a given region key, falling back to instance defaults
+   * Excludes discovery_site when all regions are unlocked
+   */
+  private async getWeightsForRegion(regionKey?: string): Promise<{
     weights: { type: EncounterType; weight: number }[];
     total: number;
-  } {
+  }> {
+    let weights: { type: EncounterType; weight: number }[];
+
     if (!regionKey || regionKey === this.regionKey) {
-      return {
-        weights: this.encounterWeights,
-        total: this.encounterTotalWeight,
-      };
+      // Use instance weights
+      weights = [...this.encounterWeights];
+    } else {
+      // Get region-specific distribution
+      const regionDist =
+        DEFAULT_BALANCE_CONFIG.region.encounterDistributions[regionKey];
+      const dist =
+        regionDist ||
+        DEFAULT_BALANCE_CONFIG.region.encounterDistributions.default ||
+        DEFAULT_BALANCE_CONFIG.encounter.encounterDistribution;
+      weights = [
+        {
+          type: 'puzzle_chamber' as EncounterType,
+          weight: dist.puzzle_chamber,
+        },
+        {
+          type: 'discovery_site' as EncounterType,
+          weight: dist.discovery_site,
+        },
+        { type: 'risk_event' as EncounterType, weight: dist.risk_event },
+        { type: 'hazard' as EncounterType, weight: dist.hazard },
+        { type: 'rest_site' as EncounterType, weight: dist.rest_site },
+        { type: 'safe_passage' as EncounterType, weight: dist.safe_passage },
+        {
+          type: 'region_shortcut' as EncounterType,
+          weight: dist.region_shortcut,
+        },
+      ];
     }
-    const regionDist =
-      DEFAULT_BALANCE_CONFIG.region.encounterDistributions[regionKey];
-    const dist =
-      regionDist ||
-      DEFAULT_BALANCE_CONFIG.region.encounterDistributions.default ||
-      DEFAULT_BALANCE_CONFIG.encounter.encounterDistribution;
-    const weights: { type: EncounterType; weight: number }[] = [
-      { type: 'puzzle_chamber' as EncounterType, weight: dist.puzzle_chamber },
-      { type: 'discovery_site' as EncounterType, weight: dist.discovery_site },
-      { type: 'risk_event' as EncounterType, weight: dist.risk_event },
-      { type: 'hazard' as EncounterType, weight: dist.hazard },
-      { type: 'rest_site' as EncounterType, weight: dist.rest_site },
-      { type: 'safe_passage' as EncounterType, weight: dist.safe_passage },
-      {
-        type: 'region_shortcut' as EncounterType,
-        weight: dist.region_shortcut,
-      },
-    ].filter((w) => w.weight > 0);
+
+    // Filter out zero weights first
+    weights = weights.filter((w) => w.weight > 0);
+
+    // Exclude discovery_site if all regions are unlocked
+    const allUnlocked = await this.areAllRegionsUnlocked();
+    if (allUnlocked) {
+      weights = weights.filter((w) => w.type !== 'discovery_site');
+    }
+
+    // Recalculate total after filtering
     const total = weights.reduce((sum, w) => sum + w.weight, 0);
     return { weights, total };
   }

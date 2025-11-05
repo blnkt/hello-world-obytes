@@ -138,18 +138,18 @@ const useActiveRunData = (runId: string) => {
     []
   );
   const updateDepth = React.useCallback(
-    (newDepth: number) =>
-      setRunState((prev) =>
-        updateDepthImpl({
-          prevState: prev,
-          newDepth,
-          maxDepth,
-          generateDepthLevel,
-          setNodes,
-          setMaxDepth,
-        })
-      ),
-    [maxDepth, generateDepthLevel]
+    async (newDepth: number) => {
+      const updated = await updateDepthImpl({
+        prevState: runState,
+        newDepth,
+        maxDepth,
+        generateDepthLevel,
+        setNodes,
+        setMaxDepth,
+      });
+      setRunState(updated);
+    },
+    [maxDepth, generateDepthLevel, runState]
   );
 
   const updateRegion = React.useCallback(
@@ -189,7 +189,7 @@ const useEncounterHandlers = (params: {
     nodes: DungeonNode[],
     visitedNodes: string[],
     newRegionId: string
-  ) => void;
+  ) => Promise<void>;
 }) => {
   const {
     onEnergyUpdate,
@@ -225,8 +225,12 @@ const useEncounterHandlers = (params: {
   );
 
   const handleEncounterComplete = useCallback(
-    (result: 'success' | 'failure', rewards?: any[], targetRegionId?: string) =>
-      handleEncounterCompleteImpl({
+    async (
+      result: 'success' | 'failure',
+      rewards?: any[],
+      targetRegionId?: string
+    ) =>
+      await handleEncounterCompleteImpl({
         selectedNode,
         setShowEncounter,
         onEnergyUpdate,
@@ -299,7 +303,7 @@ function markNodeVisitedImpl(
   };
 }
 
-function updateDepthImpl({
+async function updateDepthImpl({
   prevState,
   newDepth,
   maxDepth,
@@ -310,27 +314,33 @@ function updateDepthImpl({
   prevState: RunState | null;
   newDepth: number;
   maxDepth: number;
-  generateDepthLevel: (depth: number, regionKey?: string) => DungeonNode[];
+  generateDepthLevel: (
+    depth: number,
+    regionKey?: string
+  ) => Promise<DungeonNode[]>;
   setNodes: React.Dispatch<React.SetStateAction<DungeonNode[]>>;
   setMaxDepth: React.Dispatch<React.SetStateAction<number>>;
-}): RunState | null {
+}): Promise<RunState | null> {
   if (!prevState) return prevState;
   const updatedDepth = Math.max(prevState.currentDepth, newDepth);
   if (updatedDepth >= maxDepth) {
     const regionKey = prevState.currentRegionId;
-    const newNodes = generateDepthLevel(maxDepth + 1, regionKey);
+    const newNodes = await generateDepthLevel(maxDepth + 1, regionKey);
     setNodes((prevNodes) => [...prevNodes, ...newNodes]);
     setMaxDepth(maxDepth + 1);
   }
   return { ...prevState, currentDepth: updatedDepth };
 }
 
-function regenerateUnvisitedNodesWithRegion(params: {
+async function regenerateUnvisitedNodesWithRegion(params: {
   nodes: DungeonNode[];
   visitedNodes: string[];
   newRegionId: string;
-  generateDepthLevel: (depth: number, regionKey?: string) => DungeonNode[];
-}): DungeonNode[] {
+  generateDepthLevel: (
+    depth: number,
+    regionKey?: string
+  ) => Promise<DungeonNode[]>;
+}): Promise<DungeonNode[]> {
   const { nodes, visitedNodes, newRegionId, generateDepthLevel } = params;
   const visitedSet = new Set(visitedNodes);
   const visitedNodesList = nodes.filter((node) => visitedSet.has(node.id));
@@ -352,9 +362,9 @@ function regenerateUnvisitedNodesWithRegion(params: {
 
   // Regenerate nodes for each depth, preserving IDs and connections
   const regeneratedNodes: DungeonNode[] = [];
-  nodesByDepth.forEach((oldNodesAtDepth, depth) => {
+  for (const [depth, oldNodesAtDepth] of nodesByDepth.entries()) {
     // Generate new nodes with new encounter types
-    const newNodes = generateDepthLevel(depth, regionKey);
+    const newNodes = await generateDepthLevel(depth, regionKey);
 
     // Map old nodes to new nodes by position, preserving IDs and connections
     oldNodesAtDepth.forEach((oldNode, index) => {
@@ -366,14 +376,14 @@ function regenerateUnvisitedNodesWithRegion(params: {
         returnCost: newNode.returnCost, // Update return cost
       });
     });
-  });
+  }
 
   // Combine visited nodes (unchanged) with regenerated unvisited nodes
   return [...visitedNodesList, ...regeneratedNodes];
 }
 
 // eslint-disable-next-line max-lines-per-function
-function handleEncounterCompleteImpl({
+async function handleEncounterCompleteImpl({
   selectedNode,
   setShowEncounter,
   onEnergyUpdate,
@@ -401,7 +411,7 @@ function handleEncounterCompleteImpl({
     nodes: DungeonNode[],
     visitedNodes: string[],
     newRegionId: string
-  ) => void;
+  ) => Promise<void>;
   runState: RunState | null;
   nodes: DungeonNode[];
   result: 'success' | 'failure';
@@ -471,7 +481,7 @@ function handleEncounterCompleteImpl({
     // Update region in RunState
     onRegionUpdate(targetRegionId);
     // Regenerate unvisited nodes with new region's encounter distribution
-    onRegenerateMap(nodes, runState.visitedNodes, targetRegionId);
+    await onRegenerateMap(nodes, runState.visitedNodes, targetRegionId);
     setShowEncounter(false);
     return;
   }
@@ -579,7 +589,7 @@ async function loadRunImpl({
   setIsLoading,
 }: {
   runId: string;
-  generateFullMap: (depth: number) => DungeonNode[];
+  generateFullMap: (depth: number) => Promise<DungeonNode[]>;
   setRun: React.Dispatch<React.SetStateAction<DelvingRun | null>>;
   setNodes: React.Dispatch<React.SetStateAction<DungeonNode[]>>;
   setRunState: React.Dispatch<React.SetStateAction<RunState | null>>;
@@ -591,7 +601,7 @@ async function loadRunImpl({
     const foundRun = manager.getRunById(runId);
     if (foundRun) {
       setRun(foundRun);
-      const mapNodes = generateFullMap(5);
+      const mapNodes = await generateFullMap(5);
       setNodes(mapNodes);
       setRunState({
         runId: foundRun.id,
@@ -754,12 +764,12 @@ function useActiveRunControllers({
   });
   const handleInventoryUpdate = buildInventoryUpdater(data.addToInventory);
   const regenerateMap = React.useCallback(
-    (
+    async (
       currentNodes: DungeonNode[],
       visitedNodes: string[],
       newRegionId: string
     ) => {
-      const regenerated = regenerateUnvisitedNodesWithRegion({
+      const regenerated = await regenerateUnvisitedNodesWithRegion({
         nodes: currentNodes,
         visitedNodes,
         newRegionId,
@@ -847,7 +857,7 @@ function useHandlersWiring(params: {
     nodes: DungeonNode[],
     visitedNodes: string[],
     newRegionId: string
-  ) => void;
+  ) => Promise<void>;
   nodes: DungeonNode[];
   run: DelvingRun | null;
   router: any;

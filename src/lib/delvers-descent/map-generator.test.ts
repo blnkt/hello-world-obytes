@@ -10,31 +10,31 @@ describe('DungeonMapGenerator', () => {
   });
 
   describe('generateDepthLevel', () => {
-    it('should generate 2-3 nodes for a depth level', () => {
-      const nodes = generator.generateDepthLevel(1);
+    it('should generate 2-3 nodes for a depth level', async () => {
+      const nodes = await generator.generateDepthLevel(1);
 
       expect(nodes.length).toBeGreaterThanOrEqual(2);
       expect(nodes.length).toBeLessThanOrEqual(3);
     });
 
-    it('should generate nodes with correct depth', () => {
-      const nodes = generator.generateDepthLevel(3);
+    it('should generate nodes with correct depth', async () => {
+      const nodes = await generator.generateDepthLevel(3);
 
       nodes.forEach((node) => {
         expect(node.depth).toBe(3);
       });
     });
 
-    it('should generate nodes with unique positions', () => {
-      const nodes = generator.generateDepthLevel(1);
+    it('should generate nodes with unique positions', async () => {
+      const nodes = await generator.generateDepthLevel(1);
       const positions = nodes.map((node) => node.position);
       const uniquePositions = new Set(positions);
 
       expect(positions.length).toBe(uniquePositions.size);
     });
 
-    it('should generate nodes with valid encounter types', () => {
-      const nodes = generator.generateDepthLevel(1);
+    it('should generate nodes with valid encounter types', async () => {
+      const nodes = await generator.generateDepthLevel(1);
       const validTypes: EncounterType[] = [
         'puzzle_chamber',
         'discovery_site',
@@ -50,16 +50,16 @@ describe('DungeonMapGenerator', () => {
       });
     });
 
-    it('should generate nodes with correct IDs', () => {
-      const nodes = generator.generateDepthLevel(2);
+    it('should generate nodes with correct IDs', async () => {
+      const nodes = await generator.generateDepthLevel(2);
 
       nodes.forEach((node, index) => {
         expect(node.id).toBe(`depth2-node${index}`);
       });
     });
 
-    it('should generate nodes with energy costs', () => {
-      const nodes = generator.generateDepthLevel(1);
+    it('should generate nodes with energy costs', async () => {
+      const nodes = await generator.generateDepthLevel(1);
 
       nodes.forEach((node) => {
         expect(node.energyCost).toBeGreaterThan(0);
@@ -67,27 +67,27 @@ describe('DungeonMapGenerator', () => {
       });
     });
 
-    it('should generate nodes with return costs', () => {
-      const nodes = generator.generateDepthLevel(3);
+    it('should generate nodes with return costs', async () => {
+      const nodes = await generator.generateDepthLevel(3);
 
       nodes.forEach((node) => {
         expect(node.returnCost).toBeGreaterThan(0);
       });
     });
 
-    it('should throw error for invalid depth', () => {
-      expect(() => generator.generateDepthLevel(0)).toThrow(
+    it('should throw error for invalid depth', async () => {
+      await expect(generator.generateDepthLevel(0)).rejects.toThrow(
         'Depth must be at least 1'
       );
-      expect(() => generator.generateDepthLevel(-1)).toThrow(
+      await expect(generator.generateDepthLevel(-1)).rejects.toThrow(
         'Depth must be at least 1'
       );
     });
   });
 
   describe('generateFullMap', () => {
-    it('should generate a complete map with specified depth', () => {
-      const map = generator.generateFullMap(5);
+    it('should generate a complete map with specified depth', async () => {
+      const map = await generator.generateFullMap(5);
 
       expect(map.length).toBeGreaterThan(0);
 
@@ -98,8 +98,8 @@ describe('DungeonMapGenerator', () => {
       }
     });
 
-    it('should generate nodes with connections', () => {
-      const map = generator.generateFullMap(3);
+    it('should generate nodes with connections', async () => {
+      const map = await generator.generateFullMap(3);
 
       // Surface nodes should have connections
       const surfaceNodes = map.filter((node) => node.depth === 1);
@@ -108,8 +108,8 @@ describe('DungeonMapGenerator', () => {
       });
     });
 
-    it('should generate valid connections between depths', () => {
-      const map = generator.generateFullMap(3);
+    it('should generate valid connections between depths', async () => {
+      const map = await generator.generateFullMap(3);
 
       map.forEach((node) => {
         node.connections.forEach((connectionId) => {
@@ -120,18 +120,18 @@ describe('DungeonMapGenerator', () => {
       });
     });
 
-    it('should throw error for invalid max depth', () => {
-      expect(() => generator.generateFullMap(0)).toThrow(
+    it('should throw error for invalid max depth', async () => {
+      await expect(generator.generateFullMap(0)).rejects.toThrow(
         'Maximum depth must be at least 1'
       );
-      expect(() => generator.generateFullMap(-1)).toThrow(
+      await expect(generator.generateFullMap(-1)).rejects.toThrow(
         'Maximum depth must be at least 1'
       );
     });
 
-    it('should generate different maps on multiple calls', () => {
-      const map1 = generator.generateFullMap(3);
-      const map2 = generator.generateFullMap(3);
+    it('should generate different maps on multiple calls', async () => {
+      const map1 = await generator.generateFullMap(3);
+      const map2 = await generator.generateFullMap(3);
 
       // Maps should have different encounter types or connections
       const map1Types = map1.map((node) => node.type).sort();
@@ -151,8 +151,8 @@ describe('DungeonMapGenerator', () => {
   });
 
   describe('getNodesAtDepth', () => {
-    it('should return nodes at specific depth', () => {
-      const map = generator.generateFullMap(3);
+    it('should return nodes at specific depth', async () => {
+      const map = await generator.generateFullMap(3);
       const depth2Nodes = generator.getNodesAtDepth(map, 2);
 
       depth2Nodes.forEach((node) => {
@@ -160,8 +160,8 @@ describe('DungeonMapGenerator', () => {
       });
     });
 
-    it('should return empty array for non-existent depth', () => {
-      const map = generator.generateFullMap(3);
+    it('should return empty array for non-existent depth', async () => {
+      const map = await generator.generateFullMap(3);
       const depth10Nodes = generator.getNodesAtDepth(map, 10);
 
       expect(depth10Nodes).toEqual([]);
@@ -169,8 +169,8 @@ describe('DungeonMapGenerator', () => {
   });
 
   describe('getConnectedNodes', () => {
-    it('should return connected nodes', () => {
-      const map = generator.generateFullMap(3);
+    it('should return connected nodes', async () => {
+      const map = await generator.generateFullMap(3);
       const surfaceNodes = generator.getNodesAtDepth(map, 1);
 
       if (surfaceNodes.length > 0) {
@@ -185,8 +185,8 @@ describe('DungeonMapGenerator', () => {
       }
     });
 
-    it('should return empty array for non-existent node', () => {
-      const map = generator.generateFullMap(3);
+    it('should return empty array for non-existent node', async () => {
+      const map = await generator.generateFullMap(3);
       const connectedNodes = generator.getConnectedNodes(
         map,
         'non-existent-id'
@@ -197,8 +197,8 @@ describe('DungeonMapGenerator', () => {
   });
 
   describe('getPathsToDepth', () => {
-    it('should find paths to target depth', () => {
-      const map = generator.generateFullMap(3);
+    it('should find paths to target depth', async () => {
+      const map = await generator.generateFullMap(3);
       const paths = generator.getPathsToDepth(map, 3);
 
       expect(paths.length).toBeGreaterThan(0);
@@ -210,8 +210,8 @@ describe('DungeonMapGenerator', () => {
       });
     });
 
-    it('should return empty array for unreachable depth', () => {
-      const map = generator.generateFullMap(2);
+    it('should return empty array for unreachable depth', async () => {
+      const map = await generator.generateFullMap(2);
       const paths = generator.getPathsToDepth(map, 5);
 
       expect(paths).toEqual([]);
@@ -219,8 +219,8 @@ describe('DungeonMapGenerator', () => {
   });
 
   describe('validateMap', () => {
-    it('should validate a correct map', () => {
-      const map = generator.generateFullMap(3);
+    it('should validate a correct map', async () => {
+      const map = await generator.generateFullMap(3);
       const validation = generator.validateMap(map);
 
       if (!validation.isValid) {
@@ -337,8 +337,8 @@ describe('DungeonMapGenerator', () => {
   });
 
   describe('getMapStatistics', () => {
-    it('should return correct statistics', () => {
-      const map = generator.generateFullMap(3);
+    it('should return correct statistics', async () => {
+      const map = await generator.generateFullMap(3);
       const stats = generator.getMapStatistics(map);
 
       expect(stats.totalNodes).toBe(map.length);
@@ -365,8 +365,8 @@ describe('DungeonMapGenerator', () => {
   });
 
   describe('energy cost calculations', () => {
-    it('should generate reasonable energy costs', () => {
-      const map = generator.generateFullMap(5);
+    it('should generate reasonable energy costs', async () => {
+      const map = await generator.generateFullMap(5);
 
       map.forEach((node) => {
         expect(node.energyCost).toBeGreaterThanOrEqual(5);
@@ -374,8 +374,8 @@ describe('DungeonMapGenerator', () => {
       });
     });
 
-    it('should have increasing return costs with depth', () => {
-      const map = generator.generateFullMap(5);
+    it('should have increasing return costs with depth', async () => {
+      const map = await generator.generateFullMap(5);
 
       for (let depth = 1; depth <= 5; depth++) {
         const depthNodes = generator.getNodesAtDepth(map, depth);
@@ -388,13 +388,13 @@ describe('DungeonMapGenerator', () => {
   });
 
   describe('shortcuts', () => {
-    it('should generate maps with potential shortcuts', () => {
+    it('should generate maps with potential shortcuts', async () => {
       // Generate multiple maps to increase chance of shortcuts
       let hasShortcuts = false;
 
       for (let i = 0; i < 20; i++) {
         // Increased attempts
-        const map = generator.generateFullMap(5);
+        const map = await generator.generateFullMap(5);
 
         // Check if any node has unusually low return cost (indicating shortcut)
         // A shortcut would make return cost significantly lower than normal
@@ -423,8 +423,8 @@ describe('DungeonMapGenerator', () => {
   });
 
   describe('map consistency', () => {
-    it('should generate consistent maps', () => {
-      const map = generator.generateFullMap(4);
+    it('should generate consistent maps', async () => {
+      const map = await generator.generateFullMap(4);
 
       // All nodes should have valid properties
       map.forEach((node) => {
@@ -438,8 +438,8 @@ describe('DungeonMapGenerator', () => {
       });
     });
 
-    it('should have proper depth progression', () => {
-      const map = generator.generateFullMap(4);
+    it('should have proper depth progression', async () => {
+      const map = await generator.generateFullMap(4);
 
       // Check that each depth has nodes
       for (let depth = 1; depth <= 4; depth++) {
