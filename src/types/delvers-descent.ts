@@ -37,6 +37,12 @@ export interface RunState {
   visitedNodes: string[];
   discoveredShortcuts: Shortcut[];
   currentRegionId?: string; // Track which region the player is currently in
+  luckBoostActive?: {
+    remainingEncounters: number;
+    multiplierBonus: number;
+  };
+  modifiedEncounterProbabilities?: Record<EncounterType, number>;
+  timeDistortionHistory?: { type: 'rewind' | 'skip'; timestamp: number }[];
 }
 
 export interface CollectedItem {

@@ -37,9 +37,9 @@ Based on PRD: `prd-metaphysical-encounters.md`
 
 - [ ] 1.0 Foundation and Infrastructure Setup
   - [x] 1.1 Add four new encounter types (`luck_shrine`, `energy_nexus`, `time_distortion`, `fate_weaver`) to the `EncounterType` union type in `src/types/delvers-descent.ts`
-  - [ ] 1.2 Add `luckBoostActive?: { remainingEncounters: number; multiplierBonus: number }` field to `RunState` interface in `src/types/delvers-descent.ts`
-  - [ ] 1.3 Add `modifiedEncounterProbabilities?: Record<EncounterType, number>` field to `RunState` interface
-  - [ ] 1.4 Add `timeDistortionHistory?: Array<{ type: 'rewind' | 'skip'; timestamp: number }>` field to `RunState` interface
+  - [x] 1.2 Add `luckBoostActive?: { remainingEncounters: number; multiplierBonus: number }` field to `RunState` interface in `src/types/delvers-descent.ts`
+  - [x] 1.3 Add `modifiedEncounterProbabilities?: Record<EncounterType, number>` field to `RunState` interface
+  - [x] 1.4 Add `timeDistortionHistory?: Array<{ type: 'rewind' | 'skip'; timestamp: number }>` field to `RunState` interface
   - [x] 1.5 Update `ENCOUNTER_TYPES` constant array to include the four new encounter types
   - [x] 1.6 Update `isValidEncounterType` type guard function to include new encounter types
   - [ ] 1.7 Add routing entries for all four new encounter types in `src/lib/delvers-descent/encounter-router.ts`
