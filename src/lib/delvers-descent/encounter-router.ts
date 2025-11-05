@@ -7,7 +7,8 @@ export type EncounterRoute =
   | 'hazard'
   | 'rest_site'
   | 'safe_passage'
-  | 'region_shortcut';
+  | 'region_shortcut'
+  | 'scoundrel';
 
 /**
  * Routes dungeon node types to the appropriate encounter screen
