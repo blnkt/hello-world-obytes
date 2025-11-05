@@ -20,6 +20,10 @@ export interface EnergyBalanceConfig {
     safe_passage: number; // Default: -2 (low cost, free return is the benefit)
     region_shortcut: number; // Default: 1 (normal cost, region switching is the benefit)
     scoundrel: number; // Default: 2 (similar to risk_event, strategic encounter)
+    luck_shrine: number; // Default: 2 (utility encounter with fixed cost)
+    energy_nexus: number; // Default: 2 (utility encounter with fixed cost)
+    time_distortion: number; // Default: 4 (high cost for powerful utility)
+    fate_weaver: number; // Default: 2 (utility encounter with fixed cost)
   };
 
   // Return cost configuration
@@ -42,6 +46,10 @@ export interface RewardBalanceConfig {
     safe_passage: number; // Default: 0.6
     region_shortcut: number; // Default: 0.5 (low reward, region switching is the benefit)
     scoundrel: number; // Default: 1.2 (tiered rewards based on score)
+    luck_shrine: number; // Default: 1.0 (no direct rewards, provides utility)
+    energy_nexus: number; // Default: 1.0 (no direct rewards, provides utility)
+    time_distortion: number; // Default: 1.0 (no direct rewards, provides utility)
+    fate_weaver: number; // Default: 1.0 (no direct rewards, provides utility)
   };
 
   // Reward variation (randomness)
@@ -87,6 +95,10 @@ export interface EncounterBalanceConfig {
     safe_passage: number; // Default: 0.1121 (11.21%)
     region_shortcut: number; // Default: 0.057 (5.7% - rare)
     scoundrel: number; // Default: 0.22325 (22.325% - same as puzzle_chamber)
+    luck_shrine: number; // Default: 0.05 (5% - utility encounter)
+    energy_nexus: number; // Default: 0.05 (5% - utility encounter)
+    time_distortion: number; // Default: 0.03 (3% - rare powerful utility)
+    fate_weaver: number; // Default: 0.05 (5% - utility encounter)
   };
 }
 
@@ -149,6 +161,10 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
       safe_passage: -2,
       region_shortcut: 1,
       scoundrel: 2,
+      luck_shrine: 2,
+      energy_nexus: 2,
+      time_distortion: 4,
+      fate_weaver: 2,
     },
     returnCostBase: 5,
     returnCostExponent: 2.0, // Increased from 1.5 to make return cost scale more aggressively
@@ -166,6 +182,10 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
       safe_passage: 0.6,
       region_shortcut: 0.5,
       scoundrel: 1.2,
+      luck_shrine: 1.0,
+      energy_nexus: 1.0,
+      time_distortion: 1.0,
+      fate_weaver: 1.0,
     },
     variationBase: 0.15,
     variationDepthMultiplier: 0.02,
@@ -200,6 +220,10 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
       safe_passage: 0.1121,
       region_shortcut: 0.057,
       scoundrel: 0.22325, // Same probability as puzzle_chamber
+      luck_shrine: 0.05, // 5% - utility encounter
+      energy_nexus: 0.05, // 5% - utility encounter
+      time_distortion: 0.03, // 3% - rare powerful utility
+      fate_weaver: 0.05, // 5% - utility encounter
     },
   },
 
@@ -217,6 +241,10 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
         safe_passage: 0.1121,
         region_shortcut: 0.057,
         scoundrel: 0.22325, // Same probability as puzzle_chamber
+        luck_shrine: 0.05,
+        energy_nexus: 0.05,
+        time_distortion: 0.03,
+        fate_weaver: 0.05,
       },
       ruins: {
         // Ancient Ruins (exploration/economy)
@@ -228,6 +256,10 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
         safe_passage: 0.1121,
         region_shortcut: 0.057,
         scoundrel: 0.18525, // Same probability as puzzle_chamber
+        luck_shrine: 0.05,
+        energy_nexus: 0.05,
+        time_distortion: 0.03,
+        fate_weaver: 0.05,
       },
       caverns: {
         // Crystal Caverns (tension + recovery)
@@ -239,6 +271,10 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
         safe_passage: 0.1121,
         region_shortcut: 0.057,
         scoundrel: 0.08645, // Same probability as puzzle_chamber
+        luck_shrine: 0.05,
+        energy_nexus: 0.05,
+        time_distortion: 0.03,
+        fate_weaver: 0.05,
       },
       sanctum: {
         // Sanctum Archives (puzzle-forward, restorative)
@@ -250,6 +286,10 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
         safe_passage: 0.1121,
         region_shortcut: 0.057,
         scoundrel: 0.285, // Same probability as puzzle_chamber
+        luck_shrine: 0.05,
+        energy_nexus: 0.05,
+        time_distortion: 0.03,
+        fate_weaver: 0.05,
       },
       market: {
         // Frontier Market (economy burst, low danger)
@@ -261,6 +301,10 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
         safe_passage: 0.1121,
         region_shortcut: 0.057,
         scoundrel: 0.1634, // Same probability as puzzle_chamber
+        luck_shrine: 0.05,
+        energy_nexus: 0.05,
+        time_distortion: 0.03,
+        fate_weaver: 0.05,
       },
       wastes: {
         // Ashen Wastes (hard mode)
@@ -272,6 +316,10 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
         safe_passage: 0.1121,
         region_shortcut: 0.057,
         scoundrel: 0.03705, // Same probability as puzzle_chamber
+        luck_shrine: 0.05,
+        energy_nexus: 0.05,
+        time_distortion: 0.03,
+        fate_weaver: 0.05,
       },
     },
   },

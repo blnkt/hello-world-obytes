@@ -354,7 +354,7 @@ describe("Delver's Descent Types", () => {
       expect(region.description).toBe('Ancient woodland with hidden paths');
       expect(region.theme).toBe('ancient_forest');
       expect(region.isUnlocked).toBe(false);
-      expect(region.encounterDistribution.puzzle_chamber).toBe(20);
+      expect(region.encounterDistribution.puzzle_chamber).toBe(19);
       expect(region.startingBonus.energyBonus).toBe(0);
     });
   });
@@ -486,6 +486,13 @@ describe("Delver's Descent Types", () => {
         expect(isValidEncounterType('scoundrel')).toBe(true);
       });
 
+      it('should return true for metaphysical encounter types', () => {
+        expect(isValidEncounterType('luck_shrine')).toBe(true);
+        expect(isValidEncounterType('energy_nexus')).toBe(true);
+        expect(isValidEncounterType('time_distortion')).toBe(true);
+        expect(isValidEncounterType('fate_weaver')).toBe(true);
+      });
+
       it('should return false for invalid encounter types', () => {
         expect(isValidEncounterType('invalid_type')).toBe(false);
         expect(isValidEncounterType('')).toBe(false);
@@ -505,6 +512,10 @@ describe("Delver's Descent Types", () => {
         'safe_passage',
         'region_shortcut',
         'scoundrel',
+        'luck_shrine',
+        'energy_nexus',
+        'time_distortion',
+        'fate_weaver',
       ]);
     });
 

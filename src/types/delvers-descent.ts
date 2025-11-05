@@ -93,7 +93,11 @@ export type EncounterType =
   | 'rest_site'
   | 'safe_passage'
   | 'region_shortcut'
-  | 'scoundrel';
+  | 'scoundrel'
+  | 'luck_shrine'
+  | 'energy_nexus'
+  | 'time_distortion'
+  | 'fate_weaver';
 
 export interface CollectionSet {
   id: string;
@@ -357,6 +361,10 @@ export const isValidEncounterType = (type: string): type is EncounterType => {
     'safe_passage',
     'region_shortcut',
     'scoundrel',
+    'luck_shrine',
+    'energy_nexus',
+    'time_distortion',
+    'fate_weaver',
   ].includes(type);
 };
 
@@ -370,6 +378,10 @@ export const ENCOUNTER_TYPES: EncounterType[] = [
   'safe_passage',
   'region_shortcut',
   'scoundrel',
+  'luck_shrine',
+  'energy_nexus',
+  'time_distortion',
+  'fate_weaver',
 ];
 
 // Constants for collection set types
