@@ -35,7 +35,7 @@ Based on PRD: `prd-metaphysical-encounters.md`
 
 ## Tasks
 
-- [ ] 1.0 Foundation and Infrastructure Setup
+- [x] 1.0 Foundation and Infrastructure Setup
   - [x] 1.1 Add four new encounter types (`luck_shrine`, `energy_nexus`, `time_distortion`, `fate_weaver`) to the `EncounterType` union type in `src/types/delvers-descent.ts`
   - [x] 1.2 Add `luckBoostActive?: { remainingEncounters: number; multiplierBonus: number }` field to `RunState` interface in `src/types/delvers-descent.ts`
   - [x] 1.3 Add `modifiedEncounterProbabilities?: Record<EncounterType, number>` field to `RunState` interface
