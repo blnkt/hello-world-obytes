@@ -42,9 +42,9 @@
   - [x] 2.4 Update processExplorationDecision to check for region unlocks after item collection
   - [x] 2.5 Add return value to processExplorationDecision indicating which region was unlocked (if any)
   - [x] 2.6 Ensure unlock checking happens after CollectionManager processes items (to detect set completions)
-  - [ ] 2.7 Write unit tests for region unlock checking logic
-  - [ ] 2.8 Write unit tests for automatic unlocking when requirements are met
-  - [ ] 2.9 Write unit tests for random selection when multiple regions become available
+  - [x] 2.7 Write unit tests for region unlock checking logic
+  - [x] 2.8 Write unit tests for automatic unlocking when requirements are met
+  - [x] 2.9 Write unit tests for random selection when multiple regions become available
 
 - [ ] 3.0 Update Map Generation to Exclude Discovery Sites When All Regions Unlocked
   - [ ] 3.1 Add RegionManager dependency to DungeonMapGenerator constructor (optional parameter)

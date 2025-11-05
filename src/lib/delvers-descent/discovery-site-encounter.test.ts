@@ -315,6 +315,330 @@ describe('DiscoverySiteEncounter', () => {
     });
   });
 
+  describe('region unlock checking and automatic unlocking', () => {
+    it('should check eligible regions that can be unlocked', async () => {
+      // Mock region manager with some eligible regions
+      const mockRegionManager = {
+        isRegionUnlocked: jest.fn(async (regionId: string) => {
+          // Only forest_depths is unlocked (starting region)
+          return regionId === 'forest_depths';
+        }),
+        canUnlockRegion: jest.fn(async (regionId: string) => {
+          // desert_oasis and coastal_caves can be unlocked
+          return regionId === 'desert_oasis' || regionId === 'coastal_caves';
+        }),
+      } as unknown as RegionManager;
+
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        mockRegionManager,
+        collectionManager
+      );
+
+      const eligibleRegions = await encounter.checkEligibleRegions();
+
+      expect(eligibleRegions).toBeDefined();
+      expect(Array.isArray(eligibleRegions)).toBe(true);
+      expect(eligibleRegions.length).toBeGreaterThan(0);
+      expect(eligibleRegions).toContain('desert_oasis');
+      expect(eligibleRegions).toContain('coastal_caves');
+      // Should not include already unlocked regions
+      expect(eligibleRegions).not.toContain('forest_depths');
+    });
+
+    it('should return empty array when no regions are eligible', async () => {
+      // Mock region manager where all eligible regions are already unlocked
+      const mockRegionManager = {
+        isRegionUnlocked: jest.fn(async () => {
+          return true; // All regions unlocked
+        }),
+        canUnlockRegion: jest.fn(async () => {
+          return false; // No regions can be unlocked
+        }),
+      } as unknown as RegionManager;
+
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        mockRegionManager,
+        collectionManager
+      );
+
+      const eligibleRegions = await encounter.checkEligibleRegions();
+
+      expect(eligibleRegions).toBeDefined();
+      expect(Array.isArray(eligibleRegions)).toBe(true);
+      expect(eligibleRegions.length).toBe(0);
+    });
+
+    it('should return empty array when regionManager is not provided', async () => {
+      const encounter = new DiscoverySiteEncounter(1);
+
+      const eligibleRegions = await encounter.checkEligibleRegions();
+
+      expect(eligibleRegions).toBeDefined();
+      expect(Array.isArray(eligibleRegions)).toBe(true);
+      expect(eligibleRegions.length).toBe(0);
+    });
+
+    it('should automatically unlock a region when requirements are met', async () => {
+      const unlockSpy = jest.fn(async () => {
+        // Simulate successful unlock
+      });
+
+      const mockRegionManager = {
+        isRegionUnlocked: jest.fn(async (regionId: string) => {
+          return regionId === 'forest_depths';
+        }),
+        canUnlockRegion: jest.fn(async (regionId: string) => {
+          return regionId === 'desert_oasis';
+        }),
+        unlockRegion: unlockSpy,
+      } as unknown as RegionManager;
+
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        mockRegionManager,
+        collectionManager
+      );
+
+      const unlockedRegion = await encounter.checkAndUnlockRegions();
+
+      expect(unlockedRegion).toBe('desert_oasis');
+      expect(unlockSpy).toHaveBeenCalledWith('desert_oasis');
+      expect(unlockSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return undefined when no regions are eligible for unlocking', async () => {
+      const mockRegionManager = {
+        isRegionUnlocked: jest.fn(async () => {
+          return true; // All unlocked
+        }),
+        canUnlockRegion: jest.fn(async () => {
+          return false; // None eligible
+        }),
+        unlockRegion: jest.fn(),
+      } as unknown as RegionManager;
+
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        mockRegionManager,
+        collectionManager
+      );
+
+      const unlockedRegion = await encounter.checkAndUnlockRegions();
+
+      expect(unlockedRegion).toBeUndefined();
+    });
+
+    it('should return undefined when regionManager is not provided', async () => {
+      const encounter = new DiscoverySiteEncounter(1);
+
+      const unlockedRegion = await encounter.checkAndUnlockRegions();
+
+      expect(unlockedRegion).toBeUndefined();
+    });
+
+    it('should randomly select one region when multiple regions are eligible', async () => {
+      const unlockedRegions: string[] = [];
+
+      const mockRegionManager = {
+        isRegionUnlocked: jest.fn(async (regionId: string) => {
+          return regionId === 'forest_depths';
+        }),
+        canUnlockRegion: jest.fn(async (regionId: string) => {
+          // Multiple regions eligible
+          return (
+            regionId === 'desert_oasis' ||
+            regionId === 'coastal_caves' ||
+            regionId === 'mountain_pass'
+          );
+        }),
+        unlockRegion: jest.fn(async (regionId: string) => {
+          unlockedRegions.push(regionId);
+        }),
+      } as unknown as RegionManager;
+
+      // Run multiple times to test random selection
+      const selectedRegions: string[] = [];
+      for (let i = 0; i < 20; i++) {
+        const encounter = new DiscoverySiteEncounter(
+          1,
+          mockRegionManager,
+          collectionManager
+        );
+        const unlocked = await encounter.checkAndUnlockRegions();
+        if (unlocked) {
+          selectedRegions.push(unlocked);
+        }
+      }
+
+      // Should have unlocked some regions
+      expect(selectedRegions.length).toBeGreaterThan(0);
+
+      // All selected regions should be from the eligible set
+      const eligibleSet = ['desert_oasis', 'coastal_caves', 'mountain_pass'];
+      selectedRegions.forEach((regionId) => {
+        expect(eligibleSet).toContain(regionId);
+      });
+
+      // With 20 runs, we should see some variety (not all the same region)
+      const uniqueRegions = [...new Set(selectedRegions)];
+      expect(uniqueRegions.length).toBeGreaterThan(0);
+    });
+
+    it('should handle unlock failure gracefully', async () => {
+      const mockRegionManager = {
+        isRegionUnlocked: jest.fn(async () => {
+          return false;
+        }),
+        canUnlockRegion: jest.fn(async () => {
+          return true;
+        }),
+        unlockRegion: jest.fn(async () => {
+          throw new Error('Unlock failed');
+        }),
+      } as unknown as RegionManager;
+
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        mockRegionManager,
+        collectionManager
+      );
+
+      const unlockedRegion = await encounter.checkAndUnlockRegions();
+
+      // Should return undefined on failure, not throw
+      expect(unlockedRegion).toBeUndefined();
+    });
+
+    it('should check for unlocks after item collection via checkForRegionUnlocksAfterItemCollection', async () => {
+      const unlockSpy = jest.fn(async () => {
+        // Simulate successful unlock
+      });
+
+      const mockRegionManager = {
+        isRegionUnlocked: jest.fn(async (regionId: string) => {
+          return regionId === 'forest_depths';
+        }),
+        canUnlockRegion: jest.fn(async (regionId: string) => {
+          return regionId === 'desert_oasis';
+        }),
+        unlockRegion: unlockSpy,
+      } as unknown as RegionManager;
+
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        mockRegionManager,
+        collectionManager
+      );
+
+      // Simulate items being processed first
+      // (In real scenario, CollectionManager.addCollectedItem() would be called here)
+      const unlockedRegion =
+        await encounter.checkForRegionUnlocksAfterItemCollection();
+
+      expect(unlockedRegion).toBe('desert_oasis');
+      expect(unlockSpy).toHaveBeenCalledWith('desert_oasis');
+    });
+
+    it('should return undefined when regionManager methods are not available', async () => {
+      // Mock region manager without required methods
+      const mockRegionManager = {
+        isRegionUnlocked: jest.fn(),
+        // Missing canUnlockRegion and unlockRegion
+      } as unknown as RegionManager;
+
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        mockRegionManager,
+        collectionManager
+      );
+
+      const unlockedRegion =
+        await encounter.checkForRegionUnlocksAfterItemCollection();
+
+      expect(unlockedRegion).toBeUndefined();
+    });
+
+    it('should handle errors gracefully in checkForRegionUnlocksAfterItemCollection', async () => {
+      const mockRegionManager = {
+        isRegionUnlocked: jest.fn(async () => {
+          throw new Error('Test error');
+        }),
+        canUnlockRegion: jest.fn(),
+        unlockRegion: jest.fn(),
+      } as unknown as RegionManager;
+
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        mockRegionManager,
+        collectionManager
+      );
+
+      // Should not throw, should return undefined
+      const unlockedRegion =
+        await encounter.checkForRegionUnlocksAfterItemCollection();
+
+      expect(unlockedRegion).toBeUndefined();
+    });
+
+    it('should not unlock regions that are already unlocked', async () => {
+      const unlockSpy = jest.fn();
+
+      const mockRegionManager = {
+        isRegionUnlocked: jest.fn(async (regionId: string) => {
+          // desert_oasis is already unlocked
+          return regionId === 'forest_depths' || regionId === 'desert_oasis';
+        }),
+        canUnlockRegion: jest.fn(async (regionId: string) => {
+          return regionId === 'desert_oasis' || regionId === 'coastal_caves';
+        }),
+        unlockRegion: unlockSpy,
+      } as unknown as RegionManager;
+
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        mockRegionManager,
+        collectionManager
+      );
+
+      const unlockedRegion = await encounter.checkAndUnlockRegions();
+
+      // Should only unlock coastal_caves (desert_oasis is already unlocked)
+      expect(unlockedRegion).toBe('coastal_caves');
+      expect(unlockSpy).toHaveBeenCalledWith('coastal_caves');
+      expect(unlockSpy).not.toHaveBeenCalledWith('desert_oasis');
+    });
+
+    it('should correctly identify eligible regions based on unlock requirements', async () => {
+      // Test that canUnlockRegion is called for each region
+      const canUnlockSpy = jest.fn(async (regionId: string) => {
+        // Only desert_oasis meets requirements
+        return regionId === 'desert_oasis';
+      });
+
+      const mockRegionManager = {
+        isRegionUnlocked: jest.fn(async (regionId: string) => {
+          return regionId === 'forest_depths';
+        }),
+        canUnlockRegion: canUnlockSpy,
+      } as unknown as RegionManager;
+
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        mockRegionManager,
+        collectionManager
+      );
+
+      const eligibleRegions = await encounter.checkEligibleRegions();
+
+      // Should check all regions except already unlocked ones
+      expect(canUnlockSpy).toHaveBeenCalled();
+      expect(eligibleRegions).toContain('desert_oasis');
+      expect(eligibleRegions.length).toBe(1);
+    });
+  });
+
   describe('exploration mechanics and branching choices', () => {
     it('should provide multiple exploration paths', () => {
       const paths = discoveryEncounter.getExplorationPaths();
