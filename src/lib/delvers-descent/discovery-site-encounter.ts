@@ -1,5 +1,8 @@
 import type { CollectedItem, EncounterType } from '@/types/delvers-descent';
 
+import type { CollectionManager } from './collection-manager';
+import type { RegionManager } from './region-manager';
+
 export interface ExplorationPath {
   id: 'A' | 'B' | 'C';
   type: 'safe' | 'risky' | 'dangerous';
@@ -97,6 +100,8 @@ export interface RegionalCollectionSet {
 export class DiscoverySiteEncounter {
   private encounterType: EncounterType = 'discovery_site';
   private depth: number;
+  private regionManager?: RegionManager;
+  private collectionManager?: CollectionManager;
   private explorationPaths: ExplorationPath[] = [];
   private loreDiscoveries: LoreDiscovery[] = [];
   private regionalHistory: RegionalHistory[] = [];
@@ -111,8 +116,14 @@ export class DiscoverySiteEncounter {
   private encounterComplete: boolean = false;
   private encounterResult: 'success' | 'failure' | null = null;
 
-  constructor(depth: number = 1) {
+  constructor(
+    depth: number = 1,
+    regionManager?: RegionManager,
+    collectionManager?: CollectionManager
+  ) {
     this.depth = depth;
+    this.regionManager = regionManager;
+    this.collectionManager = collectionManager;
     this.initializeRegionalHistory();
     this.generateExplorationPaths();
     this.generateMapIntelligence();

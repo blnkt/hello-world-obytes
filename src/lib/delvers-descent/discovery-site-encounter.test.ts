@@ -1,9 +1,15 @@
+import { CollectionManager } from './collection-manager';
 import { DiscoverySiteEncounter } from './discovery-site-encounter';
+import { RegionManager } from './region-manager';
 
 describe('DiscoverySiteEncounter', () => {
   let discoveryEncounter: DiscoverySiteEncounter;
+  let collectionManager: CollectionManager;
+  let regionManager: RegionManager;
 
   beforeEach(() => {
+    collectionManager = new CollectionManager();
+    regionManager = new RegionManager(collectionManager);
     discoveryEncounter = new DiscoverySiteEncounter();
   });
 
@@ -20,6 +26,23 @@ describe('DiscoverySiteEncounter', () => {
     it('should initialize with custom depth', () => {
       const customDiscoveryEncounter = new DiscoverySiteEncounter(5);
       expect(customDiscoveryEncounter.getDepth()).toBe(5);
+    });
+
+    it('should accept RegionManager and CollectionManager as dependencies', () => {
+      const encounterWithDeps = new DiscoverySiteEncounter(
+        1,
+        regionManager,
+        collectionManager
+      );
+      expect(encounterWithDeps.getDepth()).toBe(1);
+    });
+
+    it('should maintain backward compatibility without dependencies', () => {
+      const encounterWithoutDeps = new DiscoverySiteEncounter(3);
+      expect(encounterWithoutDeps.getDepth()).toBe(3);
+      expect(encounterWithoutDeps.getExplorationPaths().length).toBeGreaterThan(
+        0
+      );
     });
 
     it('should initialize with depth-based exploration paths', () => {
