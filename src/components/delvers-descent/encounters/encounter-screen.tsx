@@ -4,6 +4,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { CollectionManager } from '@/lib/delvers-descent/collection-manager';
 import { ALL_COLLECTION_SETS } from '@/lib/delvers-descent/collection-sets';
 import { HazardEncounter } from '@/lib/delvers-descent/hazard-encounter';
+import { LuckShrineEncounter } from '@/lib/delvers-descent/luck-shrine-encounter';
 import { RegionManager } from '@/lib/delvers-descent/region-manager';
 import { RegionShortcutEncounter } from '@/lib/delvers-descent/region-shortcut-encounter';
 import { RestSiteEncounter } from '@/lib/delvers-descent/rest-site-encounter';
@@ -18,6 +19,7 @@ import type {
 
 import { useEncounterResolver } from '../hooks/use-encounter-resolver';
 import { HazardScreen } from './advanced/hazard-screen';
+import { LuckShrineScreen } from './advanced/luck-shrine-screen';
 import { RegionShortcutScreen } from './advanced/region-shortcut-screen';
 import { RestSiteScreen } from './advanced/rest-site-screen';
 import { RiskEventScreen } from './advanced/risk-event-screen';
@@ -208,6 +210,8 @@ const useAdvancedEncounter = (node: DungeonNode, currentRegionId?: string) => {
     } else if (node.type === 'scoundrel') {
       const config = ScoundrelEncounter.createScoundrelConfig(node.depth);
       setAdvancedEncounter(new ScoundrelEncounter(node.id, config));
+    } else if (node.type === 'luck_shrine') {
+      setAdvancedEncounter(new LuckShrineEncounter(node.id, node.depth));
     }
   }, [node, currentRegionId]);
 
@@ -351,6 +355,26 @@ const getBasicScreen = (params: {
   return null;
 };
 
+const renderLuckShrineScreen = (params: {
+  node: DungeonNode;
+  advancedEncounter: any;
+  runState?: RunState | null;
+  handlers: { complete: (outcome: any) => void; return: () => void };
+}) => {
+  if (params.node.type === 'luck_shrine' && params.advancedEncounter) {
+    return (
+      <LuckShrineScreen
+        encounter={params.advancedEncounter}
+        runState={params.runState}
+        onComplete={params.handlers.complete}
+        onReturn={params.handlers.return}
+      />
+    );
+  }
+
+  return null;
+};
+
 const renderBasicEncounterScreens = (params: {
   node: DungeonNode;
   advancedEncounter: any;
@@ -396,6 +420,9 @@ const renderEncounterByType = (params: {
 }) => {
   const basicScreen = renderBasicEncounterScreens(params);
   if (basicScreen) return basicScreen;
+
+  const luckShrineScreen = renderLuckShrineScreen(params);
+  if (luckShrineScreen) return luckShrineScreen;
 
   return renderScoundrelScreen({
     ...params,
@@ -641,6 +668,7 @@ export const EncounterScreen: React.FC<EncounterScreenProps> = ({
     'safe_passage',
     'region_shortcut',
     'scoundrel',
+    'luck_shrine',
   ];
   if (advancedTypes.includes(node.type)) {
     return renderAdvancedEncounterScreen({

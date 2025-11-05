@@ -59,11 +59,11 @@ Based on PRD: `prd-metaphysical-encounters.md`
   - [x] 2.5 Implement `getState()` method to return current state
   - [x] 2.6 Implement `activate()` method that sets luck boost in run state and returns `AdvancedEncounterOutcome`
   - [x] 2.7 Calculate fixed energy cost based on depth and encounter type modifier
-  - [ ] 2.8 Create `src/components/delvers-descent/encounters/advanced/luck-shrine-screen.tsx` UI component
-  - [ ] 2.9 Display current reward multiplier and boosted multiplier in UI
-  - [ ] 2.10 Display how many encounters the boost will last (2-3)
-  - [ ] 2.11 Add "Activate Shrine" button that calls onComplete with outcome
-  - [ ] 2.12 Style UI to match existing advanced encounter screens with appropriate visual theme
+  - [x] 2.8 Create `src/components/delvers-descent/encounters/advanced/luck-shrine-screen.tsx` UI component
+  - [x] 2.9 Display current reward multiplier and boosted multiplier in UI
+  - [x] 2.10 Display how many encounters the boost will last (2-3)
+  - [x] 2.11 Add "Activate Shrine" button that calls onComplete with outcome
+  - [x] 2.12 Style UI to match existing advanced encounter screens with appropriate visual theme
   - [ ] 2.13 Write unit tests for `LuckShrineEncounter` class covering activation, state management, and edge cases
   - [ ] 2.14 Write UI tests for `luck-shrine-screen.tsx` component
 
