@@ -128,6 +128,184 @@ describe('DiscoverySiteEncounter', () => {
       expect(availableSets).toContain('ancient_temple_set');
       expect(availableSets).toContain('dragons_hoard_set');
     });
+
+    it('should return empty array when regionManager is not provided', async () => {
+      const encounter = new DiscoverySiteEncounter(1);
+      const availableSets = await encounter.getAvailableRegionUnlockSets();
+
+      expect(availableSets).toBeDefined();
+      expect(Array.isArray(availableSets)).toBe(true);
+      expect(availableSets.length).toBe(0);
+    });
+
+    it('should return empty array when all regions are unlocked', async () => {
+      // Mock region manager where all regions are unlocked
+      const mockRegionManager = {
+        isRegionUnlocked: jest.fn(async () => {
+          return true; // All regions unlocked
+        }),
+      } as unknown as RegionManager;
+
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        mockRegionManager,
+        collectionManager
+      );
+
+      const availableSets = await encounter.getAvailableRegionUnlockSets();
+
+      expect(availableSets).toBeDefined();
+      expect(Array.isArray(availableSets)).toBe(true);
+      expect(availableSets.length).toBe(0);
+    });
+
+    it('should handle partial region unlocks correctly', async () => {
+      // Mock region manager where some regions are unlocked
+      const mockRegionManager = {
+        isRegionUnlocked: jest.fn(async (regionId: string) => {
+          // Unlock desert_oasis (silk_road_set) and coastal_caves (spice_trade_set)
+          return regionId === 'desert_oasis' || regionId === 'coastal_caves';
+        }),
+      } as unknown as RegionManager;
+
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        mockRegionManager,
+        collectionManager
+      );
+
+      const availableSets = await encounter.getAvailableRegionUnlockSets();
+
+      // Should exclude silk_road_set and spice_trade_set
+      expect(availableSets).not.toContain('silk_road_set');
+      expect(availableSets).not.toContain('spice_trade_set');
+      // Should still include ancient_temple_set and dragons_hoard_set
+      expect(availableSets.length).toBe(2);
+      expect(availableSets).toContain('ancient_temple_set');
+      expect(availableSets).toContain('dragons_hoard_set');
+    });
+
+    it('should correctly map set IDs to region IDs', async () => {
+      // Test that the mapping is correct for each set
+      const setToRegionMap: Record<string, string> = {
+        silk_road_set: 'desert_oasis',
+        spice_trade_set: 'coastal_caves',
+        ancient_temple_set: 'mountain_pass',
+        dragons_hoard_set: 'dragons_lair',
+      };
+
+      for (const [setId, expectedRegionId] of Object.entries(setToRegionMap)) {
+        // Mock region manager to check if the correct region is checked
+        const mockRegionManager = {
+          isRegionUnlocked: jest.fn(async (regionId: string) => {
+            // Only unlock the region we're testing
+            return regionId === expectedRegionId;
+          }),
+        } as unknown as RegionManager;
+
+        const encounter = new DiscoverySiteEncounter(
+          1,
+          mockRegionManager,
+          collectionManager
+        );
+
+        const availableSets = await encounter.getAvailableRegionUnlockSets();
+
+        // Should exclude the set whose region is unlocked
+        expect(availableSets).not.toContain(setId);
+        // Should include all other sets
+        expect(availableSets.length).toBe(3);
+      }
+    });
+
+    it('should use available sets in generateRegionalDiscoveries', async () => {
+      // Mock region manager to return only one available set
+      const mockRegionManager = {
+        isRegionUnlocked: jest.fn(async (regionId: string) => {
+          // Only unlock all except mountain_pass (ancient_temple_set)
+          return regionId !== 'mountain_pass';
+        }),
+      } as unknown as RegionManager;
+
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        mockRegionManager,
+        collectionManager
+      );
+
+      const paths = encounter.getExplorationPaths();
+      const result = await encounter.processExplorationDecision(paths[0].id);
+
+      if (result.success) {
+        const discoveries = encounter.getRegionalDiscoveries();
+        // Should only generate discoveries from ancient_temple_set
+        discoveries.forEach((discovery) => {
+          expect(discovery.setId).toBe('ancient_temple_set');
+        });
+      }
+    });
+
+    it('should not generate discoveries when all regions are unlocked', async () => {
+      // Mock region manager where all regions are unlocked
+      const mockRegionManager = {
+        isRegionUnlocked: jest.fn(async () => {
+          return true; // All regions unlocked
+        }),
+      } as unknown as RegionManager;
+
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        mockRegionManager,
+        collectionManager
+      );
+
+      const paths = encounter.getExplorationPaths();
+      const result = await encounter.processExplorationDecision(paths[0].id);
+
+      if (result.success) {
+        const discoveries = encounter.getRegionalDiscoveries();
+        // Should not generate any discoveries when all regions are unlocked
+        expect(discoveries.length).toBe(0);
+      }
+    });
+
+    it('should randomly select from available sets across multiple encounters', async () => {
+      // Create multiple encounters to test random selection
+      const selectedSetIds: string[] = [];
+
+      for (let i = 0; i < 20; i++) {
+        const encounter = new DiscoverySiteEncounter(
+          1,
+          regionManager,
+          collectionManager
+        );
+        const paths = encounter.getExplorationPaths();
+        const result = await encounter.processExplorationDecision(paths[0].id);
+
+        if (result.success) {
+          const discoveries = encounter.getRegionalDiscoveries();
+          discoveries.forEach((discovery) => {
+            if (!selectedSetIds.includes(discovery.setId)) {
+              selectedSetIds.push(discovery.setId);
+            }
+          });
+        }
+      }
+
+      // With 20 runs, we should see variety in set selection
+      expect(selectedSetIds.length).toBeGreaterThan(0);
+
+      // Verify all selected sets are valid region unlock sets
+      const validSets = [
+        'silk_road_set',
+        'spice_trade_set',
+        'ancient_temple_set',
+        'dragons_hoard_set',
+      ];
+      selectedSetIds.forEach((setId) => {
+        expect(validSets).toContain(setId);
+      });
+    });
   });
 
   describe('exploration mechanics and branching choices', () => {

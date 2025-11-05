@@ -32,7 +32,7 @@
   - [x] 1.5 Update createDiscoveryReward to randomly select items from the chosen collection set's items array
   - [x] 1.6 Remove hardcoded regional sets (ancient_ruins_set, crystal_caverns_set, shadow_realm_set, ethereal_plains_set) and related mappings
   - [x] 1.7 Update getRegionalCollectionSets to return region unlock sets instead of regional sets
-  - [ ] 1.8 Write unit tests for region unlock set selection logic
+  - [x] 1.8 Write unit tests for region unlock set selection logic
   - [ ] 1.9 Write unit tests verifying items are generated from correct collection sets
 
 - [ ] 2.0 Integrate Region Unlock Checking and Automatic Unlocking
