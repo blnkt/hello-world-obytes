@@ -87,6 +87,7 @@ describe('EncounterRouter', () => {
       expect(isEncounterSupported('rest_site')).toBe(true);
       expect(isEncounterSupported('safe_passage')).toBe(true);
       expect(isEncounterSupported('region_shortcut')).toBe(true);
+      expect(isEncounterSupported('scoundrel')).toBe(true);
     });
 
     it('should return false for unsupported encounter types', () => {

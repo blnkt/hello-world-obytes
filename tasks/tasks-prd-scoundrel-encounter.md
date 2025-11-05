@@ -33,7 +33,7 @@
   - [x] 1.3 Update `isValidEncounterType` function to include `'scoundrel'`
   - [x] 1.4 Add `'scoundrel'` to `EncounterRoute` type in `src/lib/delvers-descent/encounter-router.ts`
   - [x] 1.5 Add `'scoundrel'` route mapping in `getEncounterRoute` function
-  - [ ] 1.6 Add `'scoundrel'` to `isEncounterSupported` function
+  - [x] 1.6 Add `'scoundrel'` to `isEncounterSupported` function
   - [ ] 1.7 Add `'scoundrel'` to `supportedEncounterTypes` array in `EncounterResolver`
   - [ ] 1.8 Add `'scoundrel'` to `supportedEncounterTypes` array in `EncounterLoaderOptimized`
   - [ ] 1.9 Add `scoundrel` multiplier to `encounterTypeMultipliers` in `EncounterResolver` (suggest 1.2x)

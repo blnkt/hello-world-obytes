@@ -40,6 +40,7 @@ export function isEncounterSupported(nodeType: string): boolean {
     'rest_site',
     'safe_passage',
     'region_shortcut',
+    'scoundrel',
   ];
   return supportedTypes.includes(nodeType);
 }
