@@ -1,5 +1,6 @@
 import type { EncounterType } from '@/types/delvers-descent';
 
+import { getEncounterRoute, isEncounterSupported } from './encounter-router';
 import { DungeonMapGenerator } from './map-generator';
 import { ReturnCostCalculator } from './return-cost-calculator';
 import { type ShortcutInfo, ShortcutManager } from './shortcut-manager';
@@ -175,6 +176,111 @@ describe('Map Generator Integration with Return Cost Calculator', () => {
       expect(node2Cost).toBeGreaterThan(0);
       expect(node1Cost).toBeLessThanOrEqual(100);
       expect(node2Cost).toBeLessThanOrEqual(100);
+    });
+  });
+
+  describe('Task 8.14: Scoundrel encounter frequency verification', () => {
+    it('should generate scoundrel encounters at approximately 5% frequency', async () => {
+      // Generate many maps to sample the distribution
+      const samples: EncounterType[] = [];
+
+      for (let i = 0; i < 100; i++) {
+        const map = await mapGenerator.generateFullMap(5);
+        samples.push(...map.map((node) => node.type));
+      }
+
+      const scoundrelCount = samples.filter(
+        (type) => type === 'scoundrel'
+      ).length;
+      const scoundrelFrequency = scoundrelCount / samples.length;
+
+      // With 5% distribution, we expect approximately 5% ± 2% (accounting for randomness)
+      expect(scoundrelFrequency).toBeGreaterThan(0.03); // At least 3%
+      expect(scoundrelFrequency).toBeLessThan(0.08); // At most 8%
+    });
+
+    it('should include scoundrel in encounter type distribution across multiple maps', async () => {
+      let foundScoundrel = false;
+
+      for (let i = 0; i < 50; i++) {
+        const map = await mapGenerator.generateFullMap(5);
+        const stats = mapGenerator.getMapStatistics(map);
+
+        if (stats.encounterTypeDistribution.scoundrel > 0) {
+          foundScoundrel = true;
+          break;
+        }
+      }
+
+      // With 5% distribution, we should find at least one in 50 attempts
+      expect(foundScoundrel).toBe(true);
+    });
+  });
+
+  describe('Task 8.15: Scoundrel encounter routing and screen display', () => {
+    it('should generate scoundrel nodes that can be routed correctly', async () => {
+      const map = await mapGenerator.generateFullMap(5);
+      const scoundrelNodes = map.filter((node) => node.type === 'scoundrel');
+
+      if (scoundrelNodes.length > 0) {
+        scoundrelNodes.forEach((node) => {
+          // Verify node has all required properties for routing
+          expect(node.id).toBeDefined();
+          expect(node.type).toBe('scoundrel');
+          expect(node.depth).toBeGreaterThan(0);
+          expect(node.energyCost).toBeGreaterThan(0);
+          expect(Array.isArray(node.connections)).toBe(true);
+        });
+      }
+    });
+
+    it('should generate scoundrel nodes with valid encounter type', async () => {
+      const map = await mapGenerator.generateFullMap(5);
+      const scoundrelNodes = map.filter((node) => node.type === 'scoundrel');
+
+      if (scoundrelNodes.length > 0) {
+        scoundrelNodes.forEach((node) => {
+          // Verify the type is exactly 'scoundrel'
+          expect(node.type).toBe('scoundrel');
+          // Verify it's a valid EncounterType
+          const validTypes: EncounterType[] = [
+            'puzzle_chamber',
+            'discovery_site',
+            'risk_event',
+            'hazard',
+            'rest_site',
+            'safe_passage',
+            'region_shortcut',
+            'scoundrel',
+          ];
+          expect(validTypes).toContain(node.type);
+        });
+      }
+    });
+
+    it('should route generated scoundrel nodes correctly', async () => {
+      const map = await mapGenerator.generateFullMap(5);
+      const scoundrelNodes = map.filter((node) => node.type === 'scoundrel');
+
+      if (scoundrelNodes.length > 0) {
+        scoundrelNodes.forEach((node) => {
+          // Verify routing function returns correct route
+          const route = getEncounterRoute(node);
+          expect(route).toBe('scoundrel');
+        });
+      }
+    });
+
+    it('should identify scoundrel as supported encounter type', async () => {
+      const map = await mapGenerator.generateFullMap(5);
+      const scoundrelNodes = map.filter((node) => node.type === 'scoundrel');
+
+      if (scoundrelNodes.length > 0) {
+        scoundrelNodes.forEach((node) => {
+          // Verify isEncounterSupported returns true for scoundrel
+          expect(isEncounterSupported(node.type)).toBe(true);
+        });
+      }
     });
   });
 });

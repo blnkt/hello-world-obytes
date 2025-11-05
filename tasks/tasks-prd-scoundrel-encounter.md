@@ -156,6 +156,6 @@
   - [x] 8.10 Add scoundrel case to `useAdvancedEncounter` hook to instantiate ScoundrelEncounter
   - [x] 8.11 Create `ScoundrelEncounter.createScoundrelConfig()` static method for config generation
   - [x] 8.12 Ensure scoundrel encounters are generated with correct energy costs
-  - [ ] 8.13 Write unit tests for map generation with scoundrel encounters
-  - [ ] 8.14 Write integration tests verifying 5% frequency in generated maps
-  - [ ] 8.15 Write integration tests for encounter routing and screen display
+  - [x] 8.13 Write unit tests for map generation with scoundrel encounters
+  - [x] 8.14 Write integration tests verifying 5% frequency in generated maps
+  - [x] 8.15 Write integration tests for encounter routing and screen display

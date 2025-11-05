@@ -43,6 +43,7 @@ describe('DungeonMapGenerator', () => {
         'rest_site',
         'safe_passage',
         'region_shortcut',
+        'scoundrel',
       ];
 
       nodes.forEach((node) => {
@@ -446,6 +447,63 @@ describe('DungeonMapGenerator', () => {
         const depthNodes = generator.getNodesAtDepth(map, depth);
         expect(depthNodes.length).toBeGreaterThan(0);
       }
+    });
+  });
+
+  describe('scoundrel encounter generation', () => {
+    it('should generate scoundrel encounters in maps', async () => {
+      // Generate multiple maps to increase chance of scoundrel encounters
+      let foundScoundrel = false;
+
+      for (let i = 0; i < 50; i++) {
+        const map = await generator.generateFullMap(5);
+        const hasScoundrel = map.some((node) => node.type === 'scoundrel');
+
+        if (hasScoundrel) {
+          foundScoundrel = true;
+          break;
+        }
+      }
+
+      // With 5% distribution, we should find at least one in 50 attempts
+      expect(foundScoundrel).toBe(true);
+    });
+
+    it('should generate scoundrel encounters with correct energy costs', async () => {
+      const map = await generator.generateFullMap(5);
+      const scoundrelNodes = map.filter((node) => node.type === 'scoundrel');
+
+      if (scoundrelNodes.length > 0) {
+        scoundrelNodes.forEach((node) => {
+          // Energy cost should be reasonable and positive
+          expect(node.energyCost).toBeGreaterThan(0);
+          expect(node.energyCost).toBeLessThanOrEqual(30);
+          // Scoundrel has 2x energy modifier, so costs should be higher
+          // Base cost for depth 1 is typically 5-10, so with 2x modifier: 10-20
+          // But we'll just check it's reasonable
+          expect(node.energyCost).toBeGreaterThanOrEqual(5);
+        });
+      }
+    });
+
+    it('should generate scoundrel encounters with correct depth', async () => {
+      const map = await generator.generateFullMap(5);
+      const scoundrelNodes = map.filter((node) => node.type === 'scoundrel');
+
+      if (scoundrelNodes.length > 0) {
+        scoundrelNodes.forEach((node) => {
+          expect(node.depth).toBeGreaterThan(0);
+          expect(node.depth).toBeLessThanOrEqual(5);
+        });
+      }
+    });
+
+    it('should include scoundrel in encounter type distribution statistics', async () => {
+      const map = await generator.generateFullMap(5);
+      const stats = generator.getMapStatistics(map);
+
+      // Scoundrel should be in the distribution (even if count is 0)
+      expect(stats.encounterTypeDistribution).toHaveProperty('scoundrel');
     });
   });
 });
