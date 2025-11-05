@@ -202,6 +202,7 @@ export interface EncounterDistribution {
   rest_site: number;
   safe_passage: number;
   region_shortcut: number;
+  scoundrel: number;
 }
 
 export interface CollectionStatistics {

@@ -107,13 +107,14 @@ describe('Encounter Frequency Distribution Tuning', () => {
       balanceManager.updateConfig({
         encounter: {
           encounterDistribution: {
-            puzzle_chamber: 0.4,
-            discovery_site: 0.2,
-            risk_event: 0.1,
-            hazard: 0.1,
-            rest_site: 0.1,
-            safe_passage: 0.1,
-            region_shortcut: 0.1,
+            puzzle_chamber: 0.38,
+            discovery_site: 0.19,
+            risk_event: 0.095,
+            hazard: 0.095,
+            rest_site: 0.095,
+            safe_passage: 0.095,
+            region_shortcut: 0.095,
+            scoundrel: 0.05,
           },
         },
       });

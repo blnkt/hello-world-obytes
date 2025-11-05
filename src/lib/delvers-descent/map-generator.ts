@@ -18,6 +18,7 @@ export class DungeonMapGenerator {
     'rest_site',
     'safe_passage',
     'region_shortcut',
+    'scoundrel',
   ];
   private readonly returnCostCalculator: ReturnCostCalculator;
   private readonly encounterWeights: { type: EncounterType; weight: number }[];
@@ -57,6 +58,7 @@ export class DungeonMapGenerator {
         type: 'region_shortcut' as EncounterType,
         weight: dist.region_shortcut,
       },
+      { type: 'scoundrel' as EncounterType, weight: dist.scoundrel },
     ].filter((w) => w.weight > 0);
 
     this.encounterWeights = weights;
@@ -360,6 +362,7 @@ export class DungeonMapGenerator {
           type: 'region_shortcut' as EncounterType,
           weight: dist.region_shortcut,
         },
+        { type: 'scoundrel' as EncounterType, weight: dist.scoundrel },
       ];
     }
 

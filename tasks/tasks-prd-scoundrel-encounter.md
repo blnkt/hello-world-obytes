@@ -143,19 +143,19 @@
   - [ ] 7.16 Write unit tests for ScoundrelScreen component
   - [ ] 7.17 Write unit tests for UI state management
 
-- [ ] 8.0 Integrate Scoundrel into Map Generation
-  - [ ] 8.1 Update `DungeonMapGeneratorOptimized.encounterTypes` array to include `'scoundrel'`
-  - [ ] 8.2 Update `encounterWeights` initialization to include scoundrel with 0.05 weight (5%)
-  - [ ] 8.3 Update `DEFAULT_BALANCE_CONFIG.encounter.encounterDistribution` to include scoundrel: 0.05
-  - [ ] 8.4 Adjust other encounter weights proportionally to maintain total = 1.0
-  - [ ] 8.5 Update region-specific encounter distributions if they exist
-  - [ ] 8.6 Update `encounter-screen.tsx` to include scoundrel in `advancedTypes` array
-  - [ ] 8.7 Add scoundrel case to `renderAdvancedEncounter` function
-  - [ ] 8.8 Add scoundrel import to `encounter-screen.tsx` (import ScoundrelEncounter)
-  - [ ] 8.9 Add scoundrel case to `createBasicEncounter` function (or create separate function)
-  - [ ] 8.10 Add scoundrel case to `useAdvancedEncounter` hook to instantiate ScoundrelEncounter
-  - [ ] 8.11 Create `ScoundrelEncounter.createScoundrelConfig()` static method for config generation
-  - [ ] 8.12 Ensure scoundrel encounters are generated with correct energy costs
+- [x] 8.0 Integrate Scoundrel into Map Generation
+  - [x] 8.1 Update `DungeonMapGeneratorOptimized.encounterTypes` array to include `'scoundrel'`
+  - [x] 8.2 Update `encounterWeights` initialization to include scoundrel with 0.05 weight (5%)
+  - [x] 8.3 Update `DEFAULT_BALANCE_CONFIG.encounter.encounterDistribution` to include scoundrel: 0.05
+  - [x] 8.4 Adjust other encounter weights proportionally to maintain total = 1.0
+  - [x] 8.5 Update region-specific encounter distributions if they exist
+  - [x] 8.6 Update `encounter-screen.tsx` to include scoundrel in `advancedTypes` array
+  - [x] 8.7 Add scoundrel case to `renderAdvancedEncounter` function
+  - [x] 8.8 Add scoundrel import to `encounter-screen.tsx` (import ScoundrelEncounter)
+  - [x] 8.9 Add scoundrel case to `createBasicEncounter` function (or create separate function)
+  - [x] 8.10 Add scoundrel case to `useAdvancedEncounter` hook to instantiate ScoundrelEncounter
+  - [x] 8.11 Create `ScoundrelEncounter.createScoundrelConfig()` static method for config generation
+  - [x] 8.12 Ensure scoundrel encounters are generated with correct energy costs
   - [ ] 8.13 Write unit tests for map generation with scoundrel encounters
   - [ ] 8.14 Write integration tests verifying 5% frequency in generated maps
   - [ ] 8.15 Write integration tests for encounter routing and screen display

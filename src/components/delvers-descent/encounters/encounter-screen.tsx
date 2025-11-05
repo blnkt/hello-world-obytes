@@ -9,10 +9,7 @@ import { RegionShortcutEncounter } from '@/lib/delvers-descent/region-shortcut-e
 import { RestSiteEncounter } from '@/lib/delvers-descent/rest-site-encounter';
 import { RiskEventEncounter } from '@/lib/delvers-descent/risk-event-encounter';
 import { SafePassageEncounter } from '@/lib/delvers-descent/safe-passage-encounter';
-import {
-  type ScoundrelConfig,
-  ScoundrelEncounter,
-} from '@/lib/delvers-descent/scoundrel-encounter';
+import { ScoundrelEncounter } from '@/lib/delvers-descent/scoundrel-encounter';
 import type {
   DelvingRun,
   DungeonNode,
@@ -209,11 +206,7 @@ const useAdvancedEncounter = (node: DungeonNode, currentRegionId?: string) => {
           setIsLoading(false);
         });
     } else if (node.type === 'scoundrel') {
-      const config: ScoundrelConfig = {
-        startingLife: 10,
-        dungeonSize: 5 + Math.floor(Math.random() * 6), // 5-10 rooms
-        depth: node.depth,
-      };
+      const config = ScoundrelEncounter.createScoundrelConfig(node.depth);
       setAdvancedEncounter(new ScoundrelEncounter(node.id, config));
     }
   }, [node, currentRegionId]);
@@ -647,6 +640,7 @@ export const EncounterScreen: React.FC<EncounterScreenProps> = ({
     'rest_site',
     'safe_passage',
     'region_shortcut',
+    'scoundrel',
   ];
   if (advancedTypes.includes(node.type)) {
     return renderAdvancedEncounterScreen({

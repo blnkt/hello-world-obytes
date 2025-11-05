@@ -79,13 +79,14 @@ export interface CollectionBalanceConfig {
 export interface EncounterBalanceConfig {
   // Encounter distribution percentages
   encounterDistribution: {
-    puzzle_chamber: number; // Default: 0.235 (23.5%)
-    discovery_site: number; // Default: 0.176 (17.6%)
-    risk_event: number; // Default: 0.176 (17.6%)
-    hazard: number; // Default: 0.118 (11.8%)
-    rest_site: number; // Default: 0.118 (11.8%)
-    safe_passage: number; // Default: 0.118 (11.8%)
-    region_shortcut: number; // Default: 0.06 (6% - rare)
+    puzzle_chamber: number; // Default: 0.22325 (22.325%)
+    discovery_site: number; // Default: 0.1672 (16.72%)
+    risk_event: number; // Default: 0.1672 (16.72%)
+    hazard: number; // Default: 0.1121 (11.21%)
+    rest_site: number; // Default: 0.1121 (11.21%)
+    safe_passage: number; // Default: 0.1121 (11.21%)
+    region_shortcut: number; // Default: 0.057 (5.7% - rare)
+    scoundrel: number; // Default: 0.05 (5% - rare)
   };
 }
 
@@ -191,13 +192,14 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
 
   encounter: {
     encounterDistribution: {
-      puzzle_chamber: 0.235, // Reduced to make room for region_shortcut
-      discovery_site: 0.176,
-      risk_event: 0.176,
-      hazard: 0.118,
-      rest_site: 0.118,
-      safe_passage: 0.118,
-      region_shortcut: 0.06, // Rare - 6%
+      puzzle_chamber: 0.22325, // Scaled down to make room for scoundrel
+      discovery_site: 0.1672,
+      risk_event: 0.1672,
+      hazard: 0.1121,
+      rest_site: 0.1121,
+      safe_passage: 0.1121,
+      region_shortcut: 0.057, // Scaled down
+      scoundrel: 0.05, // Rare - 5%
     },
   },
 
@@ -207,63 +209,69 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
     },
     encounterDistributions: {
       default: {
-        puzzle_chamber: 0.235,
-        discovery_site: 0.176,
-        risk_event: 0.176,
-        hazard: 0.118,
-        rest_site: 0.118,
-        safe_passage: 0.118,
-        region_shortcut: 0.06,
+        puzzle_chamber: 0.22325,
+        discovery_site: 0.1672,
+        risk_event: 0.1672,
+        hazard: 0.1121,
+        rest_site: 0.1121,
+        safe_passage: 0.1121,
+        region_shortcut: 0.057,
+        scoundrel: 0.05,
       },
       ruins: {
         // Ancient Ruins (exploration/economy)
-        puzzle_chamber: 0.195,
-        discovery_site: 0.251,
-        risk_event: 0.125,
-        hazard: 0.125,
-        rest_site: 0.126,
-        safe_passage: 0.118,
-        region_shortcut: 0.06,
+        puzzle_chamber: 0.18525,
+        discovery_site: 0.23845,
+        risk_event: 0.11875,
+        hazard: 0.11875,
+        rest_site: 0.1197,
+        safe_passage: 0.1121,
+        region_shortcut: 0.057,
+        scoundrel: 0.05,
       },
       caverns: {
         // Crystal Caverns (tension + recovery)
-        puzzle_chamber: 0.091,
-        discovery_site: 0.157,
-        risk_event: 0.209,
-        hazard: 0.209,
-        rest_site: 0.157,
-        safe_passage: 0.118,
-        region_shortcut: 0.06,
+        puzzle_chamber: 0.08645,
+        discovery_site: 0.14915,
+        risk_event: 0.19855,
+        hazard: 0.19855,
+        rest_site: 0.14915,
+        safe_passage: 0.1121,
+        region_shortcut: 0.057,
+        scoundrel: 0.05,
       },
       sanctum: {
         // Sanctum Archives (puzzle-forward, restorative)
-        puzzle_chamber: 0.3,
-        discovery_site: 0.209,
-        risk_event: 0.104,
-        hazard: 0.053,
-        rest_site: 0.157,
-        safe_passage: 0.118,
-        region_shortcut: 0.06,
+        puzzle_chamber: 0.285,
+        discovery_site: 0.19855,
+        risk_event: 0.0988,
+        hazard: 0.05035,
+        rest_site: 0.14915,
+        safe_passage: 0.1121,
+        region_shortcut: 0.057,
+        scoundrel: 0.05,
       },
       market: {
         // Frontier Market (economy burst, low danger)
-        puzzle_chamber: 0.172,
-        discovery_site: 0.29,
-        risk_event: 0.145,
-        hazard: 0.072,
-        rest_site: 0.144,
-        safe_passage: 0.118,
-        region_shortcut: 0.06,
+        puzzle_chamber: 0.1634,
+        discovery_site: 0.2755,
+        risk_event: 0.13775,
+        hazard: 0.0684,
+        rest_site: 0.1368,
+        safe_passage: 0.1121,
+        region_shortcut: 0.057,
+        scoundrel: 0.05,
       },
       wastes: {
         // Ashen Wastes (hard mode)
-        puzzle_chamber: 0.039,
-        discovery_site: 0.104,
-        risk_event: 0.261,
-        hazard: 0.261,
-        rest_site: 0.156,
-        safe_passage: 0.118,
-        region_shortcut: 0.06,
+        puzzle_chamber: 0.03705,
+        discovery_site: 0.0988,
+        risk_event: 0.24795,
+        hazard: 0.24795,
+        rest_site: 0.1482,
+        safe_passage: 0.1121,
+        region_shortcut: 0.057,
+        scoundrel: 0.05,
       },
     },
   },

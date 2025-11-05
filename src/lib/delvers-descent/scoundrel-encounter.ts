@@ -89,6 +89,25 @@ export class ScoundrelEncounter {
   private lastCardPlayed?: Card;
   private rewardCalculator: RewardCalculator;
 
+  /**
+   * Create a scoundrel encounter configuration
+   * @param depth - Depth level affects dungeon size and difficulty
+   * @param startingLife - Starting life (default: 10)
+   * @param dungeonSize - Number of rooms (default: 5-10 based on depth)
+   */
+  static createScoundrelConfig(
+    depth: number,
+    startingLife: number = 10,
+    dungeonSize?: number
+  ): ScoundrelConfig {
+    const size = dungeonSize ?? 5 + Math.floor(Math.random() * 6); // 5-10 rooms
+    return {
+      startingLife,
+      dungeonSize: size,
+      depth,
+    };
+  }
+
   constructor(encounterId: string, config: ScoundrelConfig) {
     this.state = {
       encounterId,
