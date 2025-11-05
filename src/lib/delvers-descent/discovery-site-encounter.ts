@@ -209,28 +209,15 @@ export class DiscoverySiteEncounter {
     this.encounterResult = 'success';
     this.updateExplorationStatistics(true, path.outcome.riskLevel);
 
-    // Check for region unlocks after encounter completion
-    // Note: Items should be processed by CollectionManager before checking unlocks
-    // Only check if regionManager is available and has required methods
-    let unlockedRegion: string | undefined;
-    if (
-      this.regionManager &&
-      typeof this.regionManager.canUnlockRegion === 'function' &&
-      typeof this.regionManager.unlockRegion === 'function'
-    ) {
-      try {
-        unlockedRegion = await this.checkAndUnlockRegions();
-      } catch (error) {
-        // Silently fail if unlock checking fails (e.g., with mock regionManagers)
-        console.warn('Failed to check for region unlocks:', error);
-      }
-    }
+    // Note: Region unlock checking should happen AFTER items are processed by CollectionManager
+    // See checkForRegionUnlocksAfterItemCollection() method for post-item-processing unlock check
+    // The unlock check here may not detect unlocks if items haven't been added to CollectionManager yet
 
     return {
       success: true,
       rewards: this.regionalDiscoveries, // Use dynamically generated discoveries
       consequences: scaledOutcome.consequences,
-      unlockedRegion,
+      unlockedRegion: undefined, // Will be set by checkForRegionUnlocksAfterItemCollection()
     };
   }
 
@@ -295,6 +282,39 @@ export class DiscoverySiteEncounter {
     } catch (error) {
       // If unlock fails (e.g., requirements changed), return undefined
       console.error(`Failed to unlock region ${selectedRegionId}:`, error);
+      return undefined;
+    }
+  }
+
+  /**
+   * Check for region unlocks AFTER items have been processed by CollectionManager
+   * This method should be called after items are added to CollectionManager via addCollectedItem()
+   * to ensure set completions are detected before checking for unlocks.
+   *
+   * This is the recommended method to use for unlock checking, as it ensures items are processed first.
+   *
+   * @returns The ID of the unlocked region, or undefined if none were unlocked
+   */
+  async checkForRegionUnlocksAfterItemCollection(): Promise<
+    string | undefined
+  > {
+    if (!this.regionManager) {
+      return undefined;
+    }
+
+    // Only check if regionManager has required methods (defensive for mocks)
+    if (
+      typeof this.regionManager.canUnlockRegion !== 'function' ||
+      typeof this.regionManager.unlockRegion !== 'function'
+    ) {
+      return undefined;
+    }
+
+    try {
+      return await this.checkAndUnlockRegions();
+    } catch (error) {
+      // Silently fail if unlock checking fails (e.g., with mock regionManagers)
+      console.warn('Failed to check for region unlocks:', error);
       return undefined;
     }
   }
