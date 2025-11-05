@@ -36,11 +36,11 @@
   - [x] 1.9 Write unit tests verifying items are generated from correct collection sets
 
 - [ ] 2.0 Integrate Region Unlock Checking and Automatic Unlocking
-  - [ ] 2.1 Add method to check all regions for unlock eligibility after encounter completion
-  - [ ] 2.2 Add method to automatically unlock regions when requirements are met
-  - [ ] 2.3 Implement random selection logic when multiple regions become unlockable simultaneously
-  - [ ] 2.4 Update processExplorationDecision to check for region unlocks after item collection
-  - [ ] 2.5 Add return value to processExplorationDecision indicating which region was unlocked (if any)
+  - [x] 2.1 Add method to check all regions for unlock eligibility after encounter completion
+  - [x] 2.2 Add method to automatically unlock regions when requirements are met
+  - [x] 2.3 Implement random selection logic when multiple regions become unlockable simultaneously
+  - [x] 2.4 Update processExplorationDecision to check for region unlocks after item collection
+  - [x] 2.5 Add return value to processExplorationDecision indicating which region was unlocked (if any)
   - [ ] 2.6 Ensure unlock checking happens after CollectionManager processes items (to detect set completions)
   - [ ] 2.7 Write unit tests for region unlock checking logic
   - [ ] 2.8 Write unit tests for automatic unlocking when requirements are met

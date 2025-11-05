@@ -3,6 +3,7 @@ import type { CollectedItem, EncounterType } from '@/types/delvers-descent';
 import type { CollectionManager } from './collection-manager';
 import { getCollectionSetById } from './collection-sets';
 import type { RegionManager } from './region-manager';
+import { REGIONS } from './regions';
 
 export interface ExplorationPath {
   id: 'A' | 'B' | 'C';
@@ -181,6 +182,7 @@ export class DiscoverySiteEncounter {
     rewards?: CollectedItem[];
     consequences?: ExplorationConsequence[];
     error?: string;
+    unlockedRegion?: string;
   }> {
     if (this.encounterComplete) {
       return { success: false, error: 'Encounter already complete' };
@@ -207,11 +209,94 @@ export class DiscoverySiteEncounter {
     this.encounterResult = 'success';
     this.updateExplorationStatistics(true, path.outcome.riskLevel);
 
+    // Check for region unlocks after encounter completion
+    // Note: Items should be processed by CollectionManager before checking unlocks
+    // Only check if regionManager is available and has required methods
+    let unlockedRegion: string | undefined;
+    if (
+      this.regionManager &&
+      typeof this.regionManager.canUnlockRegion === 'function' &&
+      typeof this.regionManager.unlockRegion === 'function'
+    ) {
+      try {
+        unlockedRegion = await this.checkAndUnlockRegions();
+      } catch (error) {
+        // Silently fail if unlock checking fails (e.g., with mock regionManagers)
+        console.warn('Failed to check for region unlocks:', error);
+      }
+    }
+
     return {
       success: true,
       rewards: this.regionalDiscoveries, // Use dynamically generated discoveries
       consequences: scaledOutcome.consequences,
+      unlockedRegion,
     };
+  }
+
+  /**
+   * Check all regions for unlock eligibility
+   * Returns array of region IDs that can be unlocked
+   */
+  async checkEligibleRegions(): Promise<string[]> {
+    if (!this.regionManager) {
+      return [];
+    }
+
+    // Use REGIONS directly instead of calling getAllRegions() to avoid mock issues
+    const eligibleRegions: string[] = [];
+
+    for (const region of REGIONS) {
+      // Skip if already unlocked
+      const isUnlocked = await this.regionManager.isRegionUnlocked(region.id);
+      if (isUnlocked) {
+        continue;
+      }
+
+      // Check if requirements are met
+      const canUnlock = await this.regionManager.canUnlockRegion(region.id);
+      if (canUnlock) {
+        eligibleRegions.push(region.id);
+      }
+    }
+
+    return eligibleRegions;
+  }
+
+  /**
+   * Automatically unlock regions when requirements are met
+   * If multiple regions are eligible, randomly selects one (per PRD requirement)
+   * Returns the ID of the unlocked region, or undefined if none were unlocked
+   */
+  async checkAndUnlockRegions(): Promise<string | undefined> {
+    if (!this.regionManager) {
+      return undefined;
+    }
+
+    const eligibleRegions = await this.checkEligibleRegions();
+
+    if (eligibleRegions.length === 0) {
+      return undefined;
+    }
+
+    // If multiple regions are eligible, randomly select one (per PRD requirement)
+    let selectedRegionId: string;
+    if (eligibleRegions.length === 1) {
+      selectedRegionId = eligibleRegions[0];
+    } else {
+      const randomIndex = Math.floor(Math.random() * eligibleRegions.length);
+      selectedRegionId = eligibleRegions[randomIndex];
+    }
+
+    // Unlock the selected region
+    try {
+      await this.regionManager.unlockRegion(selectedRegionId);
+      return selectedRegionId;
+    } catch (error) {
+      // If unlock fails (e.g., requirements changed), return undefined
+      console.error(`Failed to unlock region ${selectedRegionId}:`, error);
+      return undefined;
+    }
   }
 
   isEncounterComplete(): boolean {
