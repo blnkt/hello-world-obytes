@@ -19,6 +19,7 @@ export interface EnergyBalanceConfig {
     rest_site: number; // Default: -3
     safe_passage: number; // Default: -2 (low cost, free return is the benefit)
     region_shortcut: number; // Default: 1 (normal cost, region switching is the benefit)
+    scoundrel: number; // Default: 2 (similar to risk_event, strategic encounter)
   };
 
   // Return cost configuration
@@ -40,6 +41,7 @@ export interface RewardBalanceConfig {
     rest_site: number; // Default: 0.5
     safe_passage: number; // Default: 0.6
     region_shortcut: number; // Default: 0.5 (low reward, region switching is the benefit)
+    scoundrel: number; // Default: 1.2 (tiered rewards based on score)
   };
 
   // Reward variation (randomness)
@@ -145,6 +147,7 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
       rest_site: -3,
       safe_passage: -2,
       region_shortcut: 1,
+      scoundrel: 2,
     },
     returnCostBase: 5,
     returnCostExponent: 2.0, // Increased from 1.5 to make return cost scale more aggressively
@@ -161,6 +164,7 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
       rest_site: 0.5,
       safe_passage: 0.6,
       region_shortcut: 0.5,
+      scoundrel: 1.2,
     },
     variationBase: 0.15,
     variationDepthMultiplier: 0.02,

@@ -465,6 +465,7 @@ describe("Delver's Descent Types", () => {
         'rest_site',
         'safe_passage',
         'region_shortcut',
+        'scoundrel',
       ]);
     });
 
