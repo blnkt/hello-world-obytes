@@ -8,7 +8,11 @@ export type EncounterRoute =
   | 'rest_site'
   | 'safe_passage'
   | 'region_shortcut'
-  | 'scoundrel';
+  | 'scoundrel'
+  | 'luck_shrine'
+  | 'energy_nexus'
+  | 'time_distortion'
+  | 'fate_weaver';
 
 /**
  * Routes dungeon node types to the appropriate encounter screen
@@ -23,6 +27,10 @@ export function getEncounterRoute(node: DungeonNode): EncounterRoute | null {
     safe_passage: 'safe_passage',
     region_shortcut: 'region_shortcut',
     scoundrel: 'scoundrel',
+    luck_shrine: 'luck_shrine',
+    energy_nexus: 'energy_nexus',
+    time_distortion: 'time_distortion',
+    fate_weaver: 'fate_weaver',
   };
 
   return routeMap[node.type] || null;
@@ -41,6 +49,10 @@ export function isEncounterSupported(nodeType: string): boolean {
     'safe_passage',
     'region_shortcut',
     'scoundrel',
+    'luck_shrine',
+    'energy_nexus',
+    'time_distortion',
+    'fate_weaver',
   ];
   return supportedTypes.includes(nodeType);
 }
