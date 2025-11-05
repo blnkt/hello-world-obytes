@@ -326,22 +326,37 @@ describe('DiscoverySiteEncounter', () => {
   });
 
   describe('regional discovery items', () => {
-    it('should generate regional discovery items', async () => {
-      const paths = discoveryEncounter.getExplorationPaths();
-      const result = await discoveryEncounter.processExplorationDecision(
-        paths[0].id
+    it('should generate regional discovery items when regionManager is provided', async () => {
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        regionManager,
+        collectionManager
       );
+      const paths = encounter.getExplorationPaths();
+      const result = await encounter.processExplorationDecision(paths[0].id);
 
       if (result.success) {
-        const discoveries = discoveryEncounter.getRegionalDiscoveries();
+        const discoveries = encounter.getRegionalDiscoveries();
         expect(discoveries).toBeDefined();
         expect(discoveries.length).toBeGreaterThan(0);
 
         discoveries.forEach((discovery) => {
-          expect(discovery.type).toBe('discovery');
+          expect(discovery.type).toBeDefined();
           expect(discovery.setId).toBeDefined();
           expect(discovery.value).toBeGreaterThan(0);
         });
+      }
+    });
+
+    it('should not generate discoveries when regionManager is not provided', async () => {
+      const encounter = new DiscoverySiteEncounter(1);
+      const paths = encounter.getExplorationPaths();
+      const result = await encounter.processExplorationDecision(paths[0].id);
+
+      if (result.success) {
+        const discoveries = encounter.getRegionalDiscoveries();
+        // Without regionManager, no discoveries should be generated
+        expect(discoveries.length).toBe(0);
       }
     });
 
@@ -604,14 +619,17 @@ describe('DiscoverySiteEncounter', () => {
       expect(discoveryEncounter.isEncounterComplete()).toBe(true);
     });
 
-    it('should generate appropriate rewards on completion', async () => {
-      const paths = discoveryEncounter.getExplorationPaths();
-      const result = await discoveryEncounter.processExplorationDecision(
-        paths[0].id
+    it('should generate appropriate rewards on completion when regionManager is provided', async () => {
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        regionManager,
+        collectionManager
       );
+      const paths = encounter.getExplorationPaths();
+      const result = await encounter.processExplorationDecision(paths[0].id);
 
       if (result.success) {
-        const rewards = discoveryEncounter.generateRewards();
+        const rewards = encounter.generateRewards();
         expect(rewards).toBeDefined();
         expect(rewards.length).toBeGreaterThan(0);
       }
@@ -628,7 +646,11 @@ describe('DiscoverySiteEncounter', () => {
 
   describe('comprehensive integration tests', () => {
     it('should integrate all features seamlessly', async () => {
-      const depth3Encounter = new DiscoverySiteEncounter(3);
+      const depth3Encounter = new DiscoverySiteEncounter(
+        3,
+        regionManager,
+        collectionManager
+      );
 
       // Test exploration paths
       const paths = depth3Encounter.getExplorationPaths();
@@ -648,7 +670,7 @@ describe('DiscoverySiteEncounter', () => {
       );
 
       if (result.success) {
-        // Should have rewards
+        // Should have rewards (from regional discoveries)
         expect(result.rewards).toBeDefined();
         expect(result.rewards!.length).toBeGreaterThan(0);
 

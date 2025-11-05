@@ -200,7 +200,7 @@ export class DiscoverySiteEncounter {
     // Generate lore discoveries
     this.generateLoreDiscoveries(path);
 
-    // Generate regional discoveries
+    // Generate regional discoveries (these are the actual rewards)
     await this.generateRegionalDiscoveries(path);
 
     this.encounterComplete = true;
@@ -209,7 +209,7 @@ export class DiscoverySiteEncounter {
 
     return {
       success: true,
-      rewards: scaledOutcome.rewards,
+      rewards: this.regionalDiscoveries, // Use dynamically generated discoveries
       consequences: scaledOutcome.consequences,
     };
   }
@@ -440,20 +440,15 @@ export class DiscoverySiteEncounter {
   }
 
   private generateExplorationPaths(): void {
-    const regionalSets = [
-      'ancient_ruins_set',
-      'crystal_caverns_set',
-      'shadow_realm_set',
-      'ethereal_plains_set',
-    ];
-
+    // Rewards are generated dynamically in generateRegionalDiscoveries
+    // Path outcomes now only contain consequences, not rewards
     const basePaths: ExplorationPath[] = [
       {
         id: 'A',
         type: 'safe',
         description: 'Follow the well-marked trail through ancient ruins',
         outcome: {
-          rewards: [this.createDiscoveryReward(regionalSets[0], 40)],
+          rewards: [], // Rewards generated dynamically
           consequences: [this.createExplorationConsequence('lose_energy', 5)],
           riskLevel: 'low',
         },
@@ -463,7 +458,7 @@ export class DiscoverySiteEncounter {
         type: 'risky',
         description: 'Explore the uncharted crystal formations',
         outcome: {
-          rewards: [this.createDiscoveryReward(regionalSets[1], 60)],
+          rewards: [], // Rewards generated dynamically
           consequences: [this.createExplorationConsequence('lose_energy', 10)],
           riskLevel: 'medium',
         },
@@ -473,7 +468,7 @@ export class DiscoverySiteEncounter {
         type: 'dangerous',
         description: 'Venture into the shadowy depths',
         outcome: {
-          rewards: [this.createDiscoveryReward(regionalSets[2], 80)],
+          rewards: [], // Rewards generated dynamically
           consequences: [this.createExplorationConsequence('lose_energy', 15)],
           riskLevel: 'high',
         },
@@ -562,7 +557,7 @@ export class DiscoverySiteEncounter {
   private async generateRegionalDiscoveries(
     path: ExplorationPath
   ): Promise<void> {
-    let selectedSet: string;
+    let selectedSet: string | null = null;
 
     // If regionManager is available, use region unlock sets
     if (this.regionManager) {
@@ -571,27 +566,17 @@ export class DiscoverySiteEncounter {
         // Randomly select from available region unlock sets
         const randomIndex = Math.floor(Math.random() * availableSets.length);
         selectedSet = availableSets[randomIndex];
-      } else {
-        // Fallback to old behavior if no sets available (all regions unlocked)
-        const fallbackSets = [
-          'ancient_ruins_set',
-          'crystal_caverns_set',
-          'shadow_realm_set',
-          'ethereal_plains_set',
-        ];
-        const setIndex = this.explorationPaths.indexOf(path);
-        selectedSet = fallbackSets[setIndex] || fallbackSets[0];
       }
+      // If all regions unlocked (no sets available), don't generate discovery
     } else {
-      // Backward compatibility: use old hardcoded sets if no regionManager
-      const regionalSets = [
-        'ancient_ruins_set',
-        'crystal_caverns_set',
-        'shadow_realm_set',
-        'ethereal_plains_set',
-      ];
-      const setIndex = this.explorationPaths.indexOf(path);
-      selectedSet = regionalSets[setIndex] || regionalSets[0];
+      // Without regionManager, cannot determine which sets to use
+      // Skip discovery generation for backward compatibility
+      return;
+    }
+
+    // Only generate discovery if we have a valid set
+    if (!selectedSet) {
+      return;
     }
 
     const baseValue = 50;
@@ -633,33 +618,14 @@ export class DiscoverySiteEncounter {
       };
     }
 
-    // Fallback to old hardcoded behavior for backward compatibility
-    const setNames: Record<string, string> = {
-      ancient_ruins_set: 'Ancient Ruins',
-      crystal_caverns_set: 'Crystal Caverns',
-      shadow_realm_set: 'Shadow Realm',
-      ethereal_plains_set: 'Ethereal Plains',
-    };
-
-    const itemNames: Record<string, string[]> = {
-      ancient_ruins_set: ['Ancient Artifact', 'Ruined Relic', 'Lost Treasure'],
-      crystal_caverns_set: ['Crystal Shard', 'Prismatic Gem', 'Luminous Stone'],
-      shadow_realm_set: ['Shadow Essence', 'Dark Fragment', 'Void Crystal'],
-      ethereal_plains_set: ['Ethereal Fragment', 'Void Stone', 'Mystic Orb'],
-    };
-
-    const setName = setNames[collectionSet] || 'Discovery';
-    const availableItems = itemNames[collectionSet] || ['Discovery Item'];
-    const itemName =
-      availableItems[Math.floor(Math.random() * availableItems.length)];
-
+    // Generic fallback for unknown collection sets
     return {
       id: `discovery-${collectionSet}-${Date.now()}-${Math.random()}`,
       type: 'discovery',
       setId: collectionSet,
       value,
-      name: itemName,
-      description: `A mysterious ${itemName.toLowerCase()} discovered in the ${setName.toLowerCase()}`,
+      name: 'Discovery Item',
+      description: `A mysterious discovery item from ${collectionSet}`,
     };
   }
 
