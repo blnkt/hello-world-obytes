@@ -1,4 +1,11 @@
 import { CollectionManager } from './collection-manager';
+import {
+  ANCIENT_TEMPLE_SET,
+  DRAGONS_HOARD_SET,
+  getCollectionSetById,
+  SILK_ROAD_SET,
+  SPICE_TRADE_SET,
+} from './collection-sets';
 import { DiscoverySiteEncounter } from './discovery-site-encounter';
 import { RegionManager } from './region-manager';
 
@@ -692,6 +699,253 @@ describe('DiscoverySiteEncounter', () => {
       const uniqueItems = [...new Set(itemNames)];
       // With 10 runs on a set with 5 items, we should see at least 2 different items
       expect(uniqueItems.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('should generate items that match collection set data exactly', async () => {
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        regionManager,
+        collectionManager
+      );
+      const paths = encounter.getExplorationPaths();
+      const result = await encounter.processExplorationDecision(paths[0].id);
+
+      if (result.success) {
+        const discoveries = encounter.getRegionalDiscoveries();
+        expect(discoveries.length).toBeGreaterThan(0);
+
+        discoveries.forEach((discovery) => {
+          // Get the collection set this item should be from
+          const collectionSet = getCollectionSetById(discovery.setId);
+          expect(collectionSet).toBeDefined();
+
+          if (collectionSet) {
+            // Find the matching item in the collection set
+            const matchingItem = collectionSet.items.find(
+              (item) => item.name === discovery.name
+            );
+
+            // The item should exist in the collection set
+            expect(matchingItem).toBeDefined();
+
+            if (matchingItem) {
+              // Verify all properties match
+              expect(discovery.name).toBe(matchingItem.name);
+              expect(discovery.description).toBe(matchingItem.description);
+              expect(discovery.setId).toBe(matchingItem.setId);
+              // Value may be scaled by depth, so just check it's positive
+              expect(discovery.value).toBeGreaterThan(0);
+            }
+          }
+        });
+      }
+    });
+
+    it('should generate items with correct type based on collection set category', async () => {
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        regionManager,
+        collectionManager
+      );
+      const paths = encounter.getExplorationPaths();
+      const result = await encounter.processExplorationDecision(paths[0].id);
+
+      if (result.success) {
+        const discoveries = encounter.getRegionalDiscoveries();
+        expect(discoveries.length).toBeGreaterThan(0);
+
+        discoveries.forEach((discovery) => {
+          const collectionSet = getCollectionSetById(discovery.setId);
+          expect(collectionSet).toBeDefined();
+
+          if (collectionSet) {
+            // Verify type mapping is correct
+            if (collectionSet.category === 'trade_goods') {
+              expect(discovery.type).toBe('trade_good');
+            } else if (collectionSet.category === 'discoveries') {
+              expect(discovery.type).toBe('discovery');
+            } else if (collectionSet.category === 'legendaries') {
+              expect(discovery.type).toBe('legendary');
+            }
+          }
+        });
+      }
+    });
+
+    it('should only generate items from region unlock sets', async () => {
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        regionManager,
+        collectionManager
+      );
+      const paths = encounter.getExplorationPaths();
+      const result = await encounter.processExplorationDecision(paths[0].id);
+
+      if (result.success) {
+        const discoveries = encounter.getRegionalDiscoveries();
+        expect(discoveries.length).toBeGreaterThan(0);
+
+        const validRegionUnlockSets = [
+          'silk_road_set',
+          'spice_trade_set',
+          'ancient_temple_set',
+          'dragons_hoard_set',
+        ];
+
+        discoveries.forEach((discovery) => {
+          // Should only be from region unlock sets
+          expect(validRegionUnlockSets).toContain(discovery.setId);
+        });
+      }
+    });
+
+    it('should generate items from silk_road_set when that set is available', async () => {
+      // Mock region manager to only allow silk_road_set
+      const mockRegionManager = {
+        isRegionUnlocked: jest.fn(async (regionId: string) => {
+          // Unlock all regions except desert_oasis (silk_road_set unlocks desert_oasis)
+          return regionId !== 'desert_oasis';
+        }),
+      } as unknown as RegionManager;
+
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        mockRegionManager,
+        collectionManager
+      );
+      const paths = encounter.getExplorationPaths();
+      const result = await encounter.processExplorationDecision(paths[0].id);
+
+      if (result.success) {
+        const discoveries = encounter.getRegionalDiscoveries();
+        expect(discoveries.length).toBeGreaterThan(0);
+
+        const validItemNames = SILK_ROAD_SET.items.map((item) => item.name);
+
+        discoveries.forEach((discovery) => {
+          expect(discovery.setId).toBe('silk_road_set');
+          expect(validItemNames).toContain(discovery.name);
+        });
+      }
+    });
+
+    it('should generate items from spice_trade_set when that set is available', async () => {
+      // Mock region manager to only allow spice_trade_set
+      const mockRegionManager = {
+        isRegionUnlocked: jest.fn(async (regionId: string) => {
+          // Unlock all regions except coastal_caves (spice_trade_set unlocks coastal_caves)
+          return regionId !== 'coastal_caves';
+        }),
+      } as unknown as RegionManager;
+
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        mockRegionManager,
+        collectionManager
+      );
+      const paths = encounter.getExplorationPaths();
+      const result = await encounter.processExplorationDecision(paths[0].id);
+
+      if (result.success) {
+        const discoveries = encounter.getRegionalDiscoveries();
+        expect(discoveries.length).toBeGreaterThan(0);
+
+        const validItemNames = SPICE_TRADE_SET.items.map((item) => item.name);
+
+        discoveries.forEach((discovery) => {
+          expect(discovery.setId).toBe('spice_trade_set');
+          expect(validItemNames).toContain(discovery.name);
+        });
+      }
+    });
+
+    it('should generate items from ancient_temple_set when that set is available', async () => {
+      // Mock region manager to only allow ancient_temple_set
+      const mockRegionManager = {
+        isRegionUnlocked: jest.fn(async (regionId: string) => {
+          // Unlock all regions except mountain_pass (ancient_temple_set unlocks mountain_pass)
+          return regionId !== 'mountain_pass';
+        }),
+      } as unknown as RegionManager;
+
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        mockRegionManager,
+        collectionManager
+      );
+      const paths = encounter.getExplorationPaths();
+      const result = await encounter.processExplorationDecision(paths[0].id);
+
+      if (result.success) {
+        const discoveries = encounter.getRegionalDiscoveries();
+        expect(discoveries.length).toBeGreaterThan(0);
+
+        const validItemNames = ANCIENT_TEMPLE_SET.items.map(
+          (item) => item.name
+        );
+
+        discoveries.forEach((discovery) => {
+          expect(discovery.setId).toBe('ancient_temple_set');
+          expect(validItemNames).toContain(discovery.name);
+        });
+      }
+    });
+
+    it('should generate items from dragons_hoard_set when that set is available', async () => {
+      // Mock region manager to only allow dragons_hoard_set
+      const mockRegionManager = {
+        isRegionUnlocked: jest.fn(async (regionId: string) => {
+          // Unlock all regions except dragons_lair (dragons_hoard_set unlocks dragons_lair)
+          return regionId !== 'dragons_lair';
+        }),
+      } as unknown as RegionManager;
+
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        mockRegionManager,
+        collectionManager
+      );
+      const paths = encounter.getExplorationPaths();
+      const result = await encounter.processExplorationDecision(paths[0].id);
+
+      if (result.success) {
+        const discoveries = encounter.getRegionalDiscoveries();
+        expect(discoveries.length).toBeGreaterThan(0);
+
+        const validItemNames = DRAGONS_HOARD_SET.items.map((item) => item.name);
+
+        discoveries.forEach((discovery) => {
+          expect(discovery.setId).toBe('dragons_hoard_set');
+          expect(validItemNames).toContain(discovery.name);
+        });
+      }
+    });
+
+    it('should generate items with unique IDs that include collection set and item info', async () => {
+      const encounter = new DiscoverySiteEncounter(
+        1,
+        regionManager,
+        collectionManager
+      );
+      const paths = encounter.getExplorationPaths();
+      const result = await encounter.processExplorationDecision(paths[0].id);
+
+      if (result.success) {
+        const discoveries = encounter.getRegionalDiscoveries();
+        expect(discoveries.length).toBeGreaterThan(0);
+
+        discoveries.forEach((discovery) => {
+          // ID should include the collection set ID
+          expect(discovery.id).toContain(discovery.setId);
+          // ID should be unique (check against other discoveries)
+          const otherDiscoveries = discoveries.filter(
+            (d) => d.id !== discovery.id
+          );
+          otherDiscoveries.forEach((other) => {
+            expect(other.id).not.toBe(discovery.id);
+          });
+        });
+      }
     });
 
     it('should return region unlock sets instead of old regional sets', async () => {

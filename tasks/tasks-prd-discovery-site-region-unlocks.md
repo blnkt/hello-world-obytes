@@ -33,7 +33,7 @@
   - [x] 1.6 Remove hardcoded regional sets (ancient_ruins_set, crystal_caverns_set, shadow_realm_set, ethereal_plains_set) and related mappings
   - [x] 1.7 Update getRegionalCollectionSets to return region unlock sets instead of regional sets
   - [x] 1.8 Write unit tests for region unlock set selection logic
-  - [ ] 1.9 Write unit tests verifying items are generated from correct collection sets
+  - [x] 1.9 Write unit tests verifying items are generated from correct collection sets
 
 - [ ] 2.0 Integrate Region Unlock Checking and Automatic Unlocking
   - [ ] 2.1 Add method to check all regions for unlock eligibility after encounter completion
