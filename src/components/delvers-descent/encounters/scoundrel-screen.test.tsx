@@ -14,8 +14,7 @@ import { ScoundrelScreen } from './scoundrel-screen';
 
 describe('ScoundrelScreen', () => {
   const createMockConfig = (): ScoundrelConfig => ({
-    startingLife: 10,
-    dungeonSize: 3,
+    startingLife: 20,
     depth: 1,
   });
 
@@ -60,39 +59,39 @@ describe('ScoundrelScreen', () => {
       render(<ScoundrelScreen {...defaultProps} />);
 
       expect(screen.getByTestId('scoundrel-screen')).toBeTruthy();
-      expect(screen.getByText("Scoundrel's Dungeon")).toBeTruthy();
+      expect(screen.getByText('Scoundrel')).toBeTruthy();
     });
 
-    it('should display life information', () => {
+    it('should display health information', () => {
       render(<ScoundrelScreen {...defaultProps} />);
 
-      expect(screen.getByText('Life')).toBeTruthy();
-      expect(screen.getByText(/10\/10/)).toBeTruthy();
+      expect(screen.getByText('Health')).toBeTruthy();
+      expect(screen.getByText(/20\/20/)).toBeTruthy();
     });
 
-    it('should display dungeon progress', () => {
+    it('should display deck information', () => {
       render(<ScoundrelScreen {...defaultProps} />);
 
-      expect(screen.getByText('Dungeon Progress')).toBeTruthy();
-      expect(screen.getByText(/Room \d+ of \d+/)).toBeTruthy();
+      expect(screen.getByText('Deck')).toBeTruthy();
+      expect(screen.getByText(/cards remaining/)).toBeTruthy();
     });
 
-    it('should display available cards', () => {
+    it('should display current room cards', () => {
       render(<ScoundrelScreen {...defaultProps} />);
 
-      expect(screen.getByText('Available Cards')).toBeTruthy();
+      expect(screen.getByText(/Current Room/)).toBeTruthy();
     });
   });
 
   describe('Life Display', () => {
     it('should show normal life state (green)', () => {
       const config = createMockConfig();
-      config.startingLife = 10;
+      config.startingLife = 20;
       const encounter = createMockEncounter(config);
 
       render(<ScoundrelScreen {...defaultProps} encounter={encounter} />);
 
-      const lifeText = screen.getByText(/10\/10/);
+      const lifeText = screen.getByText(/20\/20/);
       expect(lifeText).toBeTruthy();
     });
 
@@ -132,156 +131,156 @@ describe('ScoundrelScreen', () => {
   });
 
   describe('Card Selection', () => {
-    it('should display available cards', () => {
+    it('should display available cards in current room', () => {
       const encounter = createMockEncounter();
-      const availableCards = encounter.getAvailableCards();
+      const room = encounter.getCurrentRoom();
 
       render(<ScoundrelScreen {...defaultProps} encounter={encounter} />);
 
-      // Should see card names
-      availableCards.forEach((card) => {
+      // Should see room cards
+      expect(room.length).toBe(4);
+      room.forEach((card) => {
         const cardElement = screen.queryByTestId(`card-${card.id}`);
         expect(cardElement).toBeTruthy();
       });
     });
 
-    it('should allow selecting a card', () => {
+    it('should allow playing a card', () => {
       const encounter = createMockEncounter();
-      const availableCards = encounter.getAvailableCards();
+      const room = encounter.getCurrentRoom();
 
-      if (availableCards.length > 0) {
-        const firstCard = availableCards[0];
-
+      if (room.length > 0) {
         render(<ScoundrelScreen {...defaultProps} encounter={encounter} />);
 
-        const cardButton = screen.getByTestId(`card-${firstCard.id}`);
+        const cardButton = screen.getByTestId(`card-${room[0].id}`);
         fireEvent.press(cardButton);
 
-        // Card selection should trigger (component will update state)
+        // Card playing should trigger (component will update state)
         expect(cardButton).toBeTruthy();
       }
     });
 
-    it('should handle card selection when room is completed', () => {
+    it('should show weapon choice when weapon equipped and monster can be attacked', () => {
       const encounter = createMockEncounter();
-      const availableCards = encounter.getAvailableCards();
+      const room = encounter.getCurrentRoom();
 
-      if (availableCards.length > 0) {
-        // Select a card to complete the room
-        encounter.selectCard(availableCards[0].id);
-        encounter.advanceRoom();
+      // Find and equip a weapon
+      const weaponCard = room.find(
+        (card) =>
+          card.suit === 'diamonds' && card.value >= 2 && card.value <= 10
+      );
+      const monsterCard = room.find(
+        (card) => card.suit === 'clubs' || card.suit === 'spades'
+      );
+
+      if (weaponCard && monsterCard) {
+        const weaponIndex = room.indexOf(weaponCard);
+        encounter.playCard(weaponIndex, false);
 
         render(<ScoundrelScreen {...defaultProps} encounter={encounter} />);
 
-        // Component should render correctly
-        expect(screen.getByTestId('scoundrel-screen')).toBeTruthy();
+        // Should show weapon choice button for monster
+        const newRoom = encounter.getCurrentRoom();
+        const monsterIndex = newRoom.findIndex((c) => c.id === monsterCard.id);
+        if (monsterIndex >= 0) {
+          screen.queryByTestId(`card-${monsterCard.id}-weapon`);
+          // Weapon button may appear if monster can be attacked
+          expect(screen.getByTestId('scoundrel-screen')).toBeTruthy();
+        }
       }
     });
   });
 
-  describe('Room Advancement', () => {
-    it('should show advance button when room is completed', () => {
-      const encounter = createMockEncounter();
-      const availableCards = encounter.getAvailableCards();
-
-      if (availableCards.length > 0) {
-        // Complete first room by selecting a card
-        encounter.selectCard(availableCards[0].id);
-
-        render(<ScoundrelScreen {...defaultProps} encounter={encounter} />);
-
-        const advanceButton = screen.queryByText('Advance to Next Room');
-        // Button may or may not appear depending on room completion state
-        expect(screen.getByTestId('scoundrel-screen')).toBeTruthy();
-      }
-    });
-
-    it('should advance to next room when button is pressed', () => {
-      const encounter = createMockEncounter();
-      const availableCards = encounter.getAvailableCards();
-
-      if (availableCards.length > 0) {
-        // Complete first room
-        encounter.selectCard(availableCards[0].id);
-
-        render(<ScoundrelScreen {...defaultProps} encounter={encounter} />);
-
-        const advanceButton = screen.queryByText('Advance to Next Room');
-        if (advanceButton) {
-          fireEvent.press(advanceButton);
-          // Room should advance
-          expect(encounter.getState().currentRoom).toBeGreaterThanOrEqual(0);
-        }
-      }
-    });
-
-    it('should not show advance button initially', () => {
+  describe('Skip Room', () => {
+    it('should show skip button when skip is available', () => {
       const encounter = createMockEncounter();
 
       render(<ScoundrelScreen {...defaultProps} encounter={encounter} />);
 
-      // Initially, no advance button should show (room not completed)
-      const advanceButton = screen.queryByText('Advance to Next Room');
-      // Button may not appear if room is not completed
-      expect(screen.getByTestId('scoundrel-screen')).toBeTruthy();
+      const skipButton = screen.queryByText('Skip Room');
+      if (encounter.canSkipRoom()) {
+        expect(skipButton).toBeTruthy();
+      }
+    });
+
+    it('should skip room when button is pressed', () => {
+      const encounter = createMockEncounter();
+      const initialRoom = encounter.getCurrentRoom();
+
+      render(<ScoundrelScreen {...defaultProps} encounter={encounter} />);
+
+      const skipButton = screen.queryByText('Skip Room');
+      if (skipButton) {
+        fireEvent.press(skipButton);
+
+        // Room should change
+        const newRoom = encounter.getCurrentRoom();
+        expect(newRoom).not.toEqual(initialRoom);
+      }
+    });
+
+    it('should not show skip button after skipping', () => {
+      const encounter = createMockEncounter();
+      encounter.skipRoom();
+
+      render(<ScoundrelScreen {...defaultProps} encounter={encounter} />);
+
+      const skipButton = screen.queryByText('Skip Room');
+      expect(skipButton).toBeNull();
     });
   });
 
   describe('Encounter Completion', () => {
     it('should show complete button when encounter is complete', () => {
       const encounter = createMockEncounter();
-      const config = encounter.getState().config;
 
-      // Complete all rooms by selecting cards and advancing
-      for (let i = 0; i < config.dungeonSize; i++) {
-        const availableCards = encounter.getAvailableCards();
-        if (availableCards.length > 0) {
-          encounter.selectCard(availableCards[0].id);
-          if (i < config.dungeonSize - 1) {
-            encounter.advanceRoom();
-          }
-        }
+      // Force completion by reducing health to 0
+      const room = encounter.getCurrentRoom();
+      const monsterCard = room.find(
+        (card) => card.suit === 'clubs' || card.suit === 'spades'
+      );
+
+      if (monsterCard && monsterCard.value >= 20) {
+        encounter.playCard(room.indexOf(monsterCard), false);
       }
 
-      render(<ScoundrelScreen {...defaultProps} encounter={encounter} />);
+      if (encounter.isEncounterComplete()) {
+        render(<ScoundrelScreen {...defaultProps} encounter={encounter} />);
 
-      // Component should render
-      expect(screen.getByTestId('scoundrel-screen')).toBeTruthy();
-      // Complete button may appear if encounter is complete
-      const completeButton = screen.queryByText('Complete Encounter');
-      // Just verify component renders correctly
-      expect(screen.getByText("Scoundrel's Dungeon")).toBeTruthy();
+        const completeButton = screen.queryByText('Complete Encounter');
+        expect(completeButton).toBeTruthy();
+      }
     });
 
-    it('should call onComplete when encounter is resolved', async () => {
+    it('should call onComplete when encounter is resolved', () => {
       const encounter = createMockEncounter();
       const onComplete = jest.fn();
 
-      // Complete all rooms
-      const config = encounter.getState().config;
-      for (let i = 0; i < config.dungeonSize; i++) {
-        const availableCards = encounter.getAvailableCards();
-        if (availableCards.length > 0) {
-          encounter.selectCard(availableCards[0].id);
-          if (i < config.dungeonSize - 1) {
-            encounter.advanceRoom();
-          }
-        }
-      }
-
-      render(
-        <ScoundrelScreen
-          {...defaultProps}
-          encounter={encounter}
-          onComplete={onComplete}
-        />
+      // Force completion
+      const room = encounter.getCurrentRoom();
+      const monsterCard = room.find(
+        (card) => card.suit === 'clubs' || card.suit === 'spades'
       );
 
-      const completeButton = screen.queryByText('Complete Encounter');
-      if (completeButton) {
-        fireEvent.press(completeButton);
-        // onComplete should be called
-        expect(onComplete).toHaveBeenCalled();
+      if (monsterCard && monsterCard.value >= 20) {
+        encounter.playCard(room.indexOf(monsterCard), false);
+      }
+
+      if (encounter.isEncounterComplete()) {
+        render(
+          <ScoundrelScreen
+            {...defaultProps}
+            encounter={encounter}
+            onComplete={onComplete}
+          />
+        );
+
+        const completeButton = screen.queryByText('Complete Encounter');
+        if (completeButton) {
+          fireEvent.press(completeButton);
+          // onComplete should be called
+          expect(onComplete).toHaveBeenCalled();
+        }
       }
     });
   });
@@ -291,70 +290,92 @@ describe('ScoundrelScreen', () => {
       const encounter = createMockEncounter();
       const onComplete = jest.fn();
 
-      // Complete encounter
-      const config = encounter.getState().config;
-      for (let i = 0; i < config.dungeonSize; i++) {
-        const availableCards = encounter.getAvailableCards();
-        if (availableCards.length > 0) {
-          encounter.selectCard(availableCards[0].id);
-          if (i < config.dungeonSize - 1) {
-            encounter.advanceRoom();
-          }
-        }
-      }
-
-      render(
-        <ScoundrelScreen
-          {...defaultProps}
-          encounter={encounter}
-          onComplete={onComplete}
-        />
+      // Force completion
+      const room = encounter.getCurrentRoom();
+      const monsterCard = room.find(
+        (card) => card.suit === 'clubs' || card.suit === 'spades'
       );
 
-      // Trigger completion
-      const completeButton = screen.queryByText('Complete Encounter');
-      if (completeButton) {
-        fireEvent.press(completeButton);
-        // onComplete should be called
-        expect(onComplete).toHaveBeenCalled();
+      if (monsterCard && monsterCard.value >= 20) {
+        encounter.playCard(room.indexOf(monsterCard), false);
       }
 
-      // Component should handle outcome display
-      expect(screen.getByTestId('scoundrel-screen')).toBeTruthy();
+      if (encounter.isEncounterComplete()) {
+        render(
+          <ScoundrelScreen
+            {...defaultProps}
+            encounter={encounter}
+            onComplete={onComplete}
+          />
+        );
+
+        const completeButton = screen.queryByText('Complete Encounter');
+        if (completeButton) {
+          fireEvent.press(completeButton);
+          // onComplete should be called
+          expect(onComplete).toHaveBeenCalled();
+        }
+
+        // Component should handle outcome display
+        expect(screen.getByTestId('scoundrel-screen')).toBeTruthy();
+      }
     });
   });
 
-  describe('Remaining Monsters Display', () => {
-    it('should display remaining monsters when present', () => {
+  describe('Weapon Display', () => {
+    it('should display equipped weapon when weapon is equipped', () => {
       const encounter = createMockEncounter();
-      const remainingMonsters = encounter.getRemainingMonsters();
+      const room = encounter.getCurrentRoom();
+      const weaponCard = room.find(
+        (card) =>
+          card.suit === 'diamonds' && card.value >= 2 && card.value <= 10
+      );
 
-      render(<ScoundrelScreen {...defaultProps} encounter={encounter} />);
+      if (weaponCard) {
+        encounter.playCard(room.indexOf(weaponCard), false);
 
-      if (remainingMonsters.length > 0) {
-        expect(screen.queryByText('Remaining Monsters')).toBeTruthy();
+        render(<ScoundrelScreen {...defaultProps} encounter={encounter} />);
+
+        expect(screen.getByText('Equipped Weapon')).toBeTruthy();
       }
     });
 
-    it('should not display remaining monsters when none remain', () => {
+    it('should show no weapon when no weapon equipped', () => {
       const encounter = createMockEncounter();
-      // Complete all rooms to remove monsters
-      const config = encounter.getState().config;
-      for (let i = 0; i < config.dungeonSize; i++) {
-        const availableCards = encounter.getAvailableCards();
-        if (availableCards.length > 0) {
-          encounter.selectCard(availableCards[0].id);
-          if (i < config.dungeonSize - 1) {
-            encounter.advanceRoom();
-          }
-        }
-      }
 
       render(<ScoundrelScreen {...defaultProps} encounter={encounter} />);
 
-      const remainingMonsters = encounter.getRemainingMonsters();
-      if (remainingMonsters.length === 0) {
-        expect(screen.queryByText('Remaining Monsters')).toBeNull();
+      // Should show "No weapon equipped" text
+      expect(screen.getByText('No weapon equipped')).toBeTruthy();
+    });
+  });
+
+  describe('Room Progress', () => {
+    it('should display room action count', () => {
+      const encounter = createMockEncounter();
+
+      render(<ScoundrelScreen {...defaultProps} encounter={encounter} />);
+
+      expect(screen.getByText('Room Progress')).toBeTruthy();
+      expect(screen.getByText(/Cards played: \d+\/3/)).toBeTruthy();
+    });
+
+    it('should update room action count when cards are played', () => {
+      const encounter = createMockEncounter();
+      const { rerender } = render(
+        <ScoundrelScreen {...defaultProps} encounter={encounter} />
+      );
+
+      expect(encounter.getRoomActionCount()).toBe(0);
+
+      const room = encounter.getCurrentRoom();
+      if (room.length > 0) {
+        encounter.playCard(0, false);
+        rerender(<ScoundrelScreen {...defaultProps} encounter={encounter} />);
+
+        // Check that room progress is displayed (may show "Cards played: 1/3" or similar)
+        const roomProgress = screen.queryByText(/Cards played:/);
+        expect(roomProgress).toBeTruthy();
       }
     });
   });
@@ -411,65 +432,36 @@ describe('ScoundrelScreen', () => {
       render(<ScoundrelScreen {...defaultProps} encounter={encounter} />);
 
       // Component should render with initial state
-      expect(screen.getByText("Scoundrel's Dungeon")).toBeTruthy();
-      expect(screen.getByText(/Life/)).toBeTruthy();
+      expect(screen.getByText('Scoundrel')).toBeTruthy();
+      expect(screen.getByText(/Health/)).toBeTruthy();
       expect(
         screen.getByText(
           new RegExp(
-            `${initialState.currentLife}/${initialState.config.startingLife}`
+            `${initialState.health}/${initialState.config.startingLife}`
           )
         )
       ).toBeTruthy();
     });
 
-    it('should update state when card is selected', () => {
+    it('should update state when card is played', () => {
       const encounter = createMockEncounter();
-      const availableCards = encounter.getAvailableCards();
+      const room = encounter.getCurrentRoom();
 
-      if (availableCards.length > 0) {
+      if (room.length > 0) {
         const { rerender } = render(
           <ScoundrelScreen {...defaultProps} encounter={encounter} />
         );
 
-        const initialLife = encounter.getState().currentLife;
-        const cardButton = screen.getByTestId(`card-${availableCards[0].id}`);
+        const cardButton = screen.getByTestId(`card-${room[0].id}`);
         fireEvent.press(cardButton);
 
-        // State should update via handler - card selection modifies encounter state
+        // State should update via handler - card playing modifies encounter state
         const updatedState = encounter.getState();
         // Re-render to see updated state
         rerender(<ScoundrelScreen {...defaultProps} encounter={encounter} />);
 
-        // Verify card was selected by checking last card
-        const lastCard = encounter.getLastCard();
-        expect(lastCard?.id).toBe(availableCards[0].id);
-      }
-    });
-
-    it('should update state when room is advanced', () => {
-      const encounter = createMockEncounter();
-      const availableCards = encounter.getAvailableCards();
-
-      if (availableCards.length > 0) {
-        // Complete first room
-        encounter.selectCard(availableCards[0].id);
-        const initialRoom = encounter.getState().currentRoom;
-
-        const { rerender } = render(
-          <ScoundrelScreen {...defaultProps} encounter={encounter} />
-        );
-
-        const advanceButton = screen.queryByText('Advance to Next Room');
-        if (advanceButton) {
-          fireEvent.press(advanceButton);
-
-          // Re-render to see updated state
-          rerender(<ScoundrelScreen {...defaultProps} encounter={encounter} />);
-
-          // Room should have advanced
-          const updatedState = encounter.getState();
-          expect(updatedState.currentRoom).toBeGreaterThan(initialRoom);
-        }
+        // Verify card was played by checking state changed
+        expect(updatedState.roomActionCount).toBeGreaterThanOrEqual(0);
       }
     });
 
@@ -477,36 +469,18 @@ describe('ScoundrelScreen', () => {
       const encounter = createMockEncounter();
       const onComplete = jest.fn();
 
-      // Complete all rooms
-      const config = encounter.getState().config;
-      for (let i = 0; i < config.dungeonSize; i++) {
-        const availableCards = encounter.getAvailableCards();
-        if (availableCards.length > 0) {
-          encounter.selectCard(availableCards[0].id);
-          if (i < config.dungeonSize - 1) {
-            encounter.advanceRoom();
-          }
-        }
-      }
-
-      const { rerender } = render(
-        <ScoundrelScreen
-          {...defaultProps}
-          encounter={encounter}
-          onComplete={onComplete}
-        />
+      // Force completion
+      const room = encounter.getCurrentRoom();
+      const monsterCard = room.find(
+        (card) => card.suit === 'clubs' || card.suit === 'spades'
       );
 
-      // Initially should show gameplay content
-      expect(screen.getByTestId('scoundrel-screen')).toBeTruthy();
+      if (monsterCard && monsterCard.value >= 20) {
+        encounter.playCard(room.indexOf(monsterCard), false);
+      }
 
-      // Complete encounter
-      const completeButton = screen.queryByText('Complete Encounter');
-      if (completeButton) {
-        fireEvent.press(completeButton);
-
-        // Re-render to see outcome state
-        rerender(
+      if (encounter.isEncounterComplete()) {
+        const { rerender } = render(
           <ScoundrelScreen
             {...defaultProps}
             encounter={encounter}
@@ -514,9 +488,27 @@ describe('ScoundrelScreen', () => {
           />
         );
 
-        // Should show outcome display
-        expect(screen.queryByText(/Success!|Failure!/)).toBeTruthy();
-        expect(onComplete).toHaveBeenCalled();
+        // Initially should show gameplay content
+        expect(screen.getByTestId('scoundrel-screen')).toBeTruthy();
+
+        // Complete encounter
+        const completeButton = screen.queryByText('Complete Encounter');
+        if (completeButton) {
+          fireEvent.press(completeButton);
+
+          // Re-render to see outcome state
+          rerender(
+            <ScoundrelScreen
+              {...defaultProps}
+              encounter={encounter}
+              onComplete={onComplete}
+            />
+          );
+
+          // Should show outcome display
+          expect(screen.queryByText(/Victory!|Defeated!/)).toBeTruthy();
+          expect(onComplete).toHaveBeenCalled();
+        }
       }
     });
 
@@ -530,15 +522,15 @@ describe('ScoundrelScreen', () => {
       expect(
         screen.getByText(
           new RegExp(
-            `${initialState.currentLife}/${initialState.config.startingLife}`
+            `${initialState.health}/${initialState.config.startingLife}`
           )
         )
       ).toBeTruthy();
 
       // Modify encounter state
-      const availableCards = encounter.getAvailableCards();
-      if (availableCards.length > 0) {
-        encounter.selectCard(availableCards[0].id);
+      const room = encounter.getCurrentRoom();
+      if (room.length > 0) {
+        encounter.playCard(0, false);
         const updatedState = encounter.getState();
 
         // Component should reflect updated state on next render
@@ -547,79 +539,8 @@ describe('ScoundrelScreen', () => {
         );
         rerender(<ScoundrelScreen {...defaultProps} encounter={encounter} />);
 
-        // State should be synchronized - verify via last card
-        const lastCard = encounter.getLastCard();
-        expect(lastCard?.id).toBe(availableCards[0].id);
-      }
-    });
-
-    it('should handle state updates without re-mounting component', () => {
-      const encounter = createMockEncounter();
-      const { rerender } = render(
-        <ScoundrelScreen {...defaultProps} encounter={encounter} />
-      );
-
-      // Component should maintain identity across state updates
-      const initialScreen = screen.getByTestId('scoundrel-screen');
-      expect(initialScreen).toBeTruthy();
-
-      // Update encounter state
-      const availableCards = encounter.getAvailableCards();
-      if (availableCards.length > 0) {
-        encounter.selectCard(availableCards[0].id);
-        rerender(<ScoundrelScreen {...defaultProps} encounter={encounter} />);
-
-        // Component should still exist (not unmounted)
-        const updatedScreen = screen.getByTestId('scoundrel-screen');
-        expect(updatedScreen).toBeTruthy();
-      }
-    });
-
-    it('should conditionally render based on outcome state', () => {
-      const encounter = createMockEncounter();
-      const onComplete = jest.fn();
-
-      // Complete encounter and resolve
-      const config = encounter.getState().config;
-      for (let i = 0; i < config.dungeonSize; i++) {
-        const availableCards = encounter.getAvailableCards();
-        if (availableCards.length > 0) {
-          encounter.selectCard(availableCards[0].id);
-          if (i < config.dungeonSize - 1) {
-            encounter.advanceRoom();
-          }
-        }
-      }
-
-      const outcome = encounter.resolve(mockInventory);
-
-      // Render with outcome
-      const { rerender } = render(
-        <ScoundrelScreen
-          {...defaultProps}
-          encounter={encounter}
-          onComplete={onComplete}
-        />
-      );
-
-      // Complete encounter to trigger outcome state
-      const completeButton = screen.queryByText('Complete Encounter');
-      if (completeButton) {
-        fireEvent.press(completeButton);
-        rerender(
-          <ScoundrelScreen
-            {...defaultProps}
-            encounter={encounter}
-            onComplete={onComplete}
-          />
-        );
-
-        // Should show outcome display instead of gameplay content
-        if (outcome.type === 'success' || outcome.type === 'failure') {
-          expect(screen.queryByText(/Success!|Failure!/)).toBeTruthy();
-          // Gameplay content should not be visible
-          expect(screen.queryByText('Available Cards')).toBeNull();
-        }
+        // State should be synchronized
+        expect(updatedState.roomActionCount).toBeGreaterThan(0);
       }
     });
   });

@@ -11,47 +11,31 @@ import type { AdvancedEncounterOutcome } from './risk-event-encounter';
 export type { AdvancedEncounterOutcome };
 
 /**
+ * Playing card suit
+ */
+export type Suit = 'clubs' | 'spades' | 'diamonds' | 'hearts';
+
+/**
+ * Playing card value (2-10, J=11, Q=12, K=13, A=14)
+ */
+export type CardValue = 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14;
+
+/**
+ * Playing card representation
+ */
+export interface PlayingCard {
+  suit: Suit;
+  value: CardValue;
+  id: string; // Unique identifier (e.g., "clubs-7", "hearts-11")
+}
+
+/**
  * Configuration for a Scoundrel encounter
  */
 export interface ScoundrelConfig {
-  startingLife: number; // Default: 10
-  dungeonSize: number; // Number of rooms (5-10)
-  depth: number; // Depth level affects difficulty and rewards
-}
-
-/**
- * A room in the dungeon containing monsters and cards
- */
-export interface DungeonRoom {
-  id: string;
-  roomNumber: number;
-  monsters: Monster[];
-  cards: Card[];
-  isCompleted: boolean;
-}
-
-/**
- * A monster that can be encountered in a dungeon room
- */
-export interface Monster {
-  id: string;
-  name: string;
-  value: number; // For scoring
-  lifeDamage: number; // Damage dealt when encountered
-}
-
-/**
- * A card that can be drawn in a dungeon room
- */
-export interface Card {
-  id: string;
-  name: string;
-  type: 'monster' | 'health_potion' | 'treasure' | 'trap';
-  effect?: {
-    healAmount?: number;
-    damageAmount?: number;
-    treasureValue?: number;
-  };
+  startingLife: number; // Default: 20
+  depth: number; // Depth level affects rewards
+  roomsToSurvive?: number; // Number of rooms to complete to win (default: 5 + depth)
 }
 
 /**
@@ -61,9 +45,17 @@ export interface ScoundrelState {
   encounterId: string;
   encounterType: EncounterType;
   config: ScoundrelConfig;
-  currentLife: number;
-  currentRoom: number;
-  dungeon: DungeonRoom[];
+  health: number;
+  deck: PlayingCard[]; // Ordered array (top = next to draw)
+  discard: PlayingCard[];
+  equippedWeapon: PlayingCard | null;
+  defeatedByWeapon: number[]; // Ordered list of monster values defeated with current weapon
+  currentRoom: PlayingCard[]; // Up to 4 cards (left to right)
+  skipAvailable: boolean;
+  gameOutcome: null | 'win' | 'loss';
+  roomActionCount: number; // 0-3
+  roomPotionCount: number; // 0-3
+  roomsCompleted: number; // Number of rooms successfully completed
   isResolved: boolean;
   outcome?: AdvancedEncounterOutcome;
 }
@@ -84,43 +76,179 @@ const REWARD_TIERS: RewardTier[] = [
   { minScore: 21, maxScore: Infinity, xp: 200, itemCount: 3 }, // Tier 3
 ];
 
+/**
+ * Generate a standard 52-card deck
+ */
+function generateStandardDeck(): PlayingCard[] {
+  const deck: PlayingCard[] = [];
+  const suits: Suit[] = ['clubs', 'spades', 'diamonds', 'hearts'];
+  const values: CardValue[] = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+
+  for (const suit of suits) {
+    for (const value of values) {
+      deck.push({
+        suit,
+        value,
+        id: `${suit}-${value}`,
+      });
+    }
+  }
+
+  return deck;
+}
+
+/**
+ * Remove red face cards and red aces from deck
+ * Remove: ♥J (hearts-11), ♥Q (hearts-12), ♥K (hearts-13), ♥A (hearts-14)
+ *        ♦J (diamonds-11), ♦Q (diamonds-12), ♦K (diamonds-13), ♦A (diamonds-14)
+ */
+function filterDeck(deck: PlayingCard[]): PlayingCard[] {
+  return deck.filter((card) => {
+    // Remove red face cards and red aces
+    if (card.suit === 'hearts' && card.value >= 11) {
+      return false; // Hearts J, Q, K, A
+    }
+    if (card.suit === 'diamonds' && card.value >= 11) {
+      return false; // Diamonds J, Q, K, A
+    }
+    return true;
+  });
+}
+
+/**
+ * Shuffle array using Fisher-Yates algorithm
+ */
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+/**
+ * Get card value for display (2-10, J, Q, K, A)
+ */
+export function getCardDisplayValue(value: CardValue): string {
+  if (value <= 10) {
+    return value.toString();
+  }
+  if (value === 11) {
+    return 'J';
+  }
+  if (value === 12) {
+    return 'Q';
+  }
+  if (value === 13) {
+    return 'K';
+  }
+  return 'A';
+}
+
+/**
+ * Get suit symbol for display
+ */
+export function getSuitSymbol(suit: Suit): string {
+  switch (suit) {
+    case 'clubs':
+      return '♣';
+    case 'spades':
+      return '♠';
+    case 'diamonds':
+      return '♦';
+    case 'hearts':
+      return '♥';
+  }
+}
+
+/**
+ * Check if card is a monster (Clubs or Spades)
+ */
+function isMonster(card: PlayingCard): boolean {
+  return card.suit === 'clubs' || card.suit === 'spades';
+}
+
+/**
+ * Check if card is a weapon (Diamonds, value 2-10)
+ */
+function isWeapon(card: PlayingCard): boolean {
+  return card.suit === 'diamonds' && card.value >= 2 && card.value <= 10;
+}
+
+/**
+ * Check if card is a potion (Hearts)
+ */
+function isPotion(card: PlayingCard): boolean {
+  return card.suit === 'hearts';
+}
+
 export class ScoundrelEncounter {
-  private state: ScoundrelState;
-  private lastCardPlayed?: Card;
+  private state!: ScoundrelState; // Initialized in initializeGame
   private rewardCalculator: RewardCalculator;
 
   /**
    * Create a scoundrel encounter configuration
-   * @param depth - Depth level affects dungeon size and difficulty
-   * @param startingLife - Starting life (default: 10)
-   * @param dungeonSize - Number of rooms (default: 5-10 based on depth)
+   * @param depth - Depth level affects rewards and number of rooms to survive
+   * @param startingLife - Starting life (default: 20)
+   * @param roomsToSurvive - Number of rooms to complete to win (default: 5 + depth)
    */
   static createScoundrelConfig(
     depth: number,
-    startingLife: number = 10,
-    dungeonSize?: number
+    startingLife: number = 20,
+    roomsToSurvive?: number
   ): ScoundrelConfig {
-    const size = dungeonSize ?? 5 + Math.floor(Math.random() * 6); // 5-10 rooms
+    const rooms = roomsToSurvive ?? 5 + depth; // Default: 5 + depth (scales with difficulty)
     return {
       startingLife,
-      dungeonSize: size,
       depth,
+      roomsToSurvive: rooms,
     };
   }
 
   constructor(encounterId: string, config: ScoundrelConfig) {
+    this.rewardCalculator = new RewardCalculator();
+    this.initializeGame(encounterId, config);
+  }
+
+  /**
+   * Initialize the game according to Scoundrel rules
+   */
+  private initializeGame(encounterId: string, config: ScoundrelConfig): void {
+    // Create and shuffle deck
+    const fullDeck = generateStandardDeck();
+    const filteredDeck = filterDeck(fullDeck);
+    const shuffledDeck = shuffleArray(filteredDeck);
+
+    // Deal initial room (4 cards)
+    const initialRoom: PlayingCard[] = [];
+    for (let i = 0; i < 4 && shuffledDeck.length > 0; i++) {
+      initialRoom.push(shuffledDeck.shift()!);
+    }
+
+    // Ensure roomsToSurvive has a default value
+    const roomsToSurvive = config.roomsToSurvive ?? 5 + config.depth;
+
     this.state = {
       encounterId,
       encounterType: 'scoundrel',
-      config,
-      currentLife: config.startingLife,
-      currentRoom: 0,
-      dungeon: [],
+      config: {
+        ...config,
+        roomsToSurvive,
+      },
+      health: config.startingLife,
+      deck: shuffledDeck,
+      discard: [],
+      equippedWeapon: null,
+      defeatedByWeapon: [],
+      currentRoom: initialRoom,
+      skipAvailable: true,
+      gameOutcome: null,
+      roomActionCount: 0,
+      roomPotionCount: 0,
+      roomsCompleted: 0,
       isResolved: false,
     };
-
-    this.rewardCalculator = new RewardCalculator();
-    this.initializeDungeon();
   }
 
   /**
@@ -131,369 +259,363 @@ export class ScoundrelEncounter {
   }
 
   /**
-   * Initialize the dungeon structure
-   */
-  private initializeDungeon(): void {
-    this.state.dungeon = this.generateDungeon();
-  }
-
-  /**
-   * Generate dungeon with rooms based on config
-   */
-  private generateDungeon(): DungeonRoom[] {
-    const rooms: DungeonRoom[] = [];
-    const numRooms = Math.max(5, Math.min(10, this.state.config.dungeonSize));
-
-    for (let i = 0; i < numRooms; i++) {
-      const monsters = this.generateMonsters(i + 1);
-      const cards = this.generateCards(i + 1, monsters);
-
-      rooms.push({
-        id: `room-${i + 1}`,
-        roomNumber: i + 1,
-        monsters,
-        cards,
-        isCompleted: false,
-      });
-    }
-
-    return rooms;
-  }
-
-  /**
-   * Generate monsters for a room based on room number and depth
-   */
-  private generateMonsters(roomNumber: number): Monster[] {
-    const depthMultiplier = Math.pow(this.state.config.depth, 1.2);
-    const roomDifficulty = roomNumber * 0.5;
-    const numMonsters = Math.floor(Math.random() * 3) + 1; // 1-3 monsters per room
-
-    const monsters: Monster[] = [];
-
-    for (let i = 0; i < numMonsters; i++) {
-      const baseValue = Math.round((10 + roomDifficulty * 5) * depthMultiplier);
-      const baseDamage = Math.round(
-        (1 + roomDifficulty * 0.5) * depthMultiplier
-      );
-
-      const value = baseValue + Math.floor(Math.random() * 5);
-      const lifeDamage = Math.max(
-        1,
-        baseDamage + Math.floor(Math.random() * 3)
-      );
-
-      const monsterNames = [
-        'Goblin',
-        'Skeleton',
-        'Orc',
-        'Shadow Beast',
-        'Dark Mage',
-        'Troll',
-        'Vampire',
-        'Demon',
-      ];
-
-      monsters.push({
-        id: `monster-${roomNumber}-${i + 1}`,
-        name: monsterNames[Math.floor(Math.random() * monsterNames.length)],
-        value,
-        lifeDamage,
-      });
-    }
-
-    return monsters;
-  }
-
-  /**
-   * Generate cards for a room (monsters, health potions, treasures, traps)
-   */
-  private generateCards(roomNumber: number, monsters: Monster[]): Card[] {
-    const cards: Card[] = [];
-
-    // Add monster cards based on monsters in room
-    monsters.forEach((monster) => {
-      cards.push({
-        id: `card-monster-${monster.id}`,
-        name: `${monster.name} Card`,
-        type: 'monster',
-        effect: {
-          damageAmount: monster.lifeDamage,
-        },
-      });
-    });
-
-    // Add health potions (chance increases with room number)
-    const healthPotionChance = Math.min(0.4, 0.2 + roomNumber * 0.05);
-    if (Math.random() < healthPotionChance) {
-      const healAmount = Math.floor(Math.random() * 5) + 5; // 5-10 healing
-      cards.push({
-        id: `card-health-${roomNumber}`,
-        name: 'Health Potion',
-        type: 'health_potion',
-        effect: {
-          healAmount,
-        },
-      });
-    }
-
-    // Add treasure cards (rarer than health potions)
-    const treasureChance = Math.min(0.3, 0.1 + roomNumber * 0.03);
-    if (Math.random() < treasureChance) {
-      const treasureValue = Math.floor(Math.random() * 10) + 5; // 5-15 value
-      cards.push({
-        id: `card-treasure-${roomNumber}`,
-        name: 'Treasure',
-        type: 'treasure',
-        effect: {
-          treasureValue,
-        },
-      });
-    }
-
-    // Add trap cards (dangerous, but less common)
-    const trapChance = Math.min(0.25, 0.1 + roomNumber * 0.02);
-    if (Math.random() < trapChance) {
-      const damageAmount = Math.floor(Math.random() * 3) + 2; // 2-5 damage
-      cards.push({
-        id: `card-trap-${roomNumber}`,
-        name: 'Trap',
-        type: 'trap',
-        effect: {
-          damageAmount,
-        },
-      });
-    }
-
-    // Shuffle cards
-    return cards.sort(() => Math.random() - 0.5);
-  }
-
-  /**
-   * Get current life points
+   * Get current health
    */
   getCurrentLife(): number {
-    return this.state.currentLife;
+    return this.state.health;
   }
 
   /**
-   * Get maximum life points (starting life)
+   * Get maximum life (starting life)
    */
   getMaxLife(): number {
     return this.state.config.startingLife;
   }
 
   /**
-   * Check if encounter is complete (life = 0 OR dungeon completed)
+   * Check if encounter is complete (health = 0 OR game outcome set)
    */
   isEncounterComplete(): boolean {
-    // If dungeon hasn't been initialized yet, encounter is not complete
-    if (this.state.dungeon.length === 0) {
-      return false;
-    }
-
-    return (
-      this.state.currentLife <= 0 ||
-      this.state.currentRoom >= this.state.dungeon.length
-    );
+    return this.state.health <= 0 || this.state.gameOutcome !== null;
   }
 
   /**
-   * Get remaining monsters that haven't been encountered
+   * Get current room cards
    */
-  getRemainingMonsters(): Monster[] {
-    const remainingMonsters: Monster[] = [];
+  getCurrentRoom(): PlayingCard[] {
+    return [...this.state.currentRoom];
+  }
 
-    for (let i = this.state.currentRoom; i < this.state.dungeon.length; i++) {
-      const room = this.state.dungeon[i];
-      if (!room.isCompleted) {
-        remainingMonsters.push(...room.monsters);
+  /**
+   * Get equipped weapon
+   */
+  getEquippedWeapon(): PlayingCard | null {
+    return this.state.equippedWeapon;
+  }
+
+  /**
+   * Get monsters defeated by current weapon (for durability tracking)
+   */
+  getDefeatedByWeapon(): number[] {
+    return [...this.state.defeatedByWeapon];
+  }
+
+  /**
+   * Check if skip is available
+   */
+  canSkipRoom(): boolean {
+    return this.state.skipAvailable && !this.isEncounterComplete();
+  }
+
+  /**
+   * Get remaining deck size
+   */
+  getDeckSize(): number {
+    return this.state.deck.length;
+  }
+
+  /**
+   * Get room action count (0-3)
+   */
+  getRoomActionCount(): number {
+    return this.state.roomActionCount;
+  }
+
+  /**
+   * Skip the current room
+   */
+  skipRoom(): boolean {
+    if (!this.canSkipRoom()) {
+      return false;
+    }
+
+    // Move all 4 room cards to bottom of deck
+    this.state.deck.push(...this.state.currentRoom);
+    this.state.currentRoom = [];
+
+    // Deal fresh room of 4 cards
+    this.dealRoom();
+
+    // Set skipAvailable = false
+    this.state.skipAvailable = false;
+
+    // Check win condition after dealing new room
+    this.checkWinCondition();
+
+    return true;
+  }
+
+  /**
+   * Deal a new room (4 cards)
+   */
+  private dealRoom(): void {
+    // Draw 4 cards (or as many as available)
+    for (
+      let i = this.state.currentRoom.length;
+      i < 4 && this.state.deck.length > 0;
+      i++
+    ) {
+      const card = this.state.deck.shift();
+      if (card) {
+        this.state.currentRoom.push(card);
       }
     }
-
-    return remainingMonsters;
   }
 
   /**
-   * Select a card from the current room
+   * Play a card from the current room
    */
-  selectCard(cardId: string): boolean {
-    const currentRoomData = this.getCurrentRoom();
-    if (!currentRoomData) {
+  playCard(cardIndex: number, useWeapon: boolean = false): boolean {
+    if (this.isEncounterComplete()) {
       return false;
     }
 
-    const card = currentRoomData.cards.find((c) => c.id === cardId);
+    if (this.state.roomActionCount >= 3) {
+      return false; // Room already completed
+    }
+
+    if (cardIndex < 0 || cardIndex >= this.state.currentRoom.length) {
+      return false;
+    }
+
+    const card = this.state.currentRoom[cardIndex];
     if (!card) {
       return false;
     }
 
-    return this.processCard(card);
+    let success = false;
+
+    if (isMonster(card)) {
+      success = this.fightMonster(card, useWeapon);
+    } else if (isWeapon(card)) {
+      success = this.equipWeapon(card);
+    } else if (isPotion(card)) {
+      success = this.consumePotion(card);
+    }
+
+    if (success) {
+      // Remove card from room and move to discard
+      this.state.currentRoom.splice(cardIndex, 1);
+      this.state.discard.push(card);
+      this.state.roomActionCount++;
+
+      // If room completed (3 cards played), advance to next room
+      if (this.state.roomActionCount >= 3) {
+        this.completeRoom();
+      }
+    }
+
+    return success;
   }
 
   /**
-   * Process a card and update game state
+   * Fight a monster
    */
-  processCard(card: Card): boolean {
-    if (this.isEncounterComplete()) {
-      return false;
+  private fightMonster(monster: PlayingCard, useWeapon: boolean): boolean {
+    const monsterValue = monster.value;
+
+    if (!this.state.equippedWeapon || !useWeapon) {
+      // No weapon or fighting bare-handed
+      this.state.health = Math.max(this.state.health - monsterValue, 0);
+      if (this.state.health === 0) {
+        this.state.gameOutcome = 'loss';
+      }
+      return true;
     }
 
-    // Track last card played
-    this.lastCardPlayed = card;
+    // Weapon equipped - check durability legality
+    const weapon = this.state.equippedWeapon;
+    const weaponStrength = weapon.value;
 
-    // Apply card effects
-    if (card.effect) {
-      if (card.effect.healAmount) {
-        this.state.currentLife = Math.min(
-          this.getMaxLife(),
-          this.state.currentLife + card.effect.healAmount
-        );
+    // Check if weapon can attack this monster
+    if (this.state.defeatedByWeapon.length > 0) {
+      const lastDefeated =
+        this.state.defeatedByWeapon[this.state.defeatedByWeapon.length - 1];
+      if (monsterValue >= lastDefeated) {
+        // Weapon durability constraint: must be strictly descending
+        // Player can still choose to fight bare-handed
+        if (useWeapon) {
+          return false; // Cannot use weapon, must fight bare-handed
+        }
+        // Fighting bare-handed
+        this.state.health = Math.max(this.state.health - monsterValue, 0);
+        if (this.state.health === 0) {
+          this.state.gameOutcome = 'loss';
+        }
+        return true;
       }
+    }
 
-      if (card.effect.damageAmount) {
-        this.state.currentLife = Math.max(
-          0,
-          this.state.currentLife - card.effect.damageAmount
-        );
-      }
+    // Weapon can attack - calculate damage
+    const damage = Math.max(monsterValue - weaponStrength, 0);
+    this.state.health = Math.max(this.state.health - damage, 0);
+    this.state.defeatedByWeapon.push(monsterValue);
+
+    if (this.state.health === 0) {
+      this.state.gameOutcome = 'loss';
     }
 
     return true;
   }
 
   /**
-   * Advance to the next room in the dungeon
+   * Equip a weapon
    */
-  advanceRoom(): boolean {
-    if (this.isEncounterComplete()) {
-      return false;
+  private equipWeapon(weapon: PlayingCard): boolean {
+    // Discard previous weapon and all monsters in defeatedByWeapon
+    if (this.state.equippedWeapon) {
+      this.state.discard.push(this.state.equippedWeapon);
+      // Monsters were already discarded when defeated, but we track them
+      // in defeatedByWeapon for durability checking
     }
 
-    // Mark current room as completed
-    if (this.state.currentRoom < this.state.dungeon.length) {
-      this.state.dungeon[this.state.currentRoom].isCompleted = true;
-    }
-
-    // Move to next room
-    this.state.currentRoom += 1;
+    // Equip new weapon
+    this.state.equippedWeapon = weapon;
+    this.state.defeatedByWeapon = [];
 
     return true;
   }
 
   /**
-   * Get current room information
+   * Consume a potion
    */
-  getCurrentRoom(): DungeonRoom | null {
-    if (
-      this.state.currentRoom < 0 ||
-      this.state.currentRoom >= this.state.dungeon.length
-    ) {
-      return null;
+  private consumePotion(potion: PlayingCard): boolean {
+    // Only first potion per room has effect
+    if (this.state.roomPotionCount === 0) {
+      this.state.health += potion.value;
     }
 
-    return { ...this.state.dungeon[this.state.currentRoom] };
+    this.state.roomPotionCount++;
+    return true;
   }
 
   /**
-   * Get dungeon progress (current room / total rooms)
+   * Complete current room and advance to next
+   */
+  private completeRoom(): void {
+    // Increment rooms completed
+    this.state.roomsCompleted++;
+
+    // Carry over the unplayed 4th card (if room had 4 cards and we played 3)
+    let carryover: PlayingCard | null = null;
+    if (this.state.currentRoom.length > 0) {
+      carryover = this.state.currentRoom[0];
+    }
+
+    // Clear current room
+    this.state.currentRoom = [];
+
+    // Add carryover as leftmost slot of next room
+    if (carryover) {
+      this.state.currentRoom.push(carryover);
+    }
+
+    // Draw 3 more cards to complete room to 4 cards
+    this.dealRoom();
+
+    // Reset room state
+    this.state.skipAvailable = true;
+    this.state.roomActionCount = 0;
+    this.state.roomPotionCount = 0;
+
+    // Check win condition after completing room
+    this.checkWinCondition();
+  }
+
+  /**
+   * Check win condition: player survives required number of rooms
+   */
+  private checkWinCondition(): void {
+    // Win: Player has completed the required number of rooms and health > 0
+    const roomsToSurvive =
+      this.state.config.roomsToSurvive ?? 5 + this.state.config.depth;
+    if (this.state.roomsCompleted >= roomsToSurvive && this.state.health > 0) {
+      this.state.gameOutcome = 'win';
+    }
+  }
+
+  /**
+   * Get dungeon progress (rooms completed vs rooms to survive)
    */
   getDungeonProgress(): { current: number; total: number } {
+    // roomsToSurvive is guaranteed to be set in state.config after initialization
+    const roomsToSurvive = this.state.config.roomsToSurvive!;
     return {
-      current: this.state.currentRoom + 1,
-      total: this.state.dungeon.length,
+      current: this.state.roomsCompleted,
+      total: roomsToSurvive,
     };
   }
 
   /**
-   * Get available cards in the current room
+   * Get available cards in current room (for UI compatibility)
    */
-  getAvailableCards(): Card[] {
-    const currentRoomData = this.getCurrentRoom();
-    if (!currentRoomData) {
-      return [];
+  getAvailableCards(): PlayingCard[] {
+    return this.getCurrentRoom();
+  }
+
+  /**
+   * Get last card played (for compatibility - not used in actual Scoundrel)
+   */
+  getLastCard(): PlayingCard | undefined {
+    return this.state.discard.length > 0
+      ? this.state.discard[this.state.discard.length - 1]
+      : undefined;
+  }
+
+  /**
+   * Get remaining monsters (for compatibility - not used in actual Scoundrel scoring)
+   */
+  getRemainingMonsters(): { name: string; value: number }[] {
+    // Return monsters in current room and deck
+    const monsters: { name: string; value: number }[] = [];
+
+    // Check current room
+    for (const card of this.state.currentRoom) {
+      if (isMonster(card)) {
+        monsters.push({
+          name: `${getSuitSymbol(card.suit)} ${getCardDisplayValue(card.value)}`,
+          value: card.value,
+        });
+      }
     }
 
-    return [...currentRoomData.cards];
-  }
-
-  /**
-   * Track last card played (for health potion bonus)
-   */
-  trackLastCard(card: Card): void {
-    this.lastCardPlayed = card;
-  }
-
-  /**
-   * Get last card played
-   */
-  getLastCard(): Card | undefined {
-    return this.lastCardPlayed;
-  }
-
-  /**
-   * Get sum of remaining monster values
-   */
-  getRemainingMonsterValues(): number {
-    const remainingMonsters = this.getRemainingMonsters();
-    return remainingMonsters.reduce((sum, monster) => sum + monster.value, 0);
-  }
-
-  /**
-   * Check if card is a health potion
-   */
-  isHealthPotion(card: Card): boolean {
-    return card.type === 'health_potion';
-  }
-
-  /**
-   * Get health potion value (heal amount)
-   */
-  getHealthPotionValue(card: Card): number {
-    if (!this.isHealthPotion(card)) {
-      return 0;
+    // Check deck
+    for (const card of this.state.deck) {
+      if (isMonster(card)) {
+        monsters.push({
+          name: `${getSuitSymbol(card.suit)} ${getCardDisplayValue(card.value)}`,
+          value: card.value,
+        });
+      }
     }
 
-    return card.effect?.healAmount ?? 0;
+    return monsters;
   }
 
   /**
    * Calculate final score based on encounter outcome
-   * Note: Life = 0 takes priority over dungeon completion (failure > success)
+   * For Scoundrel: score = final health (win) or negative score based on remaining deck (loss)
    */
   calculateScore(): number {
-    const currentLife = this.state.currentLife;
-    const isDungeonCompleted =
-      this.state.currentRoom >= this.state.dungeon.length;
-
-    // Failure scoring: life = 0 (takes priority over dungeon completion)
-    if (currentLife <= 0) {
-      const remainingMonsterValues = this.getRemainingMonsterValues();
-      // Score = life (0) - remaining monster values = negative score
-      return 0 - remainingMonsterValues;
+    if (this.state.gameOutcome === 'win') {
+      return this.state.health;
     }
 
-    // Success scoring: dungeon completed AND life > 0
-    if (isDungeonCompleted) {
-      let score = currentLife;
-
-      // Health potion bonus: if life = 20 and last card was health potion
-      const lastCard = this.getLastCard();
-      if (lastCard && this.isHealthPotion(lastCard) && currentLife === 20) {
-        const potionValue = this.getHealthPotionValue(lastCard);
-        score = currentLife + potionValue;
-      }
-
-      return score;
+    if (this.state.gameOutcome === 'loss') {
+      // Calculate negative score based on remaining cards
+      const remainingCards =
+        this.state.deck.length + this.state.currentRoom.length;
+      return -remainingCards;
     }
 
-    // Encounter not yet complete
+    // Game not complete
     return 0;
   }
 
   /**
    * Get reward tier based on score
    */
-  getRewardTier(score: number): RewardTier {
+  private getRewardTier(score: number): RewardTier {
     // For negative scores (failures), use tier 1
     if (score < 0) {
       return REWARD_TIERS[0];
@@ -506,36 +628,14 @@ export class ScoundrelEncounter {
       }
     }
 
-    // Default to tier 1 if no match (shouldn't happen)
+    // Default to tier 1
     return REWARD_TIERS[0];
-  }
-
-  /**
-   * Calculate reward XP for a given tier
-   */
-  calculateRewardXP(tier: number): number {
-    if (tier < 1 || tier > REWARD_TIERS.length) {
-      return REWARD_TIERS[0].xp;
-    }
-
-    return REWARD_TIERS[tier - 1].xp;
-  }
-
-  /**
-   * Calculate reward item count for a given tier
-   */
-  calculateRewardItemCount(tier: number): number {
-    if (tier < 1 || tier > REWARD_TIERS.length) {
-      return REWARD_TIERS[0].itemCount;
-    }
-
-    return REWARD_TIERS[tier - 1].itemCount;
   }
 
   /**
    * Generate rewards based on score
    */
-  generateRewards(score: number): CollectedItem[] {
+  private generateRewards(score: number): CollectedItem[] {
     // No rewards for failures (negative scores)
     if (score < 0) {
       return [];
@@ -544,8 +644,6 @@ export class ScoundrelEncounter {
     const tier = this.getRewardTier(score);
     const items: CollectedItem[] = [];
 
-    // Generate items based on tier
-    // Mix of trade_goods, discoveries, and potentially legendaries for higher tiers
     const itemTypes: ('trade_good' | 'discovery' | 'legendary')[] = [
       'trade_good',
       'discovery',
@@ -568,7 +666,6 @@ export class ScoundrelEncounter {
       items.push(item);
     }
 
-    // Process rewards through RewardCalculator for proper scaling
     return this.rewardCalculator.processEncounterRewards(
       items,
       'scoundrel',
@@ -578,33 +675,20 @@ export class ScoundrelEncounter {
 
   /**
    * Calculate number of items to steal based on score
-   * Lower score (more negative) = more items stolen
    */
-  calculateItemsToSteal(score: number): number {
-    // For failures, score is negative
-    // More negative score = more items stolen
+  private calculateItemsToSteal(score: number): number {
     if (score >= 0) {
-      return 0; // No items stolen on success
+      return 0;
     }
 
-    // Score is negative, so we use its magnitude
     const scoreMagnitude = Math.abs(score);
-
-    // Base calculation: 1 item per 10 points of negative score
-    // Minimum 1 item, maximum 5 items
-    const itemsToSteal = Math.min(
-      5,
-      Math.max(1, Math.ceil(scoreMagnitude / 10))
-    );
-
-    return itemsToSteal;
+    return Math.min(5, Math.max(1, Math.ceil(scoreMagnitude / 10)));
   }
 
   /**
-   * Steal items from inventory (returns item IDs to remove)
-   * This doesn't actually modify inventory - that's done by the UI layer
+   * Steal items from inventory
    */
-  stealItemsFromInventory(
+  private stealItemsFromInventory(
     runInventory: CollectedItem[],
     count: number
   ): string[] {
@@ -612,67 +696,33 @@ export class ScoundrelEncounter {
       return [];
     }
 
-    // Randomly select items to steal
     const shuffled = [...runInventory].sort(() => Math.random() - 0.5);
     const itemsToSteal = shuffled.slice(0, Math.min(count, shuffled.length));
-
     return itemsToSteal.map((item) => item.id);
   }
 
   /**
    * Calculate energy loss based on failure severity
    */
-  calculateEnergyLoss(score: number, remainingLife: number): number {
-    // For failures, score is negative
+  private calculateEnergyLoss(score: number): number {
     if (score >= 0) {
-      return 0; // No energy loss on success
+      return 0;
     }
 
     const scoreMagnitude = Math.abs(score);
     const depthMultiplier = Math.pow(this.state.config.depth, 1.2);
-
-    // Base energy loss: 5 per 10 points of negative score
-    // Plus depth scaling
     const baseLoss = Math.ceil(scoreMagnitude / 10) * 5;
-    const scaledLoss = Math.round(baseLoss * depthMultiplier);
-
-    // Additional loss based on how close to completing dungeon
-    // If life was very low, add extra penalty
-    const lifePenalty = remainingLife <= 2 ? 5 : 0;
-
-    return scaledLoss + lifePenalty;
+    return Math.round(baseLoss * depthMultiplier);
   }
 
   /**
-   * Apply failure consequences and return item IDs to steal
-   */
-  applyFailureConsequences(runInventory: CollectedItem[]): {
-    itemsToSteal: string[];
-    energyLoss: number;
-  } {
-    const score = this.calculateScore();
-    const currentLife = this.state.currentLife;
-
-    const itemsToStealCount = this.calculateItemsToSteal(score);
-    const itemsToSteal = this.stealItemsFromInventory(
-      runInventory,
-      itemsToStealCount
-    );
-
-    const energyLoss = this.calculateEnergyLoss(score, currentLife);
-
-    return { itemsToSteal, energyLoss };
-  }
-
-  /**
-   * Generate success outcome with rewards
+   * Generate success outcome
    */
   private generateSuccessOutcome(score: number): AdvancedEncounterOutcome {
     const rewards = this.generateRewards(score);
     const tier = this.getRewardTier(score);
     const xp = tier.xp;
 
-    // Convert CollectedItem[] to EncounterReward format
     const items: AdvancedEncounterItem[] = rewards.map((item) => {
       const rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' =
         item.type === 'legendary' ? 'legendary' : 'common';
@@ -697,28 +747,28 @@ export class ScoundrelEncounter {
 
     return {
       type: 'success',
-      message: `Dungeon completed! Score: ${score}. Earned ${xp} XP and ${rewards.length} items.`,
+      message: `Victory! Score: ${score}. Earned ${xp} XP and ${rewards.length} items.`,
       reward: encounterReward,
     };
   }
 
   /**
-   * Generate failure outcome with consequences
+   * Generate failure outcome
    */
   private generateFailureOutcome(
     score: number,
     runInventory: CollectedItem[]
   ): AdvancedEncounterOutcome {
-    const inventory = runInventory || [];
-    const consequences = this.applyFailureConsequences(inventory);
+    const itemsToStealCount = this.calculateItemsToSteal(score);
+    const itemsToSteal = this.stealItemsFromInventory(
+      runInventory,
+      itemsToStealCount
+    );
+    const energyLoss = this.calculateEnergyLoss(score);
 
-    const itemsStolenCount = consequences.itemsToSteal.length;
-    const energyLoss = consequences.energyLoss;
-
-    // Build failure message
     let message = `Defeated! Your score: ${score}.`;
-    if (itemsStolenCount > 0) {
-      message += ` ${itemsStolenCount} item${itemsStolenCount > 1 ? 's' : ''} stolen.`;
+    if (itemsToSteal.length > 0) {
+      message += ` ${itemsToSteal.length} item${itemsToSteal.length > 1 ? 's' : ''} stolen.`;
     }
     if (energyLoss > 0) {
       message += ` Lost ${energyLoss} energy.`;
@@ -729,11 +779,10 @@ export class ScoundrelEncounter {
       message,
       consequence: {
         energyLoss,
-        itemLossRisk: 0, // Not used for scoundrel (we steal exact items)
+        itemLossRisk: 0,
         forcedRetreat: false,
         encounterLockout: false,
-        // Store item IDs to steal for scoundrel encounters
-        itemsToSteal: consequences.itemsToSteal,
+        itemsToSteal,
       } as AdvancedEncounterOutcome['consequence'] & {
         itemsToSteal?: string[];
       },
@@ -749,18 +798,12 @@ export class ScoundrelEncounter {
     }
 
     const score = this.calculateScore();
-    const currentLife = this.state.currentLife;
-    const isDungeonCompleted =
-      this.state.currentRoom >= this.state.dungeon.length;
-
-    // Determine success or failure
-    const isSuccess = currentLife > 0 && isDungeonCompleted;
-
     this.state.isResolved = true;
 
-    const outcome = isSuccess
-      ? this.generateSuccessOutcome(score)
-      : this.generateFailureOutcome(score, runInventory || []);
+    const outcome =
+      this.state.gameOutcome === 'win'
+        ? this.generateSuccessOutcome(score)
+        : this.generateFailureOutcome(score, runInventory || []);
 
     this.state.outcome = outcome;
     return outcome;
