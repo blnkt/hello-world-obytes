@@ -29,6 +29,10 @@ export class EncounterResolver {
     'safe_passage',
     'region_shortcut',
     'scoundrel',
+    'luck_shrine',
+    'energy_nexus',
+    'time_distortion',
+    'fate_weaver',
   ];
   private readonly encounterTypeMultipliers: Partial<
     Record<EncounterType, number>
@@ -41,6 +45,10 @@ export class EncounterResolver {
     safe_passage: 0.7, // Low reward, but free return is the main benefit
     region_shortcut: 0.5, // Low reward, region switching is the main benefit
     scoundrel: 1.2, // Tiered rewards based on score
+    luck_shrine: 1.0, // No direct rewards, provides utility
+    energy_nexus: 1.0, // No direct rewards, provides utility
+    time_distortion: 1.0, // No direct rewards, provides utility
+    fate_weaver: 1.0, // No direct rewards, provides utility
   };
 
   constructor() {

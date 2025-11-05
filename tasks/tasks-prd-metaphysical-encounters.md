@@ -45,11 +45,11 @@ Based on PRD: `prd-metaphysical-encounters.md`
   - [x] 1.7 Add routing entries for all four new encounter types in `src/lib/delvers-descent/encounter-router.ts`
   - [x] 1.8 Update `getEncounterRoute` function to return routes for new encounter types
   - [x] 1.9 Update `isEncounterSupported` function to include new encounter types
-  - [ ] 1.10 Add new encounter types to `supportedEncounterTypes` array in `EncounterResolver` class
+  - [x] 1.10 Add new encounter types to `supportedEncounterTypes` array in `EncounterResolver` class
   - [ ] 1.11 Add new encounter types to encounter type lists in `DungeonMapGenerator` class
   - [ ] 1.12 Add new encounter types to encounter type lists in `DungeonMapGeneratorOptimized` class
-  - [ ] 1.13 Write unit tests for type definitions and type guards
-  - [ ] 1.14 Write unit tests for encounter router with new types
+  - [x] 1.13 Write unit tests for type definitions and type guards
+  - [x] 1.14 Write unit tests for encounter router with new types
 
 - [ ] 2.0 Luck Shrine Encounter Implementation
   - [ ] 2.1 Create `src/lib/delvers-descent/luck-shrine-encounter.ts` with `LuckShrineEncounter` class

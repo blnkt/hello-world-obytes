@@ -241,6 +241,32 @@ describe('EncounterResolver', () => {
       expect(encounterResolver.getEncounterType()).toBe('discovery_site');
     });
 
+    it('should start encounters with metaphysical encounter types', () => {
+      const metaphysicalTypes: EncounterType[] = [
+        'luck_shrine',
+        'energy_nexus',
+        'time_distortion',
+        'fate_weaver',
+      ];
+
+      metaphysicalTypes.forEach((type) => {
+        encounterResolver.clearEncounterState();
+        const encounterData = {
+          type,
+          nodeId: `node-${type}`,
+          depth: 3,
+          energyCost: 20,
+        };
+
+        encounterResolver.startEncounter(encounterData);
+        const state = encounterResolver.getCurrentState();
+
+        expect(state?.type).toBe(type);
+        expect(encounterResolver.getEncounterType()).toBe(type);
+        expect(encounterResolver.isValidEncounterType(type)).toBe(true);
+      });
+    });
+
     it('should return null for encounter type when no encounter is active', () => {
       expect(encounterResolver.getEncounterType()).toBeNull();
     });
@@ -305,6 +331,12 @@ describe('EncounterResolver', () => {
       expect(encounterResolver.isValidEncounterType('hazard')).toBe(true);
       expect(encounterResolver.isValidEncounterType('rest_site')).toBe(true);
       expect(encounterResolver.isValidEncounterType('scoundrel')).toBe(true);
+      expect(encounterResolver.isValidEncounterType('luck_shrine')).toBe(true);
+      expect(encounterResolver.isValidEncounterType('energy_nexus')).toBe(true);
+      expect(encounterResolver.isValidEncounterType('time_distortion')).toBe(
+        true
+      );
+      expect(encounterResolver.isValidEncounterType('fate_weaver')).toBe(true);
       expect(encounterResolver.isValidEncounterType('invalid_type')).toBe(
         false
       );
