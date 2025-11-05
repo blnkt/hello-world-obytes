@@ -1,16 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
+import { CollectionManager } from '@/lib/delvers-descent/collection-manager';
+import { ALL_COLLECTION_SETS } from '@/lib/delvers-descent/collection-sets';
 import { DiscoverySiteEncounter } from '@/lib/delvers-descent/discovery-site-encounter';
 import { FailureConsequenceManager } from '@/lib/delvers-descent/failure-consequence-manager';
+import { RegionManager } from '@/lib/delvers-descent/region-manager';
 import { RewardCalculator } from '@/lib/delvers-descent/reward-calculator';
 import type { DelvingRun, DungeonNode } from '@/types/delvers-descent';
+
+import { RegionUnlockProgress } from '../region-unlock-progress';
 
 interface DiscoverySiteScreenProps {
   run: DelvingRun;
   node: DungeonNode;
   onReturnToMap: () => void;
-  onEncounterComplete: (result: 'success' | 'failure', rewards?: any[]) => void;
+  onEncounterComplete: (params: {
+    result: 'success' | 'failure';
+    rewards?: any[];
+    unlockedRegionId?: string;
+  }) => void;
+  collectionManager?: CollectionManager;
+  regionManager?: RegionManager;
 }
 
 const getRiskColor = (riskLevel: string): string => {
@@ -289,11 +300,21 @@ const DiscoveryContent: React.FC<{
   explorationResult: any;
   onReturnToMap: () => void;
   onSelectPath: (pathId: string) => void;
-}> = ({ encounter, explorationResult, onReturnToMap, onSelectPath }) => {
+  collectionManager: CollectionManager;
+  regionManager?: RegionManager;
+}> = ({
+  encounter,
+  explorationResult,
+  onReturnToMap,
+  onSelectPath,
+  collectionManager,
+  regionManager,
+}) => {
   const explorationPaths = encounter.getExplorationPaths();
   const loreDiscoveries = encounter.getLoreDiscoveries();
   const mapIntelligence = encounter.getMapIntelligence();
   const regionalHistory = encounter.getRegionalHistory();
+  const selectedCollectionSetId = encounter.getSelectedCollectionSetId();
 
   return (
     <ScrollView
@@ -310,6 +331,12 @@ const DiscoveryContent: React.FC<{
             Explore ancient sites and discover hidden knowledge!
           </Text>
         </View>
+
+        <RegionUnlockProgress
+          collectionSetId={selectedCollectionSetId || undefined}
+          collectionManager={collectionManager}
+          regionManager={regionManager}
+        />
 
         <View className="mb-6 gap-6 lg:flex-row">
           <ExplorationPathsSection
@@ -343,12 +370,52 @@ const DiscoveryContent: React.FC<{
   );
 };
 
+const processRewardsAndCheckUnlocks = async ({
+  processedRewards,
+  collectionManager,
+  encounter,
+  setters,
+}: {
+  processedRewards: any[];
+  collectionManager: CollectionManager;
+  encounter: DiscoverySiteEncounter;
+  setters: {
+    setUnlockedRegionId: (regionId: string | undefined) => void;
+  };
+}) => {
+  if (processedRewards && processedRewards.length > 0) {
+    for (const reward of processedRewards) {
+      if (
+        reward.setId &&
+        (reward.type === 'trade_good' ||
+          reward.type === 'discovery' ||
+          reward.type === 'legendary')
+      ) {
+        await collectionManager.addCollectedItem({
+          itemId: reward.id,
+          setId: reward.setId,
+          collectedDate: Date.now(),
+          source: 'encounter',
+        });
+      }
+    }
+
+    // Check for region unlocks after items are processed
+    const unlockedRegionId =
+      await encounter.checkForRegionUnlocksAfterItemCollection();
+    if (unlockedRegionId) {
+      setters.setUnlockedRegionId(unlockedRegionId);
+    }
+  }
+};
+
 const buildExplorationDecisionHandler = ({
   encounter,
   encounterComplete,
   rewardCalculator,
   failureManager,
   node,
+  collectionManager,
   setters,
 }: {
   encounter: DiscoverySiteEncounter | null;
@@ -356,17 +423,19 @@ const buildExplorationDecisionHandler = ({
   rewardCalculator: RewardCalculator;
   failureManager: FailureConsequenceManager;
   node: DungeonNode;
+  collectionManager: CollectionManager;
   setters: {
     setExplorationResult: (result: any) => void;
     setEncounterComplete: (complete: boolean) => void;
     setEncounterResult: (result: 'success' | 'failure' | null) => void;
     setRewards: (rewards: any[]) => void;
+    setUnlockedRegionId: (regionId: string | undefined) => void;
   };
 }) => {
   return async (pathId: string) => {
     if (!encounter || encounterComplete) return;
 
-    const result = encounter.processExplorationDecision(pathId);
+    const result = await encounter.processExplorationDecision(pathId);
     setters.setExplorationResult(result);
 
     if (result.success) {
@@ -379,6 +448,16 @@ const buildExplorationDecisionHandler = ({
         node.depth
       );
       setters.setRewards(processedRewards);
+
+      // Add items to CollectionManager and check for region unlocks
+      if (processedRewards && processedRewards.length > 0) {
+        await processRewardsAndCheckUnlocks({
+          processedRewards,
+          collectionManager,
+          encounter,
+          setters,
+        });
+      }
     } else {
       failureManager.processFailureConsequences(
         'objective_failed',
@@ -391,56 +470,144 @@ const buildExplorationDecisionHandler = ({
   };
 };
 
-export const DiscoverySiteScreen: React.FC<DiscoverySiteScreenProps> = ({
-  run: _run,
-  node,
-  onReturnToMap,
-  onEncounterComplete,
-}) => {
+const useDiscoveryManagers = (
+  providedCollectionManager?: CollectionManager,
+  providedRegionManager?: RegionManager
+) => {
+  const [collectionManager] = useState(
+    () =>
+      providedCollectionManager || new CollectionManager(ALL_COLLECTION_SETS)
+  );
+  const [regionManager] = useState(
+    () =>
+      providedRegionManager ||
+      (collectionManager ? new RegionManager(collectionManager) : undefined)
+  );
+  return { collectionManager, regionManager };
+};
+
+const useDiscoveryEncounter = (
+  depth: number,
+  regionManager?: RegionManager,
+  collectionManager?: CollectionManager
+) => {
   const [encounter, setEncounter] = useState<DiscoverySiteEncounter | null>(
     null
   );
+
+  useEffect(() => {
+    const discoveryEncounter = new DiscoverySiteEncounter(
+      depth,
+      regionManager,
+      collectionManager
+    );
+    setEncounter(discoveryEncounter);
+  }, [depth, regionManager, collectionManager]);
+
+  return encounter;
+};
+
+const useDiscoveryState = () => {
   const [explorationResult, setExplorationResult] = useState<any>(null);
   const [encounterComplete, setEncounterComplete] = useState(false);
   const [encounterResult, setEncounterResult] = useState<
     'success' | 'failure' | null
   >(null);
   const [rewards, setRewards] = useState<any[]>([]);
-  const [rewardCalculator] = useState(() => new RewardCalculator());
-  const [failureManager] = useState(() => new FailureConsequenceManager());
-
-  useEffect(() => {
-    const discoveryEncounter = new DiscoverySiteEncounter(node.depth);
-    setEncounter(discoveryEncounter);
-  }, [node.depth]);
-
-  const handleExplorationDecision = buildExplorationDecisionHandler({
-    encounter,
+  const [unlockedRegionId, setUnlockedRegionId] = useState<string | undefined>(
+    undefined
+  );
+  return {
+    explorationResult,
+    setExplorationResult,
     encounterComplete,
-    rewardCalculator,
-    failureManager,
-    node,
-    setters: {
-      setExplorationResult,
-      setEncounterComplete,
-      setEncounterResult,
-      setRewards,
-    },
-  });
+    setEncounterComplete,
+    encounterResult,
+    setEncounterResult,
+    rewards,
+    setRewards,
+    unlockedRegionId,
+    setUnlockedRegionId,
+  };
+};
 
-  const handleReturnFromSuccess = () => {
+const buildReturnHandler = ({
+  encounterResult,
+  rewards,
+  unlockedRegionId,
+  onEncounterComplete,
+  onReturnToMap,
+}: {
+  encounterResult: 'success' | 'failure' | null;
+  rewards: any[];
+  unlockedRegionId?: string;
+  onEncounterComplete: (params: {
+    result: 'success' | 'failure';
+    rewards?: any[];
+    unlockedRegionId?: string;
+  }) => void;
+  onReturnToMap: () => void;
+}) => {
+  return () => {
     if (encounterResult === 'success') {
-      onEncounterComplete('success', rewards);
+      onEncounterComplete({ result: 'success', rewards, unlockedRegionId });
     } else if (encounterResult === 'failure') {
-      onEncounterComplete('failure');
+      onEncounterComplete({ result: 'failure' });
     }
     onReturnToMap();
   };
+};
 
-  if (encounterComplete && encounterResult) {
+export const DiscoverySiteScreen: React.FC<DiscoverySiteScreenProps> = ({
+  run: _run,
+  node,
+  onReturnToMap,
+  onEncounterComplete,
+  collectionManager: providedCollectionManager,
+  regionManager: providedRegionManager,
+}) => {
+  const state = useDiscoveryState();
+  const [rewardCalculator] = useState(() => new RewardCalculator());
+  const [failureManager] = useState(() => new FailureConsequenceManager());
+
+  const { collectionManager, regionManager } = useDiscoveryManagers(
+    providedCollectionManager,
+    providedRegionManager
+  );
+  const encounter = useDiscoveryEncounter(
+    node.depth,
+    regionManager,
+    collectionManager
+  );
+
+  const handleExplorationDecision = buildExplorationDecisionHandler({
+    encounter,
+    encounterComplete: state.encounterComplete,
+    rewardCalculator,
+    failureManager,
+    node,
+    collectionManager,
+    setters: {
+      setExplorationResult: state.setExplorationResult,
+      setEncounterComplete: state.setEncounterComplete,
+      setEncounterResult: state.setEncounterResult,
+      setRewards: state.setRewards,
+      setUnlockedRegionId: state.setUnlockedRegionId,
+    },
+  });
+
+  const handleReturnFromSuccess = buildReturnHandler({
+    encounterResult: state.encounterResult,
+    rewards: state.rewards,
+    unlockedRegionId: state.unlockedRegionId,
+    onEncounterComplete,
+    onReturnToMap,
+  });
+
+  if (state.encounterComplete && state.encounterResult) {
     return (
       <SuccessScreen
-        rewards={rewards}
+        rewards={state.rewards}
         onReturnToMap={handleReturnFromSuccess}
       />
     );
@@ -453,9 +620,11 @@ export const DiscoverySiteScreen: React.FC<DiscoverySiteScreenProps> = ({
   return (
     <DiscoveryContent
       encounter={encounter}
-      explorationResult={explorationResult}
+      explorationResult={state.explorationResult}
       onReturnToMap={onReturnToMap}
       onSelectPath={handleExplorationDecision}
+      collectionManager={collectionManager}
+      regionManager={regionManager}
     />
   );
 };

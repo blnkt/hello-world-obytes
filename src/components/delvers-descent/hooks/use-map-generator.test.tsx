@@ -32,7 +32,7 @@ describe('useMapGenerator', () => {
   });
 
   describe('core generation functions', () => {
-    it('should generate depth level', () => {
+    it('should generate depth level', async () => {
       const mockNodes: DungeonNode[] = [
         {
           id: 'depth1-node0',
@@ -56,11 +56,11 @@ describe('useMapGenerator', () => {
         },
       ];
 
-      mockMapGenerator.generateDepthLevel.mockReturnValue(mockNodes);
+      mockMapGenerator.generateDepthLevel.mockResolvedValue(mockNodes);
 
       const { result: _result } = renderHook(() => useMapGenerator());
 
-      const nodes = _result.current.generateDepthLevel(1);
+      const nodes = await _result.current.generateDepthLevel(1);
       expect(nodes).toEqual(mockNodes);
       expect(mockMapGenerator.generateDepthLevel).toHaveBeenCalledWith(
         1,
@@ -68,7 +68,7 @@ describe('useMapGenerator', () => {
       );
     });
 
-    it('should generate full map', () => {
+    it('should generate full map', async () => {
       const mockMap: DungeonNode[] = [
         {
           id: 'depth1-node0',
@@ -92,11 +92,11 @@ describe('useMapGenerator', () => {
         },
       ];
 
-      mockMapGenerator.generateFullMap.mockReturnValue(mockMap);
+      mockMapGenerator.generateFullMap.mockResolvedValue(mockMap);
 
       const { result: _result } = renderHook(() => useMapGenerator());
 
-      const map = _result.current.generateFullMap(2);
+      const map = await _result.current.generateFullMap(2);
       expect(map).toEqual(mockMap);
       expect(mockMapGenerator.generateFullMap).toHaveBeenCalledWith(2);
     });

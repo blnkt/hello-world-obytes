@@ -29,11 +29,12 @@ interface EncounterScreenProps {
   node: DungeonNode;
   runState?: RunState | null;
   onReturnToMap: () => void;
-  onEncounterComplete: (
-    result: 'success' | 'failure',
-    rewards?: any[],
-    targetRegionId?: string
-  ) => void;
+  onEncounterComplete: (params: {
+    result: 'success' | 'failure';
+    rewards?: any[];
+    targetRegionId?: string;
+    unlockedRegionId?: string;
+  }) => void;
 }
 
 const LoadingScreen: React.FC = () => (
@@ -203,50 +204,75 @@ const useAdvancedEncounter = (node: DungeonNode, currentRegionId?: string) => {
           setIsLoading(false);
         });
     }
-  }, [node.type, node.depth, node.id, currentRegionId]);
+  }, [node, currentRegionId]);
 
   return { advancedEncounter, isLoading };
 };
 
 const handleAdvancedEncounterComplete = (
   outcome: any,
-  onEncounterComplete: (
-    result: 'success' | 'failure',
-    rewards?: any[],
-    targetRegionId?: string
-  ) => void
+  onEncounterComplete: (params: {
+    result: 'success' | 'failure';
+    rewards?: any[];
+    targetRegionId?: string;
+  }) => void
 ) => {
   const result = outcome.type === 'success' ? 'success' : 'failure';
   const rewards = outcome.reward ? [outcome.reward] : undefined;
   const targetRegionId = outcome.targetRegionId;
-  onEncounterComplete(result, rewards, targetRegionId);
+  onEncounterComplete({ result, rewards, targetRegionId });
 };
 
 const renderStandardEncounter = (params: {
   node: DungeonNode;
   run: DelvingRun;
   onReturnToMap: () => void;
-  onEncounterComplete: (result: 'success' | 'failure', rewards?: any[]) => void;
+  onEncounterComplete: (params: {
+    result: 'success' | 'failure';
+    rewards?: any[];
+    targetRegionId?: string;
+    unlockedRegionId?: string;
+  }) => void;
 }) => {
   const { node, run, onReturnToMap, onEncounterComplete } = params;
   if (node.type === 'puzzle_chamber') {
+    const wrappedOnEncounterComplete = (params: {
+      result: 'success' | 'failure';
+      rewards?: any[];
+    }) => {
+      onEncounterComplete({
+        result: params.result,
+        rewards: params.rewards,
+      });
+    };
     return (
       <PuzzleChamberScreen
         run={run}
         node={node}
         onReturnToMap={onReturnToMap}
-        onEncounterComplete={onEncounterComplete}
+        onEncounterComplete={wrappedOnEncounterComplete}
       />
     );
   }
 
   if (node.type === 'discovery_site') {
+    const wrappedOnEncounterComplete = (params: {
+      result: 'success' | 'failure';
+      rewards?: any[];
+      unlockedRegionId?: string;
+    }) => {
+      onEncounterComplete({
+        result: params.result,
+        rewards: params.rewards,
+        unlockedRegionId: params.unlockedRegionId,
+      });
+    };
     return (
       <DiscoverySiteScreen
         run={run}
         node={node}
         onReturnToMap={onReturnToMap}
-        onEncounterComplete={onEncounterComplete}
+        onEncounterComplete={wrappedOnEncounterComplete}
       />
     );
   }
@@ -258,7 +284,11 @@ const renderAdvancedEncounter = (params: {
   node: DungeonNode;
   advancedEncounter: any;
   onReturnToMap: () => void;
-  onEncounterComplete: (result: 'success' | 'failure', rewards?: any[]) => void;
+  onEncounterComplete: (params: {
+    result: 'success' | 'failure';
+    rewards?: any[];
+    targetRegionId?: string;
+  }) => void;
 }) => {
   const { node, advancedEncounter, onReturnToMap, onEncounterComplete } =
     params;
@@ -324,11 +354,12 @@ const EncounterContent: React.FC<{
   node: DungeonNode;
   runState?: RunState | null;
   onReturnToMap: () => void;
-  onEncounterComplete: (
-    result: 'success' | 'failure',
-    rewards?: any[],
-    targetRegionId?: string
-  ) => void;
+  onEncounterComplete: (params: {
+    result: 'success' | 'failure';
+    rewards?: any[];
+    targetRegionId?: string;
+    unlockedRegionId?: string;
+  }) => void;
 }> = ({ run, node, runState, onReturnToMap, onEncounterComplete }) => {
   const { advancedEncounter, isLoading } = useAdvancedEncounter(
     node,
@@ -343,7 +374,14 @@ const EncounterContent: React.FC<{
     node,
     run,
     onReturnToMap,
-    onEncounterComplete,
+    onEncounterComplete: (params) => {
+      onEncounterComplete({
+        result: params.result,
+        rewards: params.rewards,
+        targetRegionId: params.targetRegionId,
+        unlockedRegionId: params.unlockedRegionId,
+      });
+    },
   });
   if (standardContent) return standardContent;
 
@@ -351,7 +389,13 @@ const EncounterContent: React.FC<{
     node,
     advancedEncounter,
     onReturnToMap,
-    onEncounterComplete,
+    onEncounterComplete: (params) => {
+      onEncounterComplete({
+        result: params.result,
+        rewards: params.rewards,
+        targetRegionId: params.targetRegionId,
+      });
+    },
   });
   if (advancedContent) return advancedContent;
 
@@ -365,11 +409,12 @@ const renderAdvancedEncounterScreen = (params: {
   node: DungeonNode;
   runState?: RunState | null;
   onReturnToMap: () => void;
-  onEncounterComplete: (
-    result: 'success' | 'failure',
-    rewards?: any[],
-    targetRegionId?: string
-  ) => void;
+  onEncounterComplete: (params: {
+    result: 'success' | 'failure';
+    rewards?: any[];
+    targetRegionId?: string;
+    unlockedRegionId?: string;
+  }) => void;
 }) => {
   const { run, node, runState, onReturnToMap, onEncounterComplete } = params;
   return (
@@ -395,7 +440,12 @@ const renderStandardEncounterScreen = (params: {
   run: DelvingRun;
   node: DungeonNode;
   onReturnToMap: () => void;
-  onEncounterComplete: (result: 'success' | 'failure', rewards?: any[]) => void;
+  onEncounterComplete: (params: {
+    result: 'success' | 'failure';
+    rewards?: any[];
+    targetRegionId?: string;
+    unlockedRegionId?: string;
+  }) => void;
   encounterResolver: any;
   startEncounter: () => Promise<void>;
   completeEncounter: (
@@ -419,13 +469,15 @@ const renderStandardEncounterScreen = (params: {
     }
   };
 
-  const handleEncounterComplete = async (
-    result: 'success' | 'failure',
-    rewards?: any[]
-  ) => {
+  const handleEncounterComplete = async (params: {
+    result: 'success' | 'failure';
+    rewards?: any[];
+    targetRegionId?: string;
+    unlockedRegionId?: string;
+  }) => {
     if (encounterResolver) {
-      await completeEncounter(result, rewards);
-      onEncounterComplete(result, rewards);
+      await completeEncounter(params.result, params.rewards);
+      onEncounterComplete(params);
     }
   };
 

@@ -8,14 +8,17 @@ export const useMapGenerator = () => {
   const mapGenerator = getDungeonMapGenerator();
 
   const generateDepthLevel = useMemo(() => {
-    return (depth: number, regionKey?: string): DungeonNode[] => {
-      return mapGenerator.generateDepthLevel(depth, regionKey);
+    return async (
+      depth: number,
+      regionKey?: string
+    ): Promise<DungeonNode[]> => {
+      return await mapGenerator.generateDepthLevel(depth, regionKey);
     };
   }, [mapGenerator]);
 
   const generateFullMap = useMemo(() => {
-    return (maxDepth: number = 5): DungeonNode[] => {
-      return mapGenerator.generateFullMap(maxDepth);
+    return async (maxDepth: number = 5): Promise<DungeonNode[]> => {
+      return await mapGenerator.generateFullMap(maxDepth);
     };
   }, [mapGenerator]);
 

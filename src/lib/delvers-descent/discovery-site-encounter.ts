@@ -1,5 +1,10 @@
 import type { CollectedItem, EncounterType } from '@/types/delvers-descent';
 
+import type { CollectionManager } from './collection-manager';
+import { getCollectionSetById } from './collection-sets';
+import type { RegionManager } from './region-manager';
+import { REGIONS } from './regions';
+
 export interface ExplorationPath {
   id: 'A' | 'B' | 'C';
   type: 'safe' | 'risky' | 'dangerous';
@@ -97,6 +102,8 @@ export interface RegionalCollectionSet {
 export class DiscoverySiteEncounter {
   private encounterType: EncounterType = 'discovery_site';
   private depth: number;
+  private regionManager?: RegionManager;
+  private collectionManager?: CollectionManager;
   private explorationPaths: ExplorationPath[] = [];
   private loreDiscoveries: LoreDiscovery[] = [];
   private regionalHistory: RegionalHistory[] = [];
@@ -110,9 +117,16 @@ export class DiscoverySiteEncounter {
   };
   private encounterComplete: boolean = false;
   private encounterResult: 'success' | 'failure' | null = null;
+  private selectedCollectionSetId: string | null = null;
 
-  constructor(depth: number = 1) {
+  constructor(
+    depth: number = 1,
+    regionManager?: RegionManager,
+    collectionManager?: CollectionManager
+  ) {
     this.depth = depth;
+    this.regionManager = regionManager;
+    this.collectionManager = collectionManager;
     this.initializeRegionalHistory();
     this.generateExplorationPaths();
     this.generateMapIntelligence();
@@ -126,16 +140,51 @@ export class DiscoverySiteEncounter {
     return this.depth;
   }
 
+  /**
+   * Get available region unlock sets that haven't unlocked their regions yet
+   * Returns array of collection set IDs (silk_road_set, spice_trade_set, ancient_temple_set, dragons_hoard_set)
+   * that are still needed to unlock regions
+   */
+  async getAvailableRegionUnlockSets(): Promise<string[]> {
+    // If regionManager is not provided, return empty array
+    if (!this.regionManager) {
+      return [];
+    }
+
+    // Mapping of collection set IDs to region IDs
+    const setToRegionMap: Record<string, string> = {
+      silk_road_set: 'desert_oasis',
+      spice_trade_set: 'coastal_caves',
+      ancient_temple_set: 'mountain_pass',
+      dragons_hoard_set: 'dragons_lair',
+    };
+
+    const allRegionUnlockSets = Object.keys(setToRegionMap);
+    const availableSets: string[] = [];
+
+    // Check each set to see if its region is unlocked
+    for (const setId of allRegionUnlockSets) {
+      const regionId = setToRegionMap[setId];
+      const isUnlocked = await this.regionManager.isRegionUnlocked(regionId);
+      if (!isUnlocked) {
+        availableSets.push(setId);
+      }
+    }
+
+    return availableSets;
+  }
+
   getExplorationPaths(): ExplorationPath[] {
     return [...this.explorationPaths];
   }
 
-  processExplorationDecision(pathId: string): {
+  async processExplorationDecision(pathId: string): Promise<{
     success: boolean;
     rewards?: CollectedItem[];
     consequences?: ExplorationConsequence[];
     error?: string;
-  } {
+    unlockedRegion?: string;
+  }> {
     if (this.encounterComplete) {
       return { success: false, error: 'Encounter already complete' };
     }
@@ -154,18 +203,121 @@ export class DiscoverySiteEncounter {
     // Generate lore discoveries
     this.generateLoreDiscoveries(path);
 
-    // Generate regional discoveries
-    this.generateRegionalDiscoveries(path);
+    // Generate regional discoveries (these are the actual rewards)
+    await this.generateRegionalDiscoveries(path);
 
     this.encounterComplete = true;
     this.encounterResult = 'success';
     this.updateExplorationStatistics(true, path.outcome.riskLevel);
 
+    // Note: Region unlock checking should happen AFTER items are processed by CollectionManager
+    // See checkForRegionUnlocksAfterItemCollection() method for post-item-processing unlock check
+    // The unlock check here may not detect unlocks if items haven't been added to CollectionManager yet
+
     return {
       success: true,
-      rewards: scaledOutcome.rewards,
+      rewards: this.regionalDiscoveries, // Use dynamically generated discoveries
       consequences: scaledOutcome.consequences,
+      unlockedRegion: undefined, // Will be set by checkForRegionUnlocksAfterItemCollection()
     };
+  }
+
+  /**
+   * Check all regions for unlock eligibility
+   * Returns array of region IDs that can be unlocked
+   */
+  async checkEligibleRegions(): Promise<string[]> {
+    if (!this.regionManager) {
+      return [];
+    }
+
+    // Use REGIONS directly instead of calling getAllRegions() to avoid mock issues
+    const eligibleRegions: string[] = [];
+
+    for (const region of REGIONS) {
+      // Skip if already unlocked
+      const isUnlocked = await this.regionManager.isRegionUnlocked(region.id);
+      if (isUnlocked) {
+        continue;
+      }
+
+      // Check if requirements are met
+      const canUnlock = await this.regionManager.canUnlockRegion(region.id);
+      if (canUnlock) {
+        eligibleRegions.push(region.id);
+      }
+    }
+
+    return eligibleRegions;
+  }
+
+  /**
+   * Automatically unlock regions when requirements are met
+   * If multiple regions are eligible, randomly selects one (per PRD requirement)
+   * Returns the ID of the unlocked region, or undefined if none were unlocked
+   */
+  async checkAndUnlockRegions(): Promise<string | undefined> {
+    if (!this.regionManager) {
+      return undefined;
+    }
+
+    const eligibleRegions = await this.checkEligibleRegions();
+
+    if (eligibleRegions.length === 0) {
+      return undefined;
+    }
+
+    // If multiple regions are eligible, randomly select one (per PRD requirement)
+    let selectedRegionId: string;
+    if (eligibleRegions.length === 1) {
+      selectedRegionId = eligibleRegions[0];
+    } else {
+      const randomIndex = Math.floor(Math.random() * eligibleRegions.length);
+      selectedRegionId = eligibleRegions[randomIndex];
+    }
+
+    // Unlock the selected region
+    try {
+      await this.regionManager.unlockRegion(selectedRegionId);
+      return selectedRegionId;
+    } catch (error) {
+      // If unlock fails (e.g., requirements changed), return undefined
+      console.error(`Failed to unlock region ${selectedRegionId}:`, error);
+      return undefined;
+    }
+  }
+
+  /**
+   * Check for region unlocks AFTER items have been processed by CollectionManager
+   * This method should be called after items are added to CollectionManager via addCollectedItem()
+   * to ensure set completions are detected before checking for unlocks.
+   *
+   * This is the recommended method to use for unlock checking, as it ensures items are processed first.
+   *
+   * @returns The ID of the unlocked region, or undefined if none were unlocked
+   */
+  async checkForRegionUnlocksAfterItemCollection(): Promise<
+    string | undefined
+  > {
+    if (!this.regionManager) {
+      return undefined;
+    }
+
+    // Only check if regionManager has required methods (defensive for mocks)
+    if (
+      typeof this.regionManager.canUnlockRegion !== 'function' ||
+      typeof this.regionManager.unlockRegion !== 'function'
+    ) {
+      return undefined;
+    }
+
+    try {
+      return await this.checkAndUnlockRegions();
+    } catch (error) {
+      // Silently fail if unlock checking fails (e.g., with mock regionManagers)
+      console.warn('Failed to check for region unlocks:', error);
+      return undefined;
+    }
   }
 
   isEncounterComplete(): boolean {
@@ -182,6 +334,14 @@ export class DiscoverySiteEncounter {
     }
 
     return [...this.regionalDiscoveries];
+  }
+
+  /**
+   * Get the collection set ID that is currently being offered in this encounter
+   * Returns null if no collection set has been selected yet
+   */
+  getSelectedCollectionSetId(): string | null {
+    return this.selectedCollectionSetId;
   }
 
   // Lore Collection System
@@ -249,32 +409,50 @@ export class DiscoverySiteEncounter {
   }
 
   getRegionalCollectionSets(): RegionalCollectionSet[] {
-    return [
-      {
-        id: 'ancient_ruins_set',
-        name: 'Ancient Ruins Collection',
-        region: 'Forgotten Depths',
-        items: [],
-      },
-      {
-        id: 'crystal_caverns_set',
-        name: 'Crystal Caverns Collection',
-        region: 'Crystal Depths',
-        items: [],
-      },
-      {
-        id: 'shadow_realm_set',
-        name: 'Shadow Realm Collection',
-        region: 'Shadow Depths',
-        items: [],
-      },
-      {
-        id: 'ethereal_plains_set',
-        name: 'Ethereal Plains Collection',
-        region: 'Ethereal Depths',
-        items: [],
-      },
-    ];
+    // Mapping of collection set IDs to region names
+    const setToRegionMap: Record<string, string> = {
+      silk_road_set: 'Desert Oasis',
+      spice_trade_set: 'Coastal Caves',
+      ancient_temple_set: 'Mountain Pass',
+      dragons_hoard_set: "Dragon's Lair",
+    };
+
+    // Get all region unlock sets
+    const regionUnlockSetIds = Object.keys(setToRegionMap);
+
+    // Build RegionalCollectionSet objects from collection sets
+    const regionalSets: RegionalCollectionSet[] = [];
+
+    for (const setId of regionUnlockSetIds) {
+      const collectionSet = getCollectionSetById(setId);
+      if (collectionSet) {
+        // Convert CollectionItem[] to CollectedItem[]
+        const collectedItems: CollectedItem[] = collectionSet.items.map(
+          (item) => ({
+            id: item.id,
+            type:
+              collectionSet.category === 'trade_goods'
+                ? 'trade_good'
+                : collectionSet.category === 'discoveries'
+                  ? 'discovery'
+                  : 'legendary',
+            setId: item.setId,
+            value: item.value,
+            name: item.name,
+            description: item.description,
+          })
+        );
+
+        regionalSets.push({
+          id: collectionSet.id,
+          name: collectionSet.name,
+          region: setToRegionMap[setId],
+          items: collectedItems,
+        });
+      }
+    }
+
+    return regionalSets;
   }
 
   // Risk/Reward System
@@ -394,20 +572,15 @@ export class DiscoverySiteEncounter {
   }
 
   private generateExplorationPaths(): void {
-    const regionalSets = [
-      'ancient_ruins_set',
-      'crystal_caverns_set',
-      'shadow_realm_set',
-      'ethereal_plains_set',
-    ];
-
+    // Rewards are generated dynamically in generateRegionalDiscoveries
+    // Path outcomes now only contain consequences, not rewards
     const basePaths: ExplorationPath[] = [
       {
         id: 'A',
         type: 'safe',
         description: 'Follow the well-marked trail through ancient ruins',
         outcome: {
-          rewards: [this.createDiscoveryReward(regionalSets[0], 40)],
+          rewards: [], // Rewards generated dynamically
           consequences: [this.createExplorationConsequence('lose_energy', 5)],
           riskLevel: 'low',
         },
@@ -417,7 +590,7 @@ export class DiscoverySiteEncounter {
         type: 'risky',
         description: 'Explore the uncharted crystal formations',
         outcome: {
-          rewards: [this.createDiscoveryReward(regionalSets[1], 60)],
+          rewards: [], // Rewards generated dynamically
           consequences: [this.createExplorationConsequence('lose_energy', 10)],
           riskLevel: 'medium',
         },
@@ -427,7 +600,7 @@ export class DiscoverySiteEncounter {
         type: 'dangerous',
         description: 'Venture into the shadowy depths',
         outcome: {
-          rewards: [this.createDiscoveryReward(regionalSets[2], 80)],
+          rewards: [], // Rewards generated dynamically
           consequences: [this.createExplorationConsequence('lose_energy', 15)],
           riskLevel: 'high',
         },
@@ -513,15 +686,30 @@ export class DiscoverySiteEncounter {
     this.loreDiscoveries.push(scaledLore);
   }
 
-  private generateRegionalDiscoveries(path: ExplorationPath): void {
-    const regionalSets = [
-      'ancient_ruins_set',
-      'crystal_caverns_set',
-      'shadow_realm_set',
-      'ethereal_plains_set',
-    ];
-    const setIndex = this.explorationPaths.indexOf(path);
-    const selectedSet = regionalSets[setIndex] || regionalSets[0];
+  private async generateRegionalDiscoveries(
+    _path: ExplorationPath
+  ): Promise<void> {
+    let selectedSet: string | null = null;
+
+    // If regionManager is available, use region unlock sets
+    if (this.regionManager) {
+      const availableSets = await this.getAvailableRegionUnlockSets();
+      if (availableSets.length > 0) {
+        // Randomly select from available region unlock sets
+        const randomIndex = Math.floor(Math.random() * availableSets.length);
+        selectedSet = availableSets[randomIndex];
+      }
+      // If all regions unlocked (no sets available), don't generate discovery
+    } else {
+      // Without regionManager, cannot determine which sets to use
+      // Skip discovery generation for backward compatibility
+      return;
+    }
+
+    // Only generate discovery if we have a valid set
+    if (!selectedSet) {
+      return;
+    }
 
     const baseValue = 50;
     const depthMultiplier = 1 + this.depth * 0.2;
@@ -529,38 +717,48 @@ export class DiscoverySiteEncounter {
 
     const discovery = this.createDiscoveryReward(selectedSet, scaledValue);
     this.regionalDiscoveries.push(discovery);
+    this.selectedCollectionSetId = selectedSet;
   }
 
   private createDiscoveryReward(
     collectionSet: string,
     value: number
   ): CollectedItem {
-    const setNames: Record<string, string> = {
-      ancient_ruins_set: 'Ancient Ruins',
-      crystal_caverns_set: 'Crystal Caverns',
-      shadow_realm_set: 'Shadow Realm',
-      ethereal_plains_set: 'Ethereal Plains',
-    };
+    // Try to get the collection set from collection-sets.ts
+    const collectionSetData = getCollectionSetById(collectionSet);
 
-    const itemNames: Record<string, string[]> = {
-      ancient_ruins_set: ['Ancient Artifact', 'Ruined Relic', 'Lost Treasure'],
-      crystal_caverns_set: ['Crystal Shard', 'Prismatic Gem', 'Luminous Stone'],
-      shadow_realm_set: ['Shadow Essence', 'Dark Fragment', 'Void Crystal'],
-      ethereal_plains_set: ['Ethereal Fragment', 'Void Stone', 'Mystic Orb'],
-    };
+    if (collectionSetData && collectionSetData.items.length > 0) {
+      // Use actual collection set items
+      const availableItems = collectionSetData.items;
+      const randomIndex = Math.floor(Math.random() * availableItems.length);
+      const selectedItem = availableItems[randomIndex];
 
-    const setName = setNames[collectionSet] || 'Discovery';
-    const availableItems = itemNames[collectionSet] || ['Discovery Item'];
-    const itemName =
-      availableItems[Math.floor(Math.random() * availableItems.length)];
+      // Map CollectionItem category to CollectedItem type
+      const typeMap: Record<string, 'trade_good' | 'discovery' | 'legendary'> =
+        {
+          trade_goods: 'trade_good',
+          discoveries: 'discovery',
+          legendaries: 'legendary',
+        };
 
+      return {
+        id: `discovery-${collectionSet}-${selectedItem.id}-${Date.now()}-${Math.random()}`,
+        type: typeMap[collectionSetData.category] || 'discovery',
+        setId: collectionSet,
+        value: value, // Use provided value (scaled by depth)
+        name: selectedItem.name,
+        description: selectedItem.description,
+      };
+    }
+
+    // Generic fallback for unknown collection sets
     return {
       id: `discovery-${collectionSet}-${Date.now()}-${Math.random()}`,
       type: 'discovery',
       setId: collectionSet,
       value,
-      name: itemName,
-      description: `A mysterious ${itemName.toLowerCase()} discovered in the ${setName.toLowerCase()}`,
+      name: 'Discovery Item',
+      description: `A mysterious discovery item from ${collectionSet}`,
     };
   }
 
