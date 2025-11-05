@@ -555,9 +555,169 @@ export class ScoundrelEncounter {
   }
 
   /**
+   * Calculate number of items to steal based on score
+   * Lower score (more negative) = more items stolen
+   */
+  calculateItemsToSteal(score: number): number {
+    // For failures, score is negative
+    // More negative score = more items stolen
+    if (score >= 0) {
+      return 0; // No items stolen on success
+    }
+
+    // Score is negative, so we use its magnitude
+    const scoreMagnitude = Math.abs(score);
+
+    // Base calculation: 1 item per 10 points of negative score
+    // Minimum 1 item, maximum 5 items
+    const itemsToSteal = Math.min(
+      5,
+      Math.max(1, Math.ceil(scoreMagnitude / 10))
+    );
+
+    return itemsToSteal;
+  }
+
+  /**
+   * Steal items from inventory (returns item IDs to remove)
+   * This doesn't actually modify inventory - that's done by the UI layer
+   */
+  stealItemsFromInventory(
+    runInventory: CollectedItem[],
+    count: number
+  ): string[] {
+    if (runInventory.length === 0 || count <= 0) {
+      return [];
+    }
+
+    // Randomly select items to steal
+    const shuffled = [...runInventory].sort(() => Math.random() - 0.5);
+    const itemsToSteal = shuffled.slice(0, Math.min(count, shuffled.length));
+
+    return itemsToSteal.map((item) => item.id);
+  }
+
+  /**
+   * Calculate energy loss based on failure severity
+   */
+  calculateEnergyLoss(score: number, remainingLife: number): number {
+    // For failures, score is negative
+    if (score >= 0) {
+      return 0; // No energy loss on success
+    }
+
+    const scoreMagnitude = Math.abs(score);
+    const depthMultiplier = Math.pow(this.state.config.depth, 1.2);
+
+    // Base energy loss: 5 per 10 points of negative score
+    // Plus depth scaling
+    const baseLoss = Math.ceil(scoreMagnitude / 10) * 5;
+    const scaledLoss = Math.round(baseLoss * depthMultiplier);
+
+    // Additional loss based on how close to completing dungeon
+    // If life was very low, add extra penalty
+    const lifePenalty = remainingLife <= 2 ? 5 : 0;
+
+    return scaledLoss + lifePenalty;
+  }
+
+  /**
+   * Apply failure consequences and return item IDs to steal
+   */
+  applyFailureConsequences(runInventory: CollectedItem[]): {
+    itemsToSteal: string[];
+    energyLoss: number;
+  } {
+    const score = this.calculateScore();
+    const currentLife = this.state.currentLife;
+
+    const itemsToStealCount = this.calculateItemsToSteal(score);
+    const itemsToSteal = this.stealItemsFromInventory(
+      runInventory,
+      itemsToStealCount
+    );
+
+    const energyLoss = this.calculateEnergyLoss(score, currentLife);
+
+    return { itemsToSteal, energyLoss };
+  }
+
+  /**
+   * Generate success outcome with rewards
+   */
+  private generateSuccessOutcome(score: number): AdvancedEncounterOutcome {
+    const rewards = this.generateRewards(score);
+    const tier = this.getRewardTier(score);
+    const xp = tier.xp;
+
+    // Convert CollectedItem[] to EncounterReward format
+    const items: AdvancedEncounterItem[] = rewards.map((item) => {
+      const rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' =
+        item.type === 'legendary' ? 'legendary' : 'common';
+
+      return {
+        id: item.id,
+        name: item.name,
+        quantity: 1,
+        rarity,
+        type: item.type as 'trade_good' | 'discovery' | 'legendary',
+        setId: item.setId || 'unknown_set',
+        value: item.value,
+        description: item.description || `A ${item.type} item`,
+      };
+    });
+
+    const encounterReward = {
+      energy: 0,
+      items,
+      xp,
+    };
+
+    return {
+      type: 'success',
+      message: `Dungeon completed! Score: ${score}. Earned ${xp} XP and ${rewards.length} items.`,
+      reward: encounterReward,
+    };
+  }
+
+  /**
+   * Generate failure outcome with consequences
+   */
+  private generateFailureOutcome(
+    score: number,
+    runInventory: CollectedItem[]
+  ): AdvancedEncounterOutcome {
+    const inventory = runInventory || [];
+    const consequences = this.applyFailureConsequences(inventory);
+
+    const itemsStolenCount = consequences.itemsToSteal.length;
+    const energyLoss = consequences.energyLoss;
+
+    // Build failure message
+    let message = `Defeated! Your score: ${score}.`;
+    if (itemsStolenCount > 0) {
+      message += ` ${itemsStolenCount} item${itemsStolenCount > 1 ? 's' : ''} stolen.`;
+    }
+    if (energyLoss > 0) {
+      message += ` Lost ${energyLoss} energy.`;
+    }
+
+    return {
+      type: 'failure',
+      message,
+      consequence: {
+        energyLoss,
+        itemLossRisk: 0, // Not used for scoundrel (we steal exact items)
+        forcedRetreat: false,
+        encounterLockout: false,
+      },
+    };
+  }
+
+  /**
    * Resolve the encounter and return outcome
    */
-  resolve(): AdvancedEncounterOutcome {
+  resolve(runInventory?: CollectedItem[]): AdvancedEncounterOutcome {
     if (this.state.isResolved) {
       throw new Error('Encounter already resolved');
     }
@@ -572,56 +732,9 @@ export class ScoundrelEncounter {
 
     this.state.isResolved = true;
 
-    let outcome: AdvancedEncounterOutcome;
-
-    if (isSuccess) {
-      // Success: generate rewards based on score
-      const rewards = this.generateRewards(score);
-      const tier = this.getRewardTier(score);
-      const xp = tier.xp;
-
-      // Convert CollectedItem[] to EncounterReward format
-      const items: AdvancedEncounterItem[] = rewards.map((item) => {
-        // CollectedItem has optional setId and description, but AdvancedEncounterItem requires them
-        const rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' =
-          item.type === 'legendary' ? 'legendary' : 'common';
-
-        return {
-          id: item.id,
-          name: item.name,
-          quantity: 1,
-          rarity,
-          type: item.type as 'trade_good' | 'discovery' | 'legendary',
-          setId: item.setId || 'unknown_set',
-          value: item.value,
-          description: item.description || `A ${item.type} item`,
-        };
-      });
-
-      const encounterReward = {
-        energy: 0,
-        items,
-        xp,
-      };
-
-      outcome = {
-        type: 'success',
-        message: `Dungeon completed! Score: ${score}. Earned ${xp} XP and ${rewards.length} items.`,
-        reward: encounterReward,
-      };
-    } else {
-      // Failure: life reached 0
-      outcome = {
-        type: 'failure',
-        message: `Defeated! Your score: ${score}. All remaining monsters counted against you.`,
-        consequence: {
-          energyLoss: 0, // Will be calculated by failure consequences system
-          itemLossRisk: 0,
-          forcedRetreat: false,
-          encounterLockout: false,
-        },
-      };
-    }
+    const outcome = isSuccess
+      ? this.generateSuccessOutcome(score)
+      : this.generateFailureOutcome(score, runInventory || []);
 
     this.state.outcome = outcome;
     return outcome;

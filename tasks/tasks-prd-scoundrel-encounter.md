@@ -105,24 +105,24 @@
   - [x] 5.13 Write unit tests for reward generation per tier
   - [x] 5.14 Write unit tests for reward integration with RewardCalculator
 
-- [ ] 6.0 Implement Failure Consequences (Item Theft and Energy Loss)
-  - [ ] 6.1 Implement `calculateItemsToSteal(score: number)` method (lower score = more items)
-  - [ ] 6.2 Implement `stealItemsFromInventory(runInventory: CollectedItem[], count: number)` method
-  - [ ] 6.3 Ensure item theft is random from current run inventory
-  - [ ] 6.4 Implement `calculateEnergyLoss(score: number, remainingLife: number)` method
-  - [ ] 6.5 Ensure energy loss scales with failure severity (negative score magnitude or life deficit)
-  - [ ] 6.6 Implement `applyFailureConsequences()` method combining item theft and energy loss
-  - [ ] 6.7 Integrate with `RunStateManager` to access current run inventory
-  - [ ] 6.8 Ensure consequences are returned in `AdvancedEncounterOutcome.consequence` on failure
-  - [ ] 6.9 Update `resolve()` method to apply failure consequences when life = 0
-  - [ ] 6.10 Ensure failure consequences message describes items stolen and energy lost
-  - [ ] 6.11 Update `active-run.tsx` to handle scoundrel failure consequences (item theft and energy loss)
-  - [ ] 6.12 Ensure stolen items are removed from run inventory when failure occurs
-  - [ ] 6.13 Ensure additional energy loss is applied to run state when failure occurs
-  - [ ] 6.14 Write unit tests for item theft calculation
-  - [ ] 6.15 Write unit tests for energy loss calculation
-  - [ ] 6.16 Write unit tests for failure consequences integration
-  - [ ] 6.17 Write integration tests with RunStateManager
+- [x] 6.0 Implement Failure Consequences (Item Theft and Energy Loss)
+  - [x] 6.1 Implement `calculateItemsToSteal(score: number)` method (lower score = more items)
+  - [x] 6.2 Implement `stealItemsFromInventory(runInventory: CollectedItem[], count: number)` method
+  - [x] 6.3 Ensure item theft is random from current run inventory
+  - [x] 6.4 Implement `calculateEnergyLoss(score: number, remainingLife: number)` method
+  - [x] 6.5 Ensure energy loss scales with failure severity (negative score magnitude or life deficit)
+  - [x] 6.6 Implement `applyFailureConsequences()` method combining item theft and energy loss
+  - [ ] 6.7 Integrate with `RunStateManager` to access current run inventory (UI integration - Task 7.0)
+  - [x] 6.8 Ensure consequences are returned in `AdvancedEncounterOutcome.consequence` on failure
+  - [x] 6.9 Update `resolve()` method to apply failure consequences when life = 0
+  - [x] 6.10 Ensure failure consequences message describes items stolen and energy lost
+  - [ ] 6.11 Update `active-run.tsx` to handle scoundrel failure consequences (item theft and energy loss) (Task 7.0)
+  - [ ] 6.12 Ensure stolen items are removed from run inventory when failure occurs (Task 7.0)
+  - [ ] 6.13 Ensure additional energy loss is applied to run state when failure occurs (Task 7.0)
+  - [x] 6.14 Write unit tests for item theft calculation
+  - [x] 6.15 Write unit tests for energy loss calculation
+  - [x] 6.16 Write unit tests for failure consequences integration
+  - [ ] 6.17 Write integration tests with RunStateManager (Task 7.0)
 
 - [ ] 7.0 Create Scoundrel Encounter UI Screen
   - [ ] 7.1 Create `src/components/delvers-descent/encounters/scoundrel-screen.tsx` file

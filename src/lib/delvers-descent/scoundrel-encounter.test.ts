@@ -1045,4 +1045,412 @@ describe('ScoundrelEncounter', () => {
       });
     });
   });
+
+  describe('failure consequences', () => {
+    describe('calculateItemsToSteal', () => {
+      it('should return 0 for positive scores (success)', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-steal-1',
+          createDefaultConfig()
+        );
+
+        expect(encounter.calculateItemsToSteal(0)).toBe(0);
+        expect(encounter.calculateItemsToSteal(10)).toBe(0);
+        expect(encounter.calculateItemsToSteal(50)).toBe(0);
+      });
+
+      it('should calculate items to steal based on negative score', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-steal-2',
+          createDefaultConfig()
+        );
+
+        // Score -10 should steal 1 item (1 per 10 points)
+        expect(encounter.calculateItemsToSteal(-10)).toBe(1);
+        // Score -20 should steal 2 items
+        expect(encounter.calculateItemsToSteal(-20)).toBe(2);
+        // Score -30 should steal 3 items
+        expect(encounter.calculateItemsToSteal(-30)).toBe(3);
+      });
+
+      it('should cap items stolen at maximum of 5', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-steal-3',
+          createDefaultConfig()
+        );
+
+        expect(encounter.calculateItemsToSteal(-100)).toBe(5);
+        expect(encounter.calculateItemsToSteal(-200)).toBe(5);
+      });
+
+      it('should steal at least 1 item for any negative score', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-steal-4',
+          createDefaultConfig()
+        );
+
+        expect(encounter.calculateItemsToSteal(-1)).toBe(1);
+        expect(encounter.calculateItemsToSteal(-5)).toBe(1);
+        expect(encounter.calculateItemsToSteal(-9)).toBe(1);
+      });
+    });
+
+    describe('stealItemsFromInventory', () => {
+      it('should return empty array if inventory is empty', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-inventory-1',
+          createDefaultConfig()
+        );
+
+        const stolen = encounter.stealItemsFromInventory([], 3);
+        expect(stolen).toEqual([]);
+      });
+
+      it('should return empty array if count is 0 or negative', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-inventory-2',
+          createDefaultConfig()
+        );
+
+        const inventory = [
+          {
+            id: 'item-1',
+            type: 'trade_good' as const,
+            setId: 'test_set',
+            value: 10,
+            name: 'Test Item',
+            description: 'A test item',
+          },
+        ];
+
+        expect(encounter.stealItemsFromInventory(inventory, 0)).toEqual([]);
+        expect(encounter.stealItemsFromInventory(inventory, -1)).toEqual([]);
+      });
+
+      it('should return random item IDs from inventory', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-inventory-3',
+          createDefaultConfig()
+        );
+
+        const inventory = [
+          {
+            id: 'item-1',
+            type: 'trade_good' as const,
+            setId: 'test_set',
+            value: 10,
+            name: 'Item 1',
+            description: 'Item 1',
+          },
+          {
+            id: 'item-2',
+            type: 'discovery' as const,
+            setId: 'test_set',
+            value: 20,
+            name: 'Item 2',
+            description: 'Item 2',
+          },
+          {
+            id: 'item-3',
+            type: 'trade_good' as const,
+            setId: 'test_set',
+            value: 30,
+            name: 'Item 3',
+            description: 'Item 3',
+          },
+        ];
+
+        const stolen = encounter.stealItemsFromInventory(inventory, 2);
+        expect(stolen.length).toBe(2);
+        expect(
+          stolen.every((id) => inventory.some((item) => item.id === id))
+        ).toBe(true);
+      });
+
+      it('should not steal more items than available in inventory', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-inventory-4',
+          createDefaultConfig()
+        );
+
+        const inventory = [
+          {
+            id: 'item-1',
+            type: 'trade_good' as const,
+            setId: 'test_set',
+            value: 10,
+            name: 'Item 1',
+            description: 'Item 1',
+          },
+        ];
+
+        const stolen = encounter.stealItemsFromInventory(inventory, 5);
+        expect(stolen.length).toBe(1);
+        expect(stolen[0]).toBe('item-1');
+      });
+    });
+
+    describe('calculateEnergyLoss', () => {
+      it('should return 0 for positive scores (success)', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-energy-1',
+          createDefaultConfig()
+        );
+
+        expect(encounter.calculateEnergyLoss(0, 0)).toBe(0);
+        expect(encounter.calculateEnergyLoss(10, 5)).toBe(0);
+        expect(encounter.calculateEnergyLoss(50, 10)).toBe(0);
+      });
+
+      it('should calculate energy loss based on negative score', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-energy-2',
+          createDefaultConfig()
+        );
+
+        // Score -10 should lose ~5 energy (5 per 10 points)
+        const loss1 = encounter.calculateEnergyLoss(-10, 0);
+        expect(loss1).toBeGreaterThan(0);
+
+        // Score -20 should lose more energy
+        const loss2 = encounter.calculateEnergyLoss(-20, 0);
+        expect(loss2).toBeGreaterThan(loss1);
+      });
+
+      it('should scale energy loss with depth', () => {
+        const config1: ScoundrelConfig = {
+          startingLife: 10,
+          dungeonSize: 5,
+          depth: 1,
+        };
+        const encounter1 = new ScoundrelEncounter('test-energy-3a', config1);
+
+        const config3: ScoundrelConfig = {
+          startingLife: 10,
+          dungeonSize: 5,
+          depth: 3,
+        };
+        const encounter3 = new ScoundrelEncounter('test-energy-3b', config3);
+
+        const loss1 = encounter1.calculateEnergyLoss(-10, 0);
+        const loss3 = encounter3.calculateEnergyLoss(-10, 0);
+
+        expect(loss3).toBeGreaterThan(loss1);
+      });
+
+      it('should add penalty for very low remaining life', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-energy-4',
+          createDefaultConfig()
+        );
+
+        const lossLowLife = encounter.calculateEnergyLoss(-10, 1);
+        const lossNormalLife = encounter.calculateEnergyLoss(-10, 5);
+
+        expect(lossLowLife).toBeGreaterThanOrEqual(lossNormalLife);
+      });
+    });
+
+    describe('applyFailureConsequences', () => {
+      it('should return item IDs to steal and energy loss', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-consequences-1',
+          createDefaultConfig()
+        );
+
+        // Take damage to bring life to 0
+        const trap = {
+          id: 'test-trap',
+          name: 'Trap',
+          type: 'trap' as const,
+          effect: { damageAmount: encounter.getCurrentLife() },
+        };
+        encounter.processCard(trap);
+
+        const inventory = [
+          {
+            id: 'item-1',
+            type: 'trade_good' as const,
+            setId: 'test_set',
+            value: 10,
+            name: 'Item 1',
+            description: 'Item 1',
+          },
+          {
+            id: 'item-2',
+            type: 'discovery' as const,
+            setId: 'test_set',
+            value: 20,
+            name: 'Item 2',
+            description: 'Item 2',
+          },
+        ];
+
+        const consequences = encounter.applyFailureConsequences(inventory);
+
+        expect(consequences.itemsToSteal.length).toBeGreaterThan(0);
+        expect(consequences.itemsToSteal.length).toBeLessThanOrEqual(
+          inventory.length
+        );
+        expect(consequences.energyLoss).toBeGreaterThan(0);
+      });
+
+      it('should return empty array if inventory is empty', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-consequences-2',
+          createDefaultConfig()
+        );
+
+        // Take damage to bring life to 0
+        const trap = {
+          id: 'test-trap',
+          name: 'Trap',
+          type: 'trap' as const,
+          effect: { damageAmount: encounter.getCurrentLife() },
+        };
+        encounter.processCard(trap);
+
+        const consequences = encounter.applyFailureConsequences([]);
+
+        expect(consequences.itemsToSteal).toEqual([]);
+        expect(consequences.energyLoss).toBeGreaterThan(0);
+      });
+    });
+
+    describe('resolve with failure consequences', () => {
+      it('should apply failure consequences when life reaches 0', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-resolve-failure-1',
+          createDefaultConfig()
+        );
+
+        const inventory = [
+          {
+            id: 'item-1',
+            type: 'trade_good' as const,
+            setId: 'test_set',
+            value: 10,
+            name: 'Item 1',
+            description: 'Item 1',
+          },
+          {
+            id: 'item-2',
+            type: 'discovery' as const,
+            setId: 'test_set',
+            value: 20,
+            name: 'Item 2',
+            description: 'Item 2',
+          },
+        ];
+
+        // Take damage to bring life to 0
+        const trap = {
+          id: 'test-trap',
+          name: 'Trap',
+          type: 'trap' as const,
+          effect: { damageAmount: encounter.getCurrentLife() },
+        };
+        encounter.processCard(trap);
+
+        const outcome = encounter.resolve(inventory);
+
+        expect(outcome.type).toBe('failure');
+        expect(outcome.consequence).toBeDefined();
+        expect(outcome.consequence?.energyLoss).toBeGreaterThan(0);
+        expect(outcome.message).toContain('Defeated');
+      });
+
+      it('should include items stolen in failure message', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-resolve-failure-2',
+          createDefaultConfig()
+        );
+
+        const inventory = [
+          {
+            id: 'item-1',
+            type: 'trade_good' as const,
+            setId: 'test_set',
+            value: 10,
+            name: 'Item 1',
+            description: 'Item 1',
+          },
+        ];
+
+        // Take damage to bring life to 0
+        const trap = {
+          id: 'test-trap',
+          name: 'Trap',
+          type: 'trap' as const,
+          effect: { damageAmount: encounter.getCurrentLife() },
+        };
+        encounter.processCard(trap);
+
+        const outcome = encounter.resolve(inventory);
+
+        if (outcome.type === 'failure') {
+          // Message should mention items stolen if any were stolen
+          const itemsStolenCount = encounter.calculateItemsToSteal(
+            encounter.calculateScore()
+          );
+          if (itemsStolenCount > 0) {
+            expect(outcome.message).toMatch(/item/);
+          }
+        }
+      });
+
+      it('should include energy loss in failure message', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-resolve-failure-3',
+          createDefaultConfig()
+        );
+
+        // Take damage to bring life to 0
+        const trap = {
+          id: 'test-trap',
+          name: 'Trap',
+          type: 'trap' as const,
+          effect: { damageAmount: encounter.getCurrentLife() },
+        };
+        encounter.processCard(trap);
+
+        const outcome = encounter.resolve([]);
+
+        expect(outcome.type).toBe('failure');
+        if (outcome.consequence && outcome.consequence.energyLoss > 0) {
+          expect(outcome.message).toMatch(/energy/i);
+        }
+      });
+
+      it('should not apply consequences on success', () => {
+        const encounter = new ScoundrelEncounter(
+          'test-resolve-failure-4',
+          createDefaultConfig()
+        );
+
+        const inventory = [
+          {
+            id: 'item-1',
+            type: 'trade_good' as const,
+            setId: 'test_set',
+            value: 10,
+            name: 'Item 1',
+            description: 'Item 1',
+          },
+        ];
+
+        // Complete the dungeon
+        const state = encounter.getState();
+        for (let i = 0; i < state.dungeon.length; i++) {
+          encounter.advanceRoom();
+        }
+
+        const outcome = encounter.resolve(inventory);
+
+        expect(outcome.type).toBe('success');
+        expect(outcome.consequence).toBeUndefined();
+        expect(outcome.reward).toBeDefined();
+      });
+    });
+  });
 });
