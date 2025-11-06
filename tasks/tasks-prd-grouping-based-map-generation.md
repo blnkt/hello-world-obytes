@@ -31,7 +31,7 @@ Based on `prd-grouping-based-map-generation.md`
   - [x] 1.6 Add unit tests in `src/types/delvers-descent.test.ts` for grouping type definitions and helper functions
   - [x] 1.7 Verify all 11 encounter types are mapped to exactly one grouping
 
-- [ ] 2.0 Add Grouping Distribution Configuration to Balance Config
+- [x] 2.0 Add Grouping Distribution Configuration to Balance Config
   - [x] 2.1 Add `EncounterGroupingDistribution` interface to `balance-config.ts` with properties: `minigame`, `loot`, `recovery_and_navigation`, `passive` (all numbers)
   - [x] 2.2 Add `DepthConstraint` interface with `minDepth?: number` and `maxDepth?: number` properties
   - [x] 2.3 Add `GroupingBalanceConfig` interface containing `encounterGroupingDistribution` and `depthConstraints` (Record<EncounterGrouping, DepthConstraint>)
