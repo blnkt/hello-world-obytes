@@ -6,8 +6,9 @@
 - `src/types/avatar.test.ts` - Unit tests for avatar types
 - `src/lib/delvers-descent/avatar-collection-sets.ts` - Avatar collection set definitions (12 sets: 4 head, 4 torso, 4 leg)
 - `src/lib/delvers-descent/avatar-collection-sets.test.ts` - Unit tests for avatar collection sets
-- `src/lib/delvers-descent/avatar-collection-manager.ts` - AvatarCollectionManager class for tracking unlocks and equipped parts
-- `src/lib/delvers-descent/avatar-collection-manager.test.ts` - Unit tests for AvatarCollectionManager
+- `src/components/character/character-avatar.tsx` - Updated to dynamically load avatar parts based on equippedAvatarParts
+- `src/components/character/character-avatar.test.tsx` - Unit tests for CharacterAvatar component
+- `src/components/character/character-sheet.tsx` - Updated with navigation button to avatar customization screen
 - `src/types/character.ts` - Character type definition, needs extension to include equipped avatar parts
 - `src/types/character.test.ts` - Unit tests for character type extensions
 - `src/lib/delvers-descent/avatar-collection-sets.ts` - New file for avatar collection set definitions
@@ -73,18 +74,18 @@
   - [x] 3.7 Write unit tests for character storage with avatar parts
   - [x] 3.8 Write migration tests for existing characters getting default avatar parts
 
-- [ ] 4.0 Update CharacterAvatar Component for Dynamic Parts
-  - [ ] 4.1 Update `src/components/character/character-avatar.tsx` to accept equippedAvatarParts prop
-  - [ ] 4.2 Create getAvatarImagePath() helper function to resolve image paths from part IDs
-  - [ ] 4.3 Update Image components to dynamically load images based on equipped parts
-  - [ ] 4.4 Implement fallback to default images if part ID not found or image fails to load
-  - [ ] 4.5 Support placeholder asset loading with consistent naming convention
-  - [ ] 4.6 Update component to use character.equippedAvatarParts if available, otherwise use defaults
-  - [ ] 4.7 Ensure component handles missing or invalid part IDs gracefully
-  - [ ] 4.8 Write unit tests for dynamic image loading
-  - [ ] 4.9 Write unit tests for fallback behavior
-  - [ ] 4.10 Test component with various equipped part combinations
-  - [ ] 4.11 Add navigation button/link from character sheet to avatar customization screen
+- [x] 4.0 Update CharacterAvatar Component for Dynamic Parts
+  - [x] 4.1 Update `src/components/character/character-avatar.tsx` to accept equippedAvatarParts prop
+  - [x] 4.2 Create getAvatarImagePath() helper function to resolve image paths from part IDs
+  - [x] 4.3 Update Image components to dynamically load images based on equipped parts
+  - [x] 4.4 Implement fallback to default images if part ID not found or image fails to load
+  - [x] 4.5 Support placeholder asset loading with consistent naming convention
+  - [x] 4.6 Update component to use character.equippedAvatarParts if available, otherwise use defaults
+  - [x] 4.7 Ensure component handles missing or invalid part IDs gracefully
+  - [x] 4.8 Write unit tests for dynamic image loading
+  - [x] 4.9 Write unit tests for fallback behavior
+  - [x] 4.10 Test component with various equipped part combinations
+  - [x] 4.11 Add navigation button/link from character sheet to avatar customization screen
 
 - [ ] 5.0 Create Avatar Customization Screen
   - [ ] 5.1 Create `src/components/character/avatar-customization.tsx` component
