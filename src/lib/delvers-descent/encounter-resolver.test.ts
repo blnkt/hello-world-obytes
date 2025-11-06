@@ -245,7 +245,6 @@ describe('EncounterResolver', () => {
       const metaphysicalTypes: EncounterType[] = [
         'luck_shrine',
         'energy_nexus',
-        'time_distortion',
         'fate_weaver',
       ];
 
@@ -333,9 +332,6 @@ describe('EncounterResolver', () => {
       expect(encounterResolver.isValidEncounterType('scoundrel')).toBe(true);
       expect(encounterResolver.isValidEncounterType('luck_shrine')).toBe(true);
       expect(encounterResolver.isValidEncounterType('energy_nexus')).toBe(true);
-      expect(encounterResolver.isValidEncounterType('time_distortion')).toBe(
-        true
-      );
       expect(encounterResolver.isValidEncounterType('fate_weaver')).toBe(true);
       expect(encounterResolver.isValidEncounterType('invalid_type')).toBe(
         false

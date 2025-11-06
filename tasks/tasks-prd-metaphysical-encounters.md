@@ -11,8 +11,6 @@ Based on PRD: `prd-metaphysical-encounters.md`
 - `src/lib/delvers-descent/luck-shrine-encounter.test.ts` - Unit tests for Luck Shrine
 - `src/lib/delvers-descent/energy-nexus-encounter.ts` - Energy Nexus encounter logic implementation
 - `src/lib/delvers-descent/energy-nexus-encounter.test.ts` - Unit tests for Energy Nexus
-- `src/lib/delvers-descent/time-distortion-encounter.ts` - Time Distortion encounter logic implementation
-- `src/lib/delvers-descent/time-distortion-encounter.test.ts` - Unit tests for Time Distortion
 - `src/lib/delvers-descent/fate-weaver-encounter.ts` - Fate Weaver encounter logic implementation
 - `src/lib/delvers-descent/fate-weaver-encounter.test.ts` - Unit tests for Fate Weaver
 - `src/lib/delvers-descent/map-generator.ts` - Map generation with probability modification support
@@ -23,8 +21,6 @@ Based on PRD: `prd-metaphysical-encounters.md`
 - `src/components/delvers-descent/encounters/advanced/luck-shrine-screen.test.tsx` - UI tests for Luck Shrine
 - `src/components/delvers-descent/encounters/advanced/energy-nexus-screen.tsx` - Energy Nexus UI component
 - `src/components/delvers-descent/encounters/advanced/energy-nexus-screen.test.tsx` - UI tests for Energy Nexus
-- `src/components/delvers-descent/encounters/advanced/time-distortion-screen.tsx` - Time Distortion UI component
-- `src/components/delvers-descent/encounters/advanced/time-distortion-screen.test.tsx` - UI tests for Time Distortion
 - `src/components/delvers-descent/encounters/advanced/fate-weaver-screen.tsx` - Fate Weaver UI component
 - `src/components/delvers-descent/encounters/advanced/fate-weaver-screen.test.tsx` - UI tests for Fate Weaver
 
@@ -36,20 +32,19 @@ Based on PRD: `prd-metaphysical-encounters.md`
 ## Tasks
 
 - [x] 1.0 Foundation and Infrastructure Setup
-  - [x] 1.1 Add four new encounter types (`luck_shrine`, `energy_nexus`, `time_distortion`, `fate_weaver`) to the `EncounterType` union type in `src/types/delvers-descent.ts`
+  - [x] 1.1 Add three new encounter types (`luck_shrine`, `energy_nexus`, `fate_weaver`) to the `EncounterType` union type in `src/types/delvers-descent.ts`
   - [x] 1.2 Add `luckBoostActive?: { remainingEncounters: number; multiplierBonus: number }` field to `RunState` interface in `src/types/delvers-descent.ts`
   - [x] 1.3 Add `modifiedEncounterProbabilities?: Record<EncounterType, number>` field to `RunState` interface
-  - [x] 1.4 Add `timeDistortionHistory?: Array<{ type: 'rewind' | 'skip'; timestamp: number }>` field to `RunState` interface
-  - [x] 1.5 Update `ENCOUNTER_TYPES` constant array to include the four new encounter types
-  - [x] 1.6 Update `isValidEncounterType` type guard function to include new encounter types
-  - [x] 1.7 Add routing entries for all four new encounter types in `src/lib/delvers-descent/encounter-router.ts`
-  - [x] 1.8 Update `getEncounterRoute` function to return routes for new encounter types
-  - [x] 1.9 Update `isEncounterSupported` function to include new encounter types
-  - [x] 1.10 Add new encounter types to `supportedEncounterTypes` array in `EncounterResolver` class
-  - [x] 1.11 Add new encounter types to encounter type lists in `DungeonMapGenerator` class
-  - [x] 1.12 Add new encounter types to encounter type lists in `DungeonMapGeneratorOptimized` class
-  - [x] 1.13 Write unit tests for type definitions and type guards
-  - [x] 1.14 Write unit tests for encounter router with new types
+  - [x] 1.4 Update `ENCOUNTER_TYPES` constant array to include the three new encounter types
+  - [x] 1.5 Update `isValidEncounterType` type guard function to include new encounter types
+  - [x] 1.6 Add routing entries for all three new encounter types in `src/lib/delvers-descent/encounter-router.ts`
+  - [x] 1.7 Update `getEncounterRoute` function to return routes for new encounter types
+  - [x] 1.8 Update `isEncounterSupported` function to include new encounter types
+  - [x] 1.9 Add new encounter types to `supportedEncounterTypes` array in `EncounterResolver` class
+  - [x] 1.10 Add new encounter types to encounter type lists in `DungeonMapGenerator` class
+  - [x] 1.11 Add new encounter types to encounter type lists in `DungeonMapGeneratorOptimized` class
+  - [x] 1.12 Write unit tests for type definitions and type guards
+  - [x] 1.13 Write unit tests for encounter router with new types
 
 - [ ] 2.0 Luck Shrine Encounter Implementation
   - [x] 2.1 Create `src/lib/delvers-descent/luck-shrine-encounter.ts` with `LuckShrineEncounter` class

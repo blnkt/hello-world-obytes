@@ -12,6 +12,7 @@ import { RegionUnlockNotification } from '@/components/delvers-descent/region-un
 import { AchievementManager } from '@/lib/delvers-descent/achievement-manager';
 import { saveAchievements } from '@/lib/delvers-descent/achievement-persistence';
 import { ALL_ACHIEVEMENTS } from '@/lib/delvers-descent/achievement-types';
+import { AvatarCollectionManager } from '@/lib/delvers-descent/avatar-collection-manager';
 import { CollectionManager } from '@/lib/delvers-descent/collection-manager';
 import { ALL_COLLECTION_SETS } from '@/lib/delvers-descent/collection-sets';
 import { EnergyCalculator } from '@/lib/delvers-descent/energy-calculator';
@@ -558,6 +559,62 @@ async function handleEncounterCompleteImpl({
 
 // Risk flow removed - no longer needed
 
+async function processCashOutCompletion({
+  run,
+  runState,
+}: {
+  run: DelvingRun;
+  runState: RunState;
+}) {
+  const runQueueManager = getRunQueueManager();
+  const collectionManager = new CollectionManager(ALL_COLLECTION_SETS);
+  const avatarCollectionManager = new AvatarCollectionManager(
+    collectionManager
+  );
+  const achievementManager = new AchievementManager(ALL_ACHIEVEMENTS);
+  const progressionManager = getProgressionManager();
+  await achievementManager.loadSavedState();
+  const completionResult = {
+    finalInventory: runState.inventory,
+    totalEnergyUsed: run.totalEnergy - runState.energyRemaining,
+    deepestDepth: runState.currentDepth,
+    shortcutsDiscovered: runState.discoveredShortcuts,
+  };
+  for (const item of completionResult.finalInventory) {
+    if (
+      item.setId &&
+      (item.type === 'trade_good' ||
+        item.type === 'discovery' ||
+        item.type === 'legendary')
+    ) {
+      await collectionManager.addCollectedItem({
+        itemId: item.id,
+        setId: item.setId,
+        collectedDate: Date.now(),
+        runId: run.id,
+        source: 'encounter',
+      });
+    }
+  }
+  achievementManager.processEvent({
+    type: 'depth_reached',
+    data: { depth: completionResult.deepestDepth, cashOut: true },
+    timestamp: new Date(),
+  });
+  const progress = await collectionManager.getCollectionProgress();
+  for (const setId of progress.completedSets) {
+    achievementManager.processEvent({
+      type: 'collection_completed',
+      data: { collectionSetId: setId },
+      timestamp: new Date(),
+    });
+  }
+  await avatarCollectionManager.checkForAvatarUnlocks();
+  await saveAchievements(achievementManager);
+  await progressionManager.processRunCompletion(completionResult.deepestDepth);
+  runQueueManager.updateRunStatus(run.id, 'completed');
+}
+
 function useCashOutFlow({
   run,
   runState,
@@ -573,52 +630,7 @@ function useCashOutFlow({
     if (!runState || !run) return;
     setShowCashOutModal(false);
     try {
-      const runQueueManager = getRunQueueManager();
-      const collectionManager = new CollectionManager(ALL_COLLECTION_SETS);
-      const achievementManager = new AchievementManager(ALL_ACHIEVEMENTS);
-      const progressionManager = getProgressionManager();
-      await achievementManager.loadSavedState();
-      const completionResult = {
-        finalInventory: runState.inventory,
-        totalEnergyUsed: run.totalEnergy - runState.energyRemaining,
-        deepestDepth: runState.currentDepth,
-        shortcutsDiscovered: runState.discoveredShortcuts,
-      };
-      for (const item of completionResult.finalInventory) {
-        if (
-          item.setId &&
-          (item.type === 'trade_good' ||
-            item.type === 'discovery' ||
-            item.type === 'legendary')
-        ) {
-          await collectionManager.addCollectedItem({
-            itemId: item.id,
-            setId: item.setId,
-            collectedDate: Date.now(),
-            runId: run.id,
-            source: 'encounter',
-          });
-        }
-      }
-      achievementManager.processEvent({
-        type: 'depth_reached',
-        data: { depth: completionResult.deepestDepth, cashOut: true },
-        timestamp: new Date(),
-      });
-      const progress = await collectionManager.getCollectionProgress();
-      for (const setId of progress.completedSets) {
-        achievementManager.processEvent({
-          type: 'collection_completed',
-          data: { collectionSetId: setId },
-          timestamp: new Date(),
-        });
-      }
-      await saveAchievements(achievementManager);
-      // Persist progression data before removing run
-      await progressionManager.processRunCompletion(
-        completionResult.deepestDepth
-      );
-      runQueueManager.updateRunStatus(run.id, 'completed');
+      await processCashOutCompletion({ run, runState });
       router.push('/(app)/run-queue');
     } catch (error) {
       console.error('Failed to complete cash out:', error);

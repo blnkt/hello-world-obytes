@@ -33,7 +33,6 @@ export class EncounterResolver {
     'scoundrel',
     'luck_shrine',
     'energy_nexus',
-    'time_distortion',
     'fate_weaver',
   ];
   private readonly encounterTypeMultipliers: Partial<
@@ -49,7 +48,6 @@ export class EncounterResolver {
     scoundrel: 1.2, // Tiered rewards based on score
     luck_shrine: 1.0, // No direct rewards, provides utility
     energy_nexus: 1.0, // No direct rewards, provides utility
-    time_distortion: 1.0, // No direct rewards, provides utility
     fate_weaver: 1.0, // No direct rewards, provides utility
   };
 

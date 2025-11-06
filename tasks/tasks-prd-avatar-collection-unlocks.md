@@ -104,30 +104,30 @@
   - [x] 5.14 Write unit tests for AvatarCustomization component
   - [x] 5.15 Write integration tests for customization flow
 
-- [ ] 6.0 Integrate Avatar Collections with Existing Collection System
-  - [ ] 6.1 Update CollectionManager or reward generation to include avatar collection set items
-  - [ ] 6.2 Ensure avatar items can be collected during runs (same as region unlock items)
-  - [ ] 6.3 Update encounter reward generation to potentially provide avatar set items
-  - [ ] 6.4 Integrate AvatarCollectionManager.checkForAvatarUnlocks() with CollectionManager.setCompletion detection
-  - [ ] 6.5 Update `src/components/delvers-descent/collection/collection-overview.tsx` to display avatar collection sets
-  - [ ] 6.6 Add avatar sets section to collection UI alongside region unlock sets
-  - [ ] 6.7 Show progress for avatar collection sets (items collected / total items)
-  - [ ] 6.8 Display unlocked avatar parts in collection overview
-  - [ ] 6.9 Add navigation from collection overview to avatar customization screen
-  - [ ] 6.10 Write unit tests for avatar collection integration
-  - [ ] 6.11 Write integration tests for avatar unlocks triggered by collection completion
+- [x] 6.0 Integrate Avatar Collections with Existing Collection System
+  - [x] 6.1 Update CollectionManager or reward generation to include avatar collection set items
+  - [x] 6.2 Ensure avatar items can be collected during runs (same as region unlock items)
+  - [x] 6.3 Update encounter reward generation to potentially provide avatar set items
+  - [x] 6.4 Integrate AvatarCollectionManager.checkForAvatarUnlocks() with CollectionManager.setCompletion detection
+  - [x] 6.5 Update `src/components/delvers-descent/collection/collection-overview.tsx` to display avatar collection sets
+  - [x] 6.6 Add avatar sets section to collection UI alongside region unlock sets
+  - [x] 6.7 Show progress for avatar collection sets (items collected / total items)
+  - [x] 6.8 Display unlocked avatar parts in collection overview
+  - [x] 6.9 Add navigation from collection overview to avatar customization screen
+  - [x] 6.10 Write unit tests for avatar collection integration
+  - [x] 6.11 Write integration tests for avatar unlocks triggered by collection completion
 
-- [ ] 7.0 Create Placeholder Assets and Asset Management
-  - [ ] 7.1 Create `assets/avatar/` directory structure
-  - [ ] 7.2 Create `assets/avatar/heads/` subdirectory
-  - [ ] 7.3 Create `assets/avatar/torsos/` subdirectory
-  - [ ] 7.4 Create `assets/avatar/legs/` subdirectory
-  - [ ] 7.5 Create placeholder image for default head (or use existing head.png)
-  - [ ] 7.6 Create placeholder images for each head collection set (e.g., `head_warrior_placeholder.png`)
-  - [ ] 7.7 Create placeholder images for each torso collection set (e.g., `torso_warrior_placeholder.png`)
-  - [ ] 7.8 Create placeholder images for each leg collection set (e.g., `legs_warrior_placeholder.png`)
-  - [ ] 7.9 Ensure placeholder naming follows convention: `{partType}_{setname}_placeholder.png`
-  - [ ] 7.10 Create asset mapping helper function to map part IDs to asset paths
-  - [ ] 7.11 Document placeholder asset specifications for future art replacement
-  - [ ] 7.12 Test asset loading with all placeholder images
-  - [ ] 7.13 Verify assets are included in app bundle
+- [x] 7.0 Create Placeholder Assets and Asset Management
+  - [x] 7.1 Create `assets/avatar/` directory structure
+  - [x] 7.2 Create `assets/avatar/heads/` subdirectory
+  - [x] 7.3 Create `assets/avatar/torsos/` subdirectory
+  - [x] 7.4 Create `assets/avatar/legs/` subdirectory
+  - [x] 7.5 Create placeholder image for default head (or use existing head.png)
+  - [x] 7.6 Create placeholder images for each head collection set (e.g., `head_warrior_placeholder.png`)
+  - [x] 7.7 Create placeholder images for each torso collection set (e.g., `torso_warrior_placeholder.png`)
+  - [x] 7.8 Create placeholder images for each leg collection set (e.g., `legs_warrior_placeholder.png`)
+  - [x] 7.9 Ensure placeholder naming follows convention: `{partType}_{setname}_placeholder.png`
+  - [x] 7.10 Create asset mapping helper function to map part IDs to asset paths
+  - [x] 7.11 Document placeholder asset specifications for future art replacement
+  - [x] 7.12 Test asset loading with all placeholder images
+  - [x] 7.13 Verify assets are included in app bundle

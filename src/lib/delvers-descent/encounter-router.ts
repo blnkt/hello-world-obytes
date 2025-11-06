@@ -11,7 +11,6 @@ export type EncounterRoute =
   | 'scoundrel'
   | 'luck_shrine'
   | 'energy_nexus'
-  | 'time_distortion'
   | 'fate_weaver';
 
 /**
@@ -29,7 +28,6 @@ export function getEncounterRoute(node: DungeonNode): EncounterRoute | null {
     scoundrel: 'scoundrel',
     luck_shrine: 'luck_shrine',
     energy_nexus: 'energy_nexus',
-    time_distortion: 'time_distortion',
     fate_weaver: 'fate_weaver',
   };
 
@@ -51,7 +49,6 @@ export function isEncounterSupported(nodeType: string): boolean {
     'scoundrel',
     'luck_shrine',
     'energy_nexus',
-    'time_distortion',
     'fate_weaver',
   ];
   return supportedTypes.includes(nodeType);

@@ -26,7 +26,6 @@ describe('FateWeaverEncounter', () => {
     scoundrel: 0.15,
     luck_shrine: 0.05,
     energy_nexus: 0.05,
-    time_distortion: 0.03,
     fate_weaver: 0.05,
   };
 
@@ -132,7 +131,6 @@ describe('FateWeaverEncounter', () => {
         'scoundrel',
         'luck_shrine',
         'energy_nexus',
-        'time_distortion',
         'fate_weaver',
       ];
       const unselectedType = allTypes.find((type) => !selectedTypes.has(type));

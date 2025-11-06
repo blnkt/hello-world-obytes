@@ -100,7 +100,6 @@ describe('Region Difficulty Scaling', () => {
               scoundrel: 0.38, // Same as puzzle_chamber
               luck_shrine: 0.05,
               energy_nexus: 0.05,
-              time_distortion: 0.03,
               fate_weaver: 0.05,
             },
           },

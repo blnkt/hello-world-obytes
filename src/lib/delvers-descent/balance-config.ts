@@ -22,7 +22,6 @@ export interface EnergyBalanceConfig {
     scoundrel: number; // Default: 2 (similar to risk_event, strategic encounter)
     luck_shrine: number; // Default: 2 (utility encounter with fixed cost)
     energy_nexus: number; // Default: 2 (utility encounter with fixed cost)
-    time_distortion: number; // Default: 4 (high cost for powerful utility)
     fate_weaver: number; // Default: 2 (utility encounter with fixed cost)
   };
 
@@ -48,7 +47,6 @@ export interface RewardBalanceConfig {
     scoundrel: number; // Default: 1.2 (tiered rewards based on score)
     luck_shrine: number; // Default: 1.0 (no direct rewards, provides utility)
     energy_nexus: number; // Default: 1.0 (no direct rewards, provides utility)
-    time_distortion: number; // Default: 1.0 (no direct rewards, provides utility)
     fate_weaver: number; // Default: 1.0 (no direct rewards, provides utility)
   };
 
@@ -97,7 +95,6 @@ export interface EncounterBalanceConfig {
     scoundrel: number; // Default: 0.22325 (22.325% - same as puzzle_chamber)
     luck_shrine: number; // Default: 0.05 (5% - utility encounter)
     energy_nexus: number; // Default: 0.05 (5% - utility encounter)
-    time_distortion: number; // Default: 0.03 (3% - rare powerful utility)
     fate_weaver: number; // Default: 0.05 (5% - utility encounter)
   };
 }
@@ -163,7 +160,6 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
       scoundrel: 2,
       luck_shrine: 2,
       energy_nexus: 2,
-      time_distortion: 4,
       fate_weaver: 2,
     },
     returnCostBase: 5,
@@ -184,7 +180,6 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
       scoundrel: 1.2,
       luck_shrine: 1.0,
       energy_nexus: 1.0,
-      time_distortion: 1.0,
       fate_weaver: 1.0,
     },
     variationBase: 0.15,
@@ -222,7 +217,6 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
       scoundrel: 0.22325, // Same probability as puzzle_chamber
       luck_shrine: 0.05, // 5% - utility encounter
       energy_nexus: 0.05, // 5% - utility encounter
-      time_distortion: 0.03, // 3% - rare powerful utility
       fate_weaver: 0.05, // 5% - utility encounter
     },
   },
@@ -243,7 +237,6 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
         scoundrel: 0.22325, // Same probability as puzzle_chamber
         luck_shrine: 0.05,
         energy_nexus: 0.05,
-        time_distortion: 0.03,
         fate_weaver: 0.05,
       },
       ruins: {
@@ -258,7 +251,6 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
         scoundrel: 0.18525, // Same probability as puzzle_chamber
         luck_shrine: 0.05,
         energy_nexus: 0.05,
-        time_distortion: 0.03,
         fate_weaver: 0.05,
       },
       caverns: {
@@ -273,7 +265,6 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
         scoundrel: 0.08645, // Same probability as puzzle_chamber
         luck_shrine: 0.05,
         energy_nexus: 0.05,
-        time_distortion: 0.03,
         fate_weaver: 0.05,
       },
       sanctum: {
@@ -288,7 +279,6 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
         scoundrel: 0.285, // Same probability as puzzle_chamber
         luck_shrine: 0.05,
         energy_nexus: 0.05,
-        time_distortion: 0.03,
         fate_weaver: 0.05,
       },
       market: {
@@ -303,7 +293,6 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
         scoundrel: 0.1634, // Same probability as puzzle_chamber
         luck_shrine: 0.05,
         energy_nexus: 0.05,
-        time_distortion: 0.03,
         fate_weaver: 0.05,
       },
       wastes: {
@@ -318,7 +307,6 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
         scoundrel: 0.03705, // Same probability as puzzle_chamber
         luck_shrine: 0.05,
         energy_nexus: 0.05,
-        time_distortion: 0.03,
         fate_weaver: 0.05,
       },
     },

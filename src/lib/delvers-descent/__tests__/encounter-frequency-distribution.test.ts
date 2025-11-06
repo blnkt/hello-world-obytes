@@ -123,7 +123,6 @@ describe('Encounter Frequency Distribution Tuning', () => {
             scoundrel: 0.22325, // Same as puzzle_chamber
             luck_shrine: 0.05,
             energy_nexus: 0.05,
-            time_distortion: 0.03,
             fate_weaver: 0.05,
           },
         },

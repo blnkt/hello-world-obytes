@@ -182,7 +182,6 @@ describe("Delver's Descent Types", () => {
           scoundrel: 0.05,
           luck_shrine: 0.05,
           energy_nexus: 0.05,
-          time_distortion: 0.03,
           fate_weaver: 0.05,
         },
       };
@@ -190,27 +189,6 @@ describe("Delver's Descent Types", () => {
       expect(state.modifiedEncounterProbabilities).toBeDefined();
       expect(state.modifiedEncounterProbabilities?.puzzle_chamber).toBe(0.3);
       expect(state.modifiedEncounterProbabilities?.luck_shrine).toBe(0.05);
-    });
-
-    it('should support timeDistortionHistory field in RunState', () => {
-      const state: RunState = {
-        runId: 'run-101',
-        currentDepth: 5,
-        currentNode: 'depth5-node2',
-        energyRemaining: 40,
-        inventory: [],
-        visitedNodes: [],
-        discoveredShortcuts: [],
-        timeDistortionHistory: [
-          { type: 'rewind', timestamp: 1000 },
-          { type: 'skip', timestamp: 2000 },
-        ],
-      };
-
-      expect(state.timeDistortionHistory).toBeDefined();
-      expect(state.timeDistortionHistory?.length).toBe(2);
-      expect(state.timeDistortionHistory?.[0].type).toBe('rewind');
-      expect(state.timeDistortionHistory?.[1].type).toBe('skip');
     });
   });
 
@@ -560,7 +538,6 @@ describe("Delver's Descent Types", () => {
       it('should return true for metaphysical encounter types', () => {
         expect(isValidEncounterType('luck_shrine')).toBe(true);
         expect(isValidEncounterType('energy_nexus')).toBe(true);
-        expect(isValidEncounterType('time_distortion')).toBe(true);
         expect(isValidEncounterType('fate_weaver')).toBe(true);
       });
 
@@ -585,7 +562,6 @@ describe("Delver's Descent Types", () => {
         'scoundrel',
         'luck_shrine',
         'energy_nexus',
-        'time_distortion',
         'fate_weaver',
       ]);
     });
