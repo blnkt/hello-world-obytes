@@ -16,11 +16,9 @@ describe('EncounterRouter', () => {
     it('should include metaphysical encounter types as valid route types', () => {
       const luckShrineRoute: EncounterRoute = 'luck_shrine';
       const energyNexusRoute: EncounterRoute = 'energy_nexus';
-      const timeDistortionRoute: EncounterRoute = 'time_distortion';
       const fateWeaverRoute: EncounterRoute = 'fate_weaver';
       expect(luckShrineRoute).toBe('luck_shrine');
       expect(energyNexusRoute).toBe('energy_nexus');
-      expect(timeDistortionRoute).toBe('time_distortion');
       expect(fateWeaverRoute).toBe('fate_weaver');
     });
   });
@@ -83,7 +81,6 @@ describe('EncounterRouter', () => {
         'scoundrel',
         'luck_shrine',
         'energy_nexus',
-        'time_distortion',
         'fate_weaver',
       ];
 
@@ -134,21 +131,6 @@ describe('EncounterRouter', () => {
       expect(getEncounterRoute(node)).toBe('energy_nexus');
     });
 
-    it('should return route for time_distortion node', () => {
-      const node: DungeonNode = {
-        id: 'time-distortion-1',
-        depth: 5,
-        position: 2,
-        type: 'time_distortion',
-        energyCost: 25,
-        returnCost: 15,
-        isRevealed: false,
-        connections: [],
-      };
-
-      expect(getEncounterRoute(node)).toBe('time_distortion');
-    });
-
     it('should return route for fate_weaver node', () => {
       const node: DungeonNode = {
         id: 'fate-weaver-1',
@@ -194,7 +176,6 @@ describe('EncounterRouter', () => {
       expect(isEncounterSupported('scoundrel')).toBe(true);
       expect(isEncounterSupported('luck_shrine')).toBe(true);
       expect(isEncounterSupported('energy_nexus')).toBe(true);
-      expect(isEncounterSupported('time_distortion')).toBe(true);
       expect(isEncounterSupported('fate_weaver')).toBe(true);
     });
 

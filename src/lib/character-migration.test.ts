@@ -54,7 +54,19 @@ describe('Character Migration', () => {
 
       const migratedCharacter = migrateCharacterData(alreadyMigratedData);
 
-      expect(migratedCharacter).toEqual(alreadyMigratedData);
+      // Should add default avatar parts
+      expect(migratedCharacter.equippedAvatarParts).toBeDefined();
+      expect(migratedCharacter.equippedAvatarParts?.headId).toBe(
+        'default_head'
+      );
+      expect(migratedCharacter.equippedAvatarParts?.torsoId).toBe(
+        'default_torso'
+      );
+      expect(migratedCharacter.equippedAvatarParts?.legsId).toBe(
+        'default_legs'
+      );
+      expect(migratedCharacter.name).toBe('Already Clean');
+      expect(migratedCharacter.level).toBe(3);
     });
 
     it('should handle empty character data', () => {
@@ -69,7 +81,19 @@ describe('Character Migration', () => {
 
       const migratedCharacter = migrateCharacterData(emptyData);
 
-      expect(migratedCharacter).toEqual(emptyData);
+      // Should add default avatar parts
+      expect(migratedCharacter.equippedAvatarParts).toBeDefined();
+      expect(migratedCharacter.equippedAvatarParts?.headId).toBe(
+        'default_head'
+      );
+      expect(migratedCharacter.equippedAvatarParts?.torsoId).toBe(
+        'default_torso'
+      );
+      expect(migratedCharacter.equippedAvatarParts?.legsId).toBe(
+        'default_legs'
+      );
+      expect(migratedCharacter.name).toBe('');
+      expect(migratedCharacter.level).toBe(1);
     });
 
     it('should preserve all non-class fields', () => {
@@ -165,7 +189,25 @@ describe('Character Migration', () => {
       expect(needsMigration(dataWithBoth)).toBe(true);
     });
 
-    it('should return false for data without class fields', () => {
+    it('should return false for data without class fields but with equippedAvatarParts', () => {
+      const cleanData = {
+        name: 'Test',
+        level: 1,
+        experience: 0,
+        skills: [],
+        equipment: [],
+        abilities: [],
+        equippedAvatarParts: {
+          headId: 'default_head',
+          torsoId: 'default_torso',
+          legsId: 'default_legs',
+        },
+      };
+
+      expect(needsMigration(cleanData)).toBe(false);
+    });
+
+    it('should return true for data without class fields and without equippedAvatarParts', () => {
       const cleanData = {
         name: 'Test',
         level: 1,
@@ -175,7 +217,7 @@ describe('Character Migration', () => {
         abilities: [],
       };
 
-      expect(needsMigration(cleanData)).toBe(false);
+      expect(needsMigration(cleanData)).toBe(true);
     });
 
     it('should return false for null or undefined data', () => {
@@ -216,6 +258,11 @@ describe('Character Migration', () => {
         equipment: ['Shoes'],
         abilities: ['Basic Fitness'],
         notes: 'Clean data',
+        equippedAvatarParts: {
+          headId: 'default_head',
+          torsoId: 'default_torso',
+          legsId: 'default_legs',
+        },
       };
 
       const result = migrateIfNeeded(cleanData);
@@ -298,6 +345,11 @@ describe('Character Migration', () => {
         equipment: ['Shoes'],
         abilities: ['Basic Fitness'],
         notes: 'Already clean data',
+        equippedAvatarParts: {
+          headId: 'default_head',
+          torsoId: 'default_torso',
+          legsId: 'default_legs',
+        },
       };
 
       // Store the clean data

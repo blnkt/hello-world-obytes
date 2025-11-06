@@ -176,12 +176,21 @@ describe('PuzzleChamberEncounter', () => {
       const limitedChamber = new PuzzleChamberEncounter(1);
 
       // Use the one reveal
-      limitedChamber.revealTile(0, 0);
+      const result = limitedChamber.revealTile(0, 0);
 
-      expect(limitedChamber.isEncounterComplete()).toBe(true);
-      expect(['failure', 'success']).toContain(
-        limitedChamber.getEncounterResult()
-      );
+      // If the tile was a treasure, it gives a free reveal, so encounter won't be complete
+      // If it was any other tile type, reveals should be exhausted
+      if (result.tileType === 'treasure') {
+        // Treasure gives free reveal, so encounter should not be complete yet
+        expect(limitedChamber.isEncounterComplete()).toBe(false);
+        expect(limitedChamber.getTileRevealsRemaining()).toBeGreaterThan(0);
+      } else {
+        // Non-treasure tiles should exhaust reveals and complete the encounter
+        expect(limitedChamber.isEncounterComplete()).toBe(true);
+        expect(['failure', 'success']).toContain(
+          limitedChamber.getEncounterResult()
+        );
+      }
     });
 
     it('should generate appropriate rewards on success', () => {

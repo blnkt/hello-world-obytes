@@ -90,8 +90,7 @@ export class PuzzleChamberEncounter {
     }
 
     if (this.tileRevealsRemaining <= 0) {
-      this.encounterComplete = true;
-      this.encounterResult = 'failure';
+      this.completeEncounter('failure');
       return this.createErrorResult('No tile reveals remaining');
     }
 
@@ -105,6 +104,7 @@ export class PuzzleChamberEncounter {
 
     const effects = this.handleTileEffects(tileType, row, col);
 
+    // Check completion after handling effects (which may modify tileRevealsRemaining)
     this.checkEncounterCompletion();
 
     return {

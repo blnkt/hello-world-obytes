@@ -87,6 +87,13 @@ const RoomProgress: React.FC<{
   </View>
 );
 
+const DeckDisplay: React.FC<{ deckSize: number }> = ({ deckSize }) => (
+  <View className="mb-4 rounded-lg bg-white p-4 shadow">
+    <Text className="text-lg font-semibold text-gray-800">Deck</Text>
+    <Text className="text-gray-600">{deckSize} cards remaining</Text>
+  </View>
+);
+
 const WeaponDisplay: React.FC<{
   weapon: PlayingCard | null;
   defeatedMonsters: number[];
@@ -543,6 +550,8 @@ const ScoundrelGameplayContent: React.FC<{
           roomsCompleted={state.roomsCompleted}
           roomsToSurvive={state.config.roomsToSurvive ?? 5 + state.config.depth}
         />
+
+        <DeckDisplay deckSize={encounter.getDeckSize()} />
 
         <WeaponDisplay
           weapon={state.equippedWeapon}

@@ -1,8 +1,15 @@
+import { Link } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
+import { Button } from '@/components/ui';
+import {
+  ALL_AVATAR_COLLECTION_SETS,
+  getAvatarSetsByPartType,
+} from '@/lib/delvers-descent/avatar-collection-sets';
 import { type CollectionManager } from '@/lib/delvers-descent/collection-manager';
 import { ALL_COLLECTION_SETS } from '@/lib/delvers-descent/collection-sets';
+import type { AvatarCollectionSet } from '@/types/avatar';
 import type {
   CollectionProgress,
   CollectionSet,
@@ -153,7 +160,106 @@ const LoadingView: React.FC = () => (
 );
 
 const getSetsByCategory = (category: string): CollectionSet[] =>
-  ALL_COLLECTION_SETS.filter((s) => s.category === category);
+  ALL_COLLECTION_SETS.filter((s) => s.category === category && !isAvatarSet(s));
+
+const isAvatarSet = (set: CollectionSet): boolean => {
+  return (set as AvatarCollectionSet).avatarPartId !== undefined;
+};
+
+const renderAvatarSubsection = ({
+  title,
+  sets,
+  progress,
+  onSetSelect,
+}: {
+  title: string;
+  sets: AvatarCollectionSet[];
+  progress: CollectionProgress;
+  onSetSelect?: (setId: string) => void;
+}) => {
+  if (sets.length === 0) return null;
+
+  return (
+    <View className="mb-6">
+      <Text className="mb-3 text-lg font-semibold text-gray-700">{title}</Text>
+      {sets.map((set) => {
+        const setProgress = progress.partialSets.find(
+          (p) => p.setId === set.id
+        );
+        const collected =
+          setProgress?.collected ??
+          (progress.completedSets.includes(set.id) ? set.items.length : 0);
+        const isCompleted = progress.completedSets.includes(set.id);
+
+        return (
+          <View key={set.id}>
+            <SetCard
+              set={set}
+              progress={collected}
+              isCompleted={isCompleted}
+              onSelect={() => onSetSelect?.(set.id)}
+            />
+            {isCompleted && set.avatarPartId && (
+              <View className="mb-3 ml-4">
+                <Text className="text-xs font-semibold text-purple-600">
+                  ✓ Avatar Part Unlocked: {set.avatarPartId}
+                </Text>
+              </View>
+            )}
+          </View>
+        );
+      })}
+    </View>
+  );
+};
+
+const AvatarSetsSection: React.FC<{
+  progress: CollectionProgress;
+  onSetSelect?: (setId: string) => void;
+}> = ({ progress, onSetSelect }) => {
+  const headSets = getAvatarSetsByPartType('head');
+  const torsoSets = getAvatarSetsByPartType('torso');
+  const legsSets = getAvatarSetsByPartType('legs');
+
+  return (
+    <View className="mb-8">
+      <View className="mb-4 flex-row items-center justify-between">
+        <Text className="text-2xl font-bold text-gray-800">Avatar Unlocks</Text>
+        <View className="flex-row items-center">
+          <Text className="mr-4 text-sm text-gray-600">
+            {
+              progress.completedSets.filter((id) =>
+                ALL_AVATAR_COLLECTION_SETS.some((set) => set.id === id)
+              ).length
+            }{' '}
+            / {ALL_AVATAR_COLLECTION_SETS.length} unlocked
+          </Text>
+          <Link href="/(app)/avatar-customization" asChild>
+            <Button label="Customize Avatar" variant="outline" />
+          </Link>
+        </View>
+      </View>
+      {renderAvatarSubsection({
+        title: 'Heads',
+        sets: headSets,
+        progress,
+        onSetSelect,
+      })}
+      {renderAvatarSubsection({
+        title: 'Torsos',
+        sets: torsoSets,
+        progress,
+        onSetSelect,
+      })}
+      {renderAvatarSubsection({
+        title: 'Legs',
+        sets: legsSets,
+        progress,
+        onSetSelect,
+      })}
+    </View>
+  );
+};
 
 const CollectionContent: React.FC<{
   statistics: CollectionStatistics;
@@ -198,6 +304,8 @@ const CollectionContent: React.FC<{
         progress={progress}
         onSetSelect={onSetSelect}
       />
+
+      <AvatarSetsSection progress={progress} onSetSelect={onSetSelect} />
     </ScrollView>
   );
 };

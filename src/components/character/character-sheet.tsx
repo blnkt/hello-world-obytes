@@ -1,5 +1,8 @@
+import { Link } from 'expo-router';
 import React, { useCallback } from 'react';
 import { Dimensions, View } from 'react-native';
+
+import { Button } from '@/components/ui';
 
 import type { Character } from '../../types/character';
 import { CharacterAvatar } from './character-avatar';
@@ -38,6 +41,10 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
         style={{ maxHeight: maxAvatarHeight }}
       >
         <CharacterAvatar character={character} />
+        {/* Navigation to avatar customization */}
+        <Link href="/(app)/avatar-customization" asChild>
+          <Button label="Customize Avatar" variant="outline" className="mt-4" />
+        </Link>
       </View>
 
       {/* Character Details - Takes natural space */}

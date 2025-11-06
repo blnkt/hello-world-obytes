@@ -42,7 +42,6 @@ export interface RunState {
     multiplierBonus: number;
   };
   modifiedEncounterProbabilities?: Record<EncounterType, number>;
-  timeDistortionHistory?: { type: 'rewind' | 'skip'; timestamp: number }[];
 }
 
 export interface CollectedItem {
@@ -102,7 +101,6 @@ export type EncounterType =
   | 'scoundrel'
   | 'luck_shrine'
   | 'energy_nexus'
-  | 'time_distortion'
   | 'fate_weaver';
 
 export interface CollectionSet {
@@ -369,7 +367,6 @@ export const isValidEncounterType = (type: string): type is EncounterType => {
     'scoundrel',
     'luck_shrine',
     'energy_nexus',
-    'time_distortion',
     'fate_weaver',
   ].includes(type);
 };
@@ -386,7 +383,6 @@ export const ENCOUNTER_TYPES: EncounterType[] = [
   'scoundrel',
   'luck_shrine',
   'energy_nexus',
-  'time_distortion',
   'fate_weaver',
 ];
 

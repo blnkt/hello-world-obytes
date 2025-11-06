@@ -2,6 +2,7 @@ import React from 'react';
 import { Image, View } from 'react-native';
 
 import { Text } from '@/components/ui';
+import { getAvatarImageSource } from '@/lib/avatar-assets';
 
 import type { Character } from '../../types/character';
 
@@ -15,6 +16,18 @@ export const CharacterAvatar: React.FC<CharacterAvatarProps> = ({
   character,
   showName = false,
 }) => {
+  // Get equipped avatar parts from character, or use defaults
+  const equippedParts = character.equippedAvatarParts || {
+    headId: 'default_head',
+    torsoId: 'default_torso',
+    legsId: 'default_legs',
+  };
+
+  // Get image sources for each part
+  const headSource = getAvatarImageSource(equippedParts.headId, 'head');
+  const torsoSource = getAvatarImageSource(equippedParts.torsoId, 'torso');
+  const legsSource = getAvatarImageSource(equippedParts.legsId, 'legs');
+
   return (
     <View className="flex-1 items-center justify-center">
       <View className="aspect-[1/0.9] w-full max-w-sm items-center justify-center">
@@ -22,23 +35,26 @@ export const CharacterAvatar: React.FC<CharacterAvatarProps> = ({
         <View className="aspect-[1/0.9] w-full">
           {/* Head */}
           <Image
-            source={require('../../../assets/head.png')}
+            source={headSource}
             className="h-1/3 w-full"
             resizeMode="contain"
+            testID="avatar-head"
           />
 
           {/* Torso */}
           <Image
-            source={require('../../../assets/torso.png')}
+            source={torsoSource}
             className="h-1/3 w-full"
             resizeMode="contain"
+            testID="avatar-torso"
           />
 
           {/* Legs */}
           <Image
-            source={require('../../../assets/legs.png')}
+            source={legsSource}
             className="h-1/3 w-full"
             resizeMode="contain"
+            testID="avatar-legs"
           />
         </View>
       </View>

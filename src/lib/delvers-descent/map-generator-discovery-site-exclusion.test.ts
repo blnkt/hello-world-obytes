@@ -7,6 +7,19 @@ class MockRegionManagerAllUnlocked {
   async isRegionUnlocked(_regionId: string): Promise<boolean> {
     return true;
   }
+
+  // eslint-disable-next-line @typescript-eslint/require-await
+  async getUnlockedRegions(): Promise<any[]> {
+    // Return all regions to simulate all unlocked
+    return [
+      { id: 'forest_depths' },
+      { id: 'ruins' },
+      { id: 'caverns' },
+      { id: 'sanctum' },
+      { id: 'market' },
+      { id: 'wastes' },
+    ];
+  }
 }
 
 describe('Discovery Site exclusion when all regions unlocked', () => {

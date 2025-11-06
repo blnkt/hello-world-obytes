@@ -6,6 +6,7 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react-native';
+import { NavigationContainer } from '@react-navigation/native';
 import React from 'react';
 
 import type {
@@ -200,7 +201,11 @@ describe('Full Gameplay Loop Integration Tests', () => {
 
       // Step 1: View run queue
       useLocalSearchParams.mockReturnValue({});
-      const { rerender } = render(<RunQueueScreen />);
+      const { rerender } = render(
+        <NavigationContainer>
+          <RunQueueScreen />
+        </NavigationContainer>
+      );
 
       await waitFor(() => {
         expect(screen.getByText(/delver's descent/i)).toBeTruthy();
@@ -334,7 +339,11 @@ describe('Full Gameplay Loop Integration Tests', () => {
       useRouter.mockReturnValue(mockRouter);
 
       useLocalSearchParams.mockReturnValue({});
-      render(<RunQueueScreen />);
+      render(
+        <NavigationContainer>
+          <RunQueueScreen />
+        </NavigationContainer>
+      );
 
       // Find and click start run button
       const startButton = screen.getByText(/start run/i);

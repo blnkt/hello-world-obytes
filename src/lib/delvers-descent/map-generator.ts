@@ -22,7 +22,6 @@ export class DungeonMapGenerator {
     'scoundrel',
     'luck_shrine',
     'energy_nexus',
-    'time_distortion',
     'fate_weaver',
   ];
   private readonly returnCostCalculator: ReturnCostCalculator;
@@ -419,10 +418,6 @@ export class DungeonMapGenerator {
       {
         type: 'energy_nexus' as EncounterType,
         weight: baseDist.energy_nexus || 0,
-      },
-      {
-        type: 'time_distortion' as EncounterType,
-        weight: baseDist.time_distortion || 0,
       },
       {
         type: 'fate_weaver' as EncounterType,

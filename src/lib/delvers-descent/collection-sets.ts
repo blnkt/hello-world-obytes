@@ -1,5 +1,7 @@
 import type { CollectionSet } from '@/types/delvers-descent';
 
+import { ALL_AVATAR_COLLECTION_SETS } from './avatar-collection-sets';
+
 /**
  * Collection Set Definitions for Phase 4
  *
@@ -250,6 +252,7 @@ export const ALL_COLLECTION_SETS: CollectionSet[] = [
   SPICE_TRADE_SET,
   ANCIENT_TEMPLE_SET,
   DRAGONS_HOARD_SET,
+  ...ALL_AVATAR_COLLECTION_SETS,
 ];
 
 /**

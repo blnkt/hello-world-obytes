@@ -161,7 +161,6 @@ describe('Metaphysical Encounters Integration Tests (Tasks 6.19-6.24)', () => {
         scoundrel: 0.1,
         luck_shrine: 0.15, // Increased from 0.05
         energy_nexus: 0.05,
-        time_distortion: 0.03,
         fate_weaver: 0.05,
       };
 
@@ -189,7 +188,6 @@ describe('Metaphysical Encounters Integration Tests (Tasks 6.19-6.24)', () => {
         scoundrel: 0.03,
         luck_shrine: 0.0,
         energy_nexus: 0.0,
-        time_distortion: 0.0,
         fate_weaver: 0.0,
       };
 
@@ -229,7 +227,6 @@ describe('Metaphysical Encounters Integration Tests (Tasks 6.19-6.24)', () => {
         scoundrel: 0.15,
         luck_shrine: 0.0,
         energy_nexus: 0.0,
-        time_distortion: 0.0,
         fate_weaver: 0.0,
       };
 
@@ -244,7 +241,6 @@ describe('Metaphysical Encounters Integration Tests (Tasks 6.19-6.24)', () => {
           (node) =>
             node.type !== 'luck_shrine' &&
             node.type !== 'energy_nexus' &&
-            node.type !== 'time_distortion' &&
             node.type !== 'fate_weaver'
         )
       ).toBe(true);
@@ -280,7 +276,6 @@ describe('Metaphysical Encounters Integration Tests (Tasks 6.19-6.24)', () => {
         scoundrel: 0.15,
         luck_shrine: 0.0,
         energy_nexus: 0.0,
-        time_distortion: 0.0,
         fate_weaver: 0.0,
       };
 
@@ -312,7 +307,6 @@ describe('Metaphysical Encounters Integration Tests (Tasks 6.19-6.24)', () => {
         scoundrel: 0.0,
         luck_shrine: 0.0,
         energy_nexus: 0.0,
-        time_distortion: 0.0,
         fate_weaver: 0.0,
       });
 
