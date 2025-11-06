@@ -149,6 +149,40 @@ export class RunStateManager {
   }
 
   /**
+   * Set luck boost active state
+   */
+  async setLuckBoost(
+    remainingEncounters: number,
+    multiplierBonus: number
+  ): Promise<void> {
+    if (!this.currentState) {
+      throw new Error('No active run to set luck boost for');
+    }
+
+    this.currentState.luckBoostActive = {
+      remainingEncounters,
+      multiplierBonus,
+    };
+
+    await this.saveState();
+  }
+
+  /**
+   * Set modified encounter probabilities
+   */
+  async setModifiedEncounterProbabilities(
+    probabilities: Record<string, number>
+  ): Promise<void> {
+    if (!this.currentState) {
+      throw new Error('No active run to set encounter probabilities for');
+    }
+
+    this.currentState.modifiedEncounterProbabilities = probabilities as any;
+
+    await this.saveState();
+  }
+
+  /**
    * Complete the run successfully
    */
   async completeRun(): Promise<{

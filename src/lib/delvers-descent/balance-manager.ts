@@ -79,6 +79,7 @@ export class BalanceManager {
 
   /**
    * Calculate final reward value
+   * Applies luck boost multiplier if active in run state
    */
   calculateRewardValue(
     baseReward: number,
@@ -90,7 +91,18 @@ export class BalanceManager {
 
     const depthScaling = this.calculateDepthRewardScaling(depth);
     const typeMultiplier = typeMultipliers[encounterType] || 1.0;
-    const baseRewardValue = baseReward * typeMultiplier * depthScaling;
+    let baseRewardValue = baseReward * typeMultiplier * depthScaling;
+
+    // Apply luck boost if active
+    const { getRunStateManager } = require('./run-state-manager');
+    const runStateManager = getRunStateManager();
+    const runState = runStateManager.getCurrentState();
+    if (
+      runState?.luckBoostActive &&
+      runState.luckBoostActive.remainingEncounters > 0
+    ) {
+      baseRewardValue *= 1 + runState.luckBoostActive.multiplierBonus;
+    }
 
     const variationRange = variationBase + depth * variationDepthMultiplier;
     const variation = (Math.random() - 0.5) * 2 * variationRange;

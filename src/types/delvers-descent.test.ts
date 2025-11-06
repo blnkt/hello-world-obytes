@@ -141,6 +141,77 @@ describe("Delver's Descent Types", () => {
       expect(state.visitedNodes).toHaveLength(2);
       expect(state.discoveredShortcuts).toEqual([]);
     });
+
+    it('should support luckBoostActive field in RunState', () => {
+      const state: RunState = {
+        runId: 'run-456',
+        currentDepth: 3,
+        currentNode: 'depth3-node0',
+        energyRemaining: 50,
+        inventory: [],
+        visitedNodes: [],
+        discoveredShortcuts: [],
+        luckBoostActive: {
+          remainingEncounters: 2,
+          multiplierBonus: 0.5,
+        },
+      };
+
+      expect(state.luckBoostActive).toBeDefined();
+      expect(state.luckBoostActive?.remainingEncounters).toBe(2);
+      expect(state.luckBoostActive?.multiplierBonus).toBe(0.5);
+    });
+
+    it('should support modifiedEncounterProbabilities field in RunState', () => {
+      const state: RunState = {
+        runId: 'run-789',
+        currentDepth: 4,
+        currentNode: 'depth4-node1',
+        energyRemaining: 60,
+        inventory: [],
+        visitedNodes: [],
+        discoveredShortcuts: [],
+        modifiedEncounterProbabilities: {
+          puzzle_chamber: 0.3,
+          discovery_site: 0.2,
+          risk_event: 0.15,
+          hazard: 0.1,
+          rest_site: 0.1,
+          safe_passage: 0.05,
+          region_shortcut: 0.05,
+          scoundrel: 0.05,
+          luck_shrine: 0.05,
+          energy_nexus: 0.05,
+          time_distortion: 0.03,
+          fate_weaver: 0.05,
+        },
+      };
+
+      expect(state.modifiedEncounterProbabilities).toBeDefined();
+      expect(state.modifiedEncounterProbabilities?.puzzle_chamber).toBe(0.3);
+      expect(state.modifiedEncounterProbabilities?.luck_shrine).toBe(0.05);
+    });
+
+    it('should support timeDistortionHistory field in RunState', () => {
+      const state: RunState = {
+        runId: 'run-101',
+        currentDepth: 5,
+        currentNode: 'depth5-node2',
+        energyRemaining: 40,
+        inventory: [],
+        visitedNodes: [],
+        discoveredShortcuts: [],
+        timeDistortionHistory: [
+          { type: 'rewind', timestamp: 1000 },
+          { type: 'skip', timestamp: 2000 },
+        ],
+      };
+
+      expect(state.timeDistortionHistory).toBeDefined();
+      expect(state.timeDistortionHistory?.length).toBe(2);
+      expect(state.timeDistortionHistory?.[0].type).toBe('rewind');
+      expect(state.timeDistortionHistory?.[1].type).toBe('skip');
+    });
   });
 
   describe('CollectedItem interface', () => {
@@ -354,7 +425,7 @@ describe("Delver's Descent Types", () => {
       expect(region.description).toBe('Ancient woodland with hidden paths');
       expect(region.theme).toBe('ancient_forest');
       expect(region.isUnlocked).toBe(false);
-      expect(region.encounterDistribution.puzzle_chamber).toBe(20);
+      expect(region.encounterDistribution.puzzle_chamber).toBe(19);
       expect(region.startingBonus.energyBonus).toBe(0);
     });
   });
@@ -486,6 +557,13 @@ describe("Delver's Descent Types", () => {
         expect(isValidEncounterType('scoundrel')).toBe(true);
       });
 
+      it('should return true for metaphysical encounter types', () => {
+        expect(isValidEncounterType('luck_shrine')).toBe(true);
+        expect(isValidEncounterType('energy_nexus')).toBe(true);
+        expect(isValidEncounterType('time_distortion')).toBe(true);
+        expect(isValidEncounterType('fate_weaver')).toBe(true);
+      });
+
       it('should return false for invalid encounter types', () => {
         expect(isValidEncounterType('invalid_type')).toBe(false);
         expect(isValidEncounterType('')).toBe(false);
@@ -505,6 +583,10 @@ describe("Delver's Descent Types", () => {
         'safe_passage',
         'region_shortcut',
         'scoundrel',
+        'luck_shrine',
+        'energy_nexus',
+        'time_distortion',
+        'fate_weaver',
       ]);
     });
 
