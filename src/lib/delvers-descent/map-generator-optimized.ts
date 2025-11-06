@@ -13,6 +13,7 @@ import { DEFAULT_BALANCE_CONFIG } from './balance-config';
 import { type RegionManager } from './region-manager';
 import { REGIONS } from './regions';
 import { ReturnCostCalculator } from './return-cost-calculator';
+import { getRunStateManager } from './run-state-manager';
 
 export class DungeonMapGeneratorOptimized {
   private readonly encounterTypes: EncounterType[] = [
@@ -341,6 +342,108 @@ export class DungeonMapGeneratorOptimized {
     return unlockedRegions.length <= 1;
   }
 
+  /**
+   * Get base distribution for a region, checking for modified probabilities first
+   */
+  private getBaseDistribution(regionKey?: string): Record<string, number> {
+    const runStateManager = getRunStateManager();
+    const runState = runStateManager.getCurrentState();
+    const modifiedProbs = runState?.modifiedEncounterProbabilities;
+
+    if (modifiedProbs) {
+      return modifiedProbs as any;
+    }
+
+    if (!regionKey || regionKey === this.regionKey) {
+      const dist = this.regionKey
+        ? DEFAULT_BALANCE_CONFIG.region.encounterDistributions[this.regionKey]
+        : DEFAULT_BALANCE_CONFIG.region.encounterDistributions.default ||
+          DEFAULT_BALANCE_CONFIG.encounter.encounterDistribution;
+      return dist;
+    }
+
+    const regionDist =
+      DEFAULT_BALANCE_CONFIG.region.encounterDistributions[regionKey];
+    return (
+      regionDist ||
+      DEFAULT_BALANCE_CONFIG.region.encounterDistributions.default ||
+      DEFAULT_BALANCE_CONFIG.encounter.encounterDistribution
+    );
+  }
+
+  /**
+   * Convert distribution to weights array
+   */
+  private distributionToWeights(
+    baseDist: Record<string, number>
+  ): { type: EncounterType; weight: number }[] {
+    return [
+      {
+        type: 'puzzle_chamber' as EncounterType,
+        weight: baseDist.puzzle_chamber || 0,
+      },
+      {
+        type: 'discovery_site' as EncounterType,
+        weight: baseDist.discovery_site || 0,
+      },
+      { type: 'risk_event' as EncounterType, weight: baseDist.risk_event || 0 },
+      { type: 'hazard' as EncounterType, weight: baseDist.hazard || 0 },
+      { type: 'rest_site' as EncounterType, weight: baseDist.rest_site || 0 },
+      {
+        type: 'safe_passage' as EncounterType,
+        weight: baseDist.safe_passage || 0,
+      },
+      {
+        type: 'region_shortcut' as EncounterType,
+        weight: baseDist.region_shortcut || 0,
+      },
+      { type: 'scoundrel' as EncounterType, weight: baseDist.scoundrel || 0 },
+      {
+        type: 'luck_shrine' as EncounterType,
+        weight: baseDist.luck_shrine || 0,
+      },
+      {
+        type: 'energy_nexus' as EncounterType,
+        weight: baseDist.energy_nexus || 0,
+      },
+      {
+        type: 'time_distortion' as EncounterType,
+        weight: baseDist.time_distortion || 0,
+      },
+      {
+        type: 'fate_weaver' as EncounterType,
+        weight: baseDist.fate_weaver || 0,
+      },
+    ];
+  }
+
+  /**
+   * Apply filtering rules to weights
+   */
+  private async applyWeightFilters(
+    weights: { type: EncounterType; weight: number }[],
+    depth?: number
+  ): Promise<{ type: EncounterType; weight: number }[]> {
+    let filtered = weights.filter((w) => w.weight > 0);
+
+    const allUnlocked = await this.areAllRegionsUnlocked();
+    if (allUnlocked) {
+      filtered = filtered.filter((w) => w.type !== 'discovery_site');
+    }
+
+    if (depth !== undefined && depth <= 10) {
+      filtered = filtered.filter((w) => w.type !== 'region_shortcut');
+      filtered = filtered.filter((w) => w.type !== 'safe_passage');
+    }
+
+    const onlyDefaultUnlocked = await this.hasOnlyDefaultRegionUnlocked();
+    if (onlyDefaultUnlocked) {
+      filtered = filtered.filter((w) => w.type !== 'region_shortcut');
+    }
+
+    return filtered;
+  }
+
   private async getWeightsForRegion(
     regionKey?: string,
     depth?: number
@@ -348,67 +451,24 @@ export class DungeonMapGeneratorOptimized {
     weights: { type: EncounterType; weight: number }[];
     total: number;
   }> {
-    let weights: { type: EncounterType; weight: number }[];
+    const baseDist = this.getBaseDistribution(regionKey);
+    let weights = this.distributionToWeights(baseDist);
+    weights = await this.applyWeightFilters(weights, depth);
 
-    if (!regionKey || regionKey === this.regionKey) {
-      // Use instance weights
-      weights = [...this.encounterWeights];
-    } else {
-      // Get region-specific distribution
-      const regionDist =
-        DEFAULT_BALANCE_CONFIG.region.encounterDistributions[regionKey];
-      const dist =
-        regionDist ||
-        DEFAULT_BALANCE_CONFIG.region.encounterDistributions.default ||
-        DEFAULT_BALANCE_CONFIG.encounter.encounterDistribution;
-      weights = [
-        {
-          type: 'puzzle_chamber' as EncounterType,
-          weight: dist.puzzle_chamber,
-        },
-        {
-          type: 'discovery_site' as EncounterType,
-          weight: dist.discovery_site,
-        },
-        { type: 'risk_event' as EncounterType, weight: dist.risk_event },
-        { type: 'hazard' as EncounterType, weight: dist.hazard },
-        { type: 'rest_site' as EncounterType, weight: dist.rest_site },
-        { type: 'safe_passage' as EncounterType, weight: dist.safe_passage },
-        {
-          type: 'region_shortcut' as EncounterType,
-          weight: dist.region_shortcut,
-        },
-        { type: 'scoundrel' as EncounterType, weight: dist.scoundrel },
-      ];
+    const runStateManager = getRunStateManager();
+    const runState = runStateManager.getCurrentState();
+    const modifiedProbs = runState?.modifiedEncounterProbabilities;
+
+    let total = weights.reduce((sum, w) => sum + w.weight, 0);
+
+    if (modifiedProbs && total > 0) {
+      weights = weights.map((w) => ({
+        ...w,
+        weight: w.weight / total,
+      }));
+      total = 1.0;
     }
 
-    // Filter out zero weights first
-    weights = weights.filter((w) => w.weight > 0);
-
-    // Exclude discovery_site if all regions are unlocked
-    const allUnlocked = await this.areAllRegionsUnlocked();
-    if (allUnlocked) {
-      weights = weights.filter((w) => w.type !== 'discovery_site');
-    }
-
-    // Exclude region_shortcut if depth <= 10
-    if (depth !== undefined && depth <= 10) {
-      weights = weights.filter((w) => w.type !== 'region_shortcut');
-    }
-
-    // Exclude region_shortcut if only default region is unlocked
-    const onlyDefaultUnlocked = await this.hasOnlyDefaultRegionUnlocked();
-    if (onlyDefaultUnlocked) {
-      weights = weights.filter((w) => w.type !== 'region_shortcut');
-    }
-
-    // Exclude safe_passage if depth <= 10
-    if (depth !== undefined && depth <= 10) {
-      weights = weights.filter((w) => w.type !== 'safe_passage');
-    }
-
-    // Recalculate total after filtering
-    const total = weights.reduce((sum, w) => sum + w.weight, 0);
     return { weights, total };
   }
   /**

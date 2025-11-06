@@ -112,24 +112,24 @@ Based on PRD: `prd-metaphysical-encounters.md`
   - [ ] 5.20 Write UI tests for `fate-weaver-screen.tsx` component
 
 - [ ] 6.0 Integration and Balance Configuration
-  - [ ] 6.1 Update `calculateFinalReward()` method in `RewardCalculator` to check for active luck boost in run state
-  - [ ] 6.2 Apply luck boost multiplier to reward calculations when `luckBoostActive` exists
-  - [ ] 6.3 Implement luck boost decay logic that reduces `remainingEncounters` after each encounter completion
-  - [ ] 6.4 Remove luck boost from run state when `remainingEncounters` reaches 0
-  - [ ] 6.5 Update `DungeonMapGenerator.generateEncounterType()` to check for `modifiedEncounterProbabilities` in run state
-  - [ ] 6.6 Use modified probabilities if they exist, otherwise use default regional distribution
-  - [ ] 6.7 Normalize modified probabilities to ensure they sum to 100% (handle edge cases)
-  - [ ] 6.8 Update `DungeonMapGeneratorOptimized.generateEncounterType()` with same probability modification logic
-  - [ ] 6.9 Add encounter distributions for new types in `DEFAULT_BALANCE_CONFIG.encounter.encounterDistribution`
-  - [ ] 6.10 Update all regional encounter distributions in `balance-config.ts` to include new encounter types
-  - [ ] 6.11 Update `FOREST_DEPTHS` region encounter distribution to include new types
-  - [ ] 6.12 Update `DESERT_OASIS` region encounter distribution to include new types
-  - [ ] 6.13 Update `MOUNTAIN_PASS` region encounter distribution to include new types
-  - [ ] 6.14 Update `COASTAL_CAVES` region encounter distribution to include new types
-  - [ ] 6.15 Update `DRAGONS_LAIR` region encounter distribution to include new types
-  - [ ] 6.16 Add energy cost type modifiers for new encounter types in `EnergyBalanceConfig.typeModifiers`
-  - [ ] 6.17 Ensure new encounter types have no reward multipliers (they provide utility, not direct rewards)
-  - [ ] 6.18 Integrate all four new encounter screens into the encounter routing system in `encounter-screen.tsx`
+  - [x] 6.1 Update `calculateFinalReward()` method in `RewardCalculator` to check for active luck boost in run state
+  - [x] 6.2 Apply luck boost multiplier to reward calculations when `luckBoostActive` exists
+  - [x] 6.3 Implement luck boost decay logic that reduces `remainingEncounters` after each encounter completion
+  - [x] 6.4 Remove luck boost from run state when `remainingEncounters` reaches 0
+  - [x] 6.5 Update `DungeonMapGenerator.generateEncounterType()` to check for `modifiedEncounterProbabilities` in run state
+  - [x] 6.6 Use modified probabilities if they exist, otherwise use default regional distribution
+  - [x] 6.7 Normalize modified probabilities to ensure they sum to 100% (handle edge cases)
+  - [x] 6.8 Update `DungeonMapGeneratorOptimized.generateEncounterType()` with same probability modification logic
+  - [x] 6.9 Add encounter distributions for new types in `DEFAULT_BALANCE_CONFIG.encounter.encounterDistribution`
+  - [x] 6.10 Update all regional encounter distributions in `balance-config.ts` to include new encounter types
+  - [x] 6.11 Update `FOREST_DEPTHS` region encounter distribution to include new types
+  - [x] 6.12 Update `DESERT_OASIS` region encounter distribution to include new types
+  - [x] 6.13 Update `MOUNTAIN_PASS` region encounter distribution to include new types
+  - [x] 6.14 Update `COASTAL_CAVES` region encounter distribution to include new types
+  - [x] 6.15 Update `DRAGONS_LAIR` region encounter distribution to include new types
+  - [x] 6.16 Add energy cost type modifiers for new encounter types in `EnergyBalanceConfig.typeModifiers`
+  - [x] 6.17 Ensure new encounter types have no reward multipliers (they provide utility, not direct rewards)
+  - [x] 6.18 Integrate all new encounter screens into the encounter routing system in `encounter-screen.tsx`
   - [ ] 6.19 Test that luck boost applies correctly to subsequent encounters
   - [ ] 6.20 Test that modified encounter probabilities affect map generation
   - [ ] 6.21 Test that run state properly persists and restores all new state fields

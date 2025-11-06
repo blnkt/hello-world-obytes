@@ -7,6 +7,8 @@ import type {
   FailureConsequences,
 } from '@/types/delvers-descent';
 
+import { getRunStateManager } from './run-state-manager';
+
 const ENCOUNTER_STATE_KEY = 'delvers_descent_active_encounter';
 
 export class EncounterResolver {
@@ -154,12 +156,40 @@ export class EncounterResolver {
       // Update statistics
       this.updateEncounterStatistics(outcome);
 
+      // Decay luck boost if active (fire and forget)
+      this.decayLuckBoost().catch((err) => {
+        console.error('Error decaying luck boost:', err);
+      });
+
       // Add to history
       this.encounterHistory.push({ ...this.currentState });
 
       // Clear current state and persisted state
       this.currentState = null;
       this.clearPersistedState();
+    }
+  }
+
+  /**
+   * Decay luck boost after encounter completion
+   * Reduces remainingEncounters and removes if expired
+   */
+  private async decayLuckBoost(): Promise<void> {
+    const runStateManager = getRunStateManager();
+    const runState = runStateManager.getCurrentState();
+
+    if (
+      runState?.luckBoostActive &&
+      runState.luckBoostActive.remainingEncounters > 0
+    ) {
+      runState.luckBoostActive.remainingEncounters -= 1;
+
+      // Remove luck boost if expired
+      if (runState.luckBoostActive.remainingEncounters <= 0) {
+        runState.luckBoostActive = undefined;
+      }
+
+      await runStateManager['saveState']();
     }
   }
 
