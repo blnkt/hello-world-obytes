@@ -22,13 +22,13 @@ Based on `prd-grouping-based-map-generation.md`
 ## Tasks
 
 - [ ] 1.0 Define Encounter Groupings Types and Mappings
-  - [ ] 1.1 Add `EncounterGrouping` type definition to `src/types/delvers-descent.ts` with values: `'minigame' | 'loot' | 'recovery_and_navigation' | 'passive'`
-  - [ ] 1.2 Create `ENCOUNTER_GROUPINGS` constant mapping `EncounterGrouping` to `EncounterType[]` arrays
-  - [ ] 1.3 Create `ALL_ENCOUNTER_GROUPINGS` array containing all grouping type values
-  - [ ] 1.4 Create helper function `getEncounterGrouping(encounterType: EncounterType): EncounterGrouping | null` that returns the grouping for a given encounter type
-  - [ ] 1.5 Create helper function `getEncountersInGrouping(grouping: EncounterGrouping): EncounterType[]` that returns all encounters in a grouping
-  - [ ] 1.6 Add unit tests in `src/types/delvers-descent.test.ts` for grouping type definitions and helper functions
-  - [ ] 1.7 Verify all 11 encounter types are mapped to exactly one grouping
+  - [x] 1.1 Add `EncounterGrouping` type definition to `src/types/delvers-descent.ts` with values: `'minigame' | 'loot' | 'recovery_and_navigation' | 'passive'`
+  - [x] 1.2 Create `ENCOUNTER_GROUPINGS` constant mapping `EncounterGrouping` to `EncounterType[]` arrays
+  - [x] 1.3 Create `ALL_ENCOUNTER_GROUPINGS` array containing all grouping type values
+  - [x] 1.4 Create helper function `getEncounterGrouping(encounterType: EncounterType): EncounterGrouping | null` that returns the grouping for a given encounter type
+  - [x] 1.5 Create helper function `getEncountersInGrouping(grouping: EncounterGrouping): EncounterType[]` that returns all encounters in a grouping
+  - [x] 1.6 Add unit tests in `src/types/delvers-descent.test.ts` for grouping type definitions and helper functions
+  - [x] 1.7 Verify all 11 encounter types are mapped to exactly one grouping
 
 - [ ] 2.0 Add Grouping Distribution Configuration to Balance Config
   - [ ] 2.1 Add `EncounterGroupingDistribution` interface to `balance-config.ts` with properties: `minigame`, `loot`, `recovery_and_navigation`, `passive` (all numbers)

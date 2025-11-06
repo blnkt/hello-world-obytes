@@ -1,4 +1,5 @@
 import {
+  ALL_ENCOUNTER_GROUPINGS,
   BONUS_TYPES,
   type CollectedItem,
   COLLECTION_SET_TYPES,
@@ -6,8 +7,13 @@ import {
   type DelvingRun,
   type DelvingStats,
   type DungeonNode,
+  ENCOUNTER_GROUPINGS,
   ENCOUNTER_TYPES,
   type EncounterData,
+  type EncounterGrouping,
+  type EncounterType,
+  getEncounterGrouping,
+  getEncountersInGrouping,
   isCollectedItem,
   isDelvingRun,
   isDungeonNode,
@@ -545,6 +551,85 @@ describe("Delver's Descent Types", () => {
         expect(isValidEncounterType('invalid_type')).toBe(false);
         expect(isValidEncounterType('')).toBe(false);
         expect(isValidEncounterType('puzzle')).toBe(false);
+      });
+    });
+  });
+
+  describe('Encounter Groupings', () => {
+    it('should define EncounterGrouping type with correct values', () => {
+      const groupings: EncounterGrouping[] = [
+        'minigame',
+        'loot',
+        'recovery_and_navigation',
+        'passive',
+      ];
+      groupings.forEach((grouping) => {
+        expect(typeof grouping).toBe('string');
+      });
+    });
+
+    it('should have ENCOUNTER_GROUPINGS mapping all groupings to encounter arrays', () => {
+      expect(ENCOUNTER_GROUPINGS.minigame).toEqual([
+        'puzzle_chamber',
+        'scoundrel',
+      ]);
+      expect(ENCOUNTER_GROUPINGS.loot).toEqual([
+        'discovery_site',
+        'risk_event',
+        'hazard',
+      ]);
+      expect(ENCOUNTER_GROUPINGS.recovery_and_navigation).toEqual([
+        'rest_site',
+        'region_shortcut',
+        'safe_passage',
+      ]);
+      expect(ENCOUNTER_GROUPINGS.passive).toEqual([
+        'luck_shrine',
+        'energy_nexus',
+        'fate_weaver',
+      ]);
+    });
+
+    it('should have ALL_ENCOUNTER_GROUPINGS array with all grouping values', () => {
+      expect(ALL_ENCOUNTER_GROUPINGS).toEqual([
+        'minigame',
+        'loot',
+        'recovery_and_navigation',
+        'passive',
+      ]);
+    });
+
+    it('should have getEncounterGrouping helper function', () => {
+      expect(getEncounterGrouping('puzzle_chamber')).toBe('minigame');
+      expect(getEncounterGrouping('discovery_site')).toBe('loot');
+      expect(getEncounterGrouping('rest_site')).toBe('recovery_and_navigation');
+      expect(getEncounterGrouping('luck_shrine')).toBe('passive');
+    });
+
+    it('should have getEncountersInGrouping helper function', () => {
+      expect(getEncountersInGrouping('minigame')).toEqual([
+        'puzzle_chamber',
+        'scoundrel',
+      ]);
+      expect(getEncountersInGrouping('loot')).toEqual([
+        'discovery_site',
+        'risk_event',
+        'hazard',
+      ]);
+    });
+
+    it('should map all 11 encounter types to exactly one grouping', () => {
+      const mappedEncounters = new Set<EncounterType>();
+      ALL_ENCOUNTER_GROUPINGS.forEach((grouping) => {
+        const encounters = getEncountersInGrouping(grouping);
+        encounters.forEach((encounter) => {
+          expect(mappedEncounters.has(encounter)).toBe(false);
+          mappedEncounters.add(encounter);
+        });
+      });
+      expect(mappedEncounters.size).toBe(11);
+      ENCOUNTER_TYPES.forEach((encounterType) => {
+        expect(mappedEncounters.has(encounterType)).toBe(true);
       });
     });
   });

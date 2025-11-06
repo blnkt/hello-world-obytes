@@ -103,6 +103,53 @@ export type EncounterType =
   | 'energy_nexus'
   | 'fate_weaver';
 
+export type EncounterGrouping =
+  | 'minigame'
+  | 'loot'
+  | 'recovery_and_navigation'
+  | 'passive';
+
+export const ENCOUNTER_GROUPINGS: Record<EncounterGrouping, EncounterType[]> = {
+  minigame: ['puzzle_chamber', 'scoundrel'],
+  loot: ['discovery_site', 'risk_event', 'hazard'],
+  recovery_and_navigation: ['rest_site', 'region_shortcut', 'safe_passage'],
+  passive: ['luck_shrine', 'energy_nexus', 'fate_weaver'],
+};
+
+export const ALL_ENCOUNTER_GROUPINGS: EncounterGrouping[] = [
+  'minigame',
+  'loot',
+  'recovery_and_navigation',
+  'passive',
+];
+
+/**
+ * Get the encounter grouping for a given encounter type
+ * @param encounterType The encounter type to look up
+ * @returns The grouping for the encounter type, or null if not found
+ */
+export function getEncounterGrouping(
+  encounterType: EncounterType
+): EncounterGrouping | null {
+  for (const [grouping, encounters] of Object.entries(ENCOUNTER_GROUPINGS)) {
+    if (encounters.includes(encounterType)) {
+      return grouping as EncounterGrouping;
+    }
+  }
+  return null;
+}
+
+/**
+ * Get all encounter types in a given grouping
+ * @param grouping The encounter grouping to look up
+ * @returns Array of encounter types in the grouping
+ */
+export function getEncountersInGrouping(
+  grouping: EncounterGrouping
+): EncounterType[] {
+  return ENCOUNTER_GROUPINGS[grouping] || [];
+}
+
 export interface CollectionSet {
   id: string;
   name: string;
