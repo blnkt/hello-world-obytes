@@ -207,17 +207,17 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
 
   encounter: {
     encounterDistribution: {
-      puzzle_chamber: 0.22325,
-      discovery_site: 0.1672,
-      risk_event: 0.1672,
-      hazard: 0.1121,
-      rest_site: 0.1121,
-      safe_passage: 0.1121,
-      region_shortcut: 0.057,
-      scoundrel: 0.22325, // Same probability as puzzle_chamber
-      luck_shrine: 0.05, // 5% - utility encounter
-      energy_nexus: 0.05, // 5% - utility encounter
-      fate_weaver: 0.05, // 5% - utility encounter
+      puzzle_chamber: 0.16859,
+      discovery_site: 0.12626,
+      risk_event: 0.12626,
+      hazard: 0.08465,
+      rest_site: 0.08465,
+      safe_passage: 0.08465,
+      region_shortcut: 0.04304,
+      scoundrel: 0.16859, // Same probability as puzzle_chamber
+      luck_shrine: 0.03776, // ~3.8% - utility encounter
+      energy_nexus: 0.03776, // ~3.8% - utility encounter
+      fate_weaver: 0.03776, // ~3.8% - utility encounter
     },
   },
 
@@ -227,87 +227,87 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
     },
     encounterDistributions: {
       default: {
-        puzzle_chamber: 0.22325,
-        discovery_site: 0.1672,
-        risk_event: 0.1672,
-        hazard: 0.1121,
-        rest_site: 0.1121,
-        safe_passage: 0.1121,
-        region_shortcut: 0.057,
-        scoundrel: 0.22325, // Same probability as puzzle_chamber
-        luck_shrine: 0.05,
-        energy_nexus: 0.05,
-        fate_weaver: 0.05,
+        puzzle_chamber: 0.16859,
+        discovery_site: 0.12626,
+        risk_event: 0.12626,
+        hazard: 0.08465,
+        rest_site: 0.08465,
+        safe_passage: 0.08465,
+        region_shortcut: 0.04304,
+        scoundrel: 0.16859, // Same probability as puzzle_chamber
+        luck_shrine: 0.03776,
+        energy_nexus: 0.03776,
+        fate_weaver: 0.03776,
       },
       ruins: {
         // Ancient Ruins (exploration/economy)
-        puzzle_chamber: 0.18525,
-        discovery_site: 0.23845,
-        risk_event: 0.11875,
-        hazard: 0.11875,
-        rest_site: 0.1197,
-        safe_passage: 0.1121,
-        region_shortcut: 0.057,
-        scoundrel: 0.18525, // Same probability as puzzle_chamber
-        luck_shrine: 0.05,
-        energy_nexus: 0.05,
-        fate_weaver: 0.05,
+        puzzle_chamber: 0.14414,
+        discovery_site: 0.18553,
+        risk_event: 0.09239,
+        hazard: 0.09239,
+        rest_site: 0.09313,
+        safe_passage: 0.08722,
+        region_shortcut: 0.04435,
+        scoundrel: 0.14414, // Same probability as puzzle_chamber
+        luck_shrine: 0.0389,
+        energy_nexus: 0.0389,
+        fate_weaver: 0.0389,
       },
       caverns: {
         // Crystal Caverns (tension + recovery)
-        puzzle_chamber: 0.08645,
-        discovery_site: 0.14915,
-        risk_event: 0.19855,
-        hazard: 0.19855,
-        rest_site: 0.14915,
-        safe_passage: 0.1121,
-        region_shortcut: 0.057,
-        scoundrel: 0.08645, // Same probability as puzzle_chamber
-        luck_shrine: 0.05,
-        energy_nexus: 0.05,
-        fate_weaver: 0.05,
+        puzzle_chamber: 0.07281,
+        discovery_site: 0.12561,
+        risk_event: 0.16721,
+        hazard: 0.16721,
+        rest_site: 0.12561,
+        safe_passage: 0.09441,
+        region_shortcut: 0.048,
+        scoundrel: 0.07281, // Same probability as puzzle_chamber
+        luck_shrine: 0.04211,
+        energy_nexus: 0.04211,
+        fate_weaver: 0.04211,
       },
       sanctum: {
         // Sanctum Archives (puzzle-forward, restorative)
-        puzzle_chamber: 0.285,
-        discovery_site: 0.19855,
-        risk_event: 0.0988,
-        hazard: 0.05035,
-        rest_site: 0.14915,
-        safe_passage: 0.1121,
-        region_shortcut: 0.057,
-        scoundrel: 0.285, // Same probability as puzzle_chamber
-        luck_shrine: 0.05,
-        energy_nexus: 0.05,
-        fate_weaver: 0.05,
+        puzzle_chamber: 0.20564,
+        discovery_site: 0.14326,
+        risk_event: 0.07129,
+        hazard: 0.03633,
+        rest_site: 0.10762,
+        safe_passage: 0.08088,
+        region_shortcut: 0.04113,
+        scoundrel: 0.20564, // Same probability as puzzle_chamber
+        luck_shrine: 0.03608,
+        energy_nexus: 0.03608,
+        fate_weaver: 0.03608,
       },
       market: {
         // Frontier Market (economy burst, low danger)
-        puzzle_chamber: 0.1634,
-        discovery_site: 0.2755,
-        risk_event: 0.13775,
-        hazard: 0.0684,
-        rest_site: 0.1368,
-        safe_passage: 0.1121,
-        region_shortcut: 0.057,
-        scoundrel: 0.1634, // Same probability as puzzle_chamber
-        luck_shrine: 0.05,
-        energy_nexus: 0.05,
-        fate_weaver: 0.05,
+        puzzle_chamber: 0.12924,
+        discovery_site: 0.2179,
+        risk_event: 0.10895,
+        hazard: 0.0541,
+        rest_site: 0.1082,
+        safe_passage: 0.08866,
+        region_shortcut: 0.04508,
+        scoundrel: 0.12924, // Same probability as puzzle_chamber
+        luck_shrine: 0.03955,
+        energy_nexus: 0.03955,
+        fate_weaver: 0.03955,
       },
       wastes: {
         // Ashen Wastes (hard mode)
-        puzzle_chamber: 0.03705,
-        discovery_site: 0.0988,
-        risk_event: 0.24795,
-        hazard: 0.24795,
-        rest_site: 0.1482,
-        safe_passage: 0.1121,
-        region_shortcut: 0.057,
-        scoundrel: 0.03705, // Same probability as puzzle_chamber
-        luck_shrine: 0.05,
-        energy_nexus: 0.05,
-        fate_weaver: 0.05,
+        puzzle_chamber: 0.03261,
+        discovery_site: 0.08696,
+        risk_event: 0.21825,
+        hazard: 0.21825,
+        rest_site: 0.13045,
+        safe_passage: 0.09867,
+        region_shortcut: 0.05017,
+        scoundrel: 0.03261, // Same probability as puzzle_chamber
+        luck_shrine: 0.04401,
+        energy_nexus: 0.04401,
+        fate_weaver: 0.04401,
       },
     },
   },

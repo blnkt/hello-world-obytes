@@ -497,9 +497,11 @@ export class ScoundrelEncounter {
     this.state.roomsCompleted++;
 
     // Carry over the unplayed 4th card (if room had 4 cards and we played 3)
+    // After playing 3 cards, the remaining card is at the end of the array
     let carryover: PlayingCard | null = null;
     if (this.state.currentRoom.length > 0) {
-      carryover = this.state.currentRoom[0];
+      // Take the last remaining card (the 4th card that wasn't played)
+      carryover = this.state.currentRoom[this.state.currentRoom.length - 1];
     }
 
     // Clear current room

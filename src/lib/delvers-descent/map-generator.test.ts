@@ -44,6 +44,9 @@ describe('DungeonMapGenerator', () => {
         'safe_passage',
         'region_shortcut',
         'scoundrel',
+        'luck_shrine',
+        'energy_nexus',
+        'fate_weaver',
       ];
 
       nodes.forEach((node) => {
