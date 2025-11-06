@@ -130,9 +130,9 @@ Based on PRD: `prd-metaphysical-encounters.md`
   - [x] 6.16 Add energy cost type modifiers for new encounter types in `EnergyBalanceConfig.typeModifiers`
   - [x] 6.17 Ensure new encounter types have no reward multipliers (they provide utility, not direct rewards)
   - [x] 6.18 Integrate all new encounter screens into the encounter routing system in `encounter-screen.tsx`
-  - [ ] 6.19 Test that luck boost applies correctly to subsequent encounters
-  - [ ] 6.20 Test that modified encounter probabilities affect map generation
-  - [ ] 6.21 Test that run state properly persists and restores all new state fields
-  - [ ] 6.22 Write integration tests for luck boost reward calculation
-  - [ ] 6.23 Write integration tests for probability modification in map generation
-  - [ ] 6.24 Write end-to-end tests for complete encounter flows
+  - [x] 6.19 Test that luck boost applies correctly to subsequent encounters
+  - [x] 6.20 Test that modified encounter probabilities affect map generation
+  - [x] 6.21 Test that run state properly persists and restores all new state fields
+  - [x] 6.22 Write integration tests for luck boost reward calculation
+  - [x] 6.23 Write integration tests for probability modification in map generation
+  - [x] 6.24 Write end-to-end tests for complete encounter flows
