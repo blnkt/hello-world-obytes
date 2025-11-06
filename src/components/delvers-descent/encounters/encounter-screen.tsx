@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
+import { DEFAULT_BALANCE_CONFIG } from '@/lib/delvers-descent/balance-config';
 import { CollectionManager } from '@/lib/delvers-descent/collection-manager';
 import { ALL_COLLECTION_SETS } from '@/lib/delvers-descent/collection-sets';
 import { EnergyNexusEncounter } from '@/lib/delvers-descent/energy-nexus-encounter';
+import { FateWeaverEncounter } from '@/lib/delvers-descent/fate-weaver-encounter';
 import { HazardEncounter } from '@/lib/delvers-descent/hazard-encounter';
 import { LuckShrineEncounter } from '@/lib/delvers-descent/luck-shrine-encounter';
 import { RegionManager } from '@/lib/delvers-descent/region-manager';
@@ -20,6 +22,7 @@ import type {
 
 import { useEncounterResolver } from '../hooks/use-encounter-resolver';
 import { EnergyNexusScreen } from './advanced/energy-nexus-screen';
+import { FateWeaverScreen } from './advanced/fate-weaver-screen';
 import { HazardScreen } from './advanced/hazard-screen';
 import { LuckShrineScreen } from './advanced/luck-shrine-screen';
 import { RegionShortcutScreen } from './advanced/region-shortcut-screen';
@@ -216,6 +219,17 @@ const useAdvancedEncounter = (node: DungeonNode, currentRegionId?: string) => {
       setAdvancedEncounter(new LuckShrineEncounter(node.id, node.depth));
     } else if (node.type === 'energy_nexus') {
       setAdvancedEncounter(new EnergyNexusEncounter(node.id, node.depth));
+    } else if (node.type === 'fate_weaver') {
+      // Get current region's encounter distribution
+      const regionDist = currentRegionId
+        ? DEFAULT_BALANCE_CONFIG.region.encounterDistributions[currentRegionId]
+        : undefined;
+      const dist =
+        regionDist ||
+        DEFAULT_BALANCE_CONFIG.region.encounterDistributions.default ||
+        DEFAULT_BALANCE_CONFIG.encounter.encounterDistribution;
+
+      setAdvancedEncounter(new FateWeaverEncounter(node.id, node.depth, dist));
     }
   }, [node, currentRegionId]);
 
@@ -399,6 +413,25 @@ const renderEnergyNexusScreen = (params: {
   return null;
 };
 
+const renderFateWeaverScreen = (params: {
+  node: DungeonNode;
+  advancedEncounter: any;
+  runState?: RunState | null;
+  handlers: { complete: (outcome: any) => void; return: () => void };
+}) => {
+  if (params.node.type === 'fate_weaver' && params.advancedEncounter) {
+    return (
+      <FateWeaverScreen
+        encounter={params.advancedEncounter}
+        onComplete={params.handlers.complete}
+        onReturn={params.handlers.return}
+      />
+    );
+  }
+
+  return null;
+};
+
 const renderBasicEncounterScreens = (params: {
   node: DungeonNode;
   advancedEncounter: any;
@@ -450,6 +483,9 @@ const renderEncounterByType = (params: {
 
   const energyNexusScreen = renderEnergyNexusScreen(params);
   if (energyNexusScreen) return energyNexusScreen;
+
+  const fateWeaverScreen = renderFateWeaverScreen(params);
+  if (fateWeaverScreen) return fateWeaverScreen;
 
   return renderScoundrelScreen({
     ...params,
@@ -697,6 +733,7 @@ export const EncounterScreen: React.FC<EncounterScreenProps> = ({
     'scoundrel',
     'luck_shrine',
     'energy_nexus',
+    'fate_weaver',
   ];
   if (advancedTypes.includes(node.type)) {
     return renderAdvancedEncounterScreen({

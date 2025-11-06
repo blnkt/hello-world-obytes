@@ -101,13 +101,13 @@ Based on PRD: `prd-metaphysical-encounters.md`
   - [x] 5.9 Implement `execute()` method that saves modified probabilities to run state and returns outcome
   - [x] 5.10 Ensure probability changes persist for rest of run (stored in run state)
   - [x] 5.11 Calculate energy cost based on depth and encounter type modifier
-  - [ ] 5.12 Create `src/components/delvers-descent/encounters/advanced/fate-weaver-screen.tsx` UI component
-  - [ ] 5.13 Display the 3 randomly selected encounter types
-  - [ ] 5.14 Display current probability distribution (before changes) for all encounter types
-  - [ ] 5.15 Display modified probability distribution (after changes) preview
-  - [ ] 5.16 Add controls to choose increase or decrease for each of the 3 selected types
-  - [ ] 5.17 Add confirmation button to apply changes
-  - [ ] 5.18 Style UI to match existing advanced encounter screens with mystical theme
+  - [x] 5.12 Create `src/components/delvers-descent/encounters/advanced/fate-weaver-screen.tsx` UI component
+  - [x] 5.13 Display the 3 randomly selected encounter types
+  - [x] 5.14 Display current probability distribution (before changes) for all encounter types
+  - [x] 5.15 Display modified probability distribution (after changes) preview
+  - [x] 5.16 Add controls to choose increase or decrease for each of the 3 selected types
+  - [x] 5.17 Add confirmation button to apply changes
+  - [x] 5.18 Style UI to match existing advanced encounter screens with mystical theme
   - [ ] 5.19 Write unit tests for `FateWeaverEncounter` class covering type selection, probability modification, and normalization
   - [ ] 5.20 Write UI tests for `fate-weaver-screen.tsx` component
 
