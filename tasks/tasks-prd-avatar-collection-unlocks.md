@@ -87,22 +87,22 @@
   - [x] 4.10 Test component with various equipped part combinations
   - [x] 4.11 Add navigation button/link from character sheet to avatar customization screen
 
-- [ ] 5.0 Create Avatar Customization Screen
-  - [ ] 5.1 Create `src/components/character/avatar-customization.tsx` component
-  - [ ] 5.2 Create `src/app/(app)/avatar-customization.tsx` screen route
-  - [ ] 5.3 Add route to app navigation in `src/app/_layout.tsx` or appropriate layout file
-  - [ ] 5.4 Implement screen layout with category tabs or sections (Heads, Torsos, Legs)
-  - [ ] 5.5 Display unlocked avatar parts in grid/list view with preview images
-  - [ ] 5.6 Display locked avatar parts with progress indicators (e.g., "3/5 items collected")
-  - [ ] 5.7 Implement part selection functionality with visual feedback
-  - [ ] 5.8 Create preview area showing selected parts combined
-  - [ ] 5.9 Implement "Equip" button to save selected parts to character
-  - [ ] 5.10 Add "Cancel" or "Back" button to return without saving
-  - [ ] 5.11 Integrate with AvatarCollectionManager to get unlocked parts and progress
-  - [ ] 5.12 Integrate with Character storage to save equipped parts
-  - [ ] 5.13 Add visual indicators for currently equipped parts
-  - [ ] 5.14 Write unit tests for AvatarCustomization component
-  - [ ] 5.15 Write integration tests for customization flow
+- [x] 5.0 Create Avatar Customization Screen
+  - [x] 5.1 Create `src/components/character/avatar-customization.tsx` component
+  - [x] 5.2 Create `src/app/(app)/avatar-customization.tsx` screen route
+  - [x] 5.3 Add route to app navigation in `src/app/_layout.tsx` or appropriate layout file
+  - [x] 5.4 Implement screen layout with category tabs or sections (Heads, Torsos, Legs)
+  - [x] 5.5 Display unlocked avatar parts in grid/list view with preview images
+  - [x] 5.6 Display locked avatar parts with progress indicators (e.g., "3/5 items collected")
+  - [x] 5.7 Implement part selection functionality with visual feedback
+  - [x] 5.8 Create preview area showing selected parts combined
+  - [x] 5.9 Implement "Equip" button to save selected parts to character
+  - [x] 5.10 Add "Cancel" or "Back" button to return without saving
+  - [x] 5.11 Integrate with AvatarCollectionManager to get unlocked parts and progress
+  - [x] 5.12 Integrate with Character storage to save equipped parts
+  - [x] 5.13 Add visual indicators for currently equipped parts
+  - [x] 5.14 Write unit tests for AvatarCustomization component
+  - [x] 5.15 Write integration tests for customization flow
 
 - [ ] 6.0 Integrate Avatar Collections with Existing Collection System
   - [ ] 6.1 Update CollectionManager or reward generation to include avatar collection set items
