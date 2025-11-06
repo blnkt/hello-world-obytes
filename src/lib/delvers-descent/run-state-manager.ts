@@ -168,6 +168,21 @@ export class RunStateManager {
   }
 
   /**
+   * Set modified encounter probabilities
+   */
+  async setModifiedEncounterProbabilities(
+    probabilities: Record<string, number>
+  ): Promise<void> {
+    if (!this.currentState) {
+      throw new Error('No active run to set encounter probabilities for');
+    }
+
+    this.currentState.modifiedEncounterProbabilities = probabilities as any;
+
+    await this.saveState();
+  }
+
+  /**
    * Complete the run successfully
    */
   async completeRun(): Promise<{

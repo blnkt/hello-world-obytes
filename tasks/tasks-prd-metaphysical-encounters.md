@@ -89,40 +89,18 @@ Based on PRD: `prd-metaphysical-encounters.md`
   - [ ] 3.19 Write unit tests for `EnergyNexusEncounter` class covering both conversion directions, validation, and limits
   - [ ] 3.20 Write UI tests for `energy-nexus-screen.tsx` component
 
-- [ ] 4.0 Time Distortion Encounter Implementation
-  - [ ] 4.1 Create `src/lib/delvers-descent/time-distortion-encounter.ts` with `TimeDistortionEncounter` class
-  - [ ] 4.2 Define `TimeDistortionState` interface with encounter ID, config, selected action, and outcome fields
-  - [ ] 4.3 Define `TimeDistortionConfig` interface with rewind and skip costs, risks, and side effect probabilities
-  - [ ] 4.4 Implement constructor that accepts encounter ID, depth, and current run state snapshot
-  - [ ] 4.5 Implement `getState()` method to return current state
-  - [ ] 4.6 Implement `selectAction()` method to choose 'rewind' or 'skip'
-  - [ ] 4.7 Implement `executeRewind()` method that restores previous encounter state (energy, inventory, position)
-  - [ ] 4.8 Implement `executeSkip()` method that advances player 1-2 encounters forward (random or configurable)
-  - [ ] 4.9 Implement `generateRandomSideEffect()` method that generates negative side effects with probabilities
-  - [ ] 4.10 Implement `checkBustCondition()` method that evaluates if action causes bust
-  - [ ] 4.11 Implement `execute()` method that performs selected action, applies side effects, and returns outcome
-  - [ ] 4.12 Calculate high energy costs for both options based on depth
-  - [ ] 4.13 Create `src/components/delvers-descent/encounters/advanced/time-distortion-screen.tsx` UI component
-  - [ ] 4.14 Display two options: "Rewind" and "Skip" with their energy costs
-  - [ ] 4.15 Display prominent risk warnings for each option
-  - [ ] 4.16 Show potential negative side effects for each option
-  - [ ] 4.17 Add confirmation dialog before executing risky actions
-  - [ ] 4.18 Style UI to match existing advanced encounter screens with high-risk visual indicators
-  - [ ] 4.19 Write unit tests for `TimeDistortionEncounter` class covering rewind, skip, side effects, and bust conditions
-  - [ ] 4.20 Write UI tests for `time-distortion-screen.tsx` component
-
 - [ ] 5.0 Fate Weaver Encounter Implementation
-  - [ ] 5.1 Create `src/lib/delvers-descent/fate-weaver-encounter.ts` with `FateWeaverEncounter` class
-  - [ ] 5.2 Define `FateWeaverState` interface with encounter ID, config, selected types, probability changes, and outcome fields
-  - [ ] 5.3 Define `FateWeaverConfig` interface with selected encounter types (3 random), probability change amount (±10%)
-  - [ ] 5.4 Implement constructor that accepts encounter ID, depth, and current region's encounter distribution
-  - [ ] 5.5 Implement `getState()` method to return current state
-  - [ ] 5.6 Implement `selectEncounterTypes()` method that randomly selects 3 encounter types from available regional types
-  - [ ] 5.7 Implement `modifyProbability()` method that allows increase or decrease for each of the 3 types
-  - [ ] 5.8 Implement `calculateNewDistribution()` method that applies probability changes and normalizes to 100%
-  - [ ] 5.9 Implement `execute()` method that saves modified probabilities to run state and returns outcome
-  - [ ] 5.10 Ensure probability changes persist for rest of run (stored in run state)
-  - [ ] 5.11 Calculate energy cost based on depth and encounter type modifier
+  - [x] 5.1 Create `src/lib/delvers-descent/fate-weaver-encounter.ts` with `FateWeaverEncounter` class
+  - [x] 5.2 Define `FateWeaverState` interface with encounter ID, config, selected types, probability changes, and outcome fields
+  - [x] 5.3 Define `FateWeaverConfig` interface with selected encounter types (3 random), probability change amount (±10%)
+  - [x] 5.4 Implement constructor that accepts encounter ID, depth, and current region's encounter distribution
+  - [x] 5.5 Implement `getState()` method to return current state
+  - [x] 5.6 Implement `selectEncounterTypes()` method that randomly selects 3 encounter types from available regional types
+  - [x] 5.7 Implement `modifyProbability()` method that allows increase or decrease for each of the 3 types
+  - [x] 5.8 Implement `calculateNewDistribution()` method that applies probability changes and normalizes to 100%
+  - [x] 5.9 Implement `execute()` method that saves modified probabilities to run state and returns outcome
+  - [x] 5.10 Ensure probability changes persist for rest of run (stored in run state)
+  - [x] 5.11 Calculate energy cost based on depth and encounter type modifier
   - [ ] 5.12 Create `src/components/delvers-descent/encounters/advanced/fate-weaver-screen.tsx` UI component
   - [ ] 5.13 Display the 3 randomly selected encounter types
   - [ ] 5.14 Display current probability distribution (before changes) for all encounter types
