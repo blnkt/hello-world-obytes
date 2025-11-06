@@ -6,6 +6,8 @@
 - `src/types/avatar.test.ts` - Unit tests for avatar types
 - `src/lib/delvers-descent/avatar-collection-sets.ts` - Avatar collection set definitions (12 sets: 4 head, 4 torso, 4 leg)
 - `src/lib/delvers-descent/avatar-collection-sets.test.ts` - Unit tests for avatar collection sets
+- `src/lib/delvers-descent/avatar-collection-manager.ts` - AvatarCollectionManager class for tracking unlocks and equipped parts
+- `src/lib/delvers-descent/avatar-collection-manager.test.ts` - Unit tests for AvatarCollectionManager
 - `src/types/character.ts` - Character type definition, needs extension to include equipped avatar parts
 - `src/types/character.test.ts` - Unit tests for character type extensions
 - `src/lib/delvers-descent/avatar-collection-sets.ts` - New file for avatar collection set definitions
@@ -29,7 +31,7 @@
 
 ## Tasks
 
-- [ ] 1.0 Define Avatar Collection Sets and Data Structures
+- [x] 1.0 Define Avatar Collection Sets and Data Structures
   - [x] 1.1 Create `src/types/avatar.ts` with type definitions for AvatarPart, AvatarPartType, and AvatarCollectionSet
   - [x] 1.2 Define AvatarPartType as union type: 'head' | 'torso' | 'legs'
   - [x] 1.3 Create AvatarPart interface with id, name, description, partType, assetPath, and setId fields
@@ -44,22 +46,22 @@
   - [x] 1.12 Write unit tests for avatar type definitions
   - [x] 1.13 Write unit tests for avatar collection set definitions
 
-- [ ] 2.0 Implement AvatarCollectionManager
-  - [ ] 2.1 Create `src/lib/delvers-descent/avatar-collection-manager.ts` file
-  - [ ] 2.2 Implement AvatarCollectionManager class with CollectionManager dependency
-  - [ ] 2.3 Add storage keys for unlocked avatar parts and equipped avatar parts
-  - [ ] 2.4 Implement loadState() method to load unlocked and equipped parts from storage
-  - [ ] 2.5 Implement saveState() method to persist unlocked and equipped parts
-  - [ ] 2.6 Implement getUnlockedAvatarParts() method returning unlocked part IDs by category
-  - [ ] 2.7 Implement isAvatarPartUnlocked(partId: string) method
-  - [ ] 2.8 Implement unlockAvatarPart(partId: string) method
-  - [ ] 2.9 Implement getEquippedAvatarParts() method returning currently equipped parts
-  - [ ] 2.10 Implement equipAvatarPart(partType: AvatarPartType, partId: string) method
-  - [ ] 2.11 Implement checkForAvatarUnlocks() method that checks CollectionManager for completed avatar sets
-  - [ ] 2.12 Implement automatic unlock detection when collection sets complete
-  - [ ] 2.13 Ensure default avatar parts ('default_head', 'default_torso', 'default_legs') are unlocked by default
-  - [ ] 2.14 Write comprehensive unit tests for AvatarCollectionManager
-  - [ ] 2.15 Write integration tests with CollectionManager
+- [x] 2.0 Implement AvatarCollectionManager
+  - [x] 2.1 Create `src/lib/delvers-descent/avatar-collection-manager.ts` file
+  - [x] 2.2 Implement AvatarCollectionManager class with CollectionManager dependency
+  - [x] 2.3 Add storage keys for unlocked avatar parts and equipped avatar parts
+  - [x] 2.4 Implement loadState() method to load unlocked and equipped parts from storage
+  - [x] 2.5 Implement saveState() method to persist unlocked and equipped parts
+  - [x] 2.6 Implement getUnlockedAvatarParts() method returning unlocked part IDs by category
+  - [x] 2.7 Implement isAvatarPartUnlocked(partId: string) method
+  - [x] 2.8 Implement unlockAvatarPart(partId: string) method
+  - [x] 2.9 Implement getEquippedAvatarParts() method returning currently equipped parts
+  - [x] 2.10 Implement equipAvatarPart(partType: AvatarPartType, partId: string) method
+  - [x] 2.11 Implement checkForAvatarUnlocks() method that checks CollectionManager for completed avatar sets
+  - [x] 2.12 Implement automatic unlock detection when collection sets complete
+  - [x] 2.13 Ensure default avatar parts ('default_head', 'default_torso', 'default_legs') are unlocked by default
+  - [x] 2.14 Write comprehensive unit tests for AvatarCollectionManager
+  - [x] 2.15 Write integration tests with CollectionManager
 
 - [ ] 3.0 Extend Character Type and Storage for Avatar Parts
   - [ ] 3.1 Extend Character type in `src/types/character.ts` to include equippedAvatarParts field (EquippedAvatarParts type)
