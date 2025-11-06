@@ -21,7 +21,7 @@ Based on `prd-grouping-based-map-generation.md`
 
 ## Tasks
 
-- [ ] 1.0 Define Encounter Groupings Types and Mappings
+- [x] 1.0 Define Encounter Groupings Types and Mappings
   - [x] 1.1 Add `EncounterGrouping` type definition to `src/types/delvers-descent.ts` with values: `'minigame' | 'loot' | 'recovery_and_navigation' | 'passive'`
   - [x] 1.2 Create `ENCOUNTER_GROUPINGS` constant mapping `EncounterGrouping` to `EncounterType[]` arrays
   - [x] 1.3 Create `ALL_ENCOUNTER_GROUPINGS` array containing all grouping type values
