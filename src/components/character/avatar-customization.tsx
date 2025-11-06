@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, Text, View } from 'react-native';
 
 import { Button } from '@/components/ui';
+import { getAvatarImageSource } from '@/lib/avatar-assets';
 import type { AvatarCollectionManager } from '@/lib/delvers-descent/avatar-collection-manager';
 import {
   getAvatarCollectionSetByPartId,
@@ -11,8 +12,6 @@ import type { CollectionManager } from '@/lib/delvers-descent/collection-manager
 import { setCharacter } from '@/lib/storage';
 import type { AvatarPartType, EquippedAvatarParts } from '@/types/avatar';
 import type { Character } from '@/types/character';
-
-import { CharacterAvatar } from './character-avatar';
 
 export type AvatarCustomizationProps = {
   character: Character;
@@ -83,24 +82,28 @@ const PartButton: React.FC<PartButtonProps> = ({
   const partName = getPartName(partId);
   const progress = getPartProgress(partId, collectionProgress);
 
+  // Default parts are always unlocked, even if not in the list yet
+  const isDefaultPart = partId.startsWith('default_');
+  const canInteract = isUnlocked || isDefaultPart;
+
   return (
     <Pressable
       testID={`part-${partId}`}
-      onPress={() => isUnlocked && onSelect(partType, partId)}
-      disabled={!isUnlocked}
+      onPress={() => canInteract && onSelect(partType, partId)}
+      disabled={!canInteract}
       className={`mb-2 rounded-lg border-2 p-4 ${
         isSelected
           ? 'border-blue-500 bg-blue-50 dark:bg-blue-900'
-          : isUnlocked
+          : canInteract
             ? 'border-gray-300 bg-white dark:bg-gray-800'
             : 'border-gray-200 bg-gray-100 dark:bg-gray-700'
-      } ${!isUnlocked ? 'opacity-60' : ''}`}
+      } ${!canInteract ? 'opacity-60' : ''}`}
     >
       <View className="flex-row items-center justify-between">
         <View className="flex-1">
           <Text
             className={`text-base font-semibold ${
-              isUnlocked
+              canInteract
                 ? 'text-gray-900 dark:text-white'
                 : 'text-gray-500 dark:text-gray-400'
             }`}
@@ -112,7 +115,7 @@ const PartButton: React.FC<PartButtonProps> = ({
               Currently Equipped
             </Text>
           )}
-          {!isUnlocked && (
+          {!canInteract && (
             <Text className="mt-1 text-xs text-gray-500 dark:text-gray-400">
               {progress.collected}/{progress.total} items collected
             </Text>
@@ -233,6 +236,18 @@ const CustomizationHeader: React.FC<CustomizationHeaderProps> = ({
   selectedParts,
   character,
 }) => {
+  // Get equipped avatar parts from character, or use defaults
+  const equippedParts = selectedParts || {
+    headId: 'default_head',
+    torsoId: 'default_torso',
+    legsId: 'default_legs',
+  };
+
+  // Get image sources for each part
+  const headSource = getAvatarImageSource(equippedParts.headId, 'head');
+  const torsoSource = getAvatarImageSource(equippedParts.torsoId, 'torso');
+  const legsSource = getAvatarImageSource(equippedParts.legsId, 'legs');
+
   return (
     <>
       <View className="border-b border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
@@ -241,14 +256,39 @@ const CustomizationHeader: React.FC<CustomizationHeaderProps> = ({
         </Text>
       </View>
 
-      <View className="items-center border-b border-gray-200 bg-white px-4 py-6 dark:border-gray-700 dark:bg-gray-800">
-        <View testID="avatar-preview">
-          <CharacterAvatar
-            character={{
-              ...character,
-              equippedAvatarParts: selectedParts,
-            }}
-          />
+      <View className="items-center border-b border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+        <View
+          testID="avatar-preview"
+          style={{ height: 180, width: '100%', maxWidth: 200 }}
+        >
+          <View className="size-full items-center justify-center">
+            {/* Character body parts stacked vertically */}
+            <View className="size-full">
+              {/* Head */}
+              <Image
+                source={headSource}
+                className="h-1/3 w-full"
+                resizeMode="contain"
+                testID="avatar-head"
+              />
+
+              {/* Torso */}
+              <Image
+                source={torsoSource}
+                className="h-1/3 w-full"
+                resizeMode="contain"
+                testID="avatar-torso"
+              />
+
+              {/* Legs */}
+              <Image
+                source={legsSource}
+                className="h-1/3 w-full"
+                resizeMode="contain"
+                testID="avatar-legs"
+              />
+            </View>
+          </View>
         </View>
       </View>
     </>
@@ -302,6 +342,39 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ onCancel, onEquip }) => {
           <Button label="Equip" variant="default" onPress={onEquip} />
         </View>
       </View>
+    </View>
+  );
+};
+
+type DevUnlockButtonProps = {
+  avatarCollectionManager: AvatarCollectionManager;
+  onUnlock: () => void;
+};
+
+const DevUnlockButton: React.FC<DevUnlockButtonProps> = ({
+  avatarCollectionManager,
+  onUnlock,
+}) => {
+  if (!__DEV__) {
+    return null;
+  }
+
+  const handleUnlockAll = async () => {
+    // Unlock one part from each category for testing
+    await avatarCollectionManager.unlockAvatarPart('head_warrior_helmet');
+    await avatarCollectionManager.unlockAvatarPart('torso_warrior_armor');
+    await avatarCollectionManager.unlockAvatarPart('legs_warrior_boots');
+    onUnlock();
+  };
+
+  return (
+    <View className="border-t border-gray-200 bg-yellow-50 p-2 dark:border-gray-700 dark:bg-yellow-900">
+      <Button
+        label="[DEV] Unlock Test Parts"
+        variant="outline"
+        onPress={handleUnlockAll}
+        className="border-yellow-500"
+      />
     </View>
   );
 };
@@ -364,10 +437,12 @@ type CustomizationContentProps = {
     legs: string[];
   };
   collectionProgress: Map<string, number>;
+  avatarCollectionManager: AvatarCollectionManager;
   onTabChange: (tab: TabType) => void;
   onPartSelect: (partType: AvatarPartType, partId: string) => void;
   onCancel: () => void;
   onEquip: () => void;
+  onRefresh: () => void;
 };
 
 const CustomizationContent: React.FC<CustomizationContentProps> = ({
@@ -376,10 +451,12 @@ const CustomizationContent: React.FC<CustomizationContentProps> = ({
   character,
   unlockedParts,
   collectionProgress,
+  avatarCollectionManager,
   onTabChange,
   onPartSelect,
   onCancel,
   onEquip,
+  onRefresh,
 }) => {
   return (
     <View className="flex-1 bg-gray-50 dark:bg-gray-900">
@@ -398,6 +475,10 @@ const CustomizationContent: React.FC<CustomizationContentProps> = ({
           collectionProgress={collectionProgress}
         />
       </ScrollView>
+      <DevUnlockButton
+        avatarCollectionManager={avatarCollectionManager}
+        onUnlock={onRefresh}
+      />
       <ActionButtons onCancel={onCancel} onEquip={onEquip} />
     </View>
   );
@@ -473,10 +554,12 @@ export const AvatarCustomization: React.FC<AvatarCustomizationProps> = ({
       character={character}
       unlockedParts={unlockedParts}
       collectionProgress={collectionProgress}
+      avatarCollectionManager={avatarCollectionManager}
       onTabChange={setActiveTab}
       onPartSelect={handlePartSelect}
       onCancel={onCancel || (() => {})}
       onEquip={handleEquip}
+      onRefresh={loadData}
     />
   );
 };
