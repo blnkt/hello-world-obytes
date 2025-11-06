@@ -3,6 +3,25 @@
  * Centralized configuration for game balance tuning
  */
 
+import type { EncounterGrouping } from '@/types/delvers-descent';
+
+export interface EncounterGroupingDistribution {
+  minigame: number;
+  loot: number;
+  recovery_and_navigation: number;
+  passive: number;
+}
+
+export interface DepthConstraint {
+  minDepth?: number;
+  maxDepth?: number;
+}
+
+export interface GroupingBalanceConfig {
+  encounterGroupingDistribution: EncounterGroupingDistribution;
+  depthConstraints: Record<EncounterGrouping, DepthConstraint>;
+}
+
 export interface EnergyBalanceConfig {
   // Base energy cost formula: baseCost + (depth - 1) * depthMultiplier
   baseCost: number; // Default: 5
@@ -136,6 +155,7 @@ export interface GameBalanceConfig {
   encounter: EncounterBalanceConfig;
   region: RegionBalanceConfig;
   returnCost: ReturnCostBalanceConfig;
+  grouping: GroupingBalanceConfig;
 }
 
 /**
@@ -318,6 +338,21 @@ export const DEFAULT_BALANCE_CONFIG: GameBalanceConfig = {
     linearIncrement: 5, // +5 per tier
     curveType: 'linear',
   },
+
+  grouping: {
+    encounterGroupingDistribution: {
+      minigame: 0.3,
+      loot: 0.4,
+      recovery_and_navigation: 0.2,
+      passive: 0.1,
+    },
+    depthConstraints: {
+      minigame: {},
+      loot: {},
+      recovery_and_navigation: { minDepth: 11 },
+      passive: {},
+    },
+  },
 };
 
 /**
@@ -389,5 +424,20 @@ export function mergeBalanceConfig(
     encounter: { ...base.encounter, ...overrides.encounter },
     region: { ...base.region, ...overrides.region },
     returnCost: { ...base.returnCost, ...overrides.returnCost },
+    grouping: { ...base.grouping, ...overrides.grouping },
   };
+}
+
+/**
+ * Validate that grouping distribution sums to 1.0 (within tolerance)
+ * @param dist The grouping distribution to validate
+ * @returns true if distribution sums to 1.0 within tolerance (0.0001), false otherwise
+ */
+export function validateGroupingDistribution(
+  dist: EncounterGroupingDistribution
+): boolean {
+  const sum =
+    dist.minigame + dist.loot + dist.recovery_and_navigation + dist.passive;
+  const tolerance = 0.0001;
+  return Math.abs(sum - 1.0) < tolerance;
 }

@@ -7,6 +7,7 @@ Based on `prd-grouping-based-map-generation.md`
 - `src/types/delvers-descent.ts` - Add EncounterGrouping type, ENCOUNTER_GROUPINGS mapping, and helper functions
 - `src/types/delvers-descent.test.ts` - Unit tests for encounter grouping types and helpers
 - `src/lib/delvers-descent/balance-config.ts` - Add grouping distribution configuration and depth constraints
+- `src/lib/delvers-descent/balance-config.test.ts` - Unit tests for grouping configuration structure and validation
 - `src/lib/delvers-descent/map-generator.ts` - Refactor to use grouping-based selection algorithm
 - `src/lib/delvers-descent/map-generator-optimized.ts` - Refactor optimized generator to use grouping-based selection
 - `src/lib/delvers-descent/map-generator.test.ts` - Unit tests for grouping-based map generation
@@ -31,14 +32,14 @@ Based on `prd-grouping-based-map-generation.md`
   - [x] 1.7 Verify all 11 encounter types are mapped to exactly one grouping
 
 - [ ] 2.0 Add Grouping Distribution Configuration to Balance Config
-  - [ ] 2.1 Add `EncounterGroupingDistribution` interface to `balance-config.ts` with properties: `minigame`, `loot`, `recovery_and_navigation`, `passive` (all numbers)
-  - [ ] 2.2 Add `DepthConstraint` interface with `minDepth?: number` and `maxDepth?: number` properties
-  - [ ] 2.3 Add `GroupingBalanceConfig` interface containing `encounterGroupingDistribution` and `depthConstraints` (Record<EncounterGrouping, DepthConstraint>)
-  - [ ] 2.4 Add `grouping` property to `GameBalanceConfig` interface with type `GroupingBalanceConfig`
-  - [ ] 2.5 Add default grouping distribution to `DEFAULT_BALANCE_CONFIG`: minigame: 0.30, loot: 0.40, recovery_and_navigation: 0.20, passive: 0.10
-  - [ ] 2.6 Add default depth constraints: `recovery_and_navigation: { minDepth: 11 }`
-  - [ ] 2.7 Add validation function `validateGroupingDistribution(dist: EncounterGroupingDistribution): boolean` that checks if values sum to 1.0 (within tolerance)
-  - [ ] 2.8 Add unit tests for configuration structure and validation
+  - [x] 2.1 Add `EncounterGroupingDistribution` interface to `balance-config.ts` with properties: `minigame`, `loot`, `recovery_and_navigation`, `passive` (all numbers)
+  - [x] 2.2 Add `DepthConstraint` interface with `minDepth?: number` and `maxDepth?: number` properties
+  - [x] 2.3 Add `GroupingBalanceConfig` interface containing `encounterGroupingDistribution` and `depthConstraints` (Record<EncounterGrouping, DepthConstraint>)
+  - [x] 2.4 Add `grouping` property to `GameBalanceConfig` interface with type `GroupingBalanceConfig`
+  - [x] 2.5 Add default grouping distribution to `DEFAULT_BALANCE_CONFIG`: minigame: 0.30, loot: 0.40, recovery_and_navigation: 0.20, passive: 0.10
+  - [x] 2.6 Add default depth constraints: `recovery_and_navigation: { minDepth: 11 }`
+  - [x] 2.7 Add validation function `validateGroupingDistribution(dist: EncounterGroupingDistribution): boolean` that checks if values sum to 1.0 (within tolerance)
+  - [x] 2.8 Add unit tests for configuration structure and validation
 
 - [ ] 3.0 Implement Depth Constraint System
   - [ ] 3.1 Create function `filterGroupingsByDepth(groupings: EncounterGrouping[], depth: number, constraints: Record<EncounterGrouping, DepthConstraint>): EncounterGrouping[]` that filters out groupings unavailable at given depth
