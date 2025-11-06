@@ -63,15 +63,15 @@
   - [x] 2.14 Write comprehensive unit tests for AvatarCollectionManager
   - [x] 2.15 Write integration tests with CollectionManager
 
-- [ ] 3.0 Extend Character Type and Storage for Avatar Parts
-  - [ ] 3.1 Extend Character type in `src/types/character.ts` to include equippedAvatarParts field (EquippedAvatarParts type)
-  - [ ] 3.2 Update getCharacter() in `src/lib/storage.tsx` to handle equippedAvatarParts field
-  - [ ] 3.3 Update setCharacter() to persist equippedAvatarParts
-  - [ ] 3.4 Ensure default avatar parts are set when creating new character (head: 'default_head', torso: 'default_torso', legs: 'default_legs')
-  - [ ] 3.5 Update character migration logic if needed to handle avatar parts for existing characters
-  - [ ] 3.6 Write unit tests for character type extensions
-  - [ ] 3.7 Write unit tests for character storage with avatar parts
-  - [ ] 3.8 Write migration tests for existing characters getting default avatar parts
+- [x] 3.0 Extend Character Type and Storage for Avatar Parts
+  - [x] 3.1 Extend Character type in `src/types/character.ts` to include equippedAvatarParts field (EquippedAvatarParts type)
+  - [x] 3.2 Update getCharacter() in `src/lib/storage.tsx` to handle equippedAvatarParts field
+  - [x] 3.3 Update setCharacter() to persist equippedAvatarParts
+  - [x] 3.4 Ensure default avatar parts are set when creating new character (head: 'default_head', torso: 'default_torso', legs: 'default_legs')
+  - [x] 3.5 Update character migration logic if needed to handle avatar parts for existing characters
+  - [x] 3.6 Write unit tests for character type extensions
+  - [x] 3.7 Write unit tests for character storage with avatar parts
+  - [x] 3.8 Write migration tests for existing characters getting default avatar parts
 
 - [ ] 4.0 Update CharacterAvatar Component for Dynamic Parts
   - [ ] 4.1 Update `src/components/character/character-avatar.tsx` to accept equippedAvatarParts prop

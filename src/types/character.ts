@@ -1,3 +1,5 @@
+import type { EquippedAvatarParts } from './avatar';
+
 export type Character = {
   name: string;
   level: number;
@@ -6,6 +8,7 @@ export type Character = {
   equipment: string[];
   abilities: string[];
   notes?: string;
+  equippedAvatarParts?: EquippedAvatarParts;
 };
 
 // TODO: PHASE 3 - Add inventory system - Let players collect and use items from scenarios

@@ -26,6 +26,11 @@ export default function CharacterCreation() {
         equipment: [],
         abilities: [],
         notes: '',
+        equippedAvatarParts: {
+          headId: 'default_head',
+          torsoId: 'default_torso',
+          legsId: 'default_legs',
+        },
       };
 
       await saveCharacterToStorage(newCharacter);
