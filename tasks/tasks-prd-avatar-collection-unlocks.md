@@ -2,8 +2,10 @@
 
 ## Relevant Files
 
-- `src/types/avatar.ts` - New file for avatar-related type definitions (AvatarPart, AvatarPartType, AvatarCollectionSet, etc.)
+- `src/types/avatar.ts` - Avatar-related type definitions (AvatarPart, AvatarPartType, AvatarCollectionSet, EquippedAvatarParts)
 - `src/types/avatar.test.ts` - Unit tests for avatar types
+- `src/lib/delvers-descent/avatar-collection-sets.ts` - Avatar collection set definitions (12 sets: 4 head, 4 torso, 4 leg)
+- `src/lib/delvers-descent/avatar-collection-sets.test.ts` - Unit tests for avatar collection sets
 - `src/types/character.ts` - Character type definition, needs extension to include equipped avatar parts
 - `src/types/character.test.ts` - Unit tests for character type extensions
 - `src/lib/delvers-descent/avatar-collection-sets.ts` - New file for avatar collection set definitions
@@ -28,19 +30,19 @@
 ## Tasks
 
 - [ ] 1.0 Define Avatar Collection Sets and Data Structures
-  - [ ] 1.1 Create `src/types/avatar.ts` with type definitions for AvatarPart, AvatarPartType, and AvatarCollectionSet
-  - [ ] 1.2 Define AvatarPartType as union type: 'head' | 'torso' | 'legs'
-  - [ ] 1.3 Create AvatarPart interface with id, name, description, partType, assetPath, and setId fields
-  - [ ] 1.4 Create AvatarCollectionSet interface extending CollectionSet structure with avatarPartId field
-  - [ ] 1.5 Create EquippedAvatarParts interface with headId, torsoId, and legsId fields
-  - [ ] 1.6 Create `src/lib/delvers-descent/avatar-collection-sets.ts` file for avatar set definitions
-  - [ ] 1.7 Define 3-4 head collection sets (e.g., "Warrior Helmet Set", "Mage Hat Set", "Rogue Hood Set", "Crown Set")
-  - [ ] 1.8 Define 3-4 torso collection sets (e.g., "Warrior Armor Set", "Mage Robe Set", "Ranger Cloak Set", "Royal Garment Set")
-  - [ ] 1.9 Define 3-4 leg collection sets (e.g., "Warrior Boots Set", "Mage Sandals Set", "Ranger Leggings Set", "Noble Pants Set")
-  - [ ] 1.10 Create ALL_AVATAR_COLLECTION_SETS constant array containing all avatar sets
-  - [ ] 1.11 Add helper functions to get avatar sets by part type (getAvatarSetsByPartType)
-  - [ ] 1.12 Write unit tests for avatar type definitions
-  - [ ] 1.13 Write unit tests for avatar collection set definitions
+  - [x] 1.1 Create `src/types/avatar.ts` with type definitions for AvatarPart, AvatarPartType, and AvatarCollectionSet
+  - [x] 1.2 Define AvatarPartType as union type: 'head' | 'torso' | 'legs'
+  - [x] 1.3 Create AvatarPart interface with id, name, description, partType, assetPath, and setId fields
+  - [x] 1.4 Create AvatarCollectionSet interface extending CollectionSet structure with avatarPartId field
+  - [x] 1.5 Create EquippedAvatarParts interface with headId, torsoId, and legsId fields
+  - [x] 1.6 Create `src/lib/delvers-descent/avatar-collection-sets.ts` file for avatar set definitions
+  - [x] 1.7 Define 3-4 head collection sets (e.g., "Warrior Helmet Set", "Mage Hat Set", "Rogue Hood Set", "Crown Set")
+  - [x] 1.8 Define 3-4 torso collection sets (e.g., "Warrior Armor Set", "Mage Robe Set", "Ranger Cloak Set", "Royal Garment Set")
+  - [x] 1.9 Define 3-4 leg collection sets (e.g., "Warrior Boots Set", "Mage Sandals Set", "Ranger Leggings Set", "Noble Pants Set")
+  - [x] 1.10 Create ALL_AVATAR_COLLECTION_SETS constant array containing all avatar sets
+  - [x] 1.11 Add helper functions to get avatar sets by part type (getAvatarSetsByPartType)
+  - [x] 1.12 Write unit tests for avatar type definitions
+  - [x] 1.13 Write unit tests for avatar collection set definitions
 
 - [ ] 2.0 Implement AvatarCollectionManager
   - [ ] 2.1 Create `src/lib/delvers-descent/avatar-collection-manager.ts` file
