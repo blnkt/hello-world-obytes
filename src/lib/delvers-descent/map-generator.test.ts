@@ -1,4 +1,8 @@
 import type { DungeonNode, EncounterType } from '@/types/delvers-descent';
+import {
+  ENCOUNTER_GROUPINGS,
+  type EncounterGrouping,
+} from '@/types/delvers-descent';
 
 import { DungeonMapGenerator } from './map-generator';
 
@@ -507,6 +511,78 @@ describe('DungeonMapGenerator', () => {
 
       // Scoundrel should be in the distribution (even if count is 0)
       expect(stats.encounterTypeDistribution).toHaveProperty('scoundrel');
+    });
+  });
+
+  describe('Grouping-Based Selection', () => {
+    it('should not have duplicate encounters within a depth level', async () => {
+      // Run multiple times to catch potential duplicates
+      for (let i = 0; i < 20; i++) {
+        const nodes = await generator.generateDepthLevel(5);
+        const encounterTypes = nodes.map((node) => node.type);
+        const uniqueTypes = new Set(encounterTypes);
+
+        expect(encounterTypes.length).toBe(uniqueTypes.size);
+      }
+    });
+
+    it('should not have duplicate groupings within a depth level', async () => {
+      // Run multiple times to catch potential duplicates
+      for (let i = 0; i < 20; i++) {
+        const nodes = await generator.generateDepthLevel(5);
+        const groupings = nodes.map((node) => {
+          for (const [grouping, encounters] of Object.entries(
+            ENCOUNTER_GROUPINGS
+          )) {
+            if (encounters.includes(node.type)) {
+              return grouping as EncounterGrouping;
+            }
+          }
+          return null;
+        });
+        const uniqueGroupings = new Set(groupings.filter((g) => g !== null));
+
+        expect(uniqueGroupings.size).toBe(
+          groupings.filter((g) => g !== null).length
+        );
+      }
+    });
+
+    it('should exclude recovery_and_navigation encounters from depths 1-10', async () => {
+      const recoveryNavEncounters: EncounterType[] = [
+        'rest_site',
+        'region_shortcut',
+        'safe_passage',
+      ];
+
+      for (let depth = 1; depth <= 10; depth++) {
+        for (let i = 0; i < 10; i++) {
+          const nodes = await generator.generateDepthLevel(depth);
+          nodes.forEach((node) => {
+            expect(recoveryNavEncounters).not.toContain(node.type);
+          });
+        }
+      }
+    });
+
+    it('should include recovery_and_navigation encounters from depth 11+', async () => {
+      const recoveryNavEncounters: EncounterType[] = [
+        'rest_site',
+        'region_shortcut',
+        'safe_passage',
+      ];
+      let found = false;
+
+      // Run multiple times to increase chance of finding one
+      for (let i = 0; i < 50; i++) {
+        const nodes = await generator.generateDepthLevel(15);
+        if (nodes.some((node) => recoveryNavEncounters.includes(node.type))) {
+          found = true;
+          break;
+        }
+      }
+
+      expect(found).toBe(true);
     });
   });
 });

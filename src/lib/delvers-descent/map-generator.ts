@@ -3,8 +3,16 @@ import type {
   EncounterType,
   Shortcut,
 } from '@/types/delvers-descent';
+import {
+  type EncounterGrouping,
+  getEncountersInGrouping,
+} from '@/types/delvers-descent';
 
-import { DEFAULT_BALANCE_CONFIG } from './balance-config';
+import {
+  DEFAULT_BALANCE_CONFIG,
+  type EncounterGroupingDistribution,
+  getAvailableGroupingsForDepth,
+} from './balance-config';
 import { type RegionManager } from './region-manager';
 import { REGIONS } from './regions';
 import { ReturnCostCalculator } from './return-cost-calculator';
@@ -78,32 +86,36 @@ export class DungeonMapGenerator {
   generateDepthLevel(depth: number, regionKey?: string): Promise<DungeonNode[]>;
   async generateDepthLevel(
     depth: number,
-    regionKey?: string
+    _regionKey?: string
   ): Promise<DungeonNode[]> {
     if (depth < 1) {
       throw new Error('Depth must be at least 1');
     }
 
     const nodeCount = Math.floor(Math.random() * 2) + 2; // 2-3 nodes
-    // Select encounter types using weighted distribution (region-aware per call)
-    let { weights, total } = await this.getWeightsForRegion(regionKey, depth);
+
+    // Get available groupings and weights for this depth (applying constraints)
+    const { groupings: availableGroupings, weights: groupingWeights } =
+      this.getGroupingWeightsForDepth(depth);
 
     const nodes: DungeonNode[] = [];
-    let safePassageUsed = false;
+    const selectedGroupings: EncounterGrouping[] = [];
+    const selectedEncounters: EncounterType[] = [];
 
     for (let position = 0; position < nodeCount; position++) {
-      // If safe_passage was already used in this depth, remove it from weights
-      if (safePassageUsed) {
-        weights = weights.filter((w) => w.type !== 'safe_passage');
-        total = weights.reduce((sum, w) => sum + w.weight, 0);
-      }
+      const { encounterType, selectedGrouping } =
+        this.selectEncounterForPosition({
+          availableGroupings,
+          groupingWeights,
+          selectedGroupings,
+          selectedEncounters,
+        });
 
-      const encounterType = this.pickWeightedEncounterType(weights, total);
-
-      // Track if safe_passage was selected
-      if (encounterType === 'safe_passage') {
-        safePassageUsed = true;
+      // Track selections
+      if (!selectedGroupings.includes(selectedGrouping)) {
+        selectedGroupings.push(selectedGrouping);
       }
+      selectedEncounters.push(encounterType);
 
       const node: DungeonNode = {
         id: `depth${depth}-node${position}`,
@@ -120,6 +132,56 @@ export class DungeonMapGenerator {
     }
 
     return nodes;
+  }
+
+  /**
+   * Select an encounter for a position, ensuring no duplicates
+   */
+  private selectEncounterForPosition({
+    availableGroupings,
+    groupingWeights,
+    selectedGroupings,
+    selectedEncounters,
+  }: {
+    availableGroupings: EncounterGrouping[];
+    groupingWeights: EncounterGroupingDistribution;
+    selectedGroupings: EncounterGrouping[];
+    selectedEncounters: EncounterType[];
+  }): { encounterType: EncounterType; selectedGrouping: EncounterGrouping } {
+    // Select a grouping (excluding already selected groupings)
+    let selectedGrouping = this.selectGrouping(
+      availableGroupings,
+      groupingWeights,
+      selectedGroupings
+    );
+
+    // Fallback to minigame if no groupings available
+    if (!selectedGrouping) {
+      selectedGrouping = 'minigame';
+    }
+
+    // Select an encounter from the grouping (excluding already selected encounters)
+    let encounterType = this.selectEncounterFromGrouping(
+      selectedGrouping,
+      selectedEncounters
+    );
+
+    // If no encounters available in grouping, try fallback to minigame
+    if (!encounterType && selectedGrouping !== 'minigame') {
+      encounterType = this.selectEncounterFromGrouping(
+        'minigame',
+        selectedEncounters
+      );
+      selectedGrouping = 'minigame';
+    }
+
+    // Final fallback: use first available encounter from minigame
+    if (!encounterType) {
+      const minigameEncounters = getEncountersInGrouping('minigame');
+      encounterType = minigameEncounters[0];
+    }
+
+    return { encounterType, selectedGrouping };
   }
 
   /**
@@ -322,6 +384,90 @@ export class DungeonMapGenerator {
       }
     }
     return weights[weights.length - 1].type;
+  }
+
+  /**
+   * Select a grouping using weighted random, excluding already selected groupings
+   * @param availableGroupings Groupings available for selection
+   * @param weights Grouping distribution weights
+   * @param excludeGroupings Groupings to exclude from selection
+   * @returns Selected grouping, or null if no groupings available
+   */
+  private selectGrouping(
+    availableGroupings: EncounterGrouping[],
+    weights: EncounterGroupingDistribution,
+    excludeGroupings: EncounterGrouping[]
+  ): EncounterGrouping | null {
+    // Filter out excluded groupings
+    const filteredGroupings = availableGroupings.filter(
+      (g) => !excludeGroupings.includes(g)
+    );
+
+    if (filteredGroupings.length === 0) {
+      return null;
+    }
+
+    // Calculate total weight of available groupings
+    let totalWeight = 0;
+    filteredGroupings.forEach((grouping) => {
+      totalWeight += weights[grouping];
+    });
+
+    if (totalWeight <= 0) {
+      return null;
+    }
+
+    // Select using weighted random
+    const r = Math.random() * totalWeight;
+    let cumulative = 0;
+    for (const grouping of filteredGroupings) {
+      cumulative += weights[grouping];
+      if (r <= cumulative) {
+        return grouping;
+      }
+    }
+
+    // Fallback to last grouping
+    return filteredGroupings[filteredGroupings.length - 1];
+  }
+
+  /**
+   * Select an encounter from a grouping using equal probability, excluding already selected encounters
+   * @param grouping The grouping to select from
+   * @param excludeEncounters Encounters to exclude from selection
+   * @returns Selected encounter, or null if no encounters available
+   */
+  private selectEncounterFromGrouping(
+    grouping: EncounterGrouping,
+    excludeEncounters: EncounterType[]
+  ): EncounterType | null {
+    const encounters = getEncountersInGrouping(grouping);
+    const availableEncounters = encounters.filter(
+      (e) => !excludeEncounters.includes(e)
+    );
+
+    if (availableEncounters.length === 0) {
+      return null;
+    }
+
+    // Equal probability selection
+    const randomIndex = Math.floor(Math.random() * availableEncounters.length);
+    return availableEncounters[randomIndex];
+  }
+
+  /**
+   * Get grouping weights for a given depth, applying depth constraints
+   * @param depth Current depth level
+   * @returns Available groupings and their redistributed weights
+   */
+  private getGroupingWeightsForDepth(depth: number): {
+    groupings: EncounterGrouping[];
+    weights: EncounterGroupingDistribution;
+  } {
+    return getAvailableGroupingsForDepth(
+      depth,
+      DEFAULT_BALANCE_CONFIG.grouping
+    );
   }
 
   /**

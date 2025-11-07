@@ -50,23 +50,23 @@ Based on `prd-grouping-based-map-generation.md`
   - [x] 3.6 Add unit tests verifying recovery_and_navigation is filtered out for depths 1-10
 
 - [ ] 4.0 Refactor Map Generator to Use Grouping-Based Selection
-  - [ ] 4.1 Create helper method `selectGrouping(availableGroupings: EncounterGrouping[], weights: EncounterGroupingDistribution, excludeGroupings: EncounterGrouping[]): EncounterGrouping | null` that selects a grouping using weighted random, excluding already selected groupings
-  - [ ] 4.2 Create helper method `selectEncounterFromGrouping(grouping: EncounterGrouping, excludeEncounters: EncounterType[]): EncounterType | null` that selects an encounter from a grouping using equal probability, excluding already selected encounters
-  - [ ] 4.3 Update `getWeightsForRegion()` method (or create `getGroupingWeightsForDepth()`) to return grouping weights instead of encounter weights, applying depth constraints
-  - [ ] 4.4 Refactor `generateDepthLevel()` in `DungeonMapGenerator` to:
-    - [ ] 4.4.1 Get available groupings and weights for the depth (applying constraints)
-    - [ ] 4.4.2 Initialize arrays to track selected groupings and encounters
-    - [ ] 4.4.3 For each node position (2-3 nodes):
-      - [ ] Filter available groupings to exclude already selected groupings
-      - [ ] If no groupings available, use minigame as fallback
-      - [ ] Select grouping using weighted random
-      - [ ] Filter encounters in selected grouping to exclude already selected encounters
-      - [ ] Select encounter using equal probability random
-      - [ ] Add to selected arrays
-    - [ ] 4.4.4 Return nodes with selected encounters
+  - [x] 4.1 Create helper method `selectGrouping(availableGroupings: EncounterGrouping[], weights: EncounterGroupingDistribution, excludeGroupings: EncounterGrouping[]): EncounterGrouping | null` that selects a grouping using weighted random, excluding already selected groupings
+  - [x] 4.2 Create helper method `selectEncounterFromGrouping(grouping: EncounterGrouping, excludeEncounters: EncounterType[]): EncounterType | null` that selects an encounter from a grouping using equal probability, excluding already selected encounters
+  - [x] 4.3 Update `getWeightsForRegion()` method (or create `getGroupingWeightsForDepth()`) to return grouping weights instead of encounter weights, applying depth constraints
+  - [x] 4.4 Refactor `generateDepthLevel()` in `DungeonMapGenerator` to:
+    - [x] 4.4.1 Get available groupings and weights for the depth (applying constraints)
+    - [x] 4.4.2 Initialize arrays to track selected groupings and encounters
+    - [x] 4.4.3 For each node position (2-3 nodes):
+      - [x] Filter available groupings to exclude already selected groupings
+      - [x] If no groupings available, use minigame as fallback
+      - [x] Select grouping using weighted random
+      - [x] Filter encounters in selected grouping to exclude already selected encounters
+      - [x] Select encounter using equal probability random
+      - [x] Add to selected arrays
+    - [x] 4.4.4 Return nodes with selected encounters
   - [ ] 4.5 Apply same refactoring to `generateDepthLevel()` in `DungeonMapGeneratorOptimized`
   - [ ] 4.6 Remove or deprecate old encounter-based weight logic (keep for backward compatibility but don't use)
-  - [ ] 4.7 Ensure fallback behavior works correctly when constraints prevent filling all slots
+  - [x] 4.7 Ensure fallback behavior works correctly when constraints prevent filling all slots
 
 - [ ] 5.0 Add Comprehensive Tests for Grouping-Based Map Generation
   - [ ] 5.1 Add tests in `map-generator.test.ts` verifying no duplicate encounters within a depth level
