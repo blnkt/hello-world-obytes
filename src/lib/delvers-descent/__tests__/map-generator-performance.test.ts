@@ -173,4 +173,76 @@ describe('Map Generator Performance', () => {
       expect(wastesHazard).toBeGreaterThan(sanctumHazard);
     });
   });
+
+  describe('Grouping-Based Selection Performance', () => {
+    it('should generate depth levels with grouping-based selection quickly (<10ms)', async () => {
+      const generator = new DungeonMapGenerator();
+
+      const start = performance.now();
+      const nodes = await generator.generateDepthLevel(5);
+      const end = performance.now();
+      const duration = end - start;
+
+      expect(nodes.length).toBeGreaterThanOrEqual(2);
+      expect(nodes.length).toBeLessThanOrEqual(3);
+      expect(duration).toBeLessThan(10); // Target: <10ms per depth level
+    });
+
+    it('should generate full maps with grouping-based selection within <50ms', async () => {
+      const generator = new DungeonMapGenerator();
+      const maxDepth = 5;
+
+      const start = performance.now();
+      const map = await generator.generateFullMap(maxDepth);
+      const end = performance.now();
+      const duration = end - start;
+
+      expect(map.length).toBeGreaterThan(0);
+      expect(duration).toBeLessThan(50); // Target: <50ms
+    });
+
+    it('should maintain performance with grouping-based selection across multiple depths', async () => {
+      const generator = new DungeonMapGenerator();
+      const depths = [1, 5, 10, 15, 20];
+
+      for (const depth of depths) {
+        const start = performance.now();
+        const nodes = await generator.generateDepthLevel(depth);
+        const end = performance.now();
+        const duration = end - start;
+
+        expect(nodes.length).toBeGreaterThanOrEqual(2);
+        expect(nodes.length).toBeLessThanOrEqual(3);
+        expect(duration).toBeLessThan(10); // Each depth level should be fast
+      }
+    });
+
+    it('should handle grouping-based selection efficiently in optimized generator', async () => {
+      const generator = new DungeonMapGeneratorOptimized();
+      const maxDepth = 5;
+
+      const start = performance.now();
+      const map = await generator.generateFullMap(maxDepth);
+      const end = performance.now();
+      const duration = end - start;
+
+      expect(map.length).toBeGreaterThan(0);
+      expect(duration).toBeLessThan(50); // Target: <50ms
+    });
+
+    it('should generate many depth levels efficiently with grouping-based selection', async () => {
+      const generator = new DungeonMapGenerator();
+
+      const start = performance.now();
+      for (let i = 0; i < 100; i++) {
+        const depth = Math.floor(Math.random() * 20) + 1;
+        const nodes = await generator.generateDepthLevel(depth);
+        expect(nodes.length).toBeGreaterThanOrEqual(2);
+      }
+      const end = performance.now();
+      const duration = end - start;
+
+      expect(duration).toBeLessThan(500); // 100 depth levels should complete in <500ms
+    });
+  });
 });

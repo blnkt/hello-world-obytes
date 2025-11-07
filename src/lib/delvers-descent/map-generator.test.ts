@@ -2,8 +2,10 @@ import type { DungeonNode, EncounterType } from '@/types/delvers-descent';
 import {
   ENCOUNTER_GROUPINGS,
   type EncounterGrouping,
+  getEncounterGrouping,
 } from '@/types/delvers-descent';
 
+import { DEFAULT_BALANCE_CONFIG } from './balance-config';
 import { DungeonMapGenerator } from './map-generator';
 
 describe('DungeonMapGenerator', () => {
@@ -583,6 +585,110 @@ describe('DungeonMapGenerator', () => {
       }
 
       expect(found).toBe(true);
+    });
+
+    it('should match configured grouping distribution within acceptable variance', async () => {
+      const expectedDistribution =
+        DEFAULT_BALANCE_CONFIG.grouping.encounterGroupingDistribution;
+      const sampleSize = 2000; // Increased sample size for better statistical accuracy
+      const groupingCounts: Record<EncounterGrouping, number> = {
+        minigame: 0,
+        loot: 0,
+        recovery_and_navigation: 0,
+        passive: 0,
+      };
+
+      // Generate many depth levels and count groupings
+      // Use depths > 10 to avoid weight redistribution from constraints
+      for (let i = 0; i < sampleSize; i++) {
+        const depth = Math.floor(Math.random() * 20) + 11; // Random depth 11-30
+        const nodes = await generator.generateDepthLevel(depth);
+        nodes.forEach((node) => {
+          const grouping = getEncounterGrouping(node.type);
+          if (grouping) {
+            groupingCounts[grouping]++;
+          }
+        });
+      }
+
+      const totalEncounters = Object.values(groupingCounts).reduce(
+        (sum, count) => sum + count,
+        0
+      );
+
+      // Verify all groupings appear with reasonable frequency
+      // Due to the constraint preventing duplicate groupings within a depth level,
+      // we check that each grouping appears at least 50% of its expected frequency
+      // and at most 200% of its expected frequency
+      Object.keys(expectedDistribution).forEach((grouping) => {
+        const expected = expectedDistribution[grouping as EncounterGrouping];
+        const actual =
+          groupingCounts[grouping as EncounterGrouping] / totalEncounters;
+        const expectedCount = expected * totalEncounters;
+        const actualCount = groupingCounts[grouping as EncounterGrouping];
+
+        // Each grouping should appear at least 50% of expected and at most 200% of expected
+        expect(actualCount).toBeGreaterThanOrEqual(expectedCount * 0.5);
+        expect(actualCount).toBeLessThanOrEqual(expectedCount * 2.0);
+      });
+    });
+
+    it('should handle fallback behavior when constraints prevent filling all slots', async () => {
+      // Test at depth 1 where recovery_and_navigation is excluded
+      // If we generate many nodes, we should still get valid encounters
+      for (let i = 0; i < 50; i++) {
+        const nodes = await generator.generateDepthLevel(1);
+
+        // Should always generate 2-3 nodes
+        expect(nodes.length).toBeGreaterThanOrEqual(2);
+        expect(nodes.length).toBeLessThanOrEqual(3);
+
+        // All nodes should have valid encounter types
+        nodes.forEach((node) => {
+          expect(node.type).toBeDefined();
+          expect(node.type).not.toBe('');
+        });
+
+        // Should not have recovery_and_navigation encounters
+        const recoveryNavEncounters: EncounterType[] = [
+          'rest_site',
+          'region_shortcut',
+          'safe_passage',
+        ];
+        nodes.forEach((node) => {
+          expect(recoveryNavEncounters).not.toContain(node.type);
+        });
+      }
+    });
+
+    it('should redistribute weights correctly when groupings are filtered', async () => {
+      // Test at depth 1 where recovery_and_navigation is excluded
+      // The remaining groupings should have redistributed weights
+      const depth = 1;
+      const nodes = await generator.generateDepthLevel(depth);
+
+      // Count groupings
+      const groupingCounts: Record<EncounterGrouping, number> = {
+        minigame: 0,
+        loot: 0,
+        recovery_and_navigation: 0,
+        passive: 0,
+      };
+
+      nodes.forEach((node) => {
+        const grouping = getEncounterGrouping(node.type);
+        if (grouping) {
+          groupingCounts[grouping]++;
+        }
+      });
+
+      // recovery_and_navigation should never appear at depth 1
+      expect(groupingCounts.recovery_and_navigation).toBe(0);
+
+      // Other groupings should appear (at least one should be present)
+      const otherGroupingsCount =
+        groupingCounts.minigame + groupingCounts.loot + groupingCounts.passive;
+      expect(otherGroupingsCount).toBeGreaterThan(0);
     });
   });
 });

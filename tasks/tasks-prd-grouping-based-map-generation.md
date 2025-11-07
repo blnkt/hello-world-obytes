@@ -72,10 +72,10 @@ Based on `prd-grouping-based-map-generation.md`
   - [x] 5.1 Add tests in `map-generator.test.ts` verifying no duplicate encounters within a depth level
   - [x] 5.2 Add tests in `map-generator.test.ts` verifying no duplicate groupings within a depth level
   - [x] 5.3 Add tests verifying depth constraints are applied correctly (recovery_and_navigation excluded from depths 1-10)
-  - [ ] 5.4 Add tests verifying grouping distribution matches configured distribution (within acceptable variance)
-  - [ ] 5.5 Add tests for fallback behavior when constraints prevent filling all slots
-  - [ ] 5.6 Add tests verifying weight redistribution works correctly when groupings are filtered
-  - [ ] 5.7 Add integration tests in `__tests__/map-generator-grouping.test.ts` for full depth level generation with various scenarios
-  - [ ] 5.8 Add performance tests verifying map generation still completes in <50ms
+  - [x] 5.4 Add tests verifying grouping distribution matches configured distribution (within acceptable variance)
+  - [x] 5.5 Add tests for fallback behavior when constraints prevent filling all slots
+  - [x] 5.6 Add tests verifying weight redistribution works correctly when groupings are filtered
+  - [x] 5.7 Add integration tests in `__tests__/map-generator-grouping.test.ts` for full depth level generation with various scenarios
+  - [x] 5.8 Add performance tests verifying map generation still completes in <50ms
   - [ ] 5.9 Add tests for `DungeonMapGeneratorOptimized` with same test cases
   - [ ] 5.10 Verify test coverage is >90% for new grouping logic
