@@ -41,7 +41,7 @@ Based on `prd-grouping-based-map-generation.md`
   - [x] 2.7 Add validation function `validateGroupingDistribution(dist: EncounterGroupingDistribution): boolean` that checks if values sum to 1.0 (within tolerance)
   - [x] 2.8 Add unit tests for configuration structure and validation
 
-- [ ] 3.0 Implement Depth Constraint System
+- [x] 3.0 Implement Depth Constraint System
   - [x] 3.1 Create function `filterGroupingsByDepth(groupings: EncounterGrouping[], depth: number, constraints: Record<EncounterGrouping, DepthConstraint>): EncounterGrouping[]` that filters out groupings unavailable at given depth
   - [x] 3.2 Create function `redistributeGroupingWeights(weights: EncounterGroupingDistribution, availableGroupings: EncounterGrouping[]): EncounterGroupingDistribution` that proportionally redistributes weights when groupings are filtered out
   - [x] 3.3 Create function `getAvailableGroupingsForDepth(depth: number, config: GroupingBalanceConfig): { groupings: EncounterGrouping[], weights: EncounterGroupingDistribution }` that combines filtering and redistribution
