@@ -64,7 +64,7 @@ Based on `prd-grouping-based-map-generation.md`
       - [x] Select encounter using equal probability random
       - [x] Add to selected arrays
     - [x] 4.4.4 Return nodes with selected encounters
-  - [ ] 4.5 Apply same refactoring to `generateDepthLevel()` in `DungeonMapGeneratorOptimized`
+  - [x] 4.5 Apply same refactoring to `generateDepthLevel()` in `DungeonMapGeneratorOptimized`
   - [ ] 4.6 Remove or deprecate old encounter-based weight logic (keep for backward compatibility but don't use)
   - [x] 4.7 Ensure fallback behavior works correctly when constraints prevent filling all slots
 
