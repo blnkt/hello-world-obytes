@@ -33,7 +33,15 @@ export class DungeonMapGenerator {
     'fate_weaver',
   ];
   private readonly returnCostCalculator: ReturnCostCalculator;
+  /**
+   * @deprecated Kept for backward compatibility. Use grouping-based selection instead.
+   * This is no longer used by generateDepthLevel() which now uses grouping-based selection.
+   */
   private readonly encounterWeights: { type: EncounterType; weight: number }[];
+  /**
+   * @deprecated Kept for backward compatibility. Use grouping-based selection instead.
+   * This is no longer used by generateDepthLevel() which now uses grouping-based selection.
+   */
   private readonly encounterTotalWeight: number;
   private readonly regionKey?: string;
   private readonly regionManager?: RegionManager;
@@ -364,6 +372,8 @@ export class DungeonMapGenerator {
 
   /**
    * Pick an encounter type based on configured weights
+   * @deprecated Kept for backward compatibility. Use grouping-based selection instead.
+   * This method is no longer used by generateDepthLevel() which now uses selectGrouping() and selectEncounterFromGrouping().
    */
   private pickWeightedEncounterType(
     weights: { type: EncounterType; weight: number }[],
@@ -605,6 +615,8 @@ export class DungeonMapGenerator {
    * Excludes discovery_site when all regions are unlocked
    * Excludes region_shortcut when depth <= 10 or only default region is unlocked
    * Excludes safe_passage when depth <= 10
+   * @deprecated Kept for backward compatibility. Use grouping-based selection instead.
+   * This method is no longer used by generateDepthLevel() which now uses getGroupingWeightsForDepth().
    */
   private async getWeightsForRegion(
     regionKey?: string,

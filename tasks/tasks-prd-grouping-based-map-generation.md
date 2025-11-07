@@ -65,7 +65,7 @@ Based on `prd-grouping-based-map-generation.md`
       - [x] Add to selected arrays
     - [x] 4.4.4 Return nodes with selected encounters
   - [x] 4.5 Apply same refactoring to `generateDepthLevel()` in `DungeonMapGeneratorOptimized`
-  - [ ] 4.6 Remove or deprecate old encounter-based weight logic (keep for backward compatibility but don't use)
+  - [x] 4.6 Remove or deprecate old encounter-based weight logic (keep for backward compatibility but don't use)
   - [x] 4.7 Ensure fallback behavior works correctly when constraints prevent filling all slots
 
 - [ ] 5.0 Add Comprehensive Tests for Grouping-Based Map Generation
