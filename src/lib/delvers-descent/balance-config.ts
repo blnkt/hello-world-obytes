@@ -441,3 +441,121 @@ export function validateGroupingDistribution(
   const tolerance = 0.0001;
   return Math.abs(sum - 1.0) < tolerance;
 }
+
+/**
+ * Filter groupings based on depth constraints
+ * @param groupings Array of all groupings to filter
+ * @param depth Current depth level
+ * @param constraints Depth constraints for each grouping
+ * @returns Array of groupings available at the given depth
+ */
+export function filterGroupingsByDepth(
+  groupings: EncounterGrouping[],
+  depth: number,
+  constraints: Record<EncounterGrouping, DepthConstraint>
+): EncounterGrouping[] {
+  return groupings.filter((grouping) => {
+    const constraint = constraints[grouping];
+    if (!constraint) {
+      return true; // No constraint means always available
+    }
+
+    // Check minDepth constraint
+    if (constraint.minDepth !== undefined && depth < constraint.minDepth) {
+      return false;
+    }
+
+    // Check maxDepth constraint
+    if (constraint.maxDepth !== undefined && depth > constraint.maxDepth) {
+      return false;
+    }
+
+    return true;
+  });
+}
+
+/**
+ * Redistribute grouping weights proportionally when some groupings are filtered out
+ * @param weights Original grouping distribution weights
+ * @param availableGroupings Groupings that are still available after filtering
+ * @returns New distribution with weights redistributed proportionally
+ */
+export function redistributeGroupingWeights(
+  weights: EncounterGroupingDistribution,
+  availableGroupings: EncounterGrouping[]
+): EncounterGroupingDistribution {
+  // If all groupings are available, return original weights
+  if (availableGroupings.length === 4) {
+    return weights;
+  }
+
+  // Calculate total weight of available groupings
+  let availableWeight = 0;
+  availableGroupings.forEach((grouping) => {
+    availableWeight += weights[grouping];
+  });
+
+  // If no available weight, return zeros (shouldn't happen in practice)
+  if (availableWeight === 0) {
+    return {
+      minigame: 0,
+      loot: 0,
+      recovery_and_navigation: 0,
+      passive: 0,
+    };
+  }
+
+  // Redistribute proportionally
+  const result: EncounterGroupingDistribution = {
+    minigame: 0,
+    loot: 0,
+    recovery_and_navigation: 0,
+    passive: 0,
+  };
+
+  availableGroupings.forEach((grouping) => {
+    // Scale weight proportionally to sum to 1.0
+    result[grouping] = weights[grouping] / availableWeight;
+  });
+
+  return result;
+}
+
+/**
+ * Get available groupings and redistributed weights for a given depth
+ * @param depth Current depth level
+ * @param config Grouping balance configuration
+ * @returns Object containing available groupings and redistributed weights
+ */
+export function getAvailableGroupingsForDepth(
+  depth: number,
+  config: GroupingBalanceConfig
+): {
+  groupings: EncounterGrouping[];
+  weights: EncounterGroupingDistribution;
+} {
+  const allGroupings: EncounterGrouping[] = [
+    'minigame',
+    'loot',
+    'recovery_and_navigation',
+    'passive',
+  ];
+
+  // Filter groupings based on depth constraints
+  const availableGroupings = filterGroupingsByDepth(
+    allGroupings,
+    depth,
+    config.depthConstraints
+  );
+
+  // Redistribute weights proportionally
+  const redistributedWeights = redistributeGroupingWeights(
+    config.encounterGroupingDistribution,
+    availableGroupings
+  );
+
+  return {
+    groupings: availableGroupings,
+    weights: redistributedWeights,
+  };
+}

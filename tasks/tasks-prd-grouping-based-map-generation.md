@@ -42,12 +42,12 @@ Based on `prd-grouping-based-map-generation.md`
   - [x] 2.8 Add unit tests for configuration structure and validation
 
 - [ ] 3.0 Implement Depth Constraint System
-  - [ ] 3.1 Create function `filterGroupingsByDepth(groupings: EncounterGrouping[], depth: number, constraints: Record<EncounterGrouping, DepthConstraint>): EncounterGrouping[]` that filters out groupings unavailable at given depth
-  - [ ] 3.2 Create function `redistributeGroupingWeights(weights: EncounterGroupingDistribution, availableGroupings: EncounterGrouping[]): EncounterGroupingDistribution` that proportionally redistributes weights when groupings are filtered out
-  - [ ] 3.3 Create function `getAvailableGroupingsForDepth(depth: number, config: GroupingBalanceConfig): { groupings: EncounterGrouping[], weights: EncounterGroupingDistribution }` that combines filtering and redistribution
-  - [ ] 3.4 Add unit tests for depth constraint filtering logic
-  - [ ] 3.5 Add unit tests for weight redistribution (verify weights still sum to 1.0 after redistribution)
-  - [ ] 3.6 Add unit tests verifying recovery_and_navigation is filtered out for depths 1-10
+  - [x] 3.1 Create function `filterGroupingsByDepth(groupings: EncounterGrouping[], depth: number, constraints: Record<EncounterGrouping, DepthConstraint>): EncounterGrouping[]` that filters out groupings unavailable at given depth
+  - [x] 3.2 Create function `redistributeGroupingWeights(weights: EncounterGroupingDistribution, availableGroupings: EncounterGrouping[]): EncounterGroupingDistribution` that proportionally redistributes weights when groupings are filtered out
+  - [x] 3.3 Create function `getAvailableGroupingsForDepth(depth: number, config: GroupingBalanceConfig): { groupings: EncounterGrouping[], weights: EncounterGroupingDistribution }` that combines filtering and redistribution
+  - [x] 3.4 Add unit tests for depth constraint filtering logic
+  - [x] 3.5 Add unit tests for weight redistribution (verify weights still sum to 1.0 after redistribution)
+  - [x] 3.6 Add unit tests verifying recovery_and_navigation is filtered out for depths 1-10
 
 - [ ] 4.0 Refactor Map Generator to Use Grouping-Based Selection
   - [ ] 4.1 Create helper method `selectGrouping(availableGroupings: EncounterGrouping[], weights: EncounterGroupingDistribution, excludeGroupings: EncounterGrouping[]): EncounterGrouping | null` that selects a grouping using weighted random, excluding already selected groupings
