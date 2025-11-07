@@ -68,10 +68,10 @@ Based on `prd-grouping-based-map-generation.md`
   - [x] 4.6 Remove or deprecate old encounter-based weight logic (keep for backward compatibility but don't use)
   - [x] 4.7 Ensure fallback behavior works correctly when constraints prevent filling all slots
 
-- [ ] 5.0 Add Comprehensive Tests for Grouping-Based Map Generation
-  - [ ] 5.1 Add tests in `map-generator.test.ts` verifying no duplicate encounters within a depth level
-  - [ ] 5.2 Add tests in `map-generator.test.ts` verifying no duplicate groupings within a depth level
-  - [ ] 5.3 Add tests verifying depth constraints are applied correctly (recovery_and_navigation excluded from depths 1-10)
+- [x] 5.0 Add Comprehensive Tests for Grouping-Based Map Generation
+  - [x] 5.1 Add tests in `map-generator.test.ts` verifying no duplicate encounters within a depth level
+  - [x] 5.2 Add tests in `map-generator.test.ts` verifying no duplicate groupings within a depth level
+  - [x] 5.3 Add tests verifying depth constraints are applied correctly (recovery_and_navigation excluded from depths 1-10)
   - [ ] 5.4 Add tests verifying grouping distribution matches configured distribution (within acceptable variance)
   - [ ] 5.5 Add tests for fallback behavior when constraints prevent filling all slots
   - [ ] 5.6 Add tests verifying weight redistribution works correctly when groupings are filtered
