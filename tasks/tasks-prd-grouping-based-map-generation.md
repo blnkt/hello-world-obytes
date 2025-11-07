@@ -49,7 +49,7 @@ Based on `prd-grouping-based-map-generation.md`
   - [x] 3.5 Add unit tests for weight redistribution (verify weights still sum to 1.0 after redistribution)
   - [x] 3.6 Add unit tests verifying recovery_and_navigation is filtered out for depths 1-10
 
-- [ ] 4.0 Refactor Map Generator to Use Grouping-Based Selection
+- [x] 4.0 Refactor Map Generator to Use Grouping-Based Selection
   - [x] 4.1 Create helper method `selectGrouping(availableGroupings: EncounterGrouping[], weights: EncounterGroupingDistribution, excludeGroupings: EncounterGrouping[]): EncounterGrouping | null` that selects a grouping using weighted random, excluding already selected groupings
   - [x] 4.2 Create helper method `selectEncounterFromGrouping(grouping: EncounterGrouping, excludeEncounters: EncounterType[]): EncounterType | null` that selects an encounter from a grouping using equal probability, excluding already selected encounters
   - [x] 4.3 Update `getWeightsForRegion()` method (or create `getGroupingWeightsForDepth()`) to return grouping weights instead of encounter weights, applying depth constraints
